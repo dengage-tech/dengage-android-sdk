@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="small_text_size">12sp</dimen>
+    <dimen name="dengage_text_size_medium">16sp</dimen>
+    <dimen name="large_text_size">20sp</dimen>
+    <dimen name="dengage_page_margin_medium">20dp</dimen>
+    <dimen name="base_component_height">54dp</dimen>
+    <dimen name="progress_bar_height">2dp</dimen>
+</resources>

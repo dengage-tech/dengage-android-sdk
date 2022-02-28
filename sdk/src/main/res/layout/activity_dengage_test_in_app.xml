@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.fragment.HomeFragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <Button
+                android:id="@+id/btnFullScreen1"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:text="Full Image (Button) (FULL)" />
+
+            <Button
+                android:id="@+id/btnFullScreen2"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Full Image Text (Button) (FULL)" />
+
+            <Button
+                android:id="@+id/btnBanner1"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Banner (TOP + radius)" />
+
+            <Button
+                android:id="@+id/btnBanner2"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Banner (BOTTOM + radius)" />
+
+            <Button
+                android:id="@+id/btnModal1"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Image Modal (Button) (MIDDLE)" />
+
+            <Button
+                android:id="@+id/btnModal2"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Image Modal (Button) (MIDDLE + radius)" />
+
+            <Button
+                android:id="@+id/btnModal3"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Image Modal-Text (Button) (MIDDLE)" />
+
+            <Button
+                android:id="@+id/btnModal4"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Image Modal-Text (Button) (MIDDLE + radius)" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

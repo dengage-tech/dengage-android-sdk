@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dengage.android.kotlin.sample">
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DengageAndroid">
+        <activity
+            android:name=".ui.activity.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Fcm Messaging Service for handling push messages comes from firebase -->
+        <service
+            android:name="com.dengage.sdk.push.FcmMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- Hms Messaging Service for handling push messages comes from huawei messaging service -->
+        <service
+            android:name="com.dengage.sdk.push.HmsMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- For handling push notifications comes to messaging service classes -->
+        <receiver
+            android:name=".push.PushNotificationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.dengage.push.intent.RECEIVE" />
+                <action android:name="com.dengage.push.intent.OPEN" />
+                <action android:name="com.dengage.push.intent.DELETE" />
+                <action android:name="com.dengage.push.intent.ACTION_CLICK" />
+                <action android:name="com.dengage.push.intent.ITEM_CLICK" />
+                <action android:name="com.dengage.push.intent.CAROUSEL_ITEM_CLICK" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Event api url of Dengage -->
+        <meta-data
+            android:name="den_event_api_url"
+            android:value="https://dev-event.dengage.com" />
+
+        <!-- Push api url of Dengage -->
+        <meta-data
+            android:name="den_push_api_url"
+            android:value="https://pushdev.dengage.com" />
+    </application>
+
+</manifest>

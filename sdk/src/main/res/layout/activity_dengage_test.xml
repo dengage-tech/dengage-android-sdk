@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.fragment.HomeFragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <Button
+                android:id="@+id/btnPushTest"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:text="Push Test" />
+
+            <Button
+                android:id="@+id/btnInAppTest"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="In App Message Test" />
+
+            <Button
+                android:id="@+id/btnDeviceInfoTest"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Device Info Test" />
+
+            <Button
+                android:id="@+id/btnDeviceCacheTest"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Device Cache Test" />
+
+            <Button
+                android:id="@+id/btnFetchTimeResetTest"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Fetch Time Reset Test" />
+
+            <Button
+                android:id="@+id/btnShowLogsTest"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:layout_marginTop="8dp"
+                android:text="Show Logs Test" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

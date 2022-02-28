@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/actionHomeToDeviceInfo"
+            app:destination="@id/deviceInfoFragment" />
+        <action
+            android:id="@+id/actionHomeToContact_key"
+            app:destination="@id/contactKeyFragment" />
+        <action
+            android:id="@+id/actionHomeToCountry"
+            app:destination="@id/countryFragment" />
+        <action
+            android:id="@+id/actionHomeToInboxMessages"
+            app:destination="@id/inboxMessagesFragment" />
+        <action
+            android:id="@+id/actionHomeToCustomEvent"
+            app:destination="@id/customEventFragment" />
+        <action
+            android:id="@+id/actionHomeToInAppMessage"
+            app:destination="@id/inAppMessageFragment" />
+        <action
+            android:id="@+id/actionHomeToTags"
+            app:destination="@id/tagsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/deviceInfoFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.DeviceInfoFragment"
+        android:label="fragment_device_info"
+        tools:layout="@layout/fragment_device_info" />
+    <fragment
+        android:id="@+id/contactKeyFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.ContactKeyFragment"
+        android:label="fragment_contact_key"
+        tools:layout="@layout/fragment_contact_key" />
+    <fragment
+        android:id="@+id/countryFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.CountryFragment"
+        android:label="fragment_country"
+        tools:layout="@layout/fragment_country" />
+    <fragment
+        android:id="@+id/inboxMessagesFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.InboxMessagesFragment"
+        android:label="fragment_inbox_messages"
+        tools:layout="@layout/fragment_inbox_messages" />
+    <fragment
+        android:id="@+id/customEventFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.CustomEventFragment"
+        android:label="fragment_custom_event"
+        tools:layout="@layout/fragment_custom_event" />
+    <fragment
+        android:id="@+id/inAppMessageFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.InAppMessageFragment"
+        android:label="fragment_in_app_message"
+        tools:layout="@layout/fragment_in_app_message" />
+    <fragment
+        android:id="@+id/tagsFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.TagsFragment"
+        android:label="fragment_tags"
+        tools:layout="@layout/fragment_tags" />
+</navigation>

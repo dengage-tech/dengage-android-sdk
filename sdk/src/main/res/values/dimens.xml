@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dengage_text_size_small">12sp</dimen>
+    <dimen name="dengage_text_size_medium">16sp</dimen>
+    <dimen name="dengage_text_size_large">20sp</dimen>
+    <dimen name="dengage_page_margin_medium">20dp</dimen>
+    <dimen name="dengage_page_margin_small">10dp</dimen>
+</resources>

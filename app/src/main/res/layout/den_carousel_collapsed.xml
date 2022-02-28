@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingRight="16dp">
+
+    <ImageView
+        android:id="@+id/den_carousel_image"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="top|end"
+        android:layout_marginStart="12dp"
+        android:layout_marginLeft="12dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_launcher_foreground" /> <!-- Your App Icon -->
+
+    <TextView
+        android:id="@+id/den_carousel_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/den_carousel_image"
+        android:layout_toLeftOf="@id/den_carousel_image"
+        android:text="Remote Title"
+        android:textColor="@color/purple_200"
+        android:textSize="15dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/den_carousel_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/den_carousel_title"
+        android:layout_alignStart="@+id/den_carousel_title"
+        android:layout_alignLeft="@+id/den_carousel_title"
+        android:layout_alignEnd="@+id/den_carousel_title"
+        android:layout_alignRight="@+id/den_carousel_title"
+        android:layout_marginBottom="16dp"
+        android:layout_toLeftOf="@id/den_carousel_image"
+        android:ellipsize="end"
+        android:lineSpacingMultiplier="1.2"
+        android:maxLines="1"
+        android:text="Remote message"
+        android:textColor="@color/purple_200"
+        android:textSize="14dp" />
+
+</RelativeLayout>

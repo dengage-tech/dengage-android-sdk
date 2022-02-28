@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Dengage Sample</string>
+    <string name="dengage_integration_key">Integration Key = %s</string>
+    <string name="dengage_device_id">Device Id = %s</string>
+    <string name="dengage_advertising_id">Advertising Id = %s</string>
+    <string name="dengage_token">Token = %s</string>
+    <string name="dengage_contact_key">Contact Key = %s</string>
+    <string name="dengage_timezone">TimeZone = %s</string>
+    <string name="dengage_language">Language = %s</string>
+    <string name="dengage_user_permission">User Permission = %s</string>
+
+    <string name="contact_key">Contact Key</string>
+    <string name="country">Country</string>
+    <string name="screen_name">Screen Name</string>
+
+    <string name="button_save">Save</string>
+    <string name="button_inbox_messages">Inbox Messages</string>
+    <string name="button_device_info">Device Info</string>
+    <string name="button_contact_key">Change Contact Key</string>
+    <string name="button_country">Change Country</string>
+    <string name="button_custom_events">Send Custom Event</string>
+    <string name="button_in_app_message">In App Message</string>
+    <string name="button_tags">Set Tags</string>
+    <string name="button_dengage_test_page">Dengage Test Page</string>
+    <string name="table_name">Table Name</string>
+    <string name="button_send">Send</string>
+    <string name="event_key">Event Key</string>
+    <string name="event_value">Event Value</string>
+    <string name="button_mark_as_read">Read</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_set_navigation">Set Navigation</string>
+    <string name="tag">Tag</string>
+    <string name="value">Value</string>
+    <string name="change_time">Change Time</string>
+    <string name="change_value">Change Value</string>
+    <string name="remove_time">Remove Time</string>
+</resources>

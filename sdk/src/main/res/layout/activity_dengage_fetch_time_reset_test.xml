@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.fragment.HomeFragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/dengage_page_margin_small">
+
+                <TextView
+                    android:id="@+id/textViewSdkParametersFetchTimeTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium"
+                    android:textStyle="bold"
+                    android:text="Sdk Parameters Fetch Time"/>
+
+                <TextView
+                    android:id="@+id/textViewSdkParametersFetchTimeMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_below="@+id/textViewSdkParametersFetchTimeTitle"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dengage_page_margin_small"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <Button
+                    android:id="@+id/btnSdkParametersFetchTimeReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="54dp"
+                    android:layout_alignParentEnd="true"
+                    android:text="Reset" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/dengage_page_margin_small">
+
+                <TextView
+                    android:id="@+id/textViewAppTrackingTimeTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium"
+                    android:textStyle="bold"
+                    android:text="App Tracking Time"/>
+
+                <TextView
+                    android:id="@+id/textViewAppTrackingTimeMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_below="@+id/textViewAppTrackingTimeTitle"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dengage_page_margin_small"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <Button
+                    android:id="@+id/btnAppTrackingTimeReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="54dp"
+                    android:layout_alignParentEnd="true"
+                    android:text="Reset" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/dengage_page_margin_small">
+
+                <TextView
+                    android:id="@+id/textViewInAppFetchTimeTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium"
+                    android:textStyle="bold"
+                    android:text="In App Fetch Time"/>
+
+                <TextView
+                    android:id="@+id/textViewInAppFetchTimeMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_below="@+id/textViewInAppFetchTimeTitle"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dengage_page_margin_small"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <Button
+                    android:id="@+id/btnInAppFetchTimeReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="54dp"
+                    android:layout_alignParentEnd="true"
+                    android:text="Reset" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/dengage_page_margin_small">
+
+                <TextView
+                    android:id="@+id/textViewInAppShowTimeTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium"
+                    android:textStyle="bold"
+                    android:text="In App Show Time"/>
+
+                <TextView
+                    android:id="@+id/textViewInAppShowTimeMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_below="@+id/textViewInAppShowTimeTitle"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dengage_page_margin_small"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <Button
+                    android:id="@+id/btnInAppShowTimeReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="54dp"
+                    android:layout_alignParentEnd="true"
+                    android:text="Reset" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/dengage_page_margin_small">
+
+                <TextView
+                    android:id="@+id/textViewInboxFetchTimeTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium"
+                    android:textStyle="bold"
+                    android:text="Inbox Message Fetch Time"/>
+
+                <TextView
+                    android:id="@+id/textViewInboxFetchTimeMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_below="@+id/textViewInboxFetchTimeTitle"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dengage_page_margin_small"
+                    android:textColor="@color/dengage_color_black"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <Button
+                    android:id="@+id/btnInboxFetchTimeReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="54dp"
+                    android:layout_alignParentEnd="true"
+                    android:text="Reset" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

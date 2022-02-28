@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <include
+        android:id="@+id/den_carousel_collapsed"
+        layout="@layout/den_carousel_collapsed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <FrameLayout
+        android:id="@+id/den_carousel_body_portrait"
+        android:layout_width="596dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/den_carousel_collapsed"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <RelativeLayout
+                android:id="@+id/den_carousel_left_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@+id/den_carousel_portrait_current_container"
+                android:layout_toLeftOf="@+id/den_carousel_portrait_current_container">
+
+                <ImageView
+                    android:id="@+id/den_carousel_portrait_left_image"
+                    android:layout_width="192dp"
+                    android:layout_height="130dp"
+                    android:layout_centerInParent="true"
+                    android:scaleType="centerCrop" />
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/den_carousel_portrait_left_image"
+                    android:layout_alignLeft="@+id/den_carousel_portrait_left_image"
+                    android:layout_alignTop="@+id/den_carousel_portrait_left_image"
+                    android:layout_alignEnd="@+id/den_carousel_portrait_left_image"
+                    android:layout_alignRight="@+id/den_carousel_portrait_left_image"
+                    android:layout_alignBottom="@+id/den_carousel_portrait_left_image"
+                    android:background="#BFffffff" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/den_carousel_right_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/den_carousel_portrait_current_container"
+                android:layout_toRightOf="@+id/den_carousel_portrait_current_container">
+
+                <ImageView
+                    android:id="@+id/den_carousel_portrait_right_image"
+                    android:layout_width="192dp"
+                    android:layout_height="130dp"
+                    android:layout_centerInParent="true"
+                    android:scaleType="centerCrop" />
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignStart="@+id/den_carousel_portrait_right_image"
+                    android:layout_alignLeft="@+id/den_carousel_portrait_right_image"
+                    android:layout_alignTop="@+id/den_carousel_portrait_right_image"
+                    android:layout_alignEnd="@+id/den_carousel_portrait_right_image"
+                    android:layout_alignRight="@+id/den_carousel_portrait_right_image"
+                    android:layout_alignBottom="@+id/den_carousel_portrait_right_image"
+                    android:background="#B0ffffff" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/den_carousel_portrait_current_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true">
+
+                <ImageView
+                    android:id="@+id/den_carousel_portrait_current_image"
+                    android:layout_width="212dp"
+                    android:layout_height="130dp"
+                    android:cropToPadding="true"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:scaleType="centerCrop" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp">
+
+            <ImageView
+                android:id="@+id/den_carousel_left_arrow"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="start|center_vertical"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_arrow_left" />
+
+            <ImageView
+                android:id="@+id/den_carousel_right_arrow"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="end|center_vertical"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_arrow_right" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/den_carousel_item_title_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/den_carousel_body_portrait"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/den_carousel_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Item Title"
+            android:textColor="@color/purple_200" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/den_carousel_item_description_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/den_carousel_item_title_container"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/den_carousel_item_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Item Description"
+            android:textColor="@color/purple_200" />
+
+    </LinearLayout>
+
+</RelativeLayout>

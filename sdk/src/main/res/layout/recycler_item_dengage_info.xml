@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/dengage_page_margin_small">
+
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/dengage_color_black"
+        android:textSize="@dimen/dengage_text_size_medium"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textViewMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dengage_page_margin_small"
+        android:textColor="@color/dengage_color_black"
+        android:textSize="@dimen/dengage_text_size_medium" />
+
+</LinearLayout>

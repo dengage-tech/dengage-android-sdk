@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.fragment.HomeFragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/dengage_page_margin_medium">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDeviceInfo"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:text="@string/button_device_info" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnContactKey"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_contact_key" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnCountry"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_country" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnInboxMessages"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_inbox_messages" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnCustomEvents"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_custom_events" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnInAppMessage"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_in_app_message" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnTags"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_tags" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDengageTestPage"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_dengage_test_page" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</layout>

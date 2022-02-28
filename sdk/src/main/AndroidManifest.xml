@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dengage.sdk">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application>
+        <activity
+            android:name=".ui.test.DengageTestActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DengageAndroid" />
+        <activity
+            android:name=".ui.test.DengageTestInAppActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DengageAndroid" />
+        <activity
+            android:name=".ui.test.DengageTestPushActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DengageAndroid" />
+        <activity
+            android:name=".ui.test.DengageTestDeviceInfoActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DengageAndroid" />
+        <activity
+            android:name=".ui.test.DengageTestDeviceCacheActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DengageAndroid" />
+        <activity
+            android:name=".ui.test.DengageFetchTimeResetTestActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DengageAndroid" />
+        <activity
+            android:name=".ui.test.DengageTestShowLogsActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DengageAndroid" />
+        <activity
+            android:name=".ui.inappmessage.InAppMessageActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+    </application>
+
+</manifest>
