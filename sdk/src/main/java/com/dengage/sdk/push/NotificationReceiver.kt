@@ -444,18 +444,11 @@ open class NotificationReceiver : BroadcastReceiver() {
     open fun createNotificationChannel(context: Context, message: Message): String {
         val soundUri = message.sound.getSoundUri(context)
 
-        // generate new channel id for different sounds
-        val channelId = DengageUtils.generateUUID()
+        val channelId = Constants.NOTIFICATION_CHANNEL_ID
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            // delete old notification channels
-            val channels = notificationManager.notificationChannels
-            if (!channels.isNullOrEmpty()) {
-                for (channel in channels) {
-                    notificationManager.deleteNotificationChannel(channel.id)
-                }
-            }
+
             val notificationChannel = NotificationChannel(
                 channelId,
                 Prefs.notificationChannelName,
