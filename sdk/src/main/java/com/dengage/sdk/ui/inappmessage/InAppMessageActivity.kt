@@ -46,7 +46,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     ) {
         val cardInAppMessage = findViewById<CardView>(R.id.cardInAppMessage)
         val params = RelativeLayout.LayoutParams(
-            MATCH_PARENT,
+            WRAP_CONTENT,
             WRAP_CONTENT
         )
         val screenWidth = Resources.getSystem().displayMetrics.widthPixels
@@ -98,10 +98,13 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         }
 
         webView.apply {
-            loadDataWithBaseURL(
-                null,
-                contentParams.html ?: "", "text/html", "UTF-8", null
-            )
+
+            contentParams.html?.let {
+                loadDataWithBaseURL(
+                    null,
+                    it, "text/html", "UTF-8", null
+                )
+            }
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
             settings.displayZoomControls = false
