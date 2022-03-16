@@ -14,7 +14,10 @@
             android:id="@+id/actionHomeToDeviceInfo"
             app:destination="@id/deviceInfoFragment" />
         <action
-            android:id="@+id/actionHomeToContact_key"
+            android:id="@+id/actionHomeToUserPermission"
+            app:destination="@id/userPermissionFragment" />
+        <action
+            android:id="@+id/actionHomeToContactKey"
             app:destination="@id/contactKeyFragment" />
         <action
             android:id="@+id/actionHomeToCountry"
@@ -37,6 +40,11 @@
         android:name="com.dengage.android.kotlin.sample.ui.fragment.DeviceInfoFragment"
         android:label="fragment_device_info"
         tools:layout="@layout/fragment_device_info" />
+    <fragment
+        android:id="@+id/userPermissionFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.UserPermissionFragment"
+        android:label="fragment_user_permission"
+        tools:layout="@layout/fragment_user_permission" />
     <fragment
         android:id="@+id/contactKeyFragment"
         android:name="com.dengage.android.kotlin.sample.ui.fragment.ContactKeyFragment"

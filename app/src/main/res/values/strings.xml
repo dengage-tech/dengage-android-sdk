@@ -16,6 +16,7 @@
     <string name="button_save">Save</string>
     <string name="button_inbox_messages">Inbox Messages</string>
     <string name="button_device_info">Device Info</string>
+    <string name="button_user_permission">Change User Permission</string>
     <string name="button_contact_key">Change Contact Key</string>
     <string name="button_country">Change Country</string>
     <string name="button_custom_events">Send Custom Event</string>

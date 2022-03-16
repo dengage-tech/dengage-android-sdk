@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swUserPermission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dengage_page_margin_medium"
+            android:text="@string/dengage_user_permission" />
+
+    </RelativeLayout>
+
+</layout>

@@ -19,6 +19,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
             findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
         }
 
+        binding.btnUserPermission.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToUserPermission())
+        }
+
         binding.btnContactKey.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToContactKey())
         }

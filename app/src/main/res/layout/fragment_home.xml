@@ -20,6 +20,13 @@
                 android:text="@string/button_device_info" />
 
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnUserPermission"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_user_permission" />
+
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnContactKey"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/base_component_height"
