@@ -9,6 +9,9 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
+import com.dengage.sdk.domain.rfm.model.RFMGender
+import com.dengage.sdk.domain.rfm.model.RFMItem
+import com.dengage.sdk.domain.rfm.model.RFMScore
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.configuration.ConfigurationCallback
@@ -16,6 +19,7 @@ import com.dengage.sdk.manager.configuration.ConfigurationManager
 import com.dengage.sdk.manager.event.EventManager
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
+import com.dengage.sdk.manager.rfm.RFMManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.ui.test.DengageTestActivity
@@ -24,7 +28,6 @@ import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
-import java.util.*
 
 object Dengage {
 
@@ -34,6 +37,7 @@ object Dengage {
     private val inboxMessageManager by lazy { InboxMessageManager() }
     private val tagManager by lazy { TagManager() }
     private val eventManager by lazy { EventManager() }
+    private val rfmManager by lazy { RFMManager() }
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -321,6 +325,42 @@ object Dengage {
         }
     }
 
+    /**
+     * Use for testing some features of Dengage
+     * Only for developers
+     */
+    fun showTestPage(activity: Activity) {
+        activity.startActivity(Intent(activity, DengageTestActivity::class.java))
+    }
+
+    /**
+     * Use for saving rfm scores to local storage if you will use rfm item sorting
+     */
+    fun saveRFMScores(scores: MutableList<RFMScore>?) {
+        rfmManager.saveRFMScores(
+            scores = scores
+        )
+    }
+
+    /**
+     * Use for updating score of category
+     */
+    fun categoryView(categoryId: String) {
+        rfmManager.categoryView(
+            categoryId = categoryId
+        )
+    }
+
+    /**
+     * Use for sorting rfm items with respect to rfm scores saved to local storage
+     */
+    fun <T> sortRFMItems(rfmGender: RFMGender, rfmItems: MutableList<RFMItem>): MutableList<T> {
+        return rfmManager.sortRFMItems(
+            rfmGender = rfmGender,
+            rfmItems = rfmItems
+        )
+    }
+
     fun pageView(data: HashMap<String, Any>) {
         eventManager.pageView(
             eventDetails = data
@@ -490,14 +530,6 @@ object Dengage {
         } catch (e: Exception) {
             DengageLogger.error("sendOpenEvent: " + e.message)
         }
-    }
-
-    /**
-     * Use for testing some features of Dengage
-     * Only for developers
-     */
-    fun showTestPage(activity: Activity) {
-        activity.startActivity(Intent(activity, DengageTestActivity::class.java))
     }
 
 }

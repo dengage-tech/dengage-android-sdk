@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.rfm.model.RFMScore
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
@@ -71,4 +72,12 @@ object Prefs {
     internal var logVisibility: Boolean
         get() = preferences.get(PreferenceKey.LOG_VISIBILITY, false) ?: false
         set(value) = preferences.set(PreferenceKey.LOG_VISIBILITY, value)
+
+    internal var rfmScores: MutableList<RFMScore>?
+        get() = preferences.get(PreferenceKey.RFM_SCORES)
+        set(value) = preferences.set(PreferenceKey.RFM_SCORES, value)
+
+    fun clear() {
+        preferences.edit().clear().apply()
+    }
 }

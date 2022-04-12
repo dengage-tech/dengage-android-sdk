@@ -14,7 +14,8 @@ enum class PreferenceKey {
     INBOX_MESSAGE_FETCH_TIME,
     APP_SESSION_TIME,
     APP_SESSION_ID,
-    LOG_VISIBILITY;
+    LOG_VISIBILITY,
+    RFM_SCORES;
 
     override fun toString(): String = name
 }

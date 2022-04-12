@@ -333,6 +333,79 @@ Dengage.showTestPage(
 )
 ```
 
+### saveRFMScores
+
+You can save rfm scores to local storage if you will use rfm item sorting.
+
+```
+Dengage.saveRFMScores(
+    scores: RFMScore(
+        categoryId: String, /* Category identifier of the RFMScore object */
+        score: Double /* The score value of the RFMScore object, specified as a value from 0.0 to 1.0. 
+                         Score values below 0.0 are interpreted as 0.0, and values above 1.0 are interpreted as 1.0 */
+    )
+)
+```
+
+### categoryView
+
+You can update rfm score of viewed category.
+
+```
+Dengage.categoryView(
+    categoryId: String /* Category identifier of viewed category */
+)
+```
+
+### sortRFMItems
+
+You can sort rfm items with respect to rfm scores saved to local storage.
+Returns list of the sorted rfm items
+
+```
+Dengage.sortRFMItems(
+    rfmGender: RFMGender,
+    rfmItems: MutableList<RFMItem>
+)
+
+RFMItem(
+    id: String,
+    categoryId: String,
+    personalized: Boolean,
+    gender: RFMGender{
+        MALE,
+        FEMALE,
+        NEUTRAL
+    },
+    sequence: Int
+)
+```
+
+You can use RFMItem directly. Also you can create your own rfm item object that extends RFMItem.
+Then sort your own items like below:
+
+```
+class YourOwnRFMItem(
+    id: String,
+    categoryId: String,
+    personalized: Boolean,
+    gender: RFMGender,
+    sequence: Int,
+    var parameter1: String,
+    var parameter2: String,
+) : RFMItem(
+    id = id,
+    categoryId = categoryId,
+    personalized = personalized,
+    gender = gender,
+    sequence = sequence,
+)
+
+val sortedYourOwnRFMItems: MutableList<YourOwnRFMItem> = Dengage.sortRFMItems(
+    rfmItems = listOfYourOwnRFMItems
+)
+```
+
 ## Event Methods
 
 You can send events to Dengage sdk. Available event methods listed below. But you can send your own

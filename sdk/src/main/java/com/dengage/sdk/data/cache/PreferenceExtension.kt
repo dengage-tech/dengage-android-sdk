@@ -3,7 +3,6 @@ package com.dengage.sdk.data.cache
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import com.dengage.sdk.util.GsonHolder
-import com.google.gson.Gson
 import java.util.*
 
 /**
