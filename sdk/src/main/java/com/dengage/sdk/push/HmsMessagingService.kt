@@ -6,7 +6,7 @@ import com.dengage.sdk.util.DengageUtils
 import com.huawei.hms.push.HmsMessageService
 import com.huawei.hms.push.RemoteMessage
 
-class HmsMessagingService : HmsMessageService() {
+open class HmsMessagingService : HmsMessageService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)

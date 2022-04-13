@@ -6,7 +6,7 @@ import com.dengage.sdk.util.DengageUtils
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-class FcmMessagingService : FirebaseMessagingService() {
+open class FcmMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
