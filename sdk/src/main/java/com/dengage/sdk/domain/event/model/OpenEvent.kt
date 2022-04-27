@@ -8,6 +8,5 @@ data class OpenEvent(
     @SerializedName("itemId") var itemId: String?,
     @SerializedName("messageId") var messageId: Int?,
     @SerializedName("messageDetails") var messageDetails: String?,
-    @SerializedName("userAgent") var userAgent: String? = "",
     @SerializedName("integrationKey") var integrationKey: String? = ""
 ) : Serializable

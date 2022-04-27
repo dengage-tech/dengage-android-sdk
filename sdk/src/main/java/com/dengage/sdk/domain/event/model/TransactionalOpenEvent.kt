@@ -9,6 +9,5 @@ data class TransactionalOpenEvent(
     @SerializedName("messageId") var messageId: Int?,
     @SerializedName("messageDetails") var messageDetails: String?,
     @SerializedName("transactionId") var transactionId: String?,
-    @SerializedName("userAgent") var userAgent: String? = "",
     @SerializedName("integrationKey") var integrationKey: String? = ""
 ) : Serializable
