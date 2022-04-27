@@ -152,7 +152,8 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                     if (obj is HashMap<*, *>) {
                         val product = obj as HashMap<String, Any>
                         if (copyData.containsKey(EventKey.ORDER_ID.key)) {
-                            product[EventKey.ORDER_ID.key] = copyData[EventKey.ORDER_ID.key].toString()
+                            product[EventKey.ORDER_ID.key] =
+                                copyData[EventKey.ORDER_ID.key].toString()
                         }
                         sendDeviceEvent(EventTable.ORDER_EVENTS_DETAIL.tableName, product)
                     }
@@ -186,7 +187,8 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                     if (obj is HashMap<*, *>) {
                         val product = obj as HashMap<String, Any>
                         if (copyData.containsKey(EventKey.ORDER_ID.key)) {
-                            product[EventKey.ORDER_ID.key] = copyData[EventKey.ORDER_ID.key].toString()
+                            product[EventKey.ORDER_ID.key] =
+                                copyData[EventKey.ORDER_ID.key].toString()
                         }
                         sendDeviceEvent(EventTable.ORDER_EVENTS_DETAIL.tableName, product)
                     }
@@ -296,7 +298,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             messageId = messageId,
             messageDetails = messageDetails,
             transactionId = transactionId,
-            userAgent = DengageUtils.getUserAgent(ContextHolder.context),
             integrationKey = Prefs.subscription!!.integrationKey
         )
     }
@@ -312,7 +313,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             itemId = itemId,
             messageId = messageId,
             messageDetails = messageDetails,
-            userAgent = DengageUtils.getUserAgent(ContextHolder.context),
             integrationKey = Prefs.subscription!!.integrationKey
         )
     }

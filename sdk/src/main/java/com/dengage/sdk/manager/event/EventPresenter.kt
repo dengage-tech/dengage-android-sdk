@@ -37,7 +37,6 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         messageId: Int?,
         messageDetails: String?,
         transactionId: String?,
-        userAgent: String?,
         integrationKey: String?
     ) {
         sendTransactionalOpenEvent(this) {
@@ -50,7 +49,6 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
                 messageId = messageId,
                 messageDetails = messageDetails,
                 transactionId = transactionId,
-                userAgent = userAgent,
                 integrationKey = integrationKey
             )
         }
@@ -61,7 +59,6 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         itemId: String?,
         messageId: Int?,
         messageDetails: String?,
-        userAgent: String?,
         integrationKey: String?
     ) {
         sendOpenEvent(this) {
@@ -73,7 +70,6 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
                 itemId = itemId,
                 messageId = messageId,
                 messageDetails = messageDetails,
-                userAgent = userAgent,
                 integrationKey = integrationKey
             )
         }

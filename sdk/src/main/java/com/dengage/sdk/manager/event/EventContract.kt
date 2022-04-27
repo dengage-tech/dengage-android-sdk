@@ -25,7 +25,6 @@ interface EventContract {
             messageId: Int?,
             messageDetails: String?,
             transactionId: String?,
-            userAgent: String?,
             integrationKey: String?
         )
 
@@ -34,7 +33,6 @@ interface EventContract {
             itemId: String?,
             messageId: Int?,
             messageDetails: String?,
-            userAgent: String?,
             integrationKey: String?
         )
     }

@@ -15,7 +15,6 @@ class SendOpenEvent : CoroutineUseCase<Response<Unit>, SendOpenEvent.Params>() {
             itemId = params.itemId,
             messageId = params.messageId,
             messageDetails = params.messageDetails,
-            userAgent = params.userAgent,
             integrationKey = params.integrationKey,
         )
 
@@ -24,7 +23,6 @@ class SendOpenEvent : CoroutineUseCase<Response<Unit>, SendOpenEvent.Params>() {
         val itemId: String?,
         val messageId: Int?,
         val messageDetails: String?,
-        val userAgent: String?,
         val integrationKey: String?
     )
 }

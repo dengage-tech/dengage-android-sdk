@@ -16,7 +16,6 @@ class SendTransactionalOpenEvent : CoroutineUseCase<Response<Unit>, SendTransact
             messageId = params.messageId,
             messageDetails = params.messageDetails,
             transactionId = params.transactionId,
-            userAgent = params.userAgent,
             integrationKey = params.integrationKey,
         )
 
@@ -26,7 +25,6 @@ class SendTransactionalOpenEvent : CoroutineUseCase<Response<Unit>, SendTransact
         val messageId: Int?,
         val messageDetails: String?,
         val transactionId: String?,
-        val userAgent: String?,
         val integrationKey: String?
     )
 }

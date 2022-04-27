@@ -34,7 +34,6 @@ class EventRepository {
         messageId: Int?,
         messageDetails: String?,
         transactionId: String?,
-        userAgent: String?,
         integrationKey: String?
     ): Response<Unit> {
         return openEventService.sendTransactionalOpenEvent(
@@ -44,7 +43,6 @@ class EventRepository {
                 messageId = messageId,
                 messageDetails = messageDetails,
                 transactionId = transactionId,
-                userAgent = userAgent,
                 integrationKey = integrationKey
             )
         )
@@ -55,7 +53,6 @@ class EventRepository {
         itemId: String?,
         messageId: Int?,
         messageDetails: String?,
-        userAgent: String?,
         integrationKey: String?
     ): Response<Unit> {
         return openEventService.sendOpenEvent(
@@ -64,7 +61,6 @@ class EventRepository {
                 itemId = itemId,
                 messageId = messageId,
                 messageDetails = messageDetails,
-                userAgent = userAgent,
                 integrationKey = integrationKey
             )
         )
