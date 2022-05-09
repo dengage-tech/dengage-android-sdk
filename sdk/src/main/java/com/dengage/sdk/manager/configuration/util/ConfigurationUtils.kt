@@ -69,7 +69,7 @@ object ConfigurationUtils {
                         DengageLogger.debug("Hms appId is $huaweiAppId, token is $token")
                         onTokenResult.invoke(token)
                     }
-                } catch (e: ApiException) {
+                } catch (e: Exception) {
                     DengageLogger.error("Hms InstanceId Failed: ${e.message}")
                 }
             }
