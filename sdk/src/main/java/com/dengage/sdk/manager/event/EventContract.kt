@@ -35,5 +35,30 @@ interface EventContract {
             messageDetails: String?,
             integrationKey: String?
         )
+
+        fun sendLoginEvent(
+            accountId:Int?,
+            integrationKey: String,
+            key: String?,
+            eventTableName: String,
+            eventDetails: MutableMap<String, Any>
+        )
+
+        fun sendLogoutEvent(
+            accountId:Int?,
+            integrationKey: String,
+            key: String?,
+            eventTableName: String,
+            eventDetails: MutableMap<String, Any>
+        )
+
+        fun sendRegisterEvent(
+            accountId:Int?,
+            integrationKey: String,
+            key: String?,
+            eventTableName: String,
+            eventDetails: MutableMap<String, Any>
+        )
+
     }
 }

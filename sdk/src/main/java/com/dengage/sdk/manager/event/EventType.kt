@@ -9,4 +9,8 @@ enum class EventType(val type: String) {
     REMOVE_FROM_CART("remove_from_cart"),
     VIEW_CART("view_cart"),
     BEGIN_CHECKOUT("begin_checkout"),
+    LOGIN("login"),
+    LOGOUT("logout"),
+    REGISTER("register"),
+    CONTACT_KEY("contact_key")
 }

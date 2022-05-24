@@ -9,4 +9,5 @@ enum class EventKey(val key: String) {
     ORDER_ID("order_id"),
     TOTAL_AMOUNT("total_amount"),
     PAGE_TYPE("page_type"),
+    EVENT_NAME("event_name")
 }

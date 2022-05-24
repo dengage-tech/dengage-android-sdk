@@ -10,4 +10,5 @@ enum class EventTable(val tableName: String) {
     ORDER_EVENTS_DETAIL("order_events_detail"),
     PAGE_VIEW_EVENTS("page_view_events"),
     SESSION_INFO("session_info"),
+    CUSTOM_ANALYTICS_EVENTS("custom_analytics_events")
 }

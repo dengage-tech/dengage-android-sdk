@@ -13,7 +13,9 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
 
     override fun init() {
         sendPageView("device-info")
-
+        Dengage.sendLoginEvent()
+        Dengage.sendLogoutEvent()
+        Dengage.sendRegisterEvent()
         binding.tvIntegrationKey.text = getString(
             R.string.dengage_integration_key,
             Dengage.getSubscription()?.integrationKey

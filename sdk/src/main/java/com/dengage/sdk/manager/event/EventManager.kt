@@ -317,6 +317,74 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         )
     }
 
+    fun sendLoginEvent() {
+        try {
+            val data = HashMap<String, Any>()
+            val sessionId = SessionManager.getSessionId()
+
+            data[EventKey.EVENT_NAME.key] = EventType.LOGIN.type
+
+            Prefs.subscription!!.contactKey?.let { data.put(EventType.CONTACT_KEY.type, it) }
+
+            data[EventKey.SESSION_ID.key] = sessionId
+
+            presenter.sendLoginEvent(
+                accountId = Prefs.sdkParameters?.accountId,
+                integrationKey = Prefs.subscription!!.integrationKey,
+                key = Prefs.subscription!!.deviceId,
+                eventTableName = EventTable.CUSTOM_ANALYTICS_EVENTS.tableName,
+                eventDetails = data
+            )
+        } catch (e: Exception) {
+            DengageLogger.error(e.message)
+        }
+    }
+
+
+    fun sendLogoutEvent() {
+        try {
+            val data = HashMap<String, Any>()
+            val sessionId = SessionManager.getSessionId()
+
+            data[EventKey.EVENT_NAME.key] = EventType.LOGOUT.type
+
+            Prefs.subscription!!.contactKey?.let { data.put(EventType.CONTACT_KEY.type, it) }
+
+            data[EventKey.SESSION_ID.key] = sessionId
+
+            presenter.sendLogoutEvent(
+                accountId = Prefs.sdkParameters?.accountId,
+                integrationKey = Prefs.subscription!!.integrationKey,
+                key = Prefs.subscription!!.deviceId,
+                eventTableName = EventTable.CUSTOM_ANALYTICS_EVENTS.tableName,
+                eventDetails = data
+            )
+        } catch (e: Exception) {
+            DengageLogger.error(e.message)
+        }
+    }
+
+    fun sendRegisterEvent() {
+        try {
+            val data = HashMap<String, Any>()
+            val sessionId = SessionManager.getSessionId()
+
+            data[EventKey.EVENT_NAME.key] = EventType.REGISTER.type
+
+            data[EventKey.SESSION_ID.key] = sessionId
+
+            presenter.sendRegisterEvent(
+                accountId = Prefs.sdkParameters?.accountId,
+                integrationKey = Prefs.subscription!!.integrationKey,
+                key = Prefs.subscription!!.deviceId,
+                eventTableName = EventTable.CUSTOM_ANALYTICS_EVENTS.tableName,
+                eventDetails = data
+            )
+        } catch (e: Exception) {
+            DengageLogger.error(e.message)
+        }
+    }
+
     override fun eventSent() = Unit
     override fun transactionalOpenEventSent() = Unit
     override fun openEventSent() = Unit

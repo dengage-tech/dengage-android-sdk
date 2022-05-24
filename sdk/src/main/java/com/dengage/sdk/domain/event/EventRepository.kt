@@ -2,9 +2,7 @@ package com.dengage.sdk.domain.event
 
 import com.dengage.sdk.data.remote.api.ApiType
 import com.dengage.sdk.data.remote.api.service
-import com.dengage.sdk.domain.event.model.Event
-import com.dengage.sdk.domain.event.model.OpenEvent
-import com.dengage.sdk.domain.event.model.TransactionalOpenEvent
+import com.dengage.sdk.domain.event.model.*
 import retrofit2.Response
 
 class EventRepository {
@@ -62,6 +60,61 @@ class EventRepository {
                 messageId = messageId,
                 messageDetails = messageDetails,
                 integrationKey = integrationKey
+            )
+        )
+    }
+
+    suspend fun sendLoginEvent(
+        accountId: Int?,
+        integrationKey: String,
+        key: String?,
+        eventTableName: String,
+        eventDetails: MutableMap<String, Any>
+    ): Response<Unit> {
+        return eventService.sendLoginEvent(
+            event = LoginEvent(
+                accountId = accountId,
+                integrationKey = integrationKey,
+                key = key,
+                eventTableName = eventTableName,
+                eventDetails = eventDetails
+            )
+        )
+    }
+
+    suspend fun sendLogoutEvent(
+        accountId: Int?,
+        integrationKey: String,
+        key: String?,
+        eventTableName: String,
+        eventDetails: MutableMap<String, Any>
+    ): Response<Unit> {
+        return eventService.sendLogoutEvent(
+            event = LogoutEvent(
+                accountId = accountId,
+                integrationKey = integrationKey,
+                key = key,
+                eventTableName = eventTableName,
+                eventDetails = eventDetails
+            )
+        )
+    }
+
+
+    suspend fun sendRegisterEvent(
+        accountId: Int?,
+        integrationKey: String,
+        key: String?,
+        eventTableName: String,
+        eventDetails: MutableMap<String, Any>
+    ): Response<Unit> {
+        return eventService.sendRegisterEvent(
+            event = RegisterEvent(
+                accountId = accountId,
+                integrationKey = integrationKey,
+                key = key,
+                eventTableName = eventTableName,
+                eventDetails = eventDetails
             )
         )
     }
