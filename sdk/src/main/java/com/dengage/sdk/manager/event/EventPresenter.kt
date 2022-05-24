@@ -9,13 +9,10 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
     private val sendEvent by lazy { SendEvent() }
     private val sendTransactionalOpenEvent by lazy { SendTransactionalOpenEvent() }
     private val sendOpenEvent by lazy { SendOpenEvent() }
-    private val sendLoginEvent by lazy { SendLoginEvent() }
-    private val sendLogoutEvent by lazy { SendLogoutEvent() }
-    private val sendRegisterEvent by lazy { SendRegisterEvent() }
-
 
 
     override fun sendEvent(
+        accountId: Int?,
         integrationKey: String,
         key: String,
         eventTableName: String,
@@ -26,6 +23,7 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
                 view { eventSent() }
             }
             params = SendEvent.Params(
+                accountId=accountId,
                 integrationKey = integrationKey,
                 key = key,
                 eventTableName = eventTableName,
@@ -85,11 +83,11 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         eventTableName: String,
         eventDetails: MutableMap<String, Any>
     ) {
-        sendLoginEvent(this) {
+        sendEvent(this) {
             onResponse = {
                 view { openEventSent() }
             }
-            params = SendLoginEvent.Params(
+            params = SendEvent.Params(
                 accountId = accountId,
                 integrationKey = integrationKey,
                 key = key,
@@ -106,11 +104,11 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         eventTableName: String,
         eventDetails: MutableMap<String, Any>
     ) {
-        sendLogoutEvent(this) {
+        sendEvent(this) {
             onResponse = {
                 view { openEventSent() }
             }
-            params = SendLogoutEvent.Params(
+            params = SendEvent.Params(
                 accountId = accountId,
                 integrationKey = integrationKey,
                 key = key,
@@ -127,11 +125,11 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         eventTableName: String,
         eventDetails: MutableMap<String, Any>
     ) {
-        sendRegisterEvent(this) {
+        sendEvent(this) {
             onResponse = {
                 view { openEventSent() }
             }
-            params = SendRegisterEvent.Params(
+            params = SendEvent.Params(
                 accountId = accountId,
                 integrationKey = integrationKey,
                 key = key,

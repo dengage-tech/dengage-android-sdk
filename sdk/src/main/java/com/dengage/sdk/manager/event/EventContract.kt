@@ -13,6 +13,7 @@ interface EventContract {
 
     interface Presenter : BasePresenter<View> {
         fun sendEvent(
+            accountId: Int?,
             integrationKey: String,
             key: String,
             eventTableName: String,

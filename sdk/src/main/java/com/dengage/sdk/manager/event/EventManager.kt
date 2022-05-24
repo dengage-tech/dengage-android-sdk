@@ -266,6 +266,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         eventDetails[EventKey.SESSION_ID.key] = sessionId
 
         presenter.sendEvent(
+            accountId=Prefs.sdkParameters!!.accountId,
             integrationKey = Prefs.subscription!!.integrationKey,
             key = key,
             eventTableName = tableName,

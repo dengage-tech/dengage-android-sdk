@@ -11,13 +11,15 @@ class EventRepository {
     private val openEventService: OpenEventService by service(ApiType.PUSH)
 
     suspend fun sendEvent(
+        accountId: Int?,
         integrationKey: String,
-        key: String,
+        key: String?,
         eventTableName: String,
         eventDetails: MutableMap<String, Any>
     ): Response<Unit> {
         return eventService.sendEvent(
             event = Event(
+                accountId=accountId,
                 integrationKey = integrationKey,
                 key = key,
                 eventTableName = eventTableName,
@@ -64,58 +66,5 @@ class EventRepository {
         )
     }
 
-    suspend fun sendLoginEvent(
-        accountId: Int?,
-        integrationKey: String,
-        key: String?,
-        eventTableName: String,
-        eventDetails: MutableMap<String, Any>
-    ): Response<Unit> {
-        return eventService.sendLoginEvent(
-            event = LoginEvent(
-                accountId = accountId,
-                integrationKey = integrationKey,
-                key = key,
-                eventTableName = eventTableName,
-                eventDetails = eventDetails
-            )
-        )
-    }
 
-    suspend fun sendLogoutEvent(
-        accountId: Int?,
-        integrationKey: String,
-        key: String?,
-        eventTableName: String,
-        eventDetails: MutableMap<String, Any>
-    ): Response<Unit> {
-        return eventService.sendLogoutEvent(
-            event = LogoutEvent(
-                accountId = accountId,
-                integrationKey = integrationKey,
-                key = key,
-                eventTableName = eventTableName,
-                eventDetails = eventDetails
-            )
-        )
-    }
-
-
-    suspend fun sendRegisterEvent(
-        accountId: Int?,
-        integrationKey: String,
-        key: String?,
-        eventTableName: String,
-        eventDetails: MutableMap<String, Any>
-    ): Response<Unit> {
-        return eventService.sendRegisterEvent(
-            event = RegisterEvent(
-                accountId = accountId,
-                integrationKey = integrationKey,
-                key = key,
-                eventTableName = eventTableName,
-                eventDetails = eventDetails
-            )
-        )
-    }
 }

@@ -4,8 +4,9 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 data class Event(
+    @SerializedName("accountId") var accountId: Int?,
     @SerializedName("integrationKey") var integrationKey: String,
-    @SerializedName("key") var key: String,
+    @SerializedName("key") var key: String?,
     @SerializedName("eventTable") var eventTableName: String,
     @SerializedName("eventDetails") var eventDetails: MutableMap<String, Any>
 ) : Serializable
