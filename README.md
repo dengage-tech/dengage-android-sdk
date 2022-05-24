@@ -11,7 +11,7 @@
 
 ```groovy
 dependencies {
-    implementation 'com.github.whitehorse-technology:dengage.android.sdk:x.y.z'
+    implementation 'com.github.dengage-tech:dengage-android-sdk:x.y.z'
 }
 ```
 
