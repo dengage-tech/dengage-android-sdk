@@ -3,7 +3,6 @@ package com.dengage.sdk.manager.event
 import android.net.Uri
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.manager.base.BaseMvpManager
-import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import java.util.*
@@ -266,7 +265,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         eventDetails[EventKey.SESSION_ID.key] = sessionId
 
         presenter.sendEvent(
-            accountId=Prefs.sdkParameters!!.accountId,
+            accountId = Prefs.sdkParameters!!.accountId,
             integrationKey = Prefs.subscription!!.integrationKey,
             key = key,
             eventTableName = tableName,
@@ -320,19 +319,18 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
     fun sendLoginEvent() {
         try {
+            val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
 
             data[EventKey.EVENT_NAME.key] = EventType.LOGIN.type
-
-            Prefs.subscription!!.contactKey?.let { data.put(EventType.CONTACT_KEY.type, it) }
-
+            subscription?.contactKey?.let { data.put(EventType.CONTACT_KEY.type, it) }
             data[EventKey.SESSION_ID.key] = sessionId
 
-            presenter.sendLoginEvent(
+            presenter.sendEvent(
                 accountId = Prefs.sdkParameters?.accountId,
-                integrationKey = Prefs.subscription!!.integrationKey,
-                key = Prefs.subscription!!.deviceId,
+                integrationKey = subscription!!.integrationKey,
+                key = subscription.deviceId,
                 eventTableName = EventTable.CUSTOM_ANALYTICS_EVENTS.tableName,
                 eventDetails = data
             )
@@ -341,22 +339,20 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         }
     }
 
-
     fun sendLogoutEvent() {
         try {
+            val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
 
             data[EventKey.EVENT_NAME.key] = EventType.LOGOUT.type
-
-            Prefs.subscription!!.contactKey?.let { data.put(EventType.CONTACT_KEY.type, it) }
-
+            subscription?.contactKey?.let { data.put(EventType.CONTACT_KEY.type, it) }
             data[EventKey.SESSION_ID.key] = sessionId
 
-            presenter.sendLogoutEvent(
+            presenter.sendEvent(
                 accountId = Prefs.sdkParameters?.accountId,
-                integrationKey = Prefs.subscription!!.integrationKey,
-                key = Prefs.subscription!!.deviceId,
+                integrationKey = subscription!!.integrationKey,
+                key = subscription.deviceId,
                 eventTableName = EventTable.CUSTOM_ANALYTICS_EVENTS.tableName,
                 eventDetails = data
             )
@@ -367,17 +363,17 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
     fun sendRegisterEvent() {
         try {
+            val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
 
             data[EventKey.EVENT_NAME.key] = EventType.REGISTER.type
-
             data[EventKey.SESSION_ID.key] = sessionId
 
-            presenter.sendRegisterEvent(
+            presenter.sendEvent(
                 accountId = Prefs.sdkParameters?.accountId,
-                integrationKey = Prefs.subscription!!.integrationKey,
-                key = Prefs.subscription!!.deviceId,
+                integrationKey = subscription!!.integrationKey,
+                key = subscription.deviceId,
                 eventTableName = EventTable.CUSTOM_ANALYTICS_EVENTS.tableName,
                 eventDetails = data
             )

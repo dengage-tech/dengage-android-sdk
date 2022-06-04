@@ -1,6 +1,8 @@
 package com.dengage.sdk.manager.event
 
-import com.dengage.sdk.domain.event.usecase.*
+import com.dengage.sdk.domain.event.usecase.SendEvent
+import com.dengage.sdk.domain.event.usecase.SendOpenEvent
+import com.dengage.sdk.domain.event.usecase.SendTransactionalOpenEvent
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
 
 class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
@@ -10,11 +12,10 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
     private val sendTransactionalOpenEvent by lazy { SendTransactionalOpenEvent() }
     private val sendOpenEvent by lazy { SendOpenEvent() }
 
-
     override fun sendEvent(
         accountId: Int?,
         integrationKey: String,
-        key: String,
+        key: String?,
         eventTableName: String,
         eventDetails: MutableMap<String, Any>
     ) {
@@ -23,7 +24,7 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
                 view { eventSent() }
             }
             params = SendEvent.Params(
-                accountId=accountId,
+                accountId = accountId,
                 integrationKey = integrationKey,
                 key = key,
                 eventTableName = eventTableName,
@@ -72,69 +73,6 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
                 messageId = messageId,
                 messageDetails = messageDetails,
                 integrationKey = integrationKey
-            )
-        }
-    }
-
-    override fun sendLoginEvent(
-        accountId: Int?,
-        integrationKey: String,
-        key: String?,
-        eventTableName: String,
-        eventDetails: MutableMap<String, Any>
-    ) {
-        sendEvent(this) {
-            onResponse = {
-                view { openEventSent() }
-            }
-            params = SendEvent.Params(
-                accountId = accountId,
-                integrationKey = integrationKey,
-                key = key,
-                eventTableName = eventTableName,
-                eventDetails = eventDetails
-            )
-        }
-    }
-
-    override fun sendLogoutEvent(
-        accountId: Int?,
-        integrationKey: String,
-        key: String?,
-        eventTableName: String,
-        eventDetails: MutableMap<String, Any>
-    ) {
-        sendEvent(this) {
-            onResponse = {
-                view { openEventSent() }
-            }
-            params = SendEvent.Params(
-                accountId = accountId,
-                integrationKey = integrationKey,
-                key = key,
-                eventTableName = eventTableName,
-                eventDetails = eventDetails
-            )
-        }
-    }
-
-    override fun sendRegisterEvent(
-        accountId: Int?,
-        integrationKey: String,
-        key: String?,
-        eventTableName: String,
-        eventDetails: MutableMap<String, Any>
-    ) {
-        sendEvent(this) {
-            onResponse = {
-                view { openEventSent() }
-            }
-            params = SendEvent.Params(
-                accountId = accountId,
-                integrationKey = integrationKey,
-                key = key,
-                eventTableName = eventTableName,
-                eventDetails = eventDetails
             )
         }
     }

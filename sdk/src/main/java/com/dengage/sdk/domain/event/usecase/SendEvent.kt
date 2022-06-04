@@ -11,7 +11,7 @@ class SendEvent : CoroutineUseCase<Response<Unit>, SendEvent.Params>() {
 
     override suspend fun buildUseCase(params: Params?): Response<Unit> =
         repository.sendEvent(
-             accountId=params!!.accountId,
+            accountId = params!!.accountId,
             integrationKey = params.integrationKey,
             key = params.key,
             eventTableName = params.eventTableName,
@@ -19,7 +19,7 @@ class SendEvent : CoroutineUseCase<Response<Unit>, SendEvent.Params>() {
         )
 
     data class Params(
-        val accountId:Int?,
+        val accountId: Int?,
         val integrationKey: String,
         val key: String?,
         val eventTableName: String,

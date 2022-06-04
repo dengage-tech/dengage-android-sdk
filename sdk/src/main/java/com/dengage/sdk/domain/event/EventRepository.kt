@@ -2,7 +2,9 @@ package com.dengage.sdk.domain.event
 
 import com.dengage.sdk.data.remote.api.ApiType
 import com.dengage.sdk.data.remote.api.service
-import com.dengage.sdk.domain.event.model.*
+import com.dengage.sdk.domain.event.model.Event
+import com.dengage.sdk.domain.event.model.OpenEvent
+import com.dengage.sdk.domain.event.model.TransactionalOpenEvent
 import retrofit2.Response
 
 class EventRepository {
@@ -19,7 +21,7 @@ class EventRepository {
     ): Response<Unit> {
         return eventService.sendEvent(
             event = Event(
-                accountId=accountId,
+                accountId = accountId,
                 integrationKey = integrationKey,
                 key = key,
                 eventTableName = eventTableName,
@@ -65,6 +67,4 @@ class EventRepository {
             )
         )
     }
-
-
 }

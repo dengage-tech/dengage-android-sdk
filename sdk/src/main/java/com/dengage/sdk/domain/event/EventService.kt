@@ -13,4 +13,5 @@ interface EventService {
     suspend fun sendEvent(
         @Body event: Event
     ): Response<Unit>
+
 }

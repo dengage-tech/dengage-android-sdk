@@ -535,25 +535,22 @@ object Dengage {
     /**
      * Send Login custom event
      */
-
     fun sendLoginEvent() {
-        eventManager.sendLoginEvent();
+        eventManager.sendLoginEvent()
     }
 
     /**
      * Send Logout custom event
      */
-
     fun sendLogoutEvent() {
-        eventManager.sendLogoutEvent();
+        eventManager.sendLogoutEvent()
     }
 
     /**
      * Send Register custom event
      */
-
     fun sendRegisterEvent() {
-        eventManager.sendRegisterEvent();
+        eventManager.sendRegisterEvent()
     }
 
 }
