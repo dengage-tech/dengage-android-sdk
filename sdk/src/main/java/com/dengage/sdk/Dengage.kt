@@ -3,10 +3,12 @@ package com.dengage.sdk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.AppTracking
+import com.dengage.sdk.domain.geofence.model.GeofenceLocationSource
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.rfm.model.RFMGender
@@ -17,6 +19,8 @@ import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.configuration.ConfigurationCallback
 import com.dengage.sdk.manager.configuration.ConfigurationManager
 import com.dengage.sdk.manager.event.EventManager
+import com.dengage.sdk.manager.geofence.GeofenceLocationManager
+import com.dengage.sdk.manager.geofence.GeofencePermissionsHelper
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
@@ -38,6 +42,9 @@ object Dengage {
     private val tagManager by lazy { TagManager() }
     private val eventManager by lazy { EventManager() }
     private val rfmManager by lazy { RFMManager() }
+    private val geofenceManager by lazy { GeofenceLocationManager() }
+
+    internal var initialized = false
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -46,13 +53,16 @@ object Dengage {
      * @param firebaseIntegrationKey for fcm operations, get firebase integration from dengage panel
      * @param huaweiIntegrationKey for hms operations,  get huawei integration from dengage panel
      * @param firebaseApp for fcm operations, it is optional parameter
+     * @param geoFenceEnabled for geofence tracking, it is optional parameter
      */
     fun init(
         context: Context,
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
-        firebaseApp: FirebaseApp? = null
+        firebaseApp: FirebaseApp? = null,
+        geofenceEnabled: Boolean = false
     ) {
+        initialized = true
         ContextHolder.context = context
 
         subscriptionManager.buildSubscription(
@@ -77,11 +87,19 @@ object Dengage {
         configurationManager.configurationCallback = configurationCallback
 
         configurationManager.init(
-            firebaseApp = firebaseApp
+            firebaseApp = firebaseApp,
+            geofenceEnabled = geofenceEnabled
         )
+
         subscriptionManager.sendSubscription()
         configurationManager.getSdkParameters()
+
+        if (geofenceEnabled) {
+            geofenceManager.startTracking()
+        }
+
     }
+
 
     /**
      * Use to enable or disable logs on console.
@@ -551,6 +569,48 @@ object Dengage {
      */
     fun sendRegisterEvent() {
         eventManager.sendRegisterEvent()
+    }
+
+
+
+    /**
+     * Request location permission
+     *
+     * Use to request location permission for geofence tracking.
+     *
+     * @param activity   for showing ui of location permission request
+     *
+     */
+    fun requestLocationPermissions(activity: Activity) {
+        GeofencePermissionsHelper.requestLocationPermissions(activity)
+    }
+
+    /**
+     * Stop location tracking
+     *
+     * Use to stop location geofence tracking.
+     *
+     */
+    fun stopGeofence() {
+        geofenceManager.stopGeofence()
+    }
+
+    internal fun startGeofence() {
+        geofenceManager.startTracking()
+    }
+
+    internal fun handleLocation(context: Context, location: Location, source: GeofenceLocationSource, geofenceRequestId: String?) {
+        if (!initialized) {
+            init(context = context, geofenceEnabled = Prefs.geofenceEnabled)
+        }
+        geofenceManager.handleLocation(location, source, geofenceRequestId)
+    }
+
+    internal fun handleBootCompleted(context: Context) {
+        if (!initialized) {
+            init(context = context, geofenceEnabled = Prefs.geofenceEnabled)
+        }
+        geofenceManager.handleBootCompleted()
     }
 
 }

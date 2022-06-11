@@ -35,4 +35,7 @@
     <string name="change_time">Change Time</string>
     <string name="change_value">Change Value</string>
     <string name="remove_time">Remove Time</string>
+    <string name="button_request_location_permission">Request Location Permission</string>
+    <string name="button_stop_geofencing">Stop Geofencing</string>
+    <string name="button_geofence">Geofence</string>
 </resources>

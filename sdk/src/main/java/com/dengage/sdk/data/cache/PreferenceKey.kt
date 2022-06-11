@@ -15,7 +15,11 @@ enum class PreferenceKey {
     APP_SESSION_TIME,
     APP_SESSION_ID,
     LOG_VISIBILITY,
-    RFM_SCORES;
+    RFM_SCORES,
+    GEOFENCE_API_BASE_URL,
+    GEOFENCE_ENABLED,
+    GEOFENCE_HISTORY,
+    GEOFENCE_PERMISSIONS_DENIED;
 
     override fun toString(): String = name
 }

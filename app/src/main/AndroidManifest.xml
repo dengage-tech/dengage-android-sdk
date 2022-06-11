@@ -61,6 +61,11 @@
         <meta-data
             android:name="den_push_api_url"
             android:value="https://pushdev.dengage.com" />
+
+        <!-- Geofence api url of Dengage -->
+        <meta-data
+            android:name="den_geofence_api_url"
+            android:value="https://dev-push.dengage.com/geoapi/" />
     </application>
 
 </manifest>

@@ -18,14 +18,15 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
-    ConfigurationContract.Presenter>(), ConfigurationContract.View {
+        ConfigurationContract.Presenter>(), ConfigurationContract.View {
 
     internal var configurationCallback: ConfigurationCallback? = null
 
     override fun providePresenter() = ConfigurationPresenter()
 
     internal fun init(
-        firebaseApp: FirebaseApp?
+        firebaseApp: FirebaseApp?,
+        geofenceEnabled: Boolean
     ) {
         DengageUtils.getMetaData(name = "den_push_api_url").apply {
             if (this == null) {
@@ -43,6 +44,16 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
                 Prefs.eventApiBaseUrl = this
             }
         }
+        DengageUtils.getMetaData(name = "den_geofence_api_url").apply {
+            if (this == null) {
+                DengageLogger.error("Geofence api url not found on application manifest metadata")
+                throw RuntimeException("Geofence api url not found on application manifest metadata")
+            } else {
+                Prefs.geofenceApiBaseUrl = this
+            }
+        }
+
+        Prefs.geofenceEnabled = geofenceEnabled
 
         var subscription = Prefs.subscription
         if (subscription == null) {

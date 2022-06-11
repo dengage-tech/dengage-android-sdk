@@ -15,7 +15,8 @@ class App : Application() {
 
         Dengage.init(
             context = applicationContext,
-            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY
+            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
+            geofenceEnabled = true
         )
         Dengage.setLogStatus(true)
     }

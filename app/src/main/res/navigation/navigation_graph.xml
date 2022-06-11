@@ -34,6 +34,10 @@
         <action
             android:id="@+id/actionHomeToTags"
             app:destination="@id/tagsFragment" />
+
+        <action
+            android:id="@+id/actionHomeToGeofence"
+            app:destination="@id/geofenceFragment" />
     </fragment>
     <fragment
         android:id="@+id/deviceInfoFragment"
@@ -75,4 +79,10 @@
         android:name="com.dengage.android.kotlin.sample.ui.fragment.TagsFragment"
         android:label="fragment_tags"
         tools:layout="@layout/fragment_tags" />
+
+    <fragment
+        android:id="@+id/geofenceFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.GeofenceFragment"
+        android:label="fragment_tags"
+        tools:layout="@layout/fragment_geofence" />
 </navigation>

@@ -3,6 +3,7 @@ package com.dengage.sdk.data.cache
 import android.content.Context
 import android.content.SharedPreferences
 import com.dengage.sdk.domain.configuration.model.SdkParameters
+import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.rfm.model.RFMScore
 import com.dengage.sdk.domain.subscription.model.Subscription
@@ -12,7 +13,7 @@ import com.dengage.sdk.util.DengageUtils
 
 object Prefs {
 
-    private val preferences: SharedPreferences by lazy {
+    internal val preferences: SharedPreferences by lazy {
         ContextHolder.context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
     }
 
@@ -76,6 +77,22 @@ object Prefs {
     internal var rfmScores: MutableList<RFMScore>?
         get() = preferences.get(PreferenceKey.RFM_SCORES)
         set(value) = preferences.set(PreferenceKey.RFM_SCORES, value)
+
+    internal var geofenceApiBaseUrl: String
+        get() = preferences.get(PreferenceKey.GEOFENCE_API_BASE_URL) ?: Constants.GEOFENCE_API_URI
+        set(value) = preferences.set(PreferenceKey.GEOFENCE_API_BASE_URL, value)
+
+    internal var geofenceEnabled: Boolean
+        get() = preferences.get(PreferenceKey.GEOFENCE_ENABLED, defaultValue = false) ?:false
+        set(value) = preferences.set(PreferenceKey.GEOFENCE_ENABLED, value)
+
+    internal var geofenceHistory: GeofenceHistory
+        get() = preferences.get(PreferenceKey.GEOFENCE_HISTORY, defaultValue = GeofenceHistory()) ?: GeofenceHistory()
+        set(value) = preferences.set(PreferenceKey.GEOFENCE_HISTORY, value)
+
+    internal var geofencePermissionsDenied: Boolean
+        get() = preferences.get(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, defaultValue = false) ?:false
+        set(value) = preferences.set(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, value)
 
     fun clear() {
         preferences.edit().clear().apply()

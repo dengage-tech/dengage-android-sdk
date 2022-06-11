@@ -23,10 +23,16 @@ object ServiceFactory {
         serviceClass: Class<Service>,
         apiType: ApiType
     ): Service {
-        return if (apiType == ApiType.EVENT) {
-            EventApiProvider.INSTANCE.create(serviceClass)
-        } else {
-            PushApiProvider.INSTANCE.create(serviceClass)
+        return when (apiType) {
+            ApiType.EVENT -> {
+                EventApiProvider.INSTANCE.create(serviceClass)
+            }
+            ApiType.PUSH -> {
+                PushApiProvider.INSTANCE.create(serviceClass)
+            }
+            else -> {
+                GeofenceApiProvider.INSTANCE.create(serviceClass)
+            }
         }
     }
 }

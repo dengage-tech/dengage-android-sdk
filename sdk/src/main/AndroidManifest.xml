@@ -5,6 +5,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Geofence -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
     <application>
         <activity
             android:name=".ui.test.DengageTestActivity"
@@ -38,6 +44,26 @@
             android:name=".ui.inappmessage.InAppMessageActivity"
             android:exported="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+
+        <!-- Geofence -->
+        <activity android:name=".manager.geofence.GeofencePermissionActivity"
+            android:theme="@style/Theme.Transparent"
+            android:noHistory="true"/>
+        <receiver
+            android:name=".manager.geofence.GeofenceLocationReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter android:priority="999">
+                <action android:name="com.dengage.sdk.manager.geofence.LocationReceiver.SYNCED_GEOFENCES" />
+                <action android:name="com.dengage.sdk.manager.geofence.LocationReceiver.GEOFENCE" />
+                <action android:name="com.dengage.sdk.manager.geofence.LocationReceiver.LOCATION" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <service android:name="com.dengage.sdk.manager.geofence.GeofenceJobScheduler"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="true" />
+
     </application>
 
 </manifest>

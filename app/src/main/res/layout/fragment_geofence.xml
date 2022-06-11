@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/dengage_page_margin_medium"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnRequestLocationPermission"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:layout_marginTop="12dp"
+            android:text="@string/button_request_location_permission" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnStopGeofencing"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:layout_marginTop="12dp"
+            android:text="@string/button_stop_geofencing" />
+
+    </LinearLayout>
+
+</layout>
