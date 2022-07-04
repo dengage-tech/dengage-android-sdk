@@ -1,14 +1,12 @@
 package com.dengage.sdk.push
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.AudioAttributes
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -20,12 +18,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
-import com.dengage.sdk.util.Constants
-import com.dengage.sdk.util.ContextHolder
-import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.DengageUtils
-import com.dengage.sdk.util.GsonHolder
-import com.dengage.sdk.util.ImageDownloadUtils
+import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
 
@@ -288,11 +281,43 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun getPendingIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    private fun getPendingIntent(context: Context, requestCode: Int,intentParam: Intent): PendingIntent {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val stackBuilder =
+                TaskStackBuilder.create(context)
+            var intent =intentParam
+            val extras = intent.extras
+            var uri: String? = null
+            if (extras != null) {
+                val rawJson = extras.getString("RAW_DATA")
+                uri = extras.getString("targetUrl")
+            } else {
+
+            }
+            if (uri != null && !TextUtils.isEmpty(uri)) {
+                intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+            } else {
+                val packageName = context.packageName
+                intent = Intent(context,context.getActivity())
+                intent.action = Constants.PUSH_OPEN_EVENT
+                intent.putExtras(extras!!)
+                intent.setPackage(packageName)
+            }
+            if (intent != null && intent.extras != null) {
+                intent.putExtras(intent.extras!!)
+            }
+            stackBuilder.addNextIntentWithParentStack(intent)
+            stackBuilder.getPendingIntent(
+                requestCode,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
         } else {
-            PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intentParam,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
         }
     }
 

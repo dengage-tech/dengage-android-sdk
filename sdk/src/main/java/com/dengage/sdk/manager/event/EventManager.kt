@@ -1,6 +1,7 @@
 package com.dengage.sdk.manager.event
 
 import android.net.Uri
+import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.util.DengageLogger
