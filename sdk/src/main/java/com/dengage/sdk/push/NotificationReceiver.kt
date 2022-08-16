@@ -187,7 +187,7 @@ open class NotificationReceiver : BroadcastReceiver() {
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        manager?.notify(message.messageSource, message.hashCode(), notification)
+        manager?.notify(message.messageSource, message.messageId, notification)
     }
 
     open fun onTextNotificationRender(
@@ -198,7 +198,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     ) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        manager?.notify(message.messageSource, message.hashCode(), notification)
+        manager?.notify(message.messageSource, message.messageId, notification)
     }
 
     protected open fun onCarouselRender(
@@ -281,11 +281,15 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun getPendingIntent(context: Context, requestCode: Int,intentParam: Intent): PendingIntent {
+    private fun getPendingIntent(
+        context: Context,
+        requestCode: Int,
+        intentParam: Intent
+    ): PendingIntent {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val stackBuilder =
                 TaskStackBuilder.create(context)
-            var intent =intentParam
+            var intent = intentParam
             val extras = intent.extras
             var uri: String? = null
             if (extras != null) {
@@ -298,7 +302,7 @@ open class NotificationReceiver : BroadcastReceiver() {
                 intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
             } else {
                 val packageName = context.packageName
-                intent = Intent(context,context.getActivity())
+                intent = Intent(context, context.getActivity())
                 intent.action = Constants.PUSH_OPEN_EVENT
                 intent.putExtras(extras!!)
                 intent.setPackage(packageName)
@@ -379,15 +383,23 @@ open class NotificationReceiver : BroadcastReceiver() {
                     imageUrl = message.mediaUrl,
                     onComplete = { bitmap ->
                         bitmap?.let {
-                            val notificationBuilder: NotificationCompat.Builder = getNotificationBuilder(context, intent, message)
-                            onRichNotificationRender(context, intent, message, bitmap, notificationBuilder)
+                            val notificationBuilder: NotificationCompat.Builder =
+                                getNotificationBuilder(context, intent, message)
+                            onRichNotificationRender(
+                                context,
+                                intent,
+                                message,
+                                bitmap,
+                                notificationBuilder
+                            )
                         }
                     }
                 )
             }
             else -> {
                 DengageLogger.verbose("$TAG this is a text notification")
-                val notificationBuilder: NotificationCompat.Builder = getNotificationBuilder(context, intent, message)
+                val notificationBuilder: NotificationCompat.Builder =
+                    getNotificationBuilder(context, intent, message)
                 onTextNotificationRender(context, intent, message, notificationBuilder)
             }
         }
@@ -407,7 +419,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         val contentIntent = getContentIntent(extras, packageName)
         val deleteIntent = getDeleteIntent(extras, packageName)
         val pContentIntent = getPendingIntent(context, contentIntentRequestCode, contentIntent)
-        val pDeleteIntent = getPendingIntent(context, deleteIntentRequestCode, deleteIntent)
+        val pDeleteIntent = getDeleteIntent(context, deleteIntentRequestCode, deleteIntent)
 
         val channelId = createNotificationChannel(context, message)
 
@@ -421,7 +433,8 @@ open class NotificationReceiver : BroadcastReceiver() {
             .setSmallIcon(context.getSmallIconId())
         val notificationSmallIconColorId: Int = context.getSmallIconColorId()
         if (notificationSmallIconColorId > 0) {
-            notificationBuilder.color = ContextCompat.getColor(context, notificationSmallIconColorId)
+            notificationBuilder.color =
+                ContextCompat.getColor(context, notificationSmallIconColorId)
         }
         if (!TextUtils.isEmpty(message.title)) {
             notificationBuilder.setContentTitle(message.title)
@@ -472,7 +485,8 @@ open class NotificationReceiver : BroadcastReceiver() {
         val channelId = Constants.NOTIFICATION_CHANNEL_ID
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             val notificationChannel = NotificationChannel(
                 channelId,
@@ -488,4 +502,23 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
         return channelId
     }
+
+
+    private fun getDeleteIntent(
+        context: Context,
+        requestCode: Int,
+        intent: Intent
+    ): PendingIntent {
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        )
+    }
+
 }
