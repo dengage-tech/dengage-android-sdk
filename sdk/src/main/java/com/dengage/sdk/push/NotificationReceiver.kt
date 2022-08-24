@@ -1,14 +1,12 @@
 package com.dengage.sdk.push
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.AudioAttributes
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -288,12 +286,64 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun getPendingIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+     fun getPendingIntent(
+        context: Context,
+        requestCode: Int,
+        intentParam: Intent
+    ): PendingIntent {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val stackBuilder =
+                TaskStackBuilder.create(context)
+            var intent = intentParam
+            val extras = intent.extras
+            var uri: String? = null
+            if (extras != null) {
+                val rawJson = extras.getString("RAW_DATA")
+                uri = extras.getString("targetUrl")
+            } else {
+
+            }
+            if (uri != null && !TextUtils.isEmpty(uri)) {
+                intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+            } else {
+                val packageName = context.packageName
+                intent = Intent(context, context.getActivity())
+                intent.action = Constants.PUSH_OPEN_EVENT
+                intent.putExtras(extras!!)
+                intent.setPackage(packageName)
+            }
+            if (intent != null && intent.extras != null) {
+                intent.putExtras(intent.extras!!)
+            }
+            stackBuilder.addNextIntentWithParentStack(intent)
+            stackBuilder.getPendingIntent(
+                requestCode,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
         } else {
-            PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intentParam,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
         }
+    }
+
+
+     fun getDeletePendingIntent(
+        context: Context,
+        requestCode: Int,
+        intentParam: Intent
+    ): PendingIntent {
+
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intentParam,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
     }
 
     private fun prepareAndShowPush(context: Context?, intent: Intent?) {
@@ -354,15 +404,23 @@ open class NotificationReceiver : BroadcastReceiver() {
                     imageUrl = message.mediaUrl,
                     onComplete = { bitmap ->
                         bitmap?.let {
-                            val notificationBuilder: NotificationCompat.Builder = getNotificationBuilder(context, intent, message)
-                            onRichNotificationRender(context, intent, message, bitmap, notificationBuilder)
+                            val notificationBuilder: NotificationCompat.Builder =
+                                getNotificationBuilder(context, intent, message)
+                            onRichNotificationRender(
+                                context,
+                                intent,
+                                message,
+                                bitmap,
+                                notificationBuilder
+                            )
                         }
                     }
                 )
             }
             else -> {
                 DengageLogger.verbose("$TAG this is a text notification")
-                val notificationBuilder: NotificationCompat.Builder = getNotificationBuilder(context, intent, message)
+                val notificationBuilder: NotificationCompat.Builder =
+                    getNotificationBuilder(context, intent, message)
                 onTextNotificationRender(context, intent, message, notificationBuilder)
             }
         }
@@ -382,7 +440,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         val contentIntent = getContentIntent(extras, packageName)
         val deleteIntent = getDeleteIntent(extras, packageName)
         val pContentIntent = getPendingIntent(context, contentIntentRequestCode, contentIntent)
-        val pDeleteIntent = getPendingIntent(context, deleteIntentRequestCode, deleteIntent)
+        val pDeleteIntent = getDeletePendingIntent(context, deleteIntentRequestCode, deleteIntent)
 
         val channelId = createNotificationChannel(context, message)
 
@@ -396,7 +454,8 @@ open class NotificationReceiver : BroadcastReceiver() {
             .setSmallIcon(context.getSmallIconId())
         val notificationSmallIconColorId: Int = context.getSmallIconColorId()
         if (notificationSmallIconColorId > 0) {
-            notificationBuilder.color = ContextCompat.getColor(context, notificationSmallIconColorId)
+            notificationBuilder.color =
+                ContextCompat.getColor(context, notificationSmallIconColorId)
         }
         if (!TextUtils.isEmpty(message.title)) {
             notificationBuilder.setContentTitle(message.title)
@@ -421,7 +480,8 @@ open class NotificationReceiver : BroadcastReceiver() {
                 buttonIntent.putExtra("targetUrl", actionButton.targetUrl)
                 buttonIntent.putExtra("RAW_DATA", message.toJson())
                 buttonIntent.setPackage(packageName)
-                val btnPendingIntent: PendingIntent = getPendingIntent(context, requestCode, buttonIntent)
+                val btnPendingIntent: PendingIntent =
+                    getPendingIntent(context, requestCode, buttonIntent)
                 val icon: Int = context.getResourceId(actionButton.icon)
                 notificationBuilder.addAction(icon, actionButton.text, btnPendingIntent)
             }
@@ -447,7 +507,8 @@ open class NotificationReceiver : BroadcastReceiver() {
         val channelId = Constants.NOTIFICATION_CHANNEL_ID
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             val notificationChannel = NotificationChannel(
                 channelId,

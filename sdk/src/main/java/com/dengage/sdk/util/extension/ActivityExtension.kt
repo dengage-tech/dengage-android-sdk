@@ -22,7 +22,9 @@ fun Context.launchActivity(intent: Intent?, uri: String?) {
     }
 
     try {
-        this.startActivityFromClass(clazz, activityIntent)
+        activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        activityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        this.startActivity(activityIntent)
     } catch (e: Exception) {
         DengageLogger.error(e.message)
     }

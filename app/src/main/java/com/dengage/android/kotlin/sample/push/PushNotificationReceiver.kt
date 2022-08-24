@@ -45,7 +45,7 @@ class PushNotificationReceiver : NotificationReceiver() {
         val carouseItemIntent = getPendingIntent(context, 0, itemIntent)
         val carouselLeftIntent = getPendingIntent(context, 1, leftIntent)
         val carouselRightIntent = getPendingIntent(context, 2, rightIntent)
-        val deletePendingIntent = getPendingIntent(context, 4, deleteIntent)
+        val deletePendingIntent = getDeletePendingIntent(context, 4, deleteIntent)
         val contentPendingIntent = getPendingIntent(context, 5, contentIntent)
 
         // set views for the layout
@@ -123,21 +123,6 @@ class PushNotificationReceiver : NotificationReceiver() {
         )
     }
 
-    private fun getPendingIntent(
-        context: Context,
-        requestCode: Int,
-        intent: Intent
-    ): PendingIntent {
-        return PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
-        )
-    }
+
 
 }

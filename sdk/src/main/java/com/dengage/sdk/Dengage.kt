@@ -3,6 +3,7 @@ package com.dengage.sdk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.data.cache.Prefs
@@ -26,6 +27,7 @@ import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.GsonHolder
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 
@@ -553,4 +555,24 @@ object Dengage {
         eventManager.sendRegisterEvent()
     }
 
+    fun handleIncomingIntent(intent: Intent?) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (intent != null && intent.extras != null && intent.action != null) {
+                    if (intent.action == Constants.PUSH_OPEN_EVENT) {
+
+                        var message = Message.createFromIntent(intent.extras!!)
+                        val rawJson = intent.extras!!.getString("RAW_DATA")
+                        if (!TextUtils.isEmpty(rawJson)) {
+                            message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
+                        }
+                        sendOpenEvent("", "", message)
+
+                    }
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
+    }
 }

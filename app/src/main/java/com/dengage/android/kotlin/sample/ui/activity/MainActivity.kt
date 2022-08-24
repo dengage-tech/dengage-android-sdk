@@ -4,12 +4,15 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.findNavController
 import com.dengage.android.kotlin.sample.R
+import com.dengage.sdk.Dengage
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        Dengage.handleIncomingIntent(intent)
     }
 
     override fun onSupportNavigateUp(): Boolean =
