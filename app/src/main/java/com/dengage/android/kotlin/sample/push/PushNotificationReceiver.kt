@@ -43,9 +43,9 @@ class PushNotificationReceiver : NotificationReceiver() {
         val contentIntent = getContentIntent(intent.extras, context.packageName)
 
         val carouseItemIntent = getPendingIntent(context, 0, itemIntent)
-        val carouselLeftIntent = getPendingIntent(context, 1, leftIntent)
-        val carouselRightIntent = getPendingIntent(context, 2, rightIntent)
-        val deletePendingIntent = getPendingIntent(context, 4, deleteIntent)
+        val carouselLeftIntent = getClickPendingIntent(context, 1, leftIntent)
+        val carouselRightIntent = getClickPendingIntent(context, 2, rightIntent)
+        val deletePendingIntent = getDeletePendingIntent(context, 4, deleteIntent)
         val contentPendingIntent = getPendingIntent(context, 5, contentIntent)
 
         // set views for the layout
@@ -123,7 +123,7 @@ class PushNotificationReceiver : NotificationReceiver() {
         )
     }
 
-    private fun getPendingIntent(
+    private fun getClickPendingIntent(
         context: Context,
         requestCode: Int,
         intent: Intent

@@ -18,7 +18,12 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
-import com.dengage.sdk.util.*
+import com.dengage.sdk.util.Constants
+import com.dengage.sdk.util.ContextHolder
+import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
+import com.dengage.sdk.util.GsonHolder
+import com.dengage.sdk.util.ImageDownloadUtils
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
 
@@ -281,7 +286,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun getPendingIntent(
+    fun getPendingIntent(
         context: Context,
         requestCode: Int,
         intentParam: Intent
@@ -323,6 +328,22 @@ open class NotificationReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
+    }
+
+
+    fun getDeletePendingIntent(
+        context: Context,
+        requestCode: Int,
+        intentParam: Intent
+    ): PendingIntent {
+
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intentParam,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
     }
 
     private fun prepareAndShowPush(context: Context?, intent: Intent?) {
@@ -419,7 +440,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         val contentIntent = getContentIntent(extras, packageName)
         val deleteIntent = getDeleteIntent(extras, packageName)
         val pContentIntent = getPendingIntent(context, contentIntentRequestCode, contentIntent)
-        val pDeleteIntent = getDeleteIntent(context, deleteIntentRequestCode, deleteIntent)
+        val pDeleteIntent = getDeletePendingIntent(context, deleteIntentRequestCode, deleteIntent)
 
         val channelId = createNotificationChannel(context, message)
 
@@ -459,7 +480,8 @@ open class NotificationReceiver : BroadcastReceiver() {
                 buttonIntent.putExtra("targetUrl", actionButton.targetUrl)
                 buttonIntent.putExtra("RAW_DATA", message.toJson())
                 buttonIntent.setPackage(packageName)
-                val btnPendingIntent: PendingIntent = getPendingIntent(context, requestCode, buttonIntent)
+                val btnPendingIntent: PendingIntent =
+                    getPendingIntent(context, requestCode, buttonIntent)
                 val icon: Int = context.getResourceId(actionButton.icon)
                 notificationBuilder.addAction(icon, actionButton.text, btnPendingIntent)
             }
@@ -502,23 +524,4 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
         return channelId
     }
-
-
-    private fun getDeleteIntent(
-        context: Context,
-        requestCode: Int,
-        intent: Intent
-    ): PendingIntent {
-        return PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
-        )
-    }
-
 }
