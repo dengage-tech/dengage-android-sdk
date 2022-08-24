@@ -29,14 +29,6 @@
             </intent-filter>
         </service>
 
-        <!-- Hms Messaging Service for handling push messages comes from huawei messaging service -->
-        <service
-            android:name="com.dengage.sdk.push.HmsMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
 
         <!-- For handling push notifications comes to messaging service classes -->
         <receiver

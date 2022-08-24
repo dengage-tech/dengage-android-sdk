@@ -61,19 +61,8 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             Prefs.subscription = subscription
         }
 
-        if (ConfigurationUtils.isGooglePlayServicesAvailable() && ConfigurationUtils.isHuaweiMobileServicesAvailable()) {
-            DengageLogger.verbose("Google Play Services and Huawei Mobile Service are available. Firebase services will be used")
-            initWithGoogle(
-                subscription = subscription,
-                firebaseApp = firebaseApp
-            )
-        } else if (ConfigurationUtils.isHuaweiMobileServicesAvailable()) {
-            DengageLogger.verbose("Huawei Mobile Services is available")
-            initWithHuawei(
-                subscription = subscription,
-            )
-        } else if (ConfigurationUtils.isGooglePlayServicesAvailable()) {
-            DengageLogger.verbose("Google Play Services is available")
+        if (ConfigurationUtils.isGooglePlayServicesAvailable() ) {
+            DengageLogger.verbose("Google Play Services Service are available. Firebase services will be used")
             initWithGoogle(
                 subscription = subscription,
                 firebaseApp = firebaseApp
@@ -153,18 +142,5 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         }
     }
 
-    private fun initWithHuawei(subscription: Subscription) {
-        ConfigurationUtils.getHuaweiToken(
-            onTokenResult = {
-                subscription.tokenType = TokenType.HUAWEI.type
-                subscription.token = it
-                configurationCallback?.sendSubscription(subscription)
-            }
-        )
 
-        ConfigurationUtils.getHmsAdvertisingId {
-            subscription.advertisingId = it
-            configurationCallback?.sendSubscription(subscription)
-        }
-    }
 }

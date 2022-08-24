@@ -58,7 +58,6 @@ object Dengage {
     fun init(
         context: Context,
         firebaseIntegrationKey: String? = null,
-        huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
         geofenceEnabled: Boolean = false
     ) {
@@ -66,8 +65,7 @@ object Dengage {
         ContextHolder.context = context
 
         subscriptionManager.buildSubscription(
-            firebaseIntegrationKey = firebaseIntegrationKey,
-            huaweiIntegrationKey = huaweiIntegrationKey
+            firebaseIntegrationKey = firebaseIntegrationKey
         )
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
@@ -113,14 +111,6 @@ object Dengage {
         DengageLogger.verbose("setFirebaseIntegrationKey method is called")
         DengageLogger.verbose("setFirebaseIntegrationKey: $integrationKey")
         subscriptionManager.setFirebaseIntegrationKey(
-            integrationKey = integrationKey
-        )
-    }
-
-    fun setHuaweiIntegrationKey(integrationKey: String) {
-        DengageLogger.verbose("setHuaweiIntegrationKey method is called")
-        DengageLogger.verbose("setHuaweiIntegrationKey: $integrationKey")
-        subscriptionManager.setHuaweiIntegrationKey(
             integrationKey = integrationKey
         )
     }

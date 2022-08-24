@@ -18,8 +18,8 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     override fun providePresenter() = SubscriptionPresenter()
 
     internal fun buildSubscription(
-        firebaseIntegrationKey: String?,
-        huaweiIntegrationKey: String?,
+        firebaseIntegrationKey: String?
+
     ) {
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
@@ -30,7 +30,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         var subscription = Prefs.subscription
         if (subscription == null) {
             subscription = Subscription()
-            subscription.integrationKey = firebaseIntegrationKey ?: huaweiIntegrationKey ?: ""
+            subscription.integrationKey = firebaseIntegrationKey ?: ""
         }
         Prefs.subscription = subscription
     }
@@ -160,18 +160,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         }
     }
 
-    internal fun setHuaweiIntegrationKey(integrationKey: String) {
-        val subscription = Prefs.subscription
 
-        if (subscription != null) {
-            subscription.integrationKey = integrationKey
-
-            saveSubscription(subscription = subscription)
-
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
-        }
-    }
 
     override fun subscriptionSent() = Unit
 
