@@ -5,6 +5,8 @@ import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.text.TextUtils
 import com.dengage.sdk.util.DengageLogger
 
@@ -48,4 +50,22 @@ fun Context.startActivityFromClass(clazz: Class<out Activity>?, activityIntent: 
     stackBuilder.addParentStack(clazz)
     stackBuilder.addNextIntent(activityIntent)
     stackBuilder.startActivities()
+}
+
+fun Context.launchSettingsActivity() {
+    val intent = Intent()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+        intent.putExtra(Settings.EXTRA_APP_PACKAGE, this.packageName)
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+        intent.putExtra("app_package", this.packageName)
+        intent.putExtra("app_uid", this.applicationInfo.uid)
+    } else {
+        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        intent.addCategory(Intent.CATEGORY_DEFAULT)
+        intent.data = Uri.parse("package:$this.packageName")
+    }
+
+    this.startActivity(intent)
 }

@@ -546,25 +546,4 @@ object Dengage {
     fun sendRegisterEvent() {
         eventManager.sendRegisterEvent()
     }
-
-    fun handleIncomingIntent(intent: Intent?) {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (intent != null && intent.extras != null && intent.action != null) {
-                    if (intent.action == Constants.PUSH_OPEN_EVENT) {
-
-                        var message = Message.createFromIntent(intent.extras!!)
-                        val rawJson = intent.extras!!.getString("RAW_DATA")
-                        if (!TextUtils.isEmpty(rawJson)) {
-                            message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
-                        }
-                        sendOpenEvent("", "", message)
-
-                    }
-                }
-            }
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
-        }
-    }
 }

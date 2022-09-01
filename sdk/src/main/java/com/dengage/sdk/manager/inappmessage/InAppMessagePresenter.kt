@@ -39,7 +39,9 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 }
                 params = GetInAppMessages.Params(
                     account = sdkParameters?.accountName!!,
-                    subscription = Prefs.subscription!!
+                    subscription = Prefs.subscription!!,
+                    sdkParameters = sdkParameters
+
                 )
             }
         }
@@ -112,7 +114,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         sdkParameters: SdkParameters?
     ): Boolean {
         return subscription != null && sdkParameters?.accountName != null &&
-            sdkParameters.inAppEnabled != null && sdkParameters.inAppEnabled
+                sdkParameters.inAppEnabled != null && sdkParameters.inAppEnabled
     }
 
     private fun removeInAppMessageFromCache(inAppMessageId: String) {
