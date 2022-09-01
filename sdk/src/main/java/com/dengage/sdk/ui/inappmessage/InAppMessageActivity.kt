@@ -2,9 +2,12 @@ package com.dengage.sdk.ui.inappmessage
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -12,15 +15,19 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.RelativeLayout
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.R
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
+import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.extension.launchActivity
+import com.dengage.sdk.util.extension.launchSettingsActivity
 import kotlin.math.roundToInt
 
 class InAppMessageActivity : Activity(), View.OnClickListener {
@@ -191,7 +198,20 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun androidUrl(targetUrl: String) {
             DengageLogger.verbose("In app message: android target url event $targetUrl")
-            this@InAppMessageActivity.launchActivity(null, targetUrl)
+
+            if (targetUrl == "Dn.promptPushPermission()") {
+                if (!this@InAppMessageActivity.areNotificationsEnabled()) {
+                    Toast.makeText(
+                        this@InAppMessageActivity,
+                        "You need to enable push permission",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    this@InAppMessageActivity.launchSettingsActivity()
+                }
+            } else {
+                this@InAppMessageActivity.launchActivity(null, targetUrl)
+            }
+
         }
 
         @JavascriptInterface

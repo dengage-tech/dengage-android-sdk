@@ -1,5 +1,6 @@
 package com.dengage.sdk.util.extension
 
+import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.util.GsonHolder
 
@@ -16,6 +17,14 @@ fun Subscription.getType(): String {
         "d"
     } else {
         "c"
+    }
+}
+
+fun SdkParameters.getAppId(): String {
+    return if (appId.isNullOrEmpty()) {
+        ""
+    } else {
+        appId.toString()
     }
 }
 

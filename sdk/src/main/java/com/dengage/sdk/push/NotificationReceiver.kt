@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.AudioAttributes
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
@@ -18,12 +17,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
-import com.dengage.sdk.util.Constants
-import com.dengage.sdk.util.ContextHolder
-import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.DengageUtils
-import com.dengage.sdk.util.GsonHolder
-import com.dengage.sdk.util.ImageDownloadUtils
+import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
 
@@ -286,33 +280,16 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    fun getPendingIntent(
-        context: Context,
-        requestCode: Int,
-        intentParam: Intent
-    ): PendingIntent {
+    open fun getPendingIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent? {
+        var intent = intent
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val stackBuilder =
-                TaskStackBuilder.create(context)
-            var intent = intentParam
+            val stackBuilder = TaskStackBuilder.create(context)
             val extras = intent.extras
-            var uri: String? = null
-            if (extras != null) {
-                val rawJson = extras.getString("RAW_DATA")
-                uri = extras.getString("targetUrl")
-            } else {
-
-            }
-            if (uri != null && !TextUtils.isEmpty(uri)) {
-                intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-            } else {
-                val packageName = context.packageName
-                intent = Intent(context, context.getActivity())
-                intent.action = Constants.PUSH_OPEN_EVENT
-                intent.putExtras(extras!!)
-                intent.setPackage(packageName)
-            }
-            if (intent != null && intent.extras != null) {
+            val packageName = context.packageName
+            intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
+            intent.putExtras(extras!!)
+            intent.setPackage(packageName)
+            if (intent.extras != null) {
                 intent.putExtras(intent.extras!!)
             }
             stackBuilder.addNextIntentWithParentStack(intent)
@@ -324,10 +301,25 @@ open class NotificationReceiver : BroadcastReceiver() {
             PendingIntent.getBroadcast(
                 context,
                 requestCode,
-                intentParam,
+                intent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
+    }
+
+
+    open fun getCarouselDirectionIntent(
+        context: Context,
+        requestCode: Int,
+        intent: Intent
+    ): PendingIntent? {
+
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
     }
 
 
@@ -480,7 +472,7 @@ open class NotificationReceiver : BroadcastReceiver() {
                 buttonIntent.putExtra("targetUrl", actionButton.targetUrl)
                 buttonIntent.putExtra("RAW_DATA", message.toJson())
                 buttonIntent.setPackage(packageName)
-                val btnPendingIntent: PendingIntent =
+                val btnPendingIntent: PendingIntent? =
                     getPendingIntent(context, requestCode, buttonIntent)
                 val icon: Int = context.getResourceId(actionButton.icon)
                 notificationBuilder.addAction(icon, actionButton.text, btnPendingIntent)
@@ -490,15 +482,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     open fun clearNotification(context: Context, message: Message) {
-        DengageLogger.verbose("$TAG Clearing notification ID: ${message.messageId}")
-        DengageLogger.verbose("$TAG Clearing notification TAG: ${message.messageSource}")
-        if (!message.carouselContent.isNullOrEmpty()) {
-            for (item in message.carouselContent) {
-                item.removeFileFromStorage()
-            }
-        }
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
-        manager?.cancel(message.messageSource, message.messageId)
+        context.clearNotification(message)
     }
 
     open fun createNotificationChannel(context: Context, message: Message): String {
