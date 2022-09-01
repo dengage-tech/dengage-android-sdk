@@ -1,6 +1,7 @@
 package com.dengage.sdk.domain.inappmessage.usecase
 
 import com.dengage.sdk.domain.base.CoroutineUseCase
+import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.inappmessage.InAppMessageRepository
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
@@ -13,11 +14,14 @@ class GetInAppMessages : CoroutineUseCase<MutableList<InAppMessage>?, GetInAppMe
     override suspend fun buildUseCase(params: Params?): MutableList<InAppMessage>? =
         repository.getInAppMessages(
             account = params!!.account,
-            subscription = params.subscription
+            subscription = params.subscription,
+            sdkParameters = params.sdkParameters
+
         )
 
     data class Params(
         val account: String,
-        val subscription: Subscription
+        val subscription: Subscription,
+        val sdkParameters: SdkParameters
     )
 }
