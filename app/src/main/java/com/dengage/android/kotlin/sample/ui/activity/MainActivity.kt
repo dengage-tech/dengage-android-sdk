@@ -12,8 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Dengage.handleIncomingIntent(intent)
-    }
+           }
 
     override fun onSupportNavigateUp(): Boolean =
         findNavController(R.id.navigationHostFragment).navigateUp()

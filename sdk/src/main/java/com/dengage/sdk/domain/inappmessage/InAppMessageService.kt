@@ -14,7 +14,8 @@ interface InAppMessageService {
         @Query("acc") account: String,
         @Query("cdkey") cdKey: String,
         @Query("did") deviceId: String,
-        @Query("type") type: String
+        @Query("type") type: String,
+        @Query("appid") appId:String
     ): MutableList<InAppMessage>?
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")

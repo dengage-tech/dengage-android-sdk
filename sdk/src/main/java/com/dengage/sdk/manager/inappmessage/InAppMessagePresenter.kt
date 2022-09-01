@@ -39,7 +39,9 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 }
                 params = GetInAppMessages.Params(
                     account = sdkParameters?.accountName!!,
-                    subscription = Prefs.subscription!!
+                    subscription = Prefs.subscription!!,
+                    sdkParameters = sdkParameters
+
                 )
             }
         }

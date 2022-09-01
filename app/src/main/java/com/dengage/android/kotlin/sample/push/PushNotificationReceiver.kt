@@ -43,8 +43,8 @@ class PushNotificationReceiver : NotificationReceiver() {
         val contentIntent = getContentIntent(intent.extras, context.packageName)
 
         val carouseItemIntent = getPendingIntent(context, 0, itemIntent)
-        val carouselLeftIntent = getPendingIntent(context, 1, leftIntent)
-        val carouselRightIntent = getPendingIntent(context, 2, rightIntent)
+        val carouselLeftIntent = getCarouselDirectionIntent(context, 1, leftIntent)
+        val carouselRightIntent = getCarouselDirectionIntent(context, 2, rightIntent)
         val deletePendingIntent = getDeletePendingIntent(context, 4, deleteIntent)
         val contentPendingIntent = getPendingIntent(context, 5, contentIntent)
 

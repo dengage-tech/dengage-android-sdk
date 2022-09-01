@@ -2,6 +2,7 @@ package com.dengage.sdk.push
 
 import android.R.drawable
 import android.app.Activity
+import android.app.NotificationManager
 import android.app.TaskStackBuilder
 import android.content.ContentResolver
 import android.content.Context
@@ -11,9 +12,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.text.TextUtils
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.text.isDigitsOnly
 import com.dengage.sdk.domain.push.model.CarouselItem
+import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import java.io.File
@@ -44,7 +48,8 @@ fun Context.getSmallIconId(): Int {
             DengageLogger.verbose("Application icon: $smallIcon")
             appIconId
         } else {
-            val applicationInfo = packageManager.getApplicationInfo(this.packageName, PackageManager.GET_META_DATA)
+            val applicationInfo =
+                packageManager.getApplicationInfo(this.packageName, PackageManager.GET_META_DATA)
             DengageLogger.verbose("Application icon: " + applicationInfo.icon)
             applicationInfo.icon
         }
@@ -151,4 +156,33 @@ fun Context.startActivities(clazz: Class<out Activity>?, activityIntent: Intent)
     stackBuilder.addParentStack(clazz)
     stackBuilder.addNextIntent(activityIntent)
     stackBuilder.startActivities()
+}
+
+fun Context.clearNotification(message: Message?) {
+    if (!message?.carouselContent.isNullOrEmpty()) {
+        for (item in message?.carouselContent!!) {
+            item.removeFileFromStorage()
+        }
+    }
+    val manager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
+    manager?.cancel(message?.messageSource, message?.messageId!!)
+}
+
+fun Context.areNotificationsEnabled(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val manager =
+            this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (!manager.areNotificationsEnabled()) {
+            return false
+        }
+        val channels = manager.notificationChannels
+        for (channel in channels) {
+            if (channel.importance == NotificationManager.IMPORTANCE_NONE) {
+                return false
+            }
+        }
+        true
+    } else {
+        NotificationManagerCompat.from(this).areNotificationsEnabled()
+    }
 }
