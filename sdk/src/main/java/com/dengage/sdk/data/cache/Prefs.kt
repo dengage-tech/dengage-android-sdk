@@ -7,6 +7,7 @@ import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.rfm.model.RFMScore
 import com.dengage.sdk.domain.subscription.model.Subscription
+import com.dengage.sdk.domain.visitcount.model.VisitCountItem
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageUtils
@@ -44,6 +45,10 @@ object Prefs {
     internal var inAppMessageFetchTime: Long
         get() = preferences.get(PreferenceKey.IN_APP_MESSAGE_FETCH_TIME, 0) ?: 0
         set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGE_FETCH_TIME, value)
+
+    internal var realTimeInAppMessageFetchTime: Long
+        get() = preferences.get(PreferenceKey.REAL_TIME_IN_APP_MESSAGE_FETCH_TIME, 0) ?: 0
+        set(value) = preferences.set(PreferenceKey.REAL_TIME_IN_APP_MESSAGE_FETCH_TIME, value)
 
     internal var inAppMessageShowTime: Long
         get() = preferences.get(PreferenceKey.IN_APP_MESSAGE_SHOW_TIME, 0) ?: 0
@@ -83,16 +88,38 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.GEOFENCE_API_BASE_URL, value)
 
     internal var geofenceEnabled: Boolean
-        get() = preferences.get(PreferenceKey.GEOFENCE_ENABLED, defaultValue = false) ?:false
+        get() = preferences.get(PreferenceKey.GEOFENCE_ENABLED, defaultValue = false) ?: false
         set(value) = preferences.set(PreferenceKey.GEOFENCE_ENABLED, value)
 
     internal var geofenceHistory: GeofenceHistory
-        get() = preferences.get(PreferenceKey.GEOFENCE_HISTORY, defaultValue = GeofenceHistory()) ?: GeofenceHistory()
+        get() = preferences.get(PreferenceKey.GEOFENCE_HISTORY, defaultValue = GeofenceHistory())
+            ?: GeofenceHistory()
         set(value) = preferences.set(PreferenceKey.GEOFENCE_HISTORY, value)
 
     internal var geofencePermissionsDenied: Boolean
-        get() = preferences.get(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, defaultValue = false) ?:false
+        get() = preferences.get(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, defaultValue = false)
+            ?: false
         set(value) = preferences.set(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, value)
+
+    internal var firstLaunchTime: Long
+        get() = preferences.get(PreferenceKey.FIRST_LAUNCH_TIME, 0L) ?: 0L
+        set(value) = preferences.set(PreferenceKey.FIRST_LAUNCH_TIME, value)
+
+    internal var lastSessionStartTime: Long
+        get() = preferences.get(PreferenceKey.LAST_SESSION_START_TIME, 0) ?: 0
+        set(value) = preferences.set(PreferenceKey.LAST_SESSION_START_TIME, value)
+
+    internal var lastSessionDuration: Long
+        get() = preferences.get(PreferenceKey.LAST_SESSION_DURATION, 0) ?: 0
+        set(value) = preferences.set(PreferenceKey.LAST_SESSION_DURATION, value)
+
+    internal var lastSessionVisitTime: Long
+        get() = preferences.get(PreferenceKey.LAST_SESSION_VISIT_TIME, 0) ?: 0
+        set(value) = preferences.set(PreferenceKey.LAST_SESSION_VISIT_TIME, value)
+
+    internal var visitCountItems: MutableList<VisitCountItem>
+        get() = preferences.get(PreferenceKey.VISIT_COUNTS) ?: mutableListOf()
+        set(value) = preferences.set(PreferenceKey.VISIT_COUNTS, value)
 
     fun clear() {
         preferences.edit().clear().apply()

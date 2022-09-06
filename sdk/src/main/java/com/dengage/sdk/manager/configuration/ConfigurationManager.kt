@@ -18,7 +18,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
-        ConfigurationContract.Presenter>(), ConfigurationContract.View {
+    ConfigurationContract.Presenter>(), ConfigurationContract.View {
 
     internal var configurationCallback: ConfigurationCallback? = null
 

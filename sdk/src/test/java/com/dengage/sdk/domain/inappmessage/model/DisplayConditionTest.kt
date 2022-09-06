@@ -13,8 +13,7 @@ class DisplayConditionTest {
             screenNameFilters = listOf(ScreenNameFilter(
                 value = listOf(screenName),
                 operator = operator
-            )),
-            screenDataFilters = null
+            ))
         )
         Assert.assertEquals(displayCondition.screenNameFilters?.get(0)?.value?.get(0), screenName)
         Assert.assertEquals(displayCondition.screenNameFilters?.get(0)?.operator, operator)

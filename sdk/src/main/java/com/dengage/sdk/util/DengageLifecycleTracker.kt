@@ -5,7 +5,7 @@ import android.app.Application
 import android.os.Bundle
 import com.dengage.sdk.Dengage
 
-class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
+open class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
 
     private var startedActivityCount = 0
 
@@ -15,6 +15,9 @@ class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
         if (startedActivityCount == 0) {
             // app went to foreground
             Dengage.getInAppMessages()
+
+            Dengage.setLastSessionStartTime()
+            Dengage.sendAppForegroundEvent()
         }
         startedActivityCount++
     }
@@ -25,6 +28,10 @@ class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
 
     override fun onActivityStopped(activity: Activity) {
         startedActivityCount--
+        if (startedActivityCount == 0) {
+            Dengage.setLastVisitTime()
+            Dengage.setLastSessionDuration()
+        }
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit

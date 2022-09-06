@@ -15,14 +15,13 @@ interface InAppMessageContract {
 
     interface Presenter : BasePresenter<View> {
         fun getInAppMessages()
-        fun setInAppMessageAsDisplayed(messageDetails: String?)
+        fun setInAppMessageAsDisplayed(inAppMessage: InAppMessage)
         fun setInAppMessageAsClicked(
-            inAppMessageId: String,
-            messageDetails: String?,
+            inAppMessage: InAppMessage,
             buttonId: String?
         )
 
-        fun setInAppMessageAsDismissed(messageDetails: String?)
+        fun setInAppMessageAsDismissed(inAppMessage: InAppMessage)
     }
 
 }

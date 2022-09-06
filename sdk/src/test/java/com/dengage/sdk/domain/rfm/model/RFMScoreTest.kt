@@ -16,6 +16,6 @@ class RFMScoreTest {
         )
 
         Assert.assertEquals(categoryId, rfmScore.categoryId)
-        Assert.assertEquals(score, rfmScore.score)
+        Assert.assertEquals(score, rfmScore.score, 0.001)
     }
 }

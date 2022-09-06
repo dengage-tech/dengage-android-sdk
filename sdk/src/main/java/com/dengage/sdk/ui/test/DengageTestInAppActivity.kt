@@ -86,24 +86,20 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             params = contentParams
         )
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 0,
             showEveryXMinutes = 0
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "2030-10-11T12:00:00.000Z",
             priority = Priority.HIGH.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         return InAppMessage(
@@ -131,24 +127,20 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             params = contentParams
         )
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 0,
             showEveryXMinutes = 0
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "2030-10-11T12:00:00.000Z",
             priority = Priority.HIGH.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         return InAppMessage(
@@ -176,24 +168,20 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             params = contentParams
         )
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 0,
             showEveryXMinutes = 0
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "2030-10-11T12:00:00.000Z",
             priority = Priority.HIGH.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         return InAppMessage(
@@ -221,24 +209,20 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             params = contentParams
         )
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 0,
             showEveryXMinutes = 0
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "2030-10-11T12:00:00.000Z",
             priority = Priority.HIGH.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         return InAppMessage(
@@ -266,24 +250,20 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             params = contentParams
         )
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 0,
             showEveryXMinutes = 0
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "2030-10-11T12:00:00.000Z",
             priority = Priority.HIGH.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         return InAppMessage(
@@ -311,24 +291,20 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             params = contentParams
         )
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 0,
             showEveryXMinutes = 0
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "2030-10-11T12:00:00.000Z",
             priority = Priority.HIGH.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         return InAppMessage(
@@ -356,24 +332,20 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             params = contentParams
         )
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 0,
             showEveryXMinutes = 0
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "2030-10-11T12:00:00.000Z",
             priority = Priority.HIGH.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         return InAppMessage(
@@ -401,24 +373,20 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             params = contentParams
         )
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 0,
             showEveryXMinutes = 0
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "2030-10-11T12:00:00.000Z",
             priority = Priority.HIGH.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         return InAppMessage(
