@@ -16,7 +16,11 @@ object ConfigurationUtils {
 
     fun isGooglePlayServicesAvailable(): Boolean {
         return try {
-            GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(ContextHolder.context) == ConnectionResult.SUCCESS
+            ContextHolder.context?.let {
+                GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(
+                    it
+                )
+            } == ConnectionResult.SUCCESS
         } catch (ignored: java.lang.Exception) {
             false
         }
@@ -81,11 +85,13 @@ object ConfigurationUtils {
         object : Thread() {
             override fun run() {
                 try {
-                    val advertisingIdInfo = AdvertisingIdClient.getAdvertisingIdInfo(
-                        ContextHolder.context
-                    )
-                    if (!advertisingIdInfo.isLimitAdTrackingEnabled) {
-                        val advertisingId = advertisingIdInfo.id
+                    val advertisingIdInfo = ContextHolder.context?.let {
+                        AdvertisingIdClient.getAdvertisingIdInfo(
+                            it
+                        )
+                    }
+                    if (!advertisingIdInfo?.isLimitAdTrackingEnabled!!) {
+                        val advertisingId = advertisingIdInfo?.id
                         if (!advertisingId.isNullOrEmpty()) {
                             onAdIdResult.invoke(advertisingId)
                         }

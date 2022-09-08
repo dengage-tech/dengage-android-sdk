@@ -18,9 +18,9 @@ object DengageUtils {
         return Prefs.installationId!!
     }
 
-    fun getCarrier(context: Context): String {
+    fun getCarrier(context: Context?): String {
         return try {
-            val manager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
+            val manager = context?.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager?
             manager?.networkOperator ?: ""
         } catch (e: Exception) {
             DengageLogger.error(e.message)
@@ -28,10 +28,10 @@ object DengageUtils {
         }
     }
 
-    fun getAppVersion(context: Context): String? {
+    fun getAppVersion(context: Context?): String? {
         return try {
-            val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            pInfo.versionName
+            val pInfo = context?.packageManager?.getPackageInfo(context.packageName, 0)
+            pInfo?.versionName
         } catch (e: Exception) {
             DengageLogger.error(e.message)
             null
@@ -42,9 +42,9 @@ object DengageUtils {
         return "5.0.9.1"
     }
 
-    fun getUserAgent(context: Context): String {
-        val appLabel = "${getAppLabel(context, "An Android App")}/" +
-            "${getAppVersion(context)} ${Build.MANUFACTURER}/${Build.MODEL} " +
+    fun getUserAgent(context: Context?): String {
+        val appLabel = "${context?.let { getAppLabel(it, "An Android App") }}/" +
+            "${context?.let { getAppVersion(it) }} ${Build.MANUFACTURER}/${Build.MODEL} " +
             "${System.getProperty("http.agent")} Mobile/${Build.ID}"
 
         return appLabel.replace("[^\\x00-\\x7F]".toRegex(), "")
@@ -66,13 +66,15 @@ object DengageUtils {
         name: String
     ): String? {
         return try {
-            val applicationInfo = (context
-                ?: ContextHolder.context).packageManager.getApplicationInfo(
-                ContextHolder.context.packageName,
-                PackageManager.GET_META_DATA
-            )
-            val bundle = applicationInfo.metaData
-            bundle.getString(name)
+            val applicationInfo = ContextHolder.context?.let {
+                (context
+                    ?: ContextHolder.context)?.packageManager?.getApplicationInfo(
+                    it.packageName,
+                    PackageManager.GET_META_DATA
+                )
+            }
+            val bundle = applicationInfo?.metaData
+            bundle?.getString(name)
         } catch (e: PackageManager.NameNotFoundException) {
             null
         }

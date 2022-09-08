@@ -12,72 +12,72 @@ import com.dengage.sdk.util.DengageUtils
 
 object Prefs {
 
-    private val preferences: SharedPreferences by lazy {
-        ContextHolder.context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+    private val preferences: SharedPreferences? by lazy {
+        ContextHolder.context?.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE) ?: null
     }
 
     internal var installationId: String?
-        get() = preferences.get(PreferenceKey.___DEN_DEVICE_UNIQUE_ID___)
-        set(value) = preferences.set(PreferenceKey.___DEN_DEVICE_UNIQUE_ID___, value)
+        get() = preferences?.get(PreferenceKey.___DEN_DEVICE_UNIQUE_ID___)
+        set(value) = preferences?.set(PreferenceKey.___DEN_DEVICE_UNIQUE_ID___, value)!!
 
     internal var pushApiBaseUrl: String
-        get() = preferences.get(PreferenceKey.PUSH_API_BASE_URL) ?: Constants.PUSH_API_URI
-        set(value) = preferences.set(PreferenceKey.PUSH_API_BASE_URL, value)
+        get() = preferences?.get(PreferenceKey.PUSH_API_BASE_URL) ?: Constants.PUSH_API_URI
+        set(value) = preferences?.set(PreferenceKey.PUSH_API_BASE_URL, value)!!
 
     internal var eventApiBaseUrl: String
-        get() = preferences.get(PreferenceKey.EVENT_API_BASE_URL) ?: Constants.EVENT_API_URI
-        set(value) = preferences.set(PreferenceKey.EVENT_API_BASE_URL, value)
+        get() = preferences?.get(PreferenceKey.EVENT_API_BASE_URL) ?: Constants.EVENT_API_URI
+        set(value) = preferences?.set(PreferenceKey.EVENT_API_BASE_URL, value)!!
 
     internal var sdkParameters: SdkParameters?
-        get() = preferences.get(PreferenceKey.SDK_PARAMETERS)
-        set(value) = preferences.set(PreferenceKey.SDK_PARAMETERS, value)
+        get() = preferences?.get(PreferenceKey.SDK_PARAMETERS)
+        set(value) = preferences?.set(PreferenceKey.SDK_PARAMETERS, value)!!
 
     internal var appTrackingTime: Long
-        get() = preferences.get(PreferenceKey.APP_TRACKING_TIME, 0) ?: 0
-        set(value) = preferences.set(PreferenceKey.APP_TRACKING_TIME, value)
+        get() = preferences?.get(PreferenceKey.APP_TRACKING_TIME, 0) ?: 0
+        set(value) = preferences?.set(PreferenceKey.APP_TRACKING_TIME, value)!!
 
     internal var inAppMessages: MutableList<InAppMessage>?
-        get() = preferences.get(PreferenceKey.IN_APP_MESSAGES)
-        set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGES, value)
+        get() = preferences?.get(PreferenceKey.IN_APP_MESSAGES)
+        set(value) = preferences?.set(PreferenceKey.IN_APP_MESSAGES, value)!!
 
     internal var inAppMessageFetchTime: Long
-        get() = preferences.get(PreferenceKey.IN_APP_MESSAGE_FETCH_TIME, 0) ?: 0
-        set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGE_FETCH_TIME, value)
+        get() = preferences?.get(PreferenceKey.IN_APP_MESSAGE_FETCH_TIME, 0) ?: 0
+        set(value) = preferences?.set(PreferenceKey.IN_APP_MESSAGE_FETCH_TIME, value)!!
 
     internal var inAppMessageShowTime: Long
-        get() = preferences.get(PreferenceKey.IN_APP_MESSAGE_SHOW_TIME, 0) ?: 0
-        set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGE_SHOW_TIME, value)
+        get() = preferences?.get(PreferenceKey.IN_APP_MESSAGE_SHOW_TIME, 0) ?: 0
+        set(value) = preferences?.set(PreferenceKey.IN_APP_MESSAGE_SHOW_TIME, value)!!
 
     internal var notificationChannelName: String
-        get() = preferences.get(PreferenceKey.NOTIFICATION_CHANNEL_NAME, Constants.NOTIFICATION_CHANNEL_NAME)
+        get() = preferences?.get(PreferenceKey.NOTIFICATION_CHANNEL_NAME, Constants.NOTIFICATION_CHANNEL_NAME)
             ?: Constants.NOTIFICATION_CHANNEL_NAME
-        set(value) = preferences.set(PreferenceKey.NOTIFICATION_CHANNEL_NAME, value)
+        set(value) = preferences?.set(PreferenceKey.NOTIFICATION_CHANNEL_NAME, value)!!
 
     internal var subscription: Subscription?
-        get() = preferences.get(PreferenceKey.SUBSCRIPTION)
-        set(value) = preferences.set(PreferenceKey.SUBSCRIPTION, value)
+        get() = preferences?.get(PreferenceKey.SUBSCRIPTION)
+        set(value) = preferences?.set(PreferenceKey.SUBSCRIPTION, value)!!
 
     internal var inboxMessageFetchTime: Long
-        get() = preferences.get(PreferenceKey.INBOX_MESSAGE_FETCH_TIME, 0) ?: 0
-        set(value) = preferences.set(PreferenceKey.INBOX_MESSAGE_FETCH_TIME, value)
+        get() = preferences?.get(PreferenceKey.INBOX_MESSAGE_FETCH_TIME, 0) ?: 0
+        set(value) = preferences?.set(PreferenceKey.INBOX_MESSAGE_FETCH_TIME, value)!!
 
     internal var appSessionTime: Long
-        get() = preferences.get(PreferenceKey.APP_SESSION_TIME, 0) ?: 0
-        set(value) = preferences.set(PreferenceKey.APP_SESSION_TIME, value)
+        get() = preferences?.get(PreferenceKey.APP_SESSION_TIME, 0) ?: 0
+        set(value) = preferences?.set(PreferenceKey.APP_SESSION_TIME, value)!!
 
     internal var appSessionId: String
-        get() = preferences.get(PreferenceKey.APP_SESSION_ID, DengageUtils.generateUUID()) ?: ""
-        set(value) = preferences.set(PreferenceKey.APP_SESSION_ID, value)
+        get() = preferences?.get(PreferenceKey.APP_SESSION_ID, DengageUtils.generateUUID()) ?: ""
+        set(value) = preferences?.set(PreferenceKey.APP_SESSION_ID, value)!!
 
     internal var logVisibility: Boolean
-        get() = preferences.get(PreferenceKey.LOG_VISIBILITY, false) ?: false
-        set(value) = preferences.set(PreferenceKey.LOG_VISIBILITY, value)
+        get() = preferences?.get(PreferenceKey.LOG_VISIBILITY, false) ?: false
+        set(value) = preferences?.set(PreferenceKey.LOG_VISIBILITY, value)!!
 
     internal var rfmScores: MutableList<RFMScore>?
-        get() = preferences.get(PreferenceKey.RFM_SCORES)
-        set(value) = preferences.set(PreferenceKey.RFM_SCORES, value)
+        get() = preferences?.get(PreferenceKey.RFM_SCORES)
+        set(value) = preferences?.set(PreferenceKey.RFM_SCORES, value)!!
 
     fun clear() {
-        preferences.edit().clear().apply()
+        preferences?.edit()?.clear()?.apply()
     }
 }

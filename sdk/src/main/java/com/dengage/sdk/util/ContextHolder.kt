@@ -7,8 +7,8 @@ object ContextHolder {
 
     private lateinit var _context: WeakReference<Context>
 
-    var context: Context
-        get() = _context.get()!!
+    var context: Context?
+        get() = _context.get()
         set(value) {
             _context = WeakReference(value)
         }

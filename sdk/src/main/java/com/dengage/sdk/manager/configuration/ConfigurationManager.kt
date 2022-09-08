@@ -82,16 +82,18 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             // return if tracking was already done in last 6 days
             if (lastTrackingTime < 6) return tagItems
         }
-        val packageManager = ContextHolder.context.packageManager
+        val packageManager = ContextHolder.context?.packageManager
         // get a list of installed apps.
-        val packages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+        val packages = packageManager?.getInstalledApplications(PackageManager.GET_META_DATA)
 
         for (app in appTrackings ?: listOf()) {
             var isInstalled = false
-            for (packageInfo in packages) {
-                if (packageInfo.packageName == app.packageName) {
-                    isInstalled = true
-                    break
+            if (packages != null) {
+                for (packageInfo in packages) {
+                    if (packageInfo.packageName == app.packageName) {
+                        isInstalled = true
+                        break
+                    }
                 }
             }
             tagItems.add(TagItem("app-${app.alias}", if (isInstalled) "true" else "false"))

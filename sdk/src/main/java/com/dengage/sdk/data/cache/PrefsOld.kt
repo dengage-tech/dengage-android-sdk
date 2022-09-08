@@ -11,11 +11,11 @@ import com.dengage.sdk.util.ContextHolder
 @Deprecated("Use Prefs.kt class after first release of new sdk")
 object PrefsOld {
 
-    private val preferences: SharedPreferences by lazy {
-        ContextHolder.context.getSharedPreferences(ContextHolder.context.packageName, Context.MODE_PRIVATE)
+    private val preferences: SharedPreferences? by lazy {
+        ContextHolder.context?.getSharedPreferences(ContextHolder.context?.packageName, Context.MODE_PRIVATE)
     }
 
     var subscription: Subscription?
-        get() = preferences.get("dengage_subscription")
-        set(value) = preferences.set("dengage_subscription", value)
+        get() = preferences?.get("dengage_subscription")
+        set(value) = preferences?.set("dengage_subscription", value)!!
 }

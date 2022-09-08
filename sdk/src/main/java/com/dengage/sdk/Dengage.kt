@@ -320,8 +320,8 @@ object Dengage {
             for ((key, value) in data) {
                 intent.putExtra(key, value)
             }
-            intent.setPackage(ContextHolder.context.packageName)
-            ContextHolder.context.sendBroadcast(intent)
+            intent.setPackage(ContextHolder.context?.packageName)
+            ContextHolder.context?.sendBroadcast(intent)
         } catch (e: java.lang.Exception) {
             DengageLogger.error("sendBroadcast: " + e.message)
         }
