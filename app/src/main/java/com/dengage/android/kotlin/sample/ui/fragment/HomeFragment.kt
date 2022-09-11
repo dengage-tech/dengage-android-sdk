@@ -43,6 +43,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
             findNavController().navigate(HomeFragmentDirections.actionHomeToInAppMessage())
         }
 
+        binding.btnRealTimeInAppMessage.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToRealTimeInAppMessage())
+        }
+
         binding.btnTags.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToTags())
         }
@@ -50,6 +54,7 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         binding.btnDengageTestPage.setOnClickListener {
             Dengage.showTestPage(requireActivity())
         }
+
         binding.btnGeofencePage.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToGeofence())
         }

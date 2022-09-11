@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dengage_page_margin_medium"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etCategoryPath"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.8"
+                    android:hint="@string/category_path"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSetCategoryPath"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_marginStart="@dimen/dengage_page_margin_small"
+                    android:layout_weight="0.2"
+                    android:text="@string/button_set" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etCartItemCount"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.8"
+                    android:hint="@string/cart_item_count"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSetCartItemCount"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_marginStart="@dimen/dengage_page_margin_small"
+                    android:layout_weight="0.2"
+                    android:text="@string/button_set" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etCartAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.8"
+                    android:hint="@string/cart_amount"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSetCartAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_marginStart="@dimen/dengage_page_margin_small"
+                    android:layout_weight="0.2"
+                    android:text="@string/button_set" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etState"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.8"
+                    android:hint="@string/state"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSetState"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_marginStart="@dimen/dengage_page_margin_small"
+                    android:layout_weight="0.2"
+                    android:text="@string/button_set" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etCity"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.8"
+                    android:hint="@string/city"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnSetCity"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_marginStart="@dimen/dengage_page_margin_small"
+                    android:layout_weight="0.2"
+                    android:text="@string/button_set" />
+
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etScreenName"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="@dimen/dengage_page_margin_medium"
+                android:hint="@string/screen_name"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etCustomKey1"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.45"
+                    android:gravity="center_horizontal"
+                    android:hint="@string/custom_key"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.1" />
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etCustomValue1"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.45"
+                    android:gravity="center_horizontal"
+                    android:hint="@string/custom_value"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etCustomKey2"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.45"
+                    android:gravity="center_horizontal"
+                    android:hint="@string/custom_key"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.1" />
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etCustomValue2"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/base_component_height"
+                    android:layout_weight="0.45"
+                    android:gravity="center_horizontal"
+                    android:hint="@string/custom_value"
+                    android:textSize="@dimen/dengage_text_size_medium" />
+
+            </LinearLayout>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnShowRealTimeInApp"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="12dp"
+                android:text="@string/button_show_real_time_in_app" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</layout>
