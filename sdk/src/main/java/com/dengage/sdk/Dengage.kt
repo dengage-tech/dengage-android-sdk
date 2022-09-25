@@ -33,8 +33,8 @@ import com.google.firebase.FirebaseApp
 
 object Dengage {
 
-    private val configurationManager by lazy { ConfigurationManager() }
-    private val subscriptionManager by lazy { SubscriptionManager() }
+    val configurationManager by lazy { ConfigurationManager() }
+    val subscriptionManager by lazy { SubscriptionManager() }
     private val inAppMessageManager by lazy { InAppMessageManager() }
     private val inboxMessageManager by lazy { InboxMessageManager() }
     private val tagManager by lazy { TagManager() }
@@ -250,7 +250,7 @@ object Dengage {
         )
     }
 
-    internal fun getInAppMessages() {
+     fun getInAppMessages() {
         inAppMessageManager.fetchInAppMessages()
     }
 
@@ -311,7 +311,7 @@ object Dengage {
         }
     }
 
-    private fun sendBroadcast(json: String, data: Map<String, String?>) {
+     fun sendBroadcast(json: String, data: Map<String, String?>) {
         DengageLogger.verbose("sendBroadcast method is called")
         try {
             val intent = Intent(Constants.PUSH_RECEIVE_EVENT)
