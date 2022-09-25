@@ -81,6 +81,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setHtmlContent(contentParams: ContentParams) {
+        val vHtmlContent = findViewById<View>(R.id.vHtmlContent)
         val webView = findViewById<WebView>(R.id.webView)
         val vHtmlWidthContainer = findViewById<RelativeLayout>(R.id.vHtmlWidthContainer)
         val cardInAppMessage = findViewById<CardView>(R.id.cardInAppMessage)
@@ -103,6 +104,8 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             params.matchConstraintMaxWidth = InAppMessageUtils.pxToDp(it, this).roundToInt()
             vHtmlWidthContainer.layoutParams = params
         }
+
+        vHtmlContent.visibility = View.VISIBLE
 
         webView.apply {
 
