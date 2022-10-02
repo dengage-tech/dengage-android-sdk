@@ -31,6 +31,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             getInAppMessages(this) {
                 onResponse = {
                     view { fetchedInAppMessages(it) }
+                    fetchInAppExpiredMessageIds()
                 }
                 onError = {
                     Prefs.inAppMessageFetchTime = System.currentTimeMillis()
@@ -161,7 +162,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     }
 
     private fun isInAppAvailableInCache(): Boolean {
-        return Prefs.inAppMessages?.let { it.size > 0} ?: false
+        return Prefs.inAppMessages?.let { it.size > 0 } ?: false
     }
 
 
