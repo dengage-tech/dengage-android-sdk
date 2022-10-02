@@ -17,7 +17,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     override fun providePresenter() = SubscriptionPresenter()
 
-    internal fun buildSubscription(
+     fun buildSubscription(
         firebaseIntegrationKey: String?
     ) {
         // this is for migration from old sdk
@@ -126,7 +126,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         }
     }
 
-    internal fun saveSubscription(subscription: Subscription) {
+     fun saveSubscription(subscription: Subscription) {
         DengageLogger.verbose("saveSubscription method is called")
 
         if (subscription.deviceId.isNullOrEmpty()) {

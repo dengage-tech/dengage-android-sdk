@@ -15,6 +15,7 @@ class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
         if (startedActivityCount == 0) {
             // app went to foreground
             Dengage.getInAppMessages()
+            Dengage.getInAppExpiredMessageIds()
         }
         startedActivityCount++
     }

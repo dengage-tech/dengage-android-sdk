@@ -11,6 +11,7 @@ data class SdkParameters(
     @SerializedName("inAppEnabled") val inAppEnabled: Boolean?,
     @SerializedName("subscriptionEnabled") val subscriptionEnabled: Boolean?,
     @SerializedName("inAppFetchIntervalInMin") val inAppFetchIntervalInMin: Int?,
+    @SerializedName("expiredMessagesFetchIntervalInMin") val expiredMessagesFetchIntervalInMin: Int?,
     @SerializedName("inAppMinSecBetweenMessages") val inAppMinSecBetweenMessages: Int?,
     @SerializedName("lastFetchTimeInMillis") var lastFetchTimeInMillis: Long = 0,
     @SerializedName("appTrackingEnabled") var appTrackingEnabled: Boolean = false,

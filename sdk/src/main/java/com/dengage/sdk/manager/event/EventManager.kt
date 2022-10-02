@@ -259,30 +259,40 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         key: String,
         eventDetails: HashMap<String, Any>
     ) {
-        DengageLogger.verbose("sendCustomEvent method is called")
+        try {
+            DengageLogger.verbose("sendCustomEvent method is called")
 
-        val sessionId = SessionManager.getSessionId()
-        eventDetails[EventKey.SESSION_ID.key] = sessionId
+            val sessionId = SessionManager.getSessionId()
+            eventDetails[EventKey.SESSION_ID.key] = sessionId
 
-        presenter.sendEvent(
-            accountId = Prefs.sdkParameters!!.accountId,
-            integrationKey = Prefs.subscription!!.integrationKey,
-            key = key,
-            eventTableName = tableName,
-            eventDetails = eventDetails
-        )
+            presenter.sendEvent(
+                accountId = Prefs.sdkParameters!!.accountId,
+                integrationKey = Prefs.subscription!!.integrationKey,
+                key = key,
+                eventTableName = tableName,
+                eventDetails = eventDetails
+            )
+
+        } catch (e: Exception) {
+            DengageLogger.error(e.message)
+        }
     }
 
     internal fun sendDeviceEvent(
         tableName: String,
         eventDetails: HashMap<String, Any>
     ) {
-        DengageLogger.verbose("sendDeviceEvent method is called")
-        sendCustomEvent(
-            tableName = tableName,
-            key = Prefs.subscription?.getSafeDeviceId()!!,
-            eventDetails = eventDetails
-        )
+        try {
+            DengageLogger.verbose("sendDeviceEvent method is called")
+            sendCustomEvent(
+                tableName = tableName,
+                key = Prefs.subscription?.getSafeDeviceId()!!,
+                eventDetails = eventDetails
+            )
+
+        } catch (e: Exception) {
+            DengageLogger.error(e.message)
+        }
     }
 
     fun sendTransactionalOpenEvent(

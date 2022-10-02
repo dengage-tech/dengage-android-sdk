@@ -37,7 +37,7 @@
         <activity
             android:name=".ui.inappmessage.InAppMessageActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar" />
 
         <activity
             android:name=".push.NotificationNavigationDeciderActivity"
