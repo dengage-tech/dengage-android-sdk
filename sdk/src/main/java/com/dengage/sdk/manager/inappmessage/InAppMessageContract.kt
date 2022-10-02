@@ -23,6 +23,8 @@ interface InAppMessageContract {
         )
 
         fun setInAppMessageAsDismissed(messageDetails: String?)
+
+        fun fetchInAppExpiredMessageIds()
     }
 
 }

@@ -1,6 +1,7 @@
 package com.dengage.sdk.domain.inappmessage
 
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.inappmessage.model.InAppRemovalId
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -48,4 +49,13 @@ interface InAppMessageService {
         @Query("type") type: String,
         @Query("message_details") messageDetails: String?
     ): Response<Unit>
+
+
+    @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
+    @GET("/api/inapp/getExpiredMessages")
+    suspend fun getInAppExpiredMessageIds(
+        @Query("acc") account: String,
+        @Query("cdkey") cdKey: String,
+        @Query("appid") appId:String
+    ): MutableList<InAppRemovalId>?
 }

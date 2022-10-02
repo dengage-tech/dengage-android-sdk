@@ -71,6 +71,10 @@ object Dengage {
                 configurationManager.configurationCallback = null
             }
 
+            override fun fetchInAppExpiredMessageIds() {
+                inAppMessageManager.fetchInAppExpiredMessageIds()
+            }
+
             override fun sendSubscription(subscription: Subscription) {
                 subscriptionManager.saveSubscription(subscription)
                 subscriptionManager.sendSubscription()
@@ -252,6 +256,10 @@ object Dengage {
 
      fun getInAppMessages() {
         inAppMessageManager.fetchInAppMessages()
+    }
+
+    fun getInAppExpiredMessageIds() {
+        inAppMessageManager.fetchInAppExpiredMessageIds()
     }
 
     /**

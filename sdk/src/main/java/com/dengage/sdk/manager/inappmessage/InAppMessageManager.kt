@@ -39,6 +39,13 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         presenter.getInAppMessages()
     }
 
+
+    /**
+     * Fetch in app messages if enabled and fetch time is available
+     */
+    internal fun fetchInAppExpiredMessageIds() {
+        presenter.fetchInAppExpiredMessageIds()
+    }
     /**
      * Call service for setting in app message as displayed
      */

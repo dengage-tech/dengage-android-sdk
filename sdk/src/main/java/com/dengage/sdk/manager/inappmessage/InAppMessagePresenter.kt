@@ -4,10 +4,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
-import com.dengage.sdk.domain.inappmessage.usecase.GetInAppMessages
-import com.dengage.sdk.domain.inappmessage.usecase.SetInAppMessageAsClicked
-import com.dengage.sdk.domain.inappmessage.usecase.SetInAppMessageAsDismissed
-import com.dengage.sdk.domain.inappmessage.usecase.SetInAppMessageAsDisplayed
+import com.dengage.sdk.domain.inappmessage.usecase.*
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
 
 class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>(),
@@ -17,6 +14,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val setInAppMessageAsClicked by lazy { SetInAppMessageAsClicked() }
     private val setInAppMessageAsDismissed by lazy { SetInAppMessageAsDismissed() }
     private val setInAppMessageAsDisplayed by lazy { SetInAppMessageAsDisplayed() }
+    private val getInAppExpiredMessageIds by lazy { GetInAppExpiredMessageIds() }
+
 
     override fun getInAppMessages() {
         val sdkParameters = Prefs.sdkParameters
@@ -109,12 +108,43 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         }
     }
 
+    override fun fetchInAppExpiredMessageIds() {
+        val sdkParameters = Prefs.sdkParameters
+
+        if (isInAppAvailableInCache()) {
+
+            // control next in app message fetch time
+            if (System.currentTimeMillis() < Prefs.inAppRemoveFetchTime) return
+
+            val nextFetchTimePlus = (sdkParameters?.expiredMessagesFetchIntervalInMin ?: 0) * 60000
+            Prefs.inAppRemoveFetchTime = System.currentTimeMillis() + nextFetchTimePlus
+
+            getInAppExpiredMessageIds(this) {
+                onResponse = {
+                    it?.let {
+                        it.forEach { removeInAppMessageFromCache(it.id) }
+                    }
+                }
+                onError = {
+                    Prefs.inAppRemoveFetchTime = System.currentTimeMillis()
+                    view { showError(it) }
+                }
+                params = GetInAppExpiredMessageIds.Params(
+                    account = sdkParameters?.accountName!!,
+                    subscription = Prefs.subscription!!,
+                    sdkParameters = sdkParameters
+
+                )
+            }
+        }
+    }
+
     private fun isInAppMessageEnabled(
         subscription: Subscription?,
         sdkParameters: SdkParameters?
     ): Boolean {
         return subscription != null && sdkParameters?.accountName != null &&
-            sdkParameters.inAppEnabled != null && sdkParameters.inAppEnabled
+                sdkParameters.inAppEnabled != null && sdkParameters.inAppEnabled
     }
 
     private fun removeInAppMessageFromCache(inAppMessageId: String) {
@@ -129,4 +159,10 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         inAppMessages?.add(inAppMessage)
         Prefs.inAppMessages = inAppMessages
     }
+
+    private fun isInAppAvailableInCache(): Boolean {
+        return Prefs.inAppMessages?.let { it.size > 0} ?: false
+    }
+
+
 }
