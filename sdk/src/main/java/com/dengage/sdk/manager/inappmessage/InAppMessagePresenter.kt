@@ -30,6 +30,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             getInAppMessages(this) {
                 onResponse = {
                     view { fetchedInAppMessages(it) }
+                    fetchInAppExpiredMessageIds()
                 }
                 onError = {
                     Prefs.inAppMessageFetchTime = System.currentTimeMillis()
