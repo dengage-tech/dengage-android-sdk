@@ -94,6 +94,10 @@ object Prefs {
         get() = preferences.get(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, defaultValue = false) ?:false
         set(value) = preferences.set(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, value)
 
+    internal var inAppRemoveFetchTime: Long
+        get() = preferences.get(PreferenceKey.IN_APP_REMOVE_MESSAGE_FETCH_TIME, 0) ?: 0
+        set(value) = preferences.set(PreferenceKey.IN_APP_REMOVE_MESSAGE_FETCH_TIME, value)
+
     fun clear() {
         preferences.edit().clear().apply()
     }

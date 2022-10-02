@@ -112,7 +112,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         return tagItems
     }
 
-    internal fun getSdkParameters() {
+     fun getSdkParameters() {
         val subscription = Prefs.subscription
         if (subscription?.integrationKey.isNullOrEmpty()) return
 

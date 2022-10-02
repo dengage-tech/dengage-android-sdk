@@ -17,7 +17,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     override fun providePresenter() = SubscriptionPresenter()
 
-    internal fun buildSubscription(
+     fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
     ) {
@@ -127,7 +127,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         }
     }
 
-    internal fun saveSubscription(subscription: Subscription) {
+     fun saveSubscription(subscription: Subscription) {
         DengageLogger.verbose("saveSubscription method is called")
 
         if (subscription.deviceId.isNullOrEmpty()) {

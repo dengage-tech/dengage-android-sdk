@@ -8,5 +8,6 @@ interface ConfigurationCallback {
     fun sendSubscription(subscription: Subscription)
     fun fetchInAppMessages()
     fun startAppTracking(appTrackings: List<AppTracking>?)
+    fun fetchInAppExpiredMessageIds()
 
 }

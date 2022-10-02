@@ -25,7 +25,7 @@ object GeofencePermissionsHelper {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    internal fun requestLocationPermissions(activity: Activity) {
+     fun requestLocationPermissions(activity: Activity) {
         val intent = Intent(activity, GeofencePermissionActivity::class.java)
         activity.startActivity(intent)
     }
