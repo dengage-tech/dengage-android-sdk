@@ -35,8 +35,8 @@ import com.google.firebase.FirebaseApp
 
 object Dengage {
 
-    private val configurationManager by lazy { ConfigurationManager() }
-    private val subscriptionManager by lazy { SubscriptionManager() }
+     val configurationManager by lazy { ConfigurationManager() }
+     val subscriptionManager by lazy { SubscriptionManager() }
     private val inAppMessageManager by lazy { InAppMessageManager() }
     private val inboxMessageManager by lazy { InboxMessageManager() }
     private val tagManager by lazy { TagManager() }
@@ -80,6 +80,10 @@ object Dengage {
             override fun sendSubscription(subscription: Subscription) {
                 subscriptionManager.saveSubscription(subscription)
                 subscriptionManager.sendSubscription()
+            }
+
+            override fun fetchInAppExpiredMessageIds() {
+                inAppMessageManager.fetchInAppExpiredMessageIds()
             }
         }
         configurationManager.configurationCallback = configurationCallback
@@ -256,10 +260,13 @@ object Dengage {
         )
     }
 
-    internal fun getInAppMessages() {
+     fun getInAppMessages() {
         inAppMessageManager.fetchInAppMessages()
     }
 
+    fun getInAppExpiredMessageIds() {
+        inAppMessageManager.fetchInAppExpiredMessageIds()
+    }
     /**
      * Show in app message if any available
      *
@@ -317,7 +324,7 @@ object Dengage {
         }
     }
 
-    private fun sendBroadcast(json: String, data: Map<String, String?>) {
+     fun sendBroadcast(json: String, data: Map<String, String?>) {
         DengageLogger.verbose("sendBroadcast method is called")
         try {
             val intent = Intent(Constants.PUSH_RECEIVE_EVENT)
@@ -585,18 +592,18 @@ object Dengage {
         geofenceManager.stopGeofence()
     }
 
-    internal fun startGeofence() {
+     fun startGeofence() {
         geofenceManager.startTracking()
     }
 
-    internal fun handleLocation(context: Context, location: Location, source: GeofenceLocationSource, geofenceRequestId: String?) {
+     fun handleLocation(context: Context, location: Location, source: GeofenceLocationSource, geofenceRequestId: String?) {
         if (!initialized) {
             init(context = context, geofenceEnabled = Prefs.geofenceEnabled)
         }
         geofenceManager.handleLocation(location, source, geofenceRequestId)
     }
 
-    internal fun handleBootCompleted(context: Context) {
+     fun handleBootCompleted(context: Context) {
         if (!initialized) {
             init(context = context, geofenceEnabled = Prefs.geofenceEnabled)
         }

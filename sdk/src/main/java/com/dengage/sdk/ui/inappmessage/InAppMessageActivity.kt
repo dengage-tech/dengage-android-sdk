@@ -2,12 +2,9 @@ package com.dengage.sdk.ui.inappmessage
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -18,7 +15,6 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.R
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
@@ -81,6 +77,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setHtmlContent(contentParams: ContentParams) {
+        val vHtmlContent = findViewById<View>(R.id.vHtmlContent)
         val webView = findViewById<WebView>(R.id.webView)
         val vHtmlWidthContainer = findViewById<RelativeLayout>(R.id.vHtmlWidthContainer)
         val cardInAppMessage = findViewById<CardView>(R.id.cardInAppMessage)
@@ -103,6 +100,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             params.matchConstraintMaxWidth = InAppMessageUtils.pxToDp(it, this).roundToInt()
             vHtmlWidthContainer.layoutParams = params
         }
+
+        vHtmlContent.visibility = View.VISIBLE
+
 
         webView.apply {
 
