@@ -1,14 +1,14 @@
 package com.dengage.sdk.domain.inappmessage.usecase
 
 import com.dengage.sdk.domain.base.CoroutineUseCase
-import com.dengage.sdk.domain.inappmessage.InAppMessageRepository
+import com.dengage.sdk.domain.inappmessage.RealTimeInAppMessageRepository
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.util.createLazy
 import retrofit2.Response
 
 class SetRealTimeInAppMessageAsDisplayed : CoroutineUseCase<Response<Unit>, SetRealTimeInAppMessageAsDisplayed.Params>() {
 
-    private val repository: InAppMessageRepository by createLazy()
+    private val repository: RealTimeInAppMessageRepository by createLazy()
 
     override suspend fun buildUseCase(params: Params?): Response<Unit> =
         repository.setRealTimeInAppMessageAsDisplayed(
