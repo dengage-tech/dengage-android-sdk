@@ -32,7 +32,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             getInAppMessages(this) {
                 onResponse = {
                     view {
-                        fetchedInAppMessages(it)
+                        fetchedInAppMessages(it, false)
                     }
                 }
                 onError = {
@@ -56,7 +56,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             getRealTimeInAppMessages(this) {
                 onResponse = {
                     view {
-                        fetchedInAppMessages(it)
+                        fetchedInAppMessages(it, true)
                     }
                 }
                 onError = {
@@ -121,7 +121,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
                 setRealTimeInAppMessageAsClicked(this) {
                     onResponse = {
-                        view { inAppMessageSetAsDisplayed() }
+                        view { inAppMessageSetAsClicked() }
                     }
                     params = SetRealTimeInAppMessageAsClicked.Params(
                         accountName = sdkParameters?.accountName!!,
@@ -162,7 +162,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             if (isRealTimeInAppMessageEnabled(subscription, sdkParameters)) {
                 setRealTimeInAppMessageAsDismissed(this) {
                     onResponse = {
-                        view { inAppMessageSetAsDisplayed() }
+                        view { inAppMessageSetAsDismissed() }
                     }
                     params = SetRealTimeInAppMessageAsDismissed.Params(
                         accountName = sdkParameters?.accountName!!,

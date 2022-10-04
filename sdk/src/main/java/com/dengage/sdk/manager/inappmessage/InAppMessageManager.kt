@@ -86,7 +86,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
             inAppMessage.data.displayTiming.showEveryXMinutes != 0
         ) {
             inAppMessage.data.nextDisplayTime = System.currentTimeMillis() +
-                inAppMessage.data.displayTiming.showEveryXMinutes * 60000L
+                inAppMessage.data.displayTiming.showEveryXMinutes!! * 60000L
             updateInAppMessageOnCache(inAppMessage)
         } else {
             removeInAppMessageFromCache(inAppMessageId = inAppMessage.id)
@@ -124,21 +124,50 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         Prefs.inAppMessages = inAppMessages
     }
 
-    override fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?) {
+    override fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean) {
         if (!inAppMessages.isNullOrEmpty()) {
-            // get existing in app messages and save with fetched in app messages
             var existingInAppMessages = Prefs.inAppMessages
             if (existingInAppMessages == null) {
                 existingInAppMessages = mutableListOf()
+                existingInAppMessages.addAll(inAppMessages)
             } else {
-                // remove duplicated in app messages
-                existingInAppMessages.removeAll { existingInAppMessage ->
-                    inAppMessages.firstOrNull { inAppMessage ->
-                        inAppMessage.id == existingInAppMessage.id
-                    } != null
+                if (isRealTime) {
+                    // remove non existing real time in app messages
+                    existingInAppMessages.removeAll { existingInAppMessage ->
+                        existingInAppMessage.data.isRealTime() &&
+                            inAppMessages.firstOrNull { inAppMessage ->
+                                inAppMessage.id == existingInAppMessage.id
+                            } == null
+                    }
+
+                    // find duplicated ones and update them
+                    val updateInAppMessages = inAppMessages.filter { inAppMessage ->
+                        existingInAppMessages.firstOrNull { existingInAppMessage ->
+                            existingInAppMessage.id == inAppMessage.id
+                        } != null
+                    }
+
+                    // update duplicated ones on existing in app messages list and don't update some parameters
+                    updateInAppMessages.forEach { inAppMessage ->
+                        val existingInAppMessage = existingInAppMessages.firstOrNull {
+                            it.id == inAppMessage.id
+                        }
+                        existingInAppMessage?.let {
+                            val nextDisplayTime = it.data.nextDisplayTime
+                            it.data = inAppMessage.data
+                            it.data.nextDisplayTime = nextDisplayTime
+                        }
+                    }
+                } else {
+                    // remove duplicated in app messages
+                    existingInAppMessages.removeAll { existingInAppMessage ->
+                        inAppMessages.firstOrNull { inAppMessage ->
+                            inAppMessage.id == existingInAppMessage.id
+                        } != null
+                    }
+                    existingInAppMessages.addAll(inAppMessages)
                 }
             }
-            existingInAppMessages.addAll(inAppMessages)
 
             Prefs.inAppMessages = existingInAppMessages
         }

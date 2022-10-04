@@ -522,11 +522,11 @@ object InAppMessageUtils {
     }
 
     fun operateScreenValues(
-        screenNameFilterValue: List<String>,
+        screenNameFilterValue: List<String>?,
         screenName: String,
         operator: String
     ): Boolean {
-        val screenNameFilterValueSafe = screenNameFilterValue.firstOrNull() ?: ""
+        val screenNameFilterValueSafe = screenNameFilterValue?.firstOrNull() ?: ""
         when (operator) {
             Operator.EQUALS.operator -> {
                 return screenNameFilterValueSafe == screenName
@@ -553,10 +553,10 @@ object InAppMessageUtils {
                 return !screenName.endsWith(screenNameFilterValueSafe, true)
             }
             Operator.IN.operator -> {
-                return screenNameFilterValue.contains(screenName)
+                return screenNameFilterValue?.contains(screenName) ?: false
             }
             Operator.NOT_IN.operator -> {
-                return !screenNameFilterValue.contains(screenName)
+                return !(screenNameFilterValue?.contains(screenName) ?: true)
             }
         }
         return true
