@@ -9,7 +9,8 @@ object InAppMessageMocker {
         expireDate: String,
         screenName: String? = null,
         operator: Operator? = null,
-        isRealTime: Boolean = false
+        isRealTime: Boolean = false,
+        hasRules: Boolean = true,
     ): InAppMessage {
         val contentParams = ContentParams(
             position = ContentPosition.BOTTOM.position,
@@ -30,13 +31,33 @@ object InAppMessageMocker {
         )
 
         val displayCondition = DisplayCondition(
-            screenNameFilters = if (screenName != null && operator != null) listOf(
-                ScreenNameFilter(
-                    value = listOf(screenName),
-                    operator = operator.operator
+            screenNameFilters = if (screenName != null && operator != null) {
+                listOf(
+                    ScreenNameFilter(
+                        value = listOf(screenName),
+                        operator = operator.operator
+                    )
                 )
-            )
-            else null
+            } else {
+                null
+            },
+            displayRuleSet = if (isRealTime) {
+                DisplayRuleSet(
+                    logicOperator = LogicOperator.AND.name,
+                    displayRules = if (hasRules) {
+                        listOf(
+                            DisplayRule(
+                                logicOperator = LogicOperator.AND.name,
+                                criterionList = listOf()
+                            )
+                        )
+                    } else {
+                        listOf()
+                    }
+                )
+            } else {
+                null
+            }
         )
         val displayTiming = DisplayTiming(
             delay = 10,

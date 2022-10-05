@@ -345,9 +345,17 @@ class InAppMessageUtilsTest {
         val id2 = Math.random().toString()
         val id3 = Math.random().toString()
         val id4 = Math.random().toString()
+        val id5 = Math.random().toString()
 
         val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
         val expireDate = expireDateFormat.format(Date())
+        val inAppMessageRealTimeLowHasNoRules = InAppMessageMocker.createInAppMessage(
+            id = id5,
+            priority = Priority.LOW,
+            expireDate = expireDate,
+            isRealTime = true,
+            hasRules = false
+        )
         val inAppMessageRealTimeLow = InAppMessageMocker.createInAppMessage(
             id = id4,
             priority = Priority.LOW,
@@ -373,13 +381,14 @@ class InAppMessageUtilsTest {
             isRealTime = false
         )
 
-        val inAppMessages = listOf(inAppMessageRealTimeLow, inAppMessageRealTimeHigh, inAppMessageNotRealTimeLow, inAppMessageNotRealTimeHigh)
+        val inAppMessages = listOf(inAppMessageRealTimeLowHasNoRules, inAppMessageRealTimeLow, inAppMessageRealTimeHigh, inAppMessageNotRealTimeLow, inAppMessageNotRealTimeHigh)
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
 
         Assert.assertEquals(sortedInAppMessages[0].id, id1)
         Assert.assertEquals(sortedInAppMessages[1].id, id2)
         Assert.assertEquals(sortedInAppMessages[2].id, id3)
         Assert.assertEquals(sortedInAppMessages[3].id, id4)
+        Assert.assertEquals(sortedInAppMessages[4].id, id5)
     }
 
     @Test
