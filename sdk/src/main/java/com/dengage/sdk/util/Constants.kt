@@ -18,3 +18,4 @@ object Constants {
     var sendSubscription = true
 
 }
+
