@@ -52,7 +52,7 @@
         <!-- Push api url of Dengage -->
         <meta-data
             android:name="den_push_api_url"
-            android:value="https://pushdev.dengage.com" />
+            android:value="https://dev-push.dengage.com" />
     </application>
 
 </manifest>

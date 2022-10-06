@@ -298,6 +298,7 @@ object Dengage {
     }
 
     fun onMessageReceived(data: Map<String, String?>?) {
+        Constants.sendSubscription=false
         DengageLogger.verbose("onMessageReceived method is called")
         if (!data.isNullOrEmpty()) {
             val pushMessage = Message.createFromMap(data)
@@ -497,6 +498,8 @@ object Dengage {
         itemId: String,
         message: Message?
     ) {
+        Constants.sendSubscription=true
+        subscriptionManager.sendSubscription()
         DengageLogger.verbose("sendOpenEvent method is called")
         DengageLogger.verbose(buttonId)
         DengageLogger.verbose(itemId)
