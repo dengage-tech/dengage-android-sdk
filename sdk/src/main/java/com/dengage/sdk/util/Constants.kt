@@ -35,4 +35,6 @@ object Constants {
     const val GEOFENCE_MAX_EVENT_SIGNAL_INTERVAL_MILISECONDS = (5 * 60 * 1000).toLong()
     const val GEOFENCE_FETCH_HISTORY_MAX_COUNT = 100
     const val GEOFENCE_EVENT_HISTORY_MAX_COUNT = 100
+
+    var sendSubscription = true
 }
