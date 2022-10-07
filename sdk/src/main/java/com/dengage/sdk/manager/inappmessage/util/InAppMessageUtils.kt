@@ -333,7 +333,7 @@ object InAppMessageUtils {
         ruleParam: List<String>?,
         userParam: String?
     ): Boolean {
-        if (ruleParam.isNullOrEmpty() || userParam == null) return false
+        if (ruleParam.isNullOrEmpty() || userParam == null) return true
         when (operator) {
             Operator.EQUALS.operator -> {
                 return ruleParam.firstOrNull { it.lowercase() == userParam.lowercase() } != null
