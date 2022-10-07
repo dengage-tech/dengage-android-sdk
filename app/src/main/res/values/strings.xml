@@ -2,6 +2,8 @@
     <string name="app_name">Dengage Sample</string>
     <string name="dengage_integration_key">Integration Key = %s</string>
     <string name="dengage_device_id">Device Id = %s</string>
+    <string name="dengage_device_brand">Device Brand = %s</string>
+    <string name="dengage_device_model">Device Model = %s</string>
     <string name="dengage_advertising_id">Advertising Id = %s</string>
     <string name="dengage_token">Token = %s</string>
     <string name="dengage_contact_key">Contact Key = %s</string>
