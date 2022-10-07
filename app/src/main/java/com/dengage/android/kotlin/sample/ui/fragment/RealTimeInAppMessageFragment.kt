@@ -1,5 +1,6 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentRealTimeInAppMessageBinding
@@ -16,22 +17,27 @@ class RealTimeInAppMessageFragment : BaseDataBindingFragment<FragmentRealTimeInA
         sendPageView("real-time-in-app-message")
 
         binding.btnSetCategoryPath.setOnClickListener {
+            Toast.makeText(requireContext(), "Parameter saved!", Toast.LENGTH_LONG).show()
             Dengage.setCategoryPath(binding.etCategoryPath.text.toString().trim())
         }
 
         binding.btnSetCartItemCount.setOnClickListener {
+            Toast.makeText(requireContext(), "Parameter saved!", Toast.LENGTH_LONG).show()
             Dengage.setCartItemCount(binding.etCartItemCount.text.toString().trim())
         }
 
         binding.btnSetCartAmount.setOnClickListener {
+            Toast.makeText(requireContext(), "Parameter saved!", Toast.LENGTH_LONG).show()
             Dengage.setCartAmount(binding.etCartAmount.text.toString().trim())
         }
 
         binding.btnSetState.setOnClickListener {
+            Toast.makeText(requireContext(), "Parameter saved!", Toast.LENGTH_LONG).show()
             Dengage.setState(binding.etState.text.toString().trim())
         }
 
         binding.btnSetCity.setOnClickListener {
+            Toast.makeText(requireContext(), "Parameter saved!", Toast.LENGTH_LONG).show()
             Dengage.setCity(binding.etCity.text.toString().trim())
         }
 
