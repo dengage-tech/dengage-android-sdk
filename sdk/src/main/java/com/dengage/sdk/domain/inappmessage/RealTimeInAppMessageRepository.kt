@@ -26,7 +26,8 @@ class RealTimeInAppMessageRepository {
         appId: String?,
         sessionId: String,
         campaignId: String,
-        messageDetails: String?
+        messageDetails: String?,
+        contentId: String?
     ): Response<Unit> {
         return service.setRealTimeInAppMessageAsDisplayed(
             accountName = accountName,
@@ -35,7 +36,8 @@ class RealTimeInAppMessageRepository {
             appId = appId,
             sessionId = sessionId,
             campaignId = campaignId,
-            messageDetails = messageDetails
+            messageDetails = messageDetails,
+            contentId = contentId
         )
     }
 
@@ -46,7 +48,8 @@ class RealTimeInAppMessageRepository {
         sessionId: String,
         campaignId: String,
         messageDetails: String?,
-        buttonId: String?
+        buttonId: String?,
+        contentId: String?
     ): Response<Unit> {
         return service.setRealTimeInAppMessageAsClicked(
             accountName = accountName,
@@ -56,7 +59,8 @@ class RealTimeInAppMessageRepository {
             sessionId = sessionId,
             campaignId = campaignId,
             messageDetails = messageDetails,
-            buttonId = buttonId
+            buttonId = buttonId,
+            contentId = contentId
         )
     }
 
@@ -66,7 +70,8 @@ class RealTimeInAppMessageRepository {
         appId: String?,
         sessionId: String,
         campaignId: String,
-        messageDetails: String?
+        messageDetails: String?,
+        contentId: String?
     ): Response<Unit> {
         return service.setRealTimeInAppMessageAsDismissed(
             accountName = accountName,
@@ -75,7 +80,8 @@ class RealTimeInAppMessageRepository {
             appId = appId,
             sessionId = sessionId,
             campaignId = campaignId,
-            messageDetails = messageDetails
+            messageDetails = messageDetails,
+            contentId = contentId
         )
     }
 

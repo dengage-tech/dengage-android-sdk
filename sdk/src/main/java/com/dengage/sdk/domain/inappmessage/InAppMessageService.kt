@@ -67,7 +67,8 @@ interface InAppMessageService {
         @Query("appid") appId: String?,
         @Query("session_id") sessionId: String,
         @Query("campid") campaignId: String,
-        @Query("campparams") messageDetails: String?
+        @Query("campparams") messageDetails: String?,
+        @Query("content_id") contentId: String?
     ): Response<Unit>
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
@@ -81,7 +82,8 @@ interface InAppMessageService {
         @Query("session_id") sessionId: String,
         @Query("campid") campaignId: String,
         @Query("campparams") messageDetails: String?,
-        @Query("button_id") buttonId: String?
+        @Query("button_id") buttonId: String?,
+        @Query("content_id") contentId: String?
     ): Response<Unit>
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
@@ -94,7 +96,8 @@ interface InAppMessageService {
         @Query("appid") appId: String?,
         @Query("session_id") sessionId: String,
         @Query("campid") campaignId: String,
-        @Query("campparams") messageDetails: String?
+        @Query("campparams") messageDetails: String?,
+        @Query("content_id") contentId: String?
     ): Response<Unit>
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")

@@ -6,5 +6,6 @@ import java.io.Serializable
 class Content(
     @SerializedName("type") val type: String,
     @SerializedName("targetUrl") val targetUrl: String?,
-    @SerializedName("props") val params: ContentParams
+    @SerializedName("props") val params: ContentParams,
+    @SerializedName("contentId") val contentId: String? = null
 ) : Serializable

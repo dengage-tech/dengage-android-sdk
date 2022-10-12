@@ -17,7 +17,8 @@ class SetRealTimeInAppMessageAsDismissed : CoroutineUseCase<Response<Unit>, SetR
             appId = params.appId,
             sessionId = params.sessionId,
             campaignId = params.campaignId,
-            messageDetails = params.messageDetails
+            messageDetails = params.messageDetails,
+            contentId = params.contentId
         )
 
     data class Params(
@@ -26,6 +27,7 @@ class SetRealTimeInAppMessageAsDismissed : CoroutineUseCase<Response<Unit>, SetR
         val appId: String?,
         val sessionId: String,
         val campaignId: String,
-        val messageDetails: String?
+        val messageDetails: String?,
+        val contentId: String?
     )
 }

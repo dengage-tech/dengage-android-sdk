@@ -18,7 +18,8 @@ class SetRealTimeInAppMessageAsClicked : CoroutineUseCase<Response<Unit>, SetRea
             sessionId = params.sessionId,
             campaignId = params.campaignId,
             messageDetails = params.messageDetails,
-            buttonId = params.buttonId
+            buttonId = params.buttonId,
+            contentId = params.contentId
         )
 
     data class Params(
@@ -28,6 +29,7 @@ class SetRealTimeInAppMessageAsClicked : CoroutineUseCase<Response<Unit>, SetRea
         val sessionId: String,
         val campaignId: String,
         val messageDetails: String?,
-        val buttonId: String?
+        val buttonId: String?,
+        val contentId: String?
     )
 }

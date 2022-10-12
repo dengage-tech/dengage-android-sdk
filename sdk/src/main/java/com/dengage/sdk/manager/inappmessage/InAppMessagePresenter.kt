@@ -87,7 +87,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         appId = sdkParameters.appId,
                         sessionId = SessionManager.getSessionId(),
                         campaignId = inAppMessage.data.publicId!!,
-                        messageDetails = inAppMessage.data.messageDetails
+                        messageDetails = inAppMessage.data.messageDetails,
+                        contentId = inAppMessage.data.content.contentId
                     )
                 }
             }
@@ -130,7 +131,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         sessionId = SessionManager.getSessionId(),
                         campaignId = inAppMessage.data.publicId!!,
                         messageDetails = inAppMessage.data.messageDetails,
-                        buttonId = buttonId
+                        buttonId = buttonId,
+                        contentId = inAppMessage.data.content.contentId
                     )
                 }
             }
@@ -170,7 +172,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         appId = sdkParameters.appId,
                         sessionId = SessionManager.getSessionId(),
                         campaignId = inAppMessage.data.publicId!!,
-                        messageDetails = inAppMessage.data.messageDetails
+                        messageDetails = inAppMessage.data.messageDetails,
+                        contentId = inAppMessage.data.content.contentId
                     )
                 }
             }
