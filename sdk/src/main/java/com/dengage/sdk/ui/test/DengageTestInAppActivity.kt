@@ -90,7 +90,8 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
         )
         val displayTiming = DisplayTiming(
             delay = 0,
-            showEveryXMinutes = 0
+            showEveryXMinutes = 0,
+            maxShowCount = null
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -131,7 +132,8 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
         )
         val displayTiming = DisplayTiming(
             delay = 0,
-            showEveryXMinutes = 0
+            showEveryXMinutes = 0,
+            maxShowCount = null
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -172,7 +174,8 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
         )
         val displayTiming = DisplayTiming(
             delay = 0,
-            showEveryXMinutes = 0
+            showEveryXMinutes = 0,
+            maxShowCount = null
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -213,7 +216,8 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
         )
         val displayTiming = DisplayTiming(
             delay = 0,
-            showEveryXMinutes = 0
+            showEveryXMinutes = 0,
+            maxShowCount = null
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -254,7 +258,8 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
         )
         val displayTiming = DisplayTiming(
             delay = 0,
-            showEveryXMinutes = 0
+            showEveryXMinutes = 0,
+            maxShowCount = null
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -295,7 +300,8 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
         )
         val displayTiming = DisplayTiming(
             delay = 0,
-            showEveryXMinutes = 0
+            showEveryXMinutes = 0,
+            maxShowCount = null
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -336,7 +342,8 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
         )
         val displayTiming = DisplayTiming(
             delay = 0,
-            showEveryXMinutes = 0
+            showEveryXMinutes = 0,
+            maxShowCount = null
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -377,7 +384,8 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
         )
         val displayTiming = DisplayTiming(
             delay = 0,
-            showEveryXMinutes = 0
+            showEveryXMinutes = 0,
+            maxShowCount = null
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",

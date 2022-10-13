@@ -35,7 +35,8 @@ class InAppMessageDataTest {
         )
         val displayTiming = DisplayTiming(
             delay = 10,
-            showEveryXMinutes = 5
+            showEveryXMinutes = 5,
+            maxShowCount = 10
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = messageDetails,

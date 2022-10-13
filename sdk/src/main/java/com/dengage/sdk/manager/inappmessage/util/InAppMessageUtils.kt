@@ -61,14 +61,14 @@ object InAppMessageUtils {
         // Also control nextDisplayTime for showEveryXMinutes type in app messages
         val inAppMessageWithoutScreenName = sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
             inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
-                isDisplayTimeAvailable(inAppMessage) &&
+                inAppMessage.data.isDisplayTimeAvailable() &&
                 operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
         }
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
         } else {
             val inAppMessageWithScreenName = sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
-                isDisplayTimeAvailable(inAppMessage) &&
+                inAppMessage.data.isDisplayTimeAvailable() &&
                     inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
                         operateScreenValues(
                             screenNameFilter.value,
@@ -560,12 +560,6 @@ object InAppMessageUtils {
             }
         }
         return true
-    }
-
-    private fun isDisplayTimeAvailable(inAppMessage: InAppMessage): Boolean {
-        return inAppMessage.data.displayTiming.showEveryXMinutes == null ||
-            inAppMessage.data.displayTiming.showEveryXMinutes == 0 ||
-            inAppMessage.data.nextDisplayTime <= System.currentTimeMillis()
     }
 
     fun pxToDp(px: Int?, context: Context): Float {

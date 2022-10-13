@@ -9,14 +9,17 @@ class DisplayTimingTest {
     fun `DisplayTiming constructor test`() {
         val delay = 10
         val showEveryXMinutes = 20
+        val maxShowCount = 20
 
         val displayTiming = DisplayTiming(
             delay = delay,
-            showEveryXMinutes = showEveryXMinutes
+            showEveryXMinutes = showEveryXMinutes,
+            maxShowCount = maxShowCount
         )
 
         Assert.assertEquals(delay, displayTiming.delay)
         Assert.assertEquals(showEveryXMinutes, displayTiming.showEveryXMinutes)
+        Assert.assertEquals(maxShowCount, displayTiming.maxShowCount)
     }
 
 }

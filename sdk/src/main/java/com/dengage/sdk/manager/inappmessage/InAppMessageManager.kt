@@ -87,9 +87,15 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         ) {
             inAppMessage.data.nextDisplayTime = System.currentTimeMillis() +
                 inAppMessage.data.displayTiming.showEveryXMinutes!! * 60000L
+            inAppMessage.data.showCount = inAppMessage.data.showCount + 1
             updateInAppMessageOnCache(inAppMessage)
         } else {
-            removeInAppMessageFromCache(inAppMessageId = inAppMessage.id)
+            if (inAppMessage.data.isRealTime()) {
+                inAppMessage.data.showCount = inAppMessage.data.showCount + 1
+                updateInAppMessageOnCache(inAppMessage)
+            } else {
+                removeInAppMessageFromCache(inAppMessageId = inAppMessage.id)
+            }
         }
 
         // update next in app message show time
@@ -154,8 +160,10 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
                         }
                         existingInAppMessage?.let {
                             val nextDisplayTime = it.data.nextDisplayTime
+                            val showCount = it.data.showCount
                             it.data = inAppMessage.data
                             it.data.nextDisplayTime = nextDisplayTime
+                            it.data.showCount = showCount
                         }
                     }
                 } else {

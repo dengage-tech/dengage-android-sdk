@@ -11,6 +11,7 @@ object InAppMessageMocker {
         operator: Operator? = null,
         isRealTime: Boolean = false,
         hasRules: Boolean = true,
+        maxShowCount :Int = 1
     ): InAppMessage {
         val contentParams = ContentParams(
             position = ContentPosition.BOTTOM.position,
@@ -61,7 +62,8 @@ object InAppMessageMocker {
         )
         val displayTiming = DisplayTiming(
             delay = 10,
-            showEveryXMinutes = 5
+            showEveryXMinutes = 5,
+            maxShowCount = maxShowCount
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -90,7 +92,8 @@ object InAppMessageMocker {
         operator: Operator? = null,
         criterionList: MutableList<Criterion>? = null,
         criterionOperator: LogicOperator? = null,
-        ruleSetOperator: LogicOperator? = null
+        ruleSetOperator: LogicOperator? = null,
+        maxShowCount: Int = 1
     ): InAppMessage {
         val ruleSet = if (criterionList == null) {
             null
@@ -138,7 +141,8 @@ object InAppMessageMocker {
         )
         val displayTiming = DisplayTiming(
             delay = 10,
-            showEveryXMinutes = 5
+            showEveryXMinutes = 5,
+            maxShowCount = maxShowCount
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",

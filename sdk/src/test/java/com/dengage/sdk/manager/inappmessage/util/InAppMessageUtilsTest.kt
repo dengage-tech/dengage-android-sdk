@@ -1,10 +1,7 @@
 package com.dengage.sdk.manager.inappmessage.util
 
-import com.dengage.sdk.domain.inappmessage.model.Criterion
-import com.dengage.sdk.domain.inappmessage.model.DataType
 import com.dengage.sdk.domain.inappmessage.model.Operator
 import com.dengage.sdk.domain.inappmessage.model.Priority
-import com.dengage.sdk.domain.inappmessage.model.SpecialRuleParameter
 import com.dengage.sdk.util.Constants
 import org.junit.Assert
 import org.junit.Test
@@ -299,6 +296,35 @@ class InAppMessageUtilsTest {
     }
 
     @Test
+    fun `findPriorInAppMessage display timing max show count test`() {
+        val id1 = Math.random().toString()
+        val id2 = Math.random().toString()
+
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val inAppMessageIsAvailableTiming = InAppMessageMocker.createInAppMessage(
+            id = id1,
+            priority = Priority.MEDIUM,
+            expireDate = expireDate,
+            maxShowCount = 2
+        )
+        val inAppMessageIsNotAvailableTiming = InAppMessageMocker.createInAppMessage(
+            id = id2,
+            priority = Priority.HIGH,
+            expireDate = expireDate,
+            maxShowCount = 1
+        )
+        inAppMessageIsAvailableTiming.data.showCount = 1
+        inAppMessageIsNotAvailableTiming.data.showCount = 1
+
+        val inAppMessages = listOf(inAppMessageIsNotAvailableTiming, inAppMessageIsAvailableTiming)
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = inAppMessages
+        )
+        Assert.assertEquals(priorInAppMessage?.id, id1)
+    }
+
+    @Test
     fun `findPriorInAppMessage real time test`() {
         val id1 = Math.random().toString()
         val id2 = Math.random().toString()
@@ -471,7 +497,7 @@ class InAppMessageUtilsTest {
             screenName, operator))
     }
 
-    @Test
+    /*@Test
     fun `findPriorRealTimeInApp category test`() {
         RealTimeInAppParamHolder.categoryPath = "Category"
         val id1 = Math.random().toString()
@@ -518,5 +544,5 @@ class InAppMessageUtilsTest {
             inAppMessages = inAppMessages
         )
         Assert.assertEquals(priorInAppMessage?.id, id2)
-    }
+    }*/
 }
