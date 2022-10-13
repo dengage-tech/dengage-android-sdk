@@ -134,7 +134,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.categoryPath
+                    userParam = RealTimeInAppParamHolder.categoryPath ?: ""
                 )
             }
             SpecialRuleParameter.CART_ITEM_COUNT.key -> {
@@ -142,7 +142,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.cartItemCount
+                    userParam = RealTimeInAppParamHolder.cartItemCount ?: "0"
                 )
             }
             SpecialRuleParameter.CART_AMOUNT.key -> {
@@ -150,7 +150,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.cartAmount
+                    userParam = RealTimeInAppParamHolder.cartAmount ?: "0"
                 )
             }
             SpecialRuleParameter.STATE.key -> {
@@ -158,7 +158,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.state
+                    userParam = RealTimeInAppParamHolder.state ?: ""
                 )
             }
             SpecialRuleParameter.CITY.key -> {
@@ -166,7 +166,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.city
+                    userParam = RealTimeInAppParamHolder.city ?: ""
                 )
             }
             SpecialRuleParameter.TIMEZONE.key -> {
