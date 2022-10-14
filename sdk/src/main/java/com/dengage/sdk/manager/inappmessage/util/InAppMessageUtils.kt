@@ -8,8 +8,10 @@ import android.util.TypedValue
 import androidx.core.text.isDigitsOnly
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.*
+import com.dengage.sdk.manager.visitcount.VisitCountManager
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.GsonHolder
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -315,6 +317,37 @@ object InAppMessageUtils {
                     ruleParam = criterion.values,
                     userParam = Build.MODEL
                 )
+            }
+            SpecialRuleParameter.PUSH_PERMISSION.key -> {
+                operateRuleParameter(
+                    operator = criterion.operator,
+                    dataType = criterion.dataType,
+                    ruleParam = criterion.values,
+                    userParam = (subscription?.permission ?: true).toString()
+                )
+            }
+            SpecialRuleParameter.VISIT_COUNT.key -> {
+                try {
+                    if (criterion.dataType == DataType.VISIT_COUNT_PAST_X_DAYS.name &&
+                        criterion.values.isNullOrEmpty().not()
+                    ) {
+                        val visitCount = GsonHolder.fromJson<VisitCount>(criterion.values?.first())
+                        if (visitCount == null) {
+                            true
+                        } else {
+                            operateRuleParameter(
+                                operator = criterion.operator,
+                                dataType = DataType.INT.name,
+                                ruleParam = listOf(visitCount.count.toString()),
+                                userParam = VisitCountManager.findVisitCountSinceDays(visitCount.timeAmount).toString()
+                            )
+                        }
+                    } else {
+                        true
+                    }
+                } catch (e: Exception) {
+                    true
+                }
             }
             else -> {
                 operateRuleParameter(

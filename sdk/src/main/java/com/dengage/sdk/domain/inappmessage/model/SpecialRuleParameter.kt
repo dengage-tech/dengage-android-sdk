@@ -23,5 +23,7 @@ enum class SpecialRuleParameter(val key: String) {
     FIRST_VISIT("dn.first_visit"),
     LAST_VISIT("dn.last_visit_ts"),
     BRAND_NAME("dn.brand_name"),
-    MODEL_NAME("dn.model_name")
+    MODEL_NAME("dn.model_name"),
+    PUSH_PERMISSION("dn.wp_perm"),
+    VISIT_COUNT("dn.visit_count")
 }
