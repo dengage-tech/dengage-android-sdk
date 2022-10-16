@@ -46,7 +46,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
-        DengageLogger.verbose("$TAG onPushOpen method is called")
+      /*DengageLogger.verbose("$TAG onPushOpen method is called")
 
         var uri: String? = null
         if (intent.extras != null) {
@@ -56,7 +56,6 @@ open class NotificationReceiver : BroadcastReceiver() {
                 message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
             }
             uri = intent.extras!!.getString("targetUrl")
-
             ContextHolder.context = context
             Dengage.sendOpenEvent("", "", message)
 
@@ -64,7 +63,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         } else {
             DengageLogger.error("$TAG No extra data for push open")
         }
-        context.launchActivity(intent, uri)
+        context.launchActivity(intent, uri)*/
     }
 
     open fun onPushDismiss(context: Context, intent: Intent) {
@@ -282,7 +281,6 @@ open class NotificationReceiver : BroadcastReceiver() {
 
     open fun getPendingIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent? {
         var intent = intent
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val stackBuilder = TaskStackBuilder.create(context)
             val extras = intent.extras
             val packageName = context.packageName
@@ -293,18 +291,11 @@ open class NotificationReceiver : BroadcastReceiver() {
                 intent.putExtras(intent.extras!!)
             }
             stackBuilder.addNextIntentWithParentStack(intent)
-            stackBuilder.getPendingIntent(
+        return  stackBuilder.getPendingIntent(
                 requestCode,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
-        } else {
-            PendingIntent.getBroadcast(
-                context,
-                requestCode,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
+
     }
 
 
