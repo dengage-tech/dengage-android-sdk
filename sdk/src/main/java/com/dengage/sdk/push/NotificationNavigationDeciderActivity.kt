@@ -94,7 +94,7 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
             DengageLogger.verbose("RAW_DATA: $json")
             intent.putExtras(jsonDataBundle)
             intent.setPackage(packageName)
-           // sendBroadcast(intent)
+           sendBroadcast(intent)
         } catch (e: java.lang.Exception) {
             DengageLogger.error("sendBroadcast: " + e.message)
         }
