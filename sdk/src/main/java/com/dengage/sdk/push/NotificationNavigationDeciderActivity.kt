@@ -8,22 +8,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.R
 import com.dengage.sdk.domain.push.model.Message
-import com.dengage.sdk.util.GsonHolder
+import com.dengage.sdk.util.*
+import com.dengage.sdk.util.extension.toJson
 
 class NotificationNavigationDeciderActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_notification_navigation_decider)
-
-
         if (intent != null) {
 
             val extras = intent.extras
-            val uri: String?
 
+            val uri: String?
 
             if (extras != null) {
 
@@ -32,7 +28,7 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
 
                 if (uri != null && !TextUtils.isEmpty(uri)) {
 
-                    intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                    intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri));
 
                 } else {
 
@@ -58,9 +54,14 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
 
                 }
 
+
+
                 callOpenEvent(message)
 
                 clearNotification(message)
+
+                sendBroadcast(message.toJson(),extras)
+
 
             } else {
 
@@ -83,5 +84,19 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
 
         Dengage.sendOpenEvent("", "", message)
 
+    }
+
+    private fun sendBroadcast(json: String,jsonDataBundle:Bundle) {
+        DengageLogger.verbose("sendBroadcast method is called")
+        try {
+            val intent = Intent(Constants.PUSH_OPEN_EVENT)
+            intent.putExtra("RAW_DATA", json)
+            DengageLogger.verbose("RAW_DATA: $json")
+            intent.putExtras(jsonDataBundle)
+            intent.setPackage(packageName)
+            sendBroadcast(intent)
+        } catch (e: java.lang.Exception) {
+            DengageLogger.error("sendBroadcast: " + e.message)
+        }
     }
 }

@@ -9,6 +9,7 @@ import android.media.AudioAttributes
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -46,25 +47,25 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
-        DengageLogger.verbose("$TAG onPushOpen method is called")
+        /*DengageLogger.verbose("$TAG onPushOpen method is called")
 
-        var uri: String? = null
-        if (intent.extras != null) {
-            var message = Message.createFromIntent(intent.extras!!)
-            val rawJson = intent.extras!!.getString("RAW_DATA")
-            if (!TextUtils.isEmpty(rawJson)) {
-                message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
-            }
-            uri = intent.extras!!.getString("targetUrl")
+          var uri: String? = null
+          if (intent.extras != null) {
+              var message = Message.createFromIntent(intent.extras!!)
+              val rawJson = intent.extras!!.getString("RAW_DATA")
+              if (!TextUtils.isEmpty(rawJson)) {
+                  message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
+              }
+              uri = intent.extras!!.getString("targetUrl")
+              ContextHolder.context = context
+              Dengage.sendOpenEvent("", "", message)
 
-            ContextHolder.context = context
-            Dengage.sendOpenEvent("", "", message)
-
-            clearNotification(context, message)
-        } else {
-            DengageLogger.error("$TAG No extra data for push open")
-        }
-        context.launchActivity(intent, uri)
+              clearNotification(context, message)
+          } else {
+              DengageLogger.error("$TAG No extra data for push open")
+          }
+          context.launchActivity(intent, uri)*/
+        // Log.d("oops","opened")
     }
 
     open fun onPushDismiss(context: Context, intent: Intent) {
@@ -282,29 +283,21 @@ open class NotificationReceiver : BroadcastReceiver() {
 
     open fun getPendingIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent? {
         var intent = intent
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val stackBuilder = TaskStackBuilder.create(context)
-            val extras = intent.extras
-            val packageName = context.packageName
-            intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
-            intent.putExtras(extras!!)
-            intent.setPackage(packageName)
-            if (intent.extras != null) {
-                intent.putExtras(intent.extras!!)
-            }
-            stackBuilder.addNextIntentWithParentStack(intent)
-            stackBuilder.getPendingIntent(
-                requestCode,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        } else {
-            PendingIntent.getBroadcast(
-                context,
-                requestCode,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
+        val stackBuilder = TaskStackBuilder.create(context)
+        val extras = intent.extras
+        val packageName = context.packageName
+        intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
+        intent.putExtras(extras!!)
+        intent.setPackage(packageName)
+        if (intent.extras != null) {
+            intent.putExtras(intent.extras!!)
         }
+        stackBuilder.addNextIntentWithParentStack(intent)
+        return  stackBuilder.getPendingIntent(
+            requestCode,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
     }
 
 
