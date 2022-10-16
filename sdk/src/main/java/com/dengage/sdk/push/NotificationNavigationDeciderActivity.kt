@@ -86,7 +86,7 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
 
     }
 
-    fun sendBroadcast(json: String,jsonDataBundle:Bundle) {
+    private fun sendBroadcast(json: String,jsonDataBundle:Bundle) {
         DengageLogger.verbose("sendBroadcast method is called")
         try {
             val intent = Intent(Constants.PUSH_OPEN_EVENT)
@@ -94,7 +94,7 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
             DengageLogger.verbose("RAW_DATA: $json")
             intent.putExtras(jsonDataBundle)
             intent.setPackage(packageName)
-            sendBroadcast(intent)
+           // sendBroadcast(intent)
         } catch (e: java.lang.Exception) {
             DengageLogger.error("sendBroadcast: " + e.message)
         }
