@@ -65,7 +65,7 @@ open class NotificationReceiver : BroadcastReceiver() {
             DengageLogger.error("$TAG No extra data for push open")
         }
         context.launchActivity(intent, uri)*/
-        Log.d("oops","opened")
+       // Log.d("oops","opened")
     }
 
     open fun onPushDismiss(context: Context, intent: Intent) {
