@@ -567,14 +567,18 @@ object Dengage {
 
 
     fun sendDeviceIdToServer(route: String, token: String) {
-        DengageUtils.getMetaData(name = "den_device_id_api_url").apply {
-            if (this == null) {
-                DengageLogger.error("Device id api base url not found on application manifest metadata")
-            } else if (route.isNullOrEmpty()) {
-                DengageLogger.error("Device id api route is not provided")
-            } else {
-                deviceIdSenderManager.sendDeviceId("$this$route", token)
+        try {
+            DengageUtils.getMetaData(name = "den_device_id_api_url").apply {
+                if (this == null) {
+                    DengageLogger.error("Device id api base url not found on application manifest metadata")
+                } else if (route.isNullOrEmpty()) {
+                    DengageLogger.error("Device id api route is not provided")
+                } else {
+                    deviceIdSenderManager.sendDeviceId("$this$route", token)
+                }
             }
+        } catch (e: Exception) {
+            DengageLogger.error(e.message)
         }
     }
 

@@ -19,8 +19,8 @@ class DeviceIdSenderToServer: CoroutineUseCase<Response<Unit>, DeviceIdSenderToS
         )
 
     data class Params(
-        val route: String?,
-        val token: String?,
+        val route: String,
+        val token: String,
         val deviceId:String
     )
 }
