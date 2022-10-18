@@ -18,6 +18,7 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.configuration.ConfigurationCallback
 import com.dengage.sdk.manager.configuration.ConfigurationManager
+import com.dengage.sdk.manager.deviceId.DeviceIdSenderManager
 import com.dengage.sdk.manager.event.EventManager
 import com.dengage.sdk.manager.geofence.GeofenceLocationManager
 import com.dengage.sdk.manager.geofence.GeofencePermissionsHelper
@@ -30,6 +31,7 @@ import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 
@@ -43,6 +45,7 @@ object Dengage {
     private val eventManager by lazy { EventManager() }
     private val rfmManager by lazy { RFMManager() }
     private val geofenceManager by lazy { GeofenceLocationManager() }
+    private val deviceIdSenderManager by lazy { DeviceIdSenderManager() }
 
     internal var initialized = false
 
@@ -611,6 +614,18 @@ object Dengage {
             init(context = context, geofenceEnabled = Prefs.geofenceEnabled)
         }
         geofenceManager.handleBootCompleted()
+    }
+
+    fun sendDeviceIdToServer(route: String, token: String) {
+        DengageUtils.getMetaData(name = "den_device_id_api_url").apply {
+            if (this == null) {
+                DengageLogger.error("Device id api base url not found on application manifest metadata")
+            } else if (route.isNullOrEmpty()) {
+                DengageLogger.error("Device id api route is not provided")
+            } else {
+                deviceIdSenderManager.sendDeviceId("$this$route", token)
+            }
+        }
     }
 
 }
