@@ -12,8 +12,8 @@ class DeviceIdSenderContract {
 
     interface Presenter : BasePresenter<View> {
         fun sendDeviceId(
-            route: String?,
-            token:String?,
+            route: String,
+            token:String,
             deviceId:String
 
         )
