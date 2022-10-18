@@ -11,7 +11,7 @@ interface DeviceIdSenderService {
     @POST
     suspend fun sendDeviceId(
         @Url fullUrl: String,
-        @Header("Authorization") token: String?,
+        @Header("Authorization") token: String,
         @Body deviceIdObject: DeviceIdModel,
     ): Response<Unit>
 }
