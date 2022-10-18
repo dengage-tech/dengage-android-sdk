@@ -8,7 +8,7 @@ class DeviceIdSenderPresenter  : BaseAbstractPresenter<DeviceIdSenderContract.Vi
 
     private val sendDeviceId by lazy { DeviceIdSenderToServer() }
 
-    override fun sendDeviceId(route: String?,token :String?,deviceId:String) {
+    override fun sendDeviceId(route: String,token :String,deviceId:String) {
         sendDeviceId(this) {
             onResponse = {
                 view { deviceIdSent() }

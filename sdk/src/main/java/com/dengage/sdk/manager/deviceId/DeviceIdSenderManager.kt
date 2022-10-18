@@ -9,8 +9,8 @@ class DeviceIdSenderManager : BaseMvpManager<DeviceIdSenderContract.View, Device
     override fun providePresenter() = DeviceIdSenderPresenter()
 
     fun sendDeviceId(
-        route: String?,
-        token: String?,
+        route: String,
+        token: String,
     ) {
         Prefs.subscription.let {
             if (it != null) {

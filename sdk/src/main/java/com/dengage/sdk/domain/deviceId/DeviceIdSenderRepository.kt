@@ -10,8 +10,8 @@ class DeviceIdSenderRepository    {
     private val service: DeviceIdSenderService by service(ApiType.PUSH)
 
 suspend fun sendDeviceIDToServer(
-    route: String?,
-    token: String?,
+    route: String,
+    token: String,
     deviceId:String
 ): Response<Unit> {
     return service.sendDeviceId(route?:"", token, deviceIdObject = DeviceIdModel(deviceId))
