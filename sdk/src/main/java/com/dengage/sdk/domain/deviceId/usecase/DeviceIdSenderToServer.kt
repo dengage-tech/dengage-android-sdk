@@ -11,9 +11,9 @@ class DeviceIdSenderToServer: CoroutineUseCase<Response<Unit>, DeviceIdSenderToS
 
     override suspend fun buildUseCase(params: Params?): Response<Unit> =
         repository.sendDeviceIDToServer(
-            token = params?.token,
-            route = params?.route,
-            deviceId =params?.deviceId!!
+            token = params!!.token,
+            route = params.route,
+            deviceId = params.deviceId
 
 
         )
