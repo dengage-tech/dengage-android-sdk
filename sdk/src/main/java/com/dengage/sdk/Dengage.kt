@@ -3,7 +3,6 @@ package com.dengage.sdk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.data.cache.Prefs
@@ -17,6 +16,7 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.configuration.ConfigurationCallback
 import com.dengage.sdk.manager.configuration.ConfigurationManager
+import com.dengage.sdk.manager.deviceId.DeviceIdSenderManager
 import com.dengage.sdk.manager.event.EventManager
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
@@ -24,10 +24,7 @@ import com.dengage.sdk.manager.rfm.RFMManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.ui.test.DengageTestActivity
-import com.dengage.sdk.util.Constants
-import com.dengage.sdk.util.ContextHolder
-import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.GsonHolder
+import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 
@@ -40,6 +37,7 @@ object Dengage {
     private val tagManager by lazy { TagManager() }
     private val eventManager by lazy { EventManager() }
     private val rfmManager by lazy { RFMManager() }
+    private val deviceIdSenderManager by lazy { DeviceIdSenderManager() }
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -556,5 +554,18 @@ object Dengage {
      */
     fun sendRegisterEvent() {
         eventManager.sendRegisterEvent()
+    }
+
+
+    fun sendDeviceIdToServer(route: String, token: String) {
+        DengageUtils.getMetaData(name = "den_device_id_api_url").apply {
+            if (this == null) {
+                DengageLogger.error("Device id api base url not found on application manifest metadata")
+            } else if (route.isNullOrEmpty()) {
+                DengageLogger.error("Device id api route is not provided")
+            } else {
+                deviceIdSenderManager.sendDeviceId("$this$route", token)
+            }
+        }
     }
 }
