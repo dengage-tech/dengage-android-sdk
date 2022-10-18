@@ -2,6 +2,7 @@ package com.dengage.sdk.domain.deviceId
 
 import com.dengage.sdk.data.remote.api.ApiType
 import com.dengage.sdk.data.remote.api.service
+import com.dengage.sdk.domain.deviceId.model.DeviceIdModel
 import com.dengage.sdk.domain.deviceId.usecase.DeviceIdSenderService
 import retrofit2.Response
 

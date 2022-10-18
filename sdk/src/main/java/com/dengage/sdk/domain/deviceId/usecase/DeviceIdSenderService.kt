@@ -1,7 +1,7 @@
 package com.dengage.sdk.domain.deviceId.usecase
 
 
-import com.dengage.sdk.domain.deviceId.DeviceIdModel
+import com.dengage.sdk.domain.deviceId.model.DeviceIdModel
 import retrofit2.Response
 import retrofit2.http.*
 

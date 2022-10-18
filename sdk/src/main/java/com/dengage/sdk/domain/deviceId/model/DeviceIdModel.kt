@@ -1,4 +1,4 @@
-package com.dengage.sdk.domain.deviceId
+package com.dengage.sdk.domain.deviceId.model
 
 
 import com.google.gson.annotations.SerializedName
