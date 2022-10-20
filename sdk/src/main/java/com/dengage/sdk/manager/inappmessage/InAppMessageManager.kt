@@ -166,6 +166,14 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
                             it.data.showCount = showCount
                         }
                     }
+
+                    // find new ones and add them
+                    val newInAppMessages = inAppMessages.filter { inAppMessage ->
+                        existingInAppMessages.firstOrNull { existingInAppMessage ->
+                            existingInAppMessage.id == inAppMessage.id
+                        } == null
+                    }
+                    existingInAppMessages.addAll(newInAppMessages)
                 } else {
                     // remove duplicated in app messages
                     existingInAppMessages.removeAll { existingInAppMessage ->
