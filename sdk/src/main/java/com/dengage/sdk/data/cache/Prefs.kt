@@ -3,6 +3,7 @@ package com.dengage.sdk.data.cache
 import android.content.Context
 import android.content.SharedPreferences
 import com.dengage.sdk.domain.configuration.model.SdkParameters
+import com.dengage.sdk.domain.configuration.model.VisitorInfo
 import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.rfm.model.RFMScore
@@ -124,6 +125,10 @@ object Prefs {
     internal var visitCountItems: MutableList<VisitCountItem>
         get() = preferences.get(PreferenceKey.VISIT_COUNTS) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.VISIT_COUNTS, value)
+
+    internal var visitorInfo: VisitorInfo?
+        get() = preferences.get(PreferenceKey.VISITOR_INFO)
+        set(value) = preferences.set(PreferenceKey.VISITOR_INFO, value)
 
     fun clear() {
         preferences.edit().clear().apply()

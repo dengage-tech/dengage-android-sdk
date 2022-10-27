@@ -25,5 +25,7 @@ enum class SpecialRuleParameter(val key: String) {
     BRAND_NAME("dn.brand_name"),
     MODEL_NAME("dn.model_name"),
     PUSH_PERMISSION("dn.wp_perm"),
-    VISIT_COUNT("dn.visit_count")
+    VISIT_COUNT("dn.visit_count"),
+    SEGMENT("dn.segment"),
+    TAG("dn.tag")
 }

@@ -2,6 +2,7 @@ package com.dengage.sdk.manager.inappmessage
 
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
+import com.dengage.sdk.domain.configuration.usecase.GetVisitorInfo
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.usecase.*
 import com.dengage.sdk.domain.subscription.model.Subscription
@@ -19,6 +20,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val setRealTimeInAppMessageAsDismissed by lazy { SetRealTimeInAppMessageAsDismissed() }
     private val setInAppMessageAsDisplayed by lazy { SetInAppMessageAsDisplayed() }
     private val setRealTimeInAppMessageAsDisplayed by lazy { SetRealTimeInAppMessageAsDisplayed() }
+    private val getVisitorInfo by lazy { GetVisitorInfo() }
 
     override fun getInAppMessages() {
         val sdkParameters = Prefs.sdkParameters
@@ -67,6 +69,20 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     accountId = sdkParameters?.accountName!!,
                     appId = sdkParameters.appId!!
                 )
+            }
+
+            // get visitor info for segments and tags defined to user
+            if (subscription != null && sdkParameters != null) {
+                getVisitorInfo(this) {
+                    onResponse = {
+                        Prefs.visitorInfo = it
+                    }
+                    params = GetVisitorInfo.Params(
+                        accountName = sdkParameters.accountName,
+                        contactKey = subscription.contactKey,
+                        deviceId = subscription.getSafeDeviceId(),
+                    )
+                }
             }
         }
     }

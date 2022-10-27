@@ -26,7 +26,8 @@ enum class PreferenceKey {
     LAST_SESSION_START_TIME,
     LAST_SESSION_DURATION,
     LAST_SESSION_VISIT_TIME,
-    VISIT_COUNTS;
+    VISIT_COUNTS,
+    VISITOR_INFO;
 
     override fun toString(): String = name
 }

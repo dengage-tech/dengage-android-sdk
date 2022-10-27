@@ -130,6 +130,7 @@ object InAppMessageUtils {
         params: HashMap<String, String>?
     ): Boolean {
         val subscription = Prefs.subscription
+        val visitorInfo = Prefs.visitorInfo
         return when (criterion.parameter) {
             SpecialRuleParameter.CATEGORY_PATH.key -> {
                 operateRuleParameter(
@@ -349,6 +350,36 @@ object InAppMessageUtils {
                     true
                 }
             }
+            SpecialRuleParameter.SEGMENT.key -> {
+                if (visitorInfo?.segments.isNullOrEmpty()) {
+                    true
+                } else {
+                    val segments = visitorInfo?.segments?.map {
+                        it.toString()
+                    }
+                    operateVisitorRuleParameter(
+                        operator = criterion.operator,
+                        dataType = criterion.dataType,
+                        ruleParam = criterion.values,
+                        userParam = segments
+                    )
+                }
+            }
+            SpecialRuleParameter.TAG.key -> {
+                if (visitorInfo?.tags.isNullOrEmpty()) {
+                    true
+                } else {
+                    val tags = visitorInfo?.tags?.map {
+                        it.toString()
+                    }
+                    operateVisitorRuleParameter(
+                        operator = criterion.operator,
+                        dataType = criterion.dataType,
+                        ruleParam = criterion.values,
+                        userParam = tags
+                    )
+                }
+            }
             else -> {
                 operateRuleParameter(
                     operator = criterion.operator,
@@ -358,6 +389,29 @@ object InAppMessageUtils {
                 )
             }
         }
+    }
+
+    private fun operateVisitorRuleParameter(
+        operator: String,
+        dataType: String,
+        ruleParam: List<String>?,
+        userParam: List<String>?
+    ): Boolean {
+        // visitor rules only work with IN and NOT_IN operator
+        if (ruleParam != null && userParam != null && dataType == DataType.TEXT_LIST.name) {
+            val ruleContainsUserParam = userParam.firstOrNull {
+                ruleParam.contains(it)
+            } != null
+            when (operator) {
+                Operator.IN.operator -> {
+                    return ruleContainsUserParam
+                }
+                Operator.NOT_IN.operator -> {
+                    return !ruleContainsUserParam
+                }
+            }
+        }
+        return true
     }
 
     private fun operateRuleParameter(
