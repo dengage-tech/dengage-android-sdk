@@ -39,7 +39,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "5.6.4"
+        return "5.7.1.4"
     }
 
     fun getUserAgent(context: Context): String {
@@ -87,4 +87,13 @@ object DengageUtils {
         return Constants.MESSAGE_SOURCE == message.messageSource
     }
 
+
+    fun getIANAFormatTimeZone(): String {
+        try {
+            return TimeZone.getDefault().id
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
+    }
 }

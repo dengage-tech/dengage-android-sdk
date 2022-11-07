@@ -12,12 +12,13 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
+class SubscriptionManager :
+    BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
     SubscriptionContract.View {
 
     override fun providePresenter() = SubscriptionPresenter()
 
-     fun buildSubscription(
+    fun buildSubscription(
         firebaseIntegrationKey: String?
 
     ) {
@@ -127,7 +128,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         }
     }
 
-     fun saveSubscription(subscription: Subscription) {
+    fun saveSubscription(subscription: Subscription) {
         DengageLogger.verbose("saveSubscription method is called")
 
         if (subscription.deviceId.isNullOrEmpty()) {
@@ -138,9 +139,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         subscription.sdkVersion = DengageUtils.getSdkVersion()
         subscription.language = Locale.getDefault().language
 
-        val calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault())
-        val date: DateFormat = SimpleDateFormat("z", Locale.getDefault())
-        subscription.timezone = date.format(calendar.time)
+        subscription.timezone = DengageUtils.getIANAFormatTimeZone()
         DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
 
         // save to cache
@@ -159,7 +158,6 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
             presenter.sendSubscription(subscription = subscription)
         }
     }
-
 
 
     override fun subscriptionSent() = Unit
