@@ -2,6 +2,7 @@ package com.dengage.android.kotlin.sample.ui.activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import androidx.navigation.findNavController
 import com.dengage.android.kotlin.sample.R
 import com.dengage.sdk.Dengage
