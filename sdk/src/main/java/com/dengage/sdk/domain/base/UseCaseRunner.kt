@@ -23,15 +23,20 @@ class UseCaseRunnerDelegate : UseCaseRunner {
     private val onCancelCallbacks = arrayListOf<OnCancel>()
 
     override fun cancelUseCases() {
-        val iterator = onCancelCallbacks.iterator()
-        while (iterator.hasNext()) {
-            iterator.next().invoke(true)
-            iterator.remove()
+        try {
+            val iterator = onCancelCallbacks.iterator()
+            while (iterator.hasNext()) {
+                iterator.next().invoke(true)
+                iterator.remove()
+            }
         }
+        catch (e:Exception){}
     }
 
     override fun subscribeToCancel(onCancel: OnCancel) {
-        onCancelCallbacks.add(onCancel)
+        try {
+            onCancelCallbacks.add(onCancel)
+        } catch (e: Exception) {}
     }
 }
 
