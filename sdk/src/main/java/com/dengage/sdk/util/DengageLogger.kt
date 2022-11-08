@@ -59,11 +59,15 @@ object DengageLogger {
     }
 
     fun addToLogs(type: String, message: String?) {
-        if (message.isNullOrEmpty()) return
+        try {
+            if (message.isNullOrEmpty()) return
 
-        if (dengageLogs.size >= 200) {
-            dengageLogs.removeLast()
+            if (dengageLogs.size >= 200) {
+                dengageLogs.removeLast()
+            }
+            dengageLogs.add(0, "$type: $message")
+        } catch (e: Exception) {
+            return
         }
-        dengageLogs.add(0, "$type: $message")
     }
 }
