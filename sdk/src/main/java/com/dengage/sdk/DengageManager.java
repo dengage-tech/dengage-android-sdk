@@ -230,7 +230,7 @@ public class DengageManager {
         DengageLogger.INSTANCE.verbose("sendCustomEvent method is called");
         try {
 
-            Dengage.INSTANCE.sendCustomEvent(tableName, key, data);
+            Dengage.INSTANCE.sendCustomEvent(tableName, key, data,_context);
         } catch (Exception e) {
             DengageLogger.INSTANCE.error("sendCustomEvent: " + e.getMessage());
         }
@@ -249,7 +249,7 @@ public class DengageManager {
         DengageLogger.INSTANCE.verbose("sendDeviceEvent method is called");
         try {
 
-            Dengage.INSTANCE.sendDeviceEvent(tableName, data);
+            Dengage.INSTANCE.sendDeviceEvent(tableName, data,_context);
         } catch (Exception e) {
             DengageLogger.INSTANCE.error("sendDeviceEvent: " + e.getMessage());
         }
@@ -409,7 +409,7 @@ public class DengageManager {
      * @param tags will be send to api
      */
     public void setTags(@NonNull List<TagItem> tags) {
-        Dengage.INSTANCE.setTags(tags);
+        Dengage.INSTANCE.setTags(tags,_context);
     }
 
     /**
@@ -432,7 +432,7 @@ public class DengageManager {
      * Use for updating score of category
      */
     public void categoryView(@NonNull String categoryId) {
-        Dengage.INSTANCE.categoryView(categoryId);
+        Dengage.INSTANCE.categoryView(categoryId,_context);
     }
 
     /**
