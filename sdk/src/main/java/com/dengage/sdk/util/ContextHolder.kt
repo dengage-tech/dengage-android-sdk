@@ -12,4 +12,8 @@ object ContextHolder {
         set(value) {
             _context = WeakReference(value)
         }
+
+    fun resetContext(context: Context?) {
+        context?.let { this.context = context.applicationContext }
+    }
 }

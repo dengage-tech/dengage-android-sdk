@@ -11,7 +11,9 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
+      /*  val data = HashMap<String, Any>()
+        data["page_type"] = "test123"
+        Dengage.pageView(data,this)*/
         // to handle application bring to foreground
         registerActivityLifecycleCallbacks(DengageLifecycleTracker())
 
