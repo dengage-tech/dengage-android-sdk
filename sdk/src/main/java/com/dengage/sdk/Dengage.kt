@@ -364,7 +364,8 @@ object Dengage {
     /**
      * Use for updating score of category
      */
-    fun categoryView(categoryId: String) {
+    fun categoryView(categoryId: String,context: Context? = null) {
+        ContextHolder.resetContext(context)
         rfmManager.categoryView(
             categoryId = categoryId
         )
@@ -380,7 +381,8 @@ object Dengage {
         )
     }
 
-    fun pageView(data: HashMap<String, Any>) {
+    fun pageView(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.pageView(
             eventDetails = data
         )
@@ -388,51 +390,59 @@ object Dengage {
 
     fun sendCartEvents(
         data: HashMap<String, Any>,
-        eventType: String
+        eventType: String,context: Context? = null
     ) {
+        ContextHolder.resetContext(context)
         eventManager.sendCartEvents(
             eventDetails = data,
             eventType = eventType
         )
     }
 
-    fun addToCart(data: HashMap<String, Any>) {
+    fun addToCart(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.addToCart(
             eventDetails = data
         )
     }
 
-    fun removeFromCart(data: HashMap<String, Any>) {
+    fun removeFromCart(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.removeFromCart(
             eventDetails = data
         )
     }
 
-    fun viewCart(data: HashMap<String, Any>) {
+    fun viewCart(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.viewCart(
             eventDetails = data
         )
     }
 
-    fun beginCheckout(data: HashMap<String, Any>) {
+    fun beginCheckout(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.beginCheckout(
             eventDetails = data
         )
     }
 
-    fun cancelOrder(data: HashMap<String, Any>) {
+    fun cancelOrder(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.cancelOrder(
             eventDetails = data
         )
     }
 
-    fun order(data: HashMap<String, Any>) {
+    fun order(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.order(
             eventDetails = data
         )
     }
 
-    fun search(data: HashMap<String, Any>) {
+    fun search(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.search(
             eventDetails = data
         )
@@ -440,21 +450,24 @@ object Dengage {
 
     fun sendWishListEvents(
         data: HashMap<String, Any>,
-        eventType: String
+        eventType: String,context: Context? = null
     ) {
+        ContextHolder.resetContext(context)
         eventManager.sendWishListEvents(
             eventDetails = data,
             eventType = eventType
         )
     }
 
-    fun addToWishList(data: HashMap<String, Any>) {
+    fun addToWishList(data: HashMap<String, Any> ,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.addToWishList(
             eventDetails = data
         )
     }
 
-    fun removeFromWishList(data: HashMap<String, Any>) {
+    fun removeFromWishList(data: HashMap<String, Any>,context: Context? = null) {
+        ContextHolder.resetContext(context)
         eventManager.removeFromWishList(
             eventDetails = data
         )
@@ -473,8 +486,9 @@ object Dengage {
     fun sendCustomEvent(
         tableName: String,
         key: String,
-        data: HashMap<String, Any>
+        data: HashMap<String, Any>,context: Context? = null
     ) {
+        ContextHolder.resetContext(context)
         eventManager.sendCustomEvent(
             tableName = tableName,
             key = key,
@@ -493,8 +507,9 @@ object Dengage {
      */
     fun sendDeviceEvent(
         tableName: String,
-        data: HashMap<String, Any>
+        data: HashMap<String, Any>,context: Context? = null
     ) {
+        ContextHolder.resetContext(context)
         eventManager.sendDeviceEvent(
             tableName = tableName,
             eventDetails = data
