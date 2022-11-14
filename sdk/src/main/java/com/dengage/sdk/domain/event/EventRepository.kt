@@ -21,7 +21,6 @@ class EventRepository {
     ): Response<Unit> {
         return eventService.sendEvent(
             event = Event(
-                accountId = accountId,
                 integrationKey = integrationKey,
                 key = key,
                 eventTableName = eventTableName,

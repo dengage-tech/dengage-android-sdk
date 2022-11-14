@@ -55,12 +55,12 @@
         <!-- Event api url of Dengage -->
         <meta-data
             android:name="den_event_api_url"
-            android:value="https://dev-event.dengage.com" />
+            android:value="https://event.dengage.com" />
 
         <!-- Push api url of Dengage -->
         <meta-data
             android:name="den_push_api_url"
-            android:value="https://pushdev.dengage.com" />
+            android:value="https://push.dengage.com" />
 
         <meta-data
             android:name="den_device_id_api_url"
