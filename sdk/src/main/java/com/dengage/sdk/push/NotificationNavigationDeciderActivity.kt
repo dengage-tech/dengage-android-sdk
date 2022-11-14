@@ -15,6 +15,8 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification_navigation_decider)
+
+        ContextHolder.resetContext(this.applicationContext)
         if (intent != null) {
 
             val extras = intent.extras
