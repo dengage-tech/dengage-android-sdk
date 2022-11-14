@@ -15,6 +15,8 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification_navigation_decider)
+
+        ContextHolder.resetContext(context = this)
         if (intent != null) {
 
             val extras = intent.extras
@@ -60,7 +62,7 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
 
                 clearNotification(message)
 
-                sendBroadcast(message.toJson(),extras)
+                sendBroadcast(message.toJson(), extras)
 
 
             } else {
@@ -86,7 +88,7 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
 
     }
 
-    private fun sendBroadcast(json: String,jsonDataBundle:Bundle) {
+    private fun sendBroadcast(json: String, jsonDataBundle: Bundle) {
         DengageLogger.verbose("sendBroadcast method is called")
         try {
             val intent = Intent(Constants.PUSH_OPEN_EVENT)
