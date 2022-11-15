@@ -96,7 +96,6 @@ object Dengage {
             geofenceEnabled = geofenceEnabled
         )
 
-        subscriptionManager.sendSubscription()
         configurationManager.getSdkParameters()
 
         if (geofenceEnabled) {

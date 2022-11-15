@@ -1,7 +1,6 @@
 package com.dengage.sdk.manager.subscription
 
-import android.os.Handler
-import android.os.Looper
+import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.subscription.usecase.SendSubscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
@@ -24,7 +23,11 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
         scope.launch {
             delay(4000)
             if (Constants.sendSubscription) {
-                callSubscriptionApi(subscription)
+                if (Prefs.subscription != Prefs.previouSubscription) {
+                    Prefs.subscription?.let { callSubscriptionApi(it) }
+                } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
+                    Prefs.subscription?.let { callSubscriptionApi(it) }
+                }
             }
 
         }
@@ -36,7 +39,11 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
         sendSubscriptionTryCount++
         sendSubscription(this) {
             onResponse = {
-                view { subscriptionSent() }
+                view {
+                    Prefs.previouSubscription = Prefs.subscription
+                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
+
+                    subscriptionSent() }
             }
             onError = {
                 // try to send it for 5 times
