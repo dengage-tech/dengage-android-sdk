@@ -28,10 +28,10 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
             if (Constants.sendSubscription) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
                     Prefs.previouSubscription = Prefs.subscription
-                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (1 * 60 * 1000)
+                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
-                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (1 * 60 * 1000)
+                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 }
 
