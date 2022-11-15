@@ -27,15 +27,10 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
             delay(4000)
             if (Constants.sendSubscription) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
-                    Prefs.previouSubscription = Prefs.subscription
-                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
-                    Prefs.subscription?.let { callSubscriptionApi(it) }
+                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
-                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
-                    Prefs.subscription?.let { callSubscriptionApi(it) }
+                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 }
-
-
             }
 
         }
@@ -47,7 +42,11 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
         sendSubscriptionTryCount++
         sendSubscription(this) {
             onResponse = {
-                view { subscriptionSent() }
+                view {
+                    Prefs.previouSubscription = Prefs.subscription
+                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
+
+                    subscriptionSent() }
             }
             onError = {
                 // try to send it for 5 times
