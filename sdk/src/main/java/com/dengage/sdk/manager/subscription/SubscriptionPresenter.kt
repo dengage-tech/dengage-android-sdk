@@ -2,6 +2,8 @@ package com.dengage.sdk.manager.subscription
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.subscription.usecase.SendSubscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
@@ -24,7 +26,16 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
         scope.launch {
             delay(4000)
             if (Constants.sendSubscription) {
-                callSubscriptionApi(subscription)
+                if (Prefs.subscription != Prefs.previouSubscription) {
+                    Prefs.previouSubscription = Prefs.subscription
+                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (1 * 60 * 1000)
+                    Prefs.subscription?.let { callSubscriptionApi(it) }
+                } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
+                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (1 * 60 * 1000)
+                    Prefs.subscription?.let { callSubscriptionApi(it) }
+                }
+
+
             }
 
         }

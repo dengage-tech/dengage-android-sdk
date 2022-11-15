@@ -82,6 +82,14 @@ object Prefs {
         get() = preferences.get(PreferenceKey.RFM_SCORES)
         set(value) = preferences.set(PreferenceKey.RFM_SCORES, value)
 
+    internal var subscriptionCallTime: Long
+        get() = preferences.get(PreferenceKey.SUBSCRIPTION_CALL_TIME, 0) ?: 0
+        set(value) = preferences.set(PreferenceKey.SUBSCRIPTION_CALL_TIME, value)
+
+    internal var previouSubscription: Subscription?
+        get() = preferences.get(PreferenceKey.PREVIOUS_SUBSCRIPTION,null)
+        set(value) = preferences.set(PreferenceKey.PREVIOUS_SUBSCRIPTION, value)
+
     fun clear() {
         preferences.edit().clear().apply()
     }

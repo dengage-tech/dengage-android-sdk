@@ -84,7 +84,6 @@ object Dengage {
         configurationManager.init(
             firebaseApp = firebaseApp
         )
-        subscriptionManager.sendSubscription()
         configurationManager.getSdkParameters()
     }
 

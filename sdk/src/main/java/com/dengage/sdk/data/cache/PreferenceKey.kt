@@ -16,6 +16,8 @@ enum class PreferenceKey {
     APP_SESSION_TIME,
     APP_SESSION_ID,
     LOG_VISIBILITY,
+    SUBSCRIPTION_CALL_TIME,
+    PREVIOUS_SUBSCRIPTION,
     RFM_SCORES;
 
     override fun toString(): String = name
