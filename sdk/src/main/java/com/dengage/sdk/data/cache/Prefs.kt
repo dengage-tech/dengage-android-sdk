@@ -98,6 +98,15 @@ object Prefs {
         get() = preferences.get(PreferenceKey.IN_APP_REMOVE_MESSAGE_FETCH_TIME, 0) ?: 0
         set(value) = preferences.set(PreferenceKey.IN_APP_REMOVE_MESSAGE_FETCH_TIME, value)
 
+
+    internal var subscriptionCallTime: Long
+        get() = preferences.get(PreferenceKey.SUBSCRIPTION_CALL_TIME, 0) ?: 0
+        set(value) = preferences.set(PreferenceKey.SUBSCRIPTION_CALL_TIME, value)
+
+    internal var previouSubscription: Subscription?
+        get() = preferences.get(PreferenceKey.PREVIOUS_SUBSCRIPTION,null)
+        set(value) = preferences.set(PreferenceKey.PREVIOUS_SUBSCRIPTION, value)
+
     fun clear() {
         preferences.edit().clear().apply()
     }

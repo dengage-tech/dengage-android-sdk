@@ -97,8 +97,7 @@ object Dengage {
             firebaseApp = firebaseApp,
             geofenceEnabled = geofenceEnabled
         )
-
-        subscriptionManager.sendSubscription()
+        
         configurationManager.getSdkParameters()
 
         if (geofenceEnabled) {
