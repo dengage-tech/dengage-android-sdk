@@ -21,14 +21,15 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
     private var sendSubscriptionTryCount = 0
 
     override fun sendSubscription(subscription: Subscription) {
-
+        scope.launch {
+            delay(4000)
             if (DengageUtils.foregrounded()) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 }
-
+            }
 
         }
     }
