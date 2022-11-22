@@ -3,7 +3,6 @@ package com.dengage.sdk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.data.cache.Prefs
@@ -305,7 +304,6 @@ object Dengage {
     }
 
     fun onMessageReceived(data: Map<String, String?>?) {
-        Constants.sendSubscription = false
         DengageLogger.verbose("onMessageReceived method is called")
         if (!data.isNullOrEmpty()) {
             val pushMessage = Message.createFromMap(data)
@@ -527,7 +525,6 @@ object Dengage {
         DengageLogger.verbose(itemId)
         DengageLogger.verbose(message?.toJson())
         try {
-            Constants.sendSubscription = true
             subscriptionManager.sendSubscription()
             getSubscription()
             if (message == null) {

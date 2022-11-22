@@ -10,6 +10,7 @@ import com.dengage.sdk.domain.inboxmessage.usecase.SetInboxMessageAsClicked
 import com.dengage.sdk.domain.inboxmessage.usecase.SetInboxMessageAsDeleted
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
+import com.dengage.sdk.util.DengageUtils
 
 class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>(),
     InboxMessageContract.Presenter {
@@ -27,7 +28,7 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
     ) {
         val subscription = Prefs.subscription
         val sdkParameters = Prefs.sdkParameters
-        if (isInboxMessageEnabled(subscription, sdkParameters)) {
+        if (isInboxMessageEnabled(subscription, sdkParameters)&& DengageUtils.foregrounded()) {
             if (!inboxMessages.isNullOrEmpty() && offset == 0 &&
                 System.currentTimeMillis() < Prefs.inboxMessageFetchTime + 600000
             ) {

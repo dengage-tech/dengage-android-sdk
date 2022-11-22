@@ -1,5 +1,6 @@
 package com.dengage.sdk.util
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
@@ -39,7 +40,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.1.1"
+        return "6.0.2.1"
     }
 
     fun getUserAgent(context: Context): String {
@@ -96,5 +97,11 @@ object DengageUtils {
             e.printStackTrace()
         }
         return ""
+    }
+
+    fun foregrounded(): Boolean {
+        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
+        ActivityManager.getMyMemoryState(appProcessInfo)
+        return appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
     }
 }

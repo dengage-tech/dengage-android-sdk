@@ -6,6 +6,7 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.usecase.*
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
+import com.dengage.sdk.util.DengageUtils
 
 class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>(),
     InAppMessageContract.Presenter {
@@ -20,7 +21,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     override fun getInAppMessages() {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
-        if (isInAppMessageEnabled(subscription, sdkParameters)) {
+        if (isInAppMessageEnabled(subscription, sdkParameters)&& DengageUtils.foregrounded()) {
 
             // control next in app message fetch time
             if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
