@@ -16,11 +16,13 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
     SubscriptionContract.Presenter {
 
     private val sendSubscription by lazy { SendSubscription() }
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     private var sendSubscriptionTryCount = 0
 
     override fun sendSubscription(subscription: Subscription) {
-
+        scope.launch {
+            delay(4000)
             if (DengageUtils.foregrounded()) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
                     Prefs.subscription?.let { callSubscriptionApi(it) }
@@ -29,7 +31,7 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
                 }
             }
 
-
+        }
     }
 
 
