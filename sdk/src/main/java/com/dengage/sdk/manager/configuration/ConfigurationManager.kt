@@ -25,7 +25,8 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
     override fun providePresenter() = ConfigurationPresenter()
 
     internal fun init(
-        firebaseApp: FirebaseApp?
+        firebaseApp: FirebaseApp?,
+        geofenceEnabled: Boolean
     ) {
         DengageUtils.getMetaData(name = "den_push_api_url").apply {
             if (this == null) {
@@ -43,6 +44,19 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
                 Prefs.eventApiBaseUrl = this
             }
         }
+        DengageUtils.getMetaData(name = "den_in_app_api_url")?.let {
+            Prefs.inAppApiBaseUrl = it
+        }
+        DengageUtils.getMetaData(name = "den_geofence_api_url").apply {
+            if (this == null) {
+                DengageLogger.error("Geofence api url not found on application manifest metadata")
+                throw RuntimeException("Geofence api url not found on application manifest metadata")
+            } else {
+                Prefs.geofenceApiBaseUrl = this
+            }
+        }
+
+        Prefs.geofenceEnabled = geofenceEnabled
 
         var subscription = Prefs.subscription
         if (subscription == null) {

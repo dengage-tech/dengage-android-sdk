@@ -7,6 +7,7 @@ class SdkParametersTest {
 
     @Test
     fun `SdkParameters constructor test`() {
+        val appId = "1"
         val accountId = 1
         val accountName = "accountName"
         val eventsEnabled = true
@@ -18,8 +19,12 @@ class SdkParametersTest {
         val lastFetchTimeInMillis = 3L
         val appTrackingEnabled = true
         val appTrackingList = null
+        val realTimeInAppEnabled = true
+        val realTimeInAppFetchIntervalInMinutes = 30
+        val realTimeInAppSessionTimeoutMinutes = 30
 
         val sdkParameters = SdkParameters(
+            appId = appId,
             accountId = accountId,
             accountName = accountName,
             eventsEnabled = eventsEnabled,
@@ -30,9 +35,13 @@ class SdkParametersTest {
             inAppMinSecBetweenMessages = inAppMinSecBetweenMessages,
             lastFetchTimeInMillis = lastFetchTimeInMillis,
             appTrackingEnabled = appTrackingEnabled,
-            appTrackingList = appTrackingList
+            appTrackingList = appTrackingList,
+            realTimeInAppEnabled = realTimeInAppEnabled,
+            realTimeInAppFetchIntervalInMinutes = realTimeInAppFetchIntervalInMinutes,
+            realTimeInAppSessionTimeoutMinutes = realTimeInAppSessionTimeoutMinutes,
         )
 
+        Assert.assertEquals(appId, sdkParameters.appId)
         Assert.assertEquals(accountId, sdkParameters.accountId)
         Assert.assertEquals(accountName, sdkParameters.accountName)
         Assert.assertEquals(eventsEnabled, sdkParameters.eventsEnabled)
@@ -44,6 +53,9 @@ class SdkParametersTest {
         Assert.assertEquals(lastFetchTimeInMillis, sdkParameters.lastFetchTimeInMillis)
         Assert.assertEquals(appTrackingEnabled, sdkParameters.appTrackingEnabled)
         Assert.assertEquals(appTrackingList, sdkParameters.appTrackingList)
+        Assert.assertEquals(realTimeInAppEnabled, sdkParameters.realTimeInAppEnabled)
+        Assert.assertEquals(realTimeInAppFetchIntervalInMinutes, sdkParameters.realTimeInAppFetchIntervalInMinutes)
+        Assert.assertEquals(realTimeInAppSessionTimeoutMinutes, sdkParameters.realTimeInAppSessionTimeoutMinutes)
     }
 
 }

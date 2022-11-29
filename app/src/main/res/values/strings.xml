@@ -2,6 +2,8 @@
     <string name="app_name">Dengage Sample</string>
     <string name="dengage_integration_key">Integration Key = %s</string>
     <string name="dengage_device_id">Device Id = %s</string>
+    <string name="dengage_device_brand">Device Brand = %s</string>
+    <string name="dengage_device_model">Device Model = %s</string>
     <string name="dengage_advertising_id">Advertising Id = %s</string>
     <string name="dengage_token">Token = %s</string>
     <string name="dengage_contact_key">Contact Key = %s</string>
@@ -12,6 +14,11 @@
     <string name="contact_key">Contact Key</string>
     <string name="country">Country</string>
     <string name="screen_name">Screen Name</string>
+    <string name="category_path">Category Path</string>
+    <string name="cart_item_count">Cart Item Count</string>
+    <string name="cart_amount">Cart Amount</string>
+    <string name="state">State</string>
+    <string name="city">City</string>
 
     <string name="button_save">Save</string>
     <string name="button_inbox_messages">Inbox Messages</string>
@@ -21,18 +28,26 @@
     <string name="button_country">Change Country</string>
     <string name="button_custom_events">Send Custom Event</string>
     <string name="button_in_app_message">In App Message</string>
+    <string name="button_real_time_in_app_message">Real Time In App Message</string>
     <string name="button_tags">Set Tags</string>
     <string name="button_dengage_test_page">Dengage Test Page</string>
     <string name="table_name">Table Name</string>
     <string name="button_send">Send</string>
     <string name="event_key">Event Key</string>
     <string name="event_value">Event Value</string>
+    <string name="custom_key">Custom Key</string>
+    <string name="custom_value">Custom Value</string>
     <string name="button_mark_as_read">Read</string>
     <string name="button_delete">Delete</string>
     <string name="button_set_navigation">Set Navigation</string>
+    <string name="button_show_real_time_in_app">Show Real Time In App</string>
+    <string name="button_set">Set</string>
     <string name="tag">Tag</string>
     <string name="value">Value</string>
     <string name="change_time">Change Time</string>
     <string name="change_value">Change Value</string>
     <string name="remove_time">Remove Time</string>
+    <string name="button_request_location_permission">Request Location Permission</string>
+    <string name="button_stop_geofencing">Stop Geofencing</string>
+    <string name="button_geofence">Geofence</string>
 </resources>

@@ -14,7 +14,7 @@ class ScreenNameFilterTest {
             operator = operator
         )
 
-        Assert.assertEquals(screenNameFilter.value[0], screenName)
+        Assert.assertEquals(screenNameFilter.value?.get(0), screenName)
         Assert.assertEquals(screenNameFilter.operator, operator)
     }
 

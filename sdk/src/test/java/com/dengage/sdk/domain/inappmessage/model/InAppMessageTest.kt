@@ -27,24 +27,21 @@ class InAppMessageTest {
         )
 
         val displayCondition = DisplayCondition(
-            screenNameFilters = null,
-            screenDataFilters = null
+            screenNameFilters = null
         )
         val displayTiming = DisplayTiming(
-            triggerBy = TriggerBy.NAVIGATION.triggerBy,
             delay = 10,
-            showEveryXMinutes = 5
+            showEveryXMinutes = 5,
+            maxShowCount = 10
         )
         val inAppMessageData = InAppMessageData(
-            messageId = Math.random().toString(),
             messageDetails = "messageDetails",
             expireDate = "expireDate",
             priority = Priority.LOW.priority,
-            dengageSendId = Math.random().toInt(),
-            dengageCampId = Math.random().toInt(),
             content = content,
             displayCondition = displayCondition,
-            displayTiming = displayTiming
+            displayTiming = displayTiming,
+            publicId = null
         )
 
         val inAppMessage = InAppMessage(
@@ -54,6 +51,7 @@ class InAppMessageTest {
 
         Assert.assertEquals(id, inAppMessage.id)
         Assert.assertEquals(inAppMessageData, inAppMessage.data)
+        Assert.assertFalse(inAppMessage.data.isRealTime())
     }
 
 }

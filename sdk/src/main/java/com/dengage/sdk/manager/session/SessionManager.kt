@@ -1,6 +1,8 @@
-package com.dengage.sdk.manager.event
+package com.dengage.sdk.manager.session
 
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
+import com.dengage.sdk.manager.visitcount.VisitCountManager
 import com.dengage.sdk.util.DengageUtils
 import java.util.*
 
@@ -10,15 +12,21 @@ object SessionManager {
         return Calendar.getInstance().time > Date(Prefs.appSessionTime)
     }
 
-    fun getSessionId(): String {
+    fun getSessionId(force: Boolean = false): String {
         var sessionId = Prefs.appSessionId
-        if (isExpired()) {
+        if (force || isExpired()) {
             sessionId = DengageUtils.generateUUID()
             Prefs.appSessionId = sessionId
 
             val expireCalendar = Calendar.getInstance()
-            expireCalendar.add(Calendar.MINUTE, 30)
+            expireCalendar.add(
+                Calendar.MINUTE,
+                Prefs.sdkParameters?.realTimeInAppSessionTimeoutMinutes ?: 30
+            )
             Prefs.appSessionTime = expireCalendar.time.time
+
+            VisitCountManager.updateVisitCount()
+            RealTimeInAppParamHolder.pageViewVisitCount = 0
         }
         return sessionId
     }
