@@ -159,6 +159,20 @@ class SubscriptionManager :
         }
     }
 
+    internal fun setPartnerDeviceId(adid: String?) {
+        val subscription = Prefs.subscription
+
+        if (subscription != null) {
+            if (adid != null) {
+                subscription.partnerDeviceId = adid
+            }
+
+            saveSubscription(subscription = subscription)
+
+            // send to api
+            presenter.sendSubscription(subscription = subscription)
+        }
+    }
 
     override fun subscriptionSent() = Unit
 
