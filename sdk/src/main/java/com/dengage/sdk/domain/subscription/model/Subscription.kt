@@ -19,7 +19,9 @@ data class Subscription(
     @SerializedName("testGroup") var testGroup: String = "",
     @SerializedName("country") var country: String? = "",
     @SerializedName("language") var language: String = "",
-    @SerializedName("timezone") var timezone: String = ""
+    @SerializedName("timezone") var timezone: String = "",
+    @SerializedName("partner_device_id") var partnerDeviceId: String = ""
+
 ) : Serializable {
 
     fun getSafeDeviceId(): String {

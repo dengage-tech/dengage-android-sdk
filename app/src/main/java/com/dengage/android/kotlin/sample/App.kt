@@ -7,8 +7,8 @@ import com.dengage.sdk.DengageManager
 import com.dengage.sdk.util.DengageLifecycleTracker
 
 class App : Application() {
-    lateinit var dengageManager: DengageManager
-
+    /*lateinit var dengageManager: DengageManager
+*/
     override fun onCreate() {
         super.onCreate()
       /*  val data = HashMap<String, Any>()
@@ -17,11 +17,18 @@ class App : Application() {
         // to handle application bring to foreground
         registerActivityLifecycleCallbacks(DengageLifecycleTracker())
 
-        dengageManager = DengageManager
+       /* dengageManager = DengageManager
             .getInstance(applicationContext)
             .setLogStatus(true)
             .setFirebaseIntegrationKey(Constants.FIREBASE_APP_INTEGRATION_KEY)
-            .init()
+            .init()*/
+
+        Dengage.init(
+            context = applicationContext,
+            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY
+        )
+        Dengage.setLogStatus(true)
+
     }
 
 }
