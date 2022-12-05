@@ -586,4 +586,11 @@ object Dengage {
             DengageLogger.error(e.message)
         }
     }
+
+    fun setPartnerDeviceId(adid:String)
+    {
+        DengageLogger.verbose("setPartnerDeviceId method is called")
+        subscriptionManager.setPartnerDeviceId(adid = adid)
+    }
+
 }
