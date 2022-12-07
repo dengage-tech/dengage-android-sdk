@@ -5,5 +5,5 @@ import java.io.Serializable
 
 class DisplayCondition(
     @SerializedName("screenNameFilters") val screenNameFilters: List<ScreenNameFilter>?,
-    @SerializedName("screenDataFilters") val screenDataFilters: List<ScreenDataFilter>?
+    @SerializedName("ruleSet") val displayRuleSet: DisplayRuleSet? = null
 ) : Serializable

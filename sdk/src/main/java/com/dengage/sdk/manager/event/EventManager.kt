@@ -1,9 +1,10 @@
 package com.dengage.sdk.manager.event
 
 import android.net.Uri
-import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.manager.base.BaseMvpManager
+import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
+import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import java.util.*
@@ -65,6 +66,8 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 return
             }
             sendDeviceEvent(EventTable.PAGE_VIEW_EVENTS.tableName, eventDetails)
+
+            RealTimeInAppParamHolder.addPageView()
         } catch (e: Exception) {
             DengageLogger.error(e.message)
         }
@@ -273,9 +276,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 eventTableName = tableName,
                 eventDetails = eventDetails
             )
-        } catch (e: Exception) {
-            DengageLogger.error(e.message)
-        }
+
+    } catch (e: Exception) {
+        DengageLogger.error(e.message)
+    }
     }
 
     internal fun sendDeviceEvent(
@@ -289,9 +293,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 key = Prefs.subscription?.getSafeDeviceId()!!,
                 eventDetails = eventDetails
             )
-        } catch (e: Exception) {
-            DengageLogger.error(e.message)
-        }
+
+    } catch (e: Exception) {
+        DengageLogger.error(e.message)
+    }
     }
 
     fun sendTransactionalOpenEvent(

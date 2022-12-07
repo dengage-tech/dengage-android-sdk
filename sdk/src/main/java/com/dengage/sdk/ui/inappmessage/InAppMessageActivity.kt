@@ -2,9 +2,12 @@ package com.dengage.sdk.ui.inappmessage
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -15,6 +18,7 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.R
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
@@ -102,7 +106,6 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         }
 
         vHtmlContent.visibility = View.VISIBLE
-
 
         webView.apply {
 

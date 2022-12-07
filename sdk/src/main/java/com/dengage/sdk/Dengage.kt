@@ -20,9 +20,12 @@ import com.dengage.sdk.manager.configuration.ConfigurationCallback
 import com.dengage.sdk.manager.configuration.ConfigurationManager
 import com.dengage.sdk.manager.deviceId.DeviceIdSenderManager
 import com.dengage.sdk.manager.event.EventManager
+import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.manager.geofence.GeofenceLocationManager
 import com.dengage.sdk.manager.geofence.GeofencePermissionsHelper
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
+import com.dengage.sdk.manager.inappmessage.session.InAppSessionManager
+import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
@@ -46,6 +49,7 @@ object Dengage {
     private val rfmManager by lazy { RFMManager() }
     private val geofenceManager by lazy { GeofenceLocationManager() }
     private val deviceIdSenderManager by lazy { DeviceIdSenderManager() }
+    private val inAppSessionManager by lazy { InAppSessionManager() }
 
     internal var initialized = false
 
@@ -66,6 +70,7 @@ object Dengage {
     ) {
         initialized = true
         ContextHolder.context = context
+        SessionManager.getSessionId()
 
         subscriptionManager.buildSubscription(
             firebaseIntegrationKey = firebaseIntegrationKey
@@ -83,6 +88,7 @@ object Dengage {
             override fun sendSubscription(subscription: Subscription) {
                 subscriptionManager.saveSubscription(subscription)
                 subscriptionManager.sendSubscription()
+                inAppSessionManager.sendFirstLaunchEvent()
             }
 
             override fun fetchInAppExpiredMessageIds() {
@@ -269,6 +275,58 @@ object Dengage {
     fun getInAppExpiredMessageIds() {
         inAppMessageManager.fetchInAppExpiredMessageIds()
     }
+
+    /**
+     * Set category path for using in real time in app comparisons
+     */
+    fun setCategoryPath(path: String?) {
+        RealTimeInAppParamHolder.categoryPath = path
+    }
+
+    /**
+     * Set cart item count for using in real time in app comparisons
+     */
+    fun setCartItemCount(count: String?) {
+        RealTimeInAppParamHolder.cartItemCount = count
+    }
+
+    /**
+     * Set cart amount for using in real time in app comparisons
+     */
+    fun setCartAmount(amount: String?) {
+        RealTimeInAppParamHolder.cartAmount = amount
+    }
+
+    /**
+     * Set state for using in real time in app comparisons
+     */
+    fun setState(name: String?) {
+        RealTimeInAppParamHolder.state = name
+    }
+
+    /**
+     * Set city for using in real time in app comparisons
+     */
+    fun setCity(name: String?) {
+        RealTimeInAppParamHolder.city = name
+    }
+
+    internal fun setLastSessionStartTime() {
+        inAppSessionManager.setLastSessionStartTime()
+    }
+
+    internal fun setLastSessionDuration() {
+        inAppSessionManager.setLastSessionDuration()
+    }
+
+    internal fun setLastVisitTime() {
+        inAppSessionManager.setLastVisitTime()
+    }
+
+    internal fun sendAppForegroundEvent() {
+        inAppSessionManager.sendAppForegroundEvent()
+    }
+
     /**
      * Show in app message if any available
      *
@@ -300,19 +358,40 @@ object Dengage {
     }
 
     /**
+     * Show in app message if any available
+     *
+     * @param activity   for showing ui of in app message
+     * @param screenName for showing screen specific in app message
+     * @param params for user specific in app message
+     */
+    fun showRealTimeInApp(
+        activity: Activity,
+        screenName: String? = null,
+        params: HashMap<String, String>? = null
+    ) {
+        inAppMessageManager.setNavigation(
+            activity = activity,
+            screenName = screenName,
+            params = params
+        )
+    }
+
+    /**
      * Send tags
      *
      * @param tags will be send to api
      */
     fun setTags(
-        tags: List<TagItem>
+        tags: List<TagItem>,context: Context? = null
     ) {
+        ContextHolder.resetContext(context)
         tagManager.setTags(
             tags = tags
         )
     }
 
     fun onMessageReceived(data: Map<String, String?>?) {
+
         DengageLogger.verbose("onMessageReceived method is called")
         if (!data.isNullOrEmpty()) {
             val pushMessage = Message.createFromMap(data)
@@ -457,7 +536,7 @@ object Dengage {
         )
     }
 
-    fun addToWishList(data: HashMap<String, Any> ,context: Context? = null) {
+    fun addToWishList(data: HashMap<String, Any>,context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.addToWishList(
             eventDetails = data
@@ -587,7 +666,6 @@ object Dengage {
     }
 
 
-
     /**
      * Request location permission
      *
@@ -644,11 +722,11 @@ object Dengage {
         }
     }
 
+
     fun setPartnerDeviceId(adid:String)
     {
         DengageLogger.verbose("setPartnerDeviceId method is called")
         subscriptionManager.setPartnerDeviceId(adid = adid)
     }
-
 
 }

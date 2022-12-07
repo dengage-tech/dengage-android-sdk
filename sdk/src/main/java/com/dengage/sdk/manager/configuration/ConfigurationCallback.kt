@@ -9,4 +9,5 @@ interface ConfigurationCallback {
     fun fetchInAppMessages()
     fun startAppTracking(appTrackings: List<AppTracking>?)
     fun fetchInAppExpiredMessageIds()
+
 }

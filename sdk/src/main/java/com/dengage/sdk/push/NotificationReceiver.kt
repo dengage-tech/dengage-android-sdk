@@ -41,7 +41,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     open fun onPushReceive(context: Context, intent: Intent) {
-        ContextHolder.resetContext(context)
+        ContextHolder.resetContext(context = context)
         DengageLogger.verbose("$TAG onPushReceive method is called")
         intent.extras ?: return
         prepareAndShowPush(context, intent)

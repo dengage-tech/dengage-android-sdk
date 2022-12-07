@@ -4,8 +4,8 @@ object Constants {
 
     const val PREFS_NAME = "___DEN_DEVICE_UNIQUE_ID___"
     const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-    const val PUSH_API_URI = "https://push.dengage.com"
-    const val EVENT_API_URI = "https://event.dengage.com"
+    const val PUSH_API_URI = "https://dev-push.dengage.com"
+    const val EVENT_API_URI = "https://dev-event.dengage.com"
     const val MESSAGE_SOURCE = "DENGAGE"
 
     const val PUSH_ITEM_CLICK_EVENT = "com.dengage.push.intent.ITEM_CLICK"
@@ -35,5 +35,6 @@ object Constants {
     const val GEOFENCE_MAX_EVENT_SIGNAL_INTERVAL_MILISECONDS = (5 * 60 * 1000).toLong()
     const val GEOFENCE_FETCH_HISTORY_MAX_COUNT = 100
     const val GEOFENCE_EVENT_HISTORY_MAX_COUNT = 100
+
 
 }

@@ -16,7 +16,11 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     /**
      * Call this method for the pages that you should show in app message if available
      */
-    internal fun setNavigation(activity: Activity, screenName: String? = null) {
+    internal fun setNavigation(
+        activity: Activity,
+        screenName: String? = null,
+        params: HashMap<String, String>? = null
+    ) {
         // control next in app message show time
         if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
 
@@ -25,7 +29,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         Prefs.inAppMessages = inAppMessages
         if (!inAppMessages.isNullOrEmpty()) {
             val priorInAppMessage =
-                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName)
+                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params)
             if (priorInAppMessage != null) {
                 showInAppMessage(activity, priorInAppMessage)
             }
@@ -39,15 +43,17 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         presenter.getInAppMessages()
     }
 
+
+
     internal fun fetchInAppExpiredMessageIds() {
         presenter.fetchInAppExpiredMessageIds()
     }
     /**
      * Call service for setting in app message as displayed
      */
-    private fun setInAppMessageAsDisplayed(inAppMessageDetails: String?) {
+    private fun setInAppMessageAsDisplayed(inAppMessage: InAppMessage) {
         presenter.setInAppMessageAsDisplayed(
-            messageDetails = inAppMessageDetails
+            inAppMessage = inAppMessage
         )
     }
 
@@ -55,13 +61,11 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
      * Call service for setting in app message as clicked
      */
     private fun setInAppMessageAsClicked(
-        inAppMessageId: String,
-        inAppMessageDetails: String?,
+        inAppMessage: InAppMessage,
         buttonId: String?
     ) {
         presenter.setInAppMessageAsClicked(
-            inAppMessageId = inAppMessageId,
-            messageDetails = inAppMessageDetails,
+            inAppMessage = inAppMessage,
             buttonId = buttonId
         )
     }
@@ -69,9 +73,9 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     /**
      * Call service for setting in app message as dismissed
      */
-    private fun setInAppMessageAsDismissed(inAppMessageDetails: String?) {
+    private fun setInAppMessageAsDismissed(inAppMessage: InAppMessage) {
         presenter.setInAppMessageAsDismissed(
-            messageDetails = inAppMessageDetails
+            inAppMessage = inAppMessage
         )
     }
 
@@ -80,17 +84,23 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
      */
     private fun showInAppMessage(activity: Activity, inAppMessage: InAppMessage) {
         setInAppMessageAsDisplayed(
-            inAppMessageDetails = inAppMessage.data.messageDetails
+            inAppMessage = inAppMessage
         )
 
         if (inAppMessage.data.displayTiming.showEveryXMinutes != null &&
             inAppMessage.data.displayTiming.showEveryXMinutes != 0
         ) {
             inAppMessage.data.nextDisplayTime = System.currentTimeMillis() +
-                inAppMessage.data.displayTiming.showEveryXMinutes * 60000L
+                inAppMessage.data.displayTiming.showEveryXMinutes!! * 60000L
+            inAppMessage.data.showCount = inAppMessage.data.showCount + 1
             updateInAppMessageOnCache(inAppMessage)
         } else {
-            removeInAppMessageFromCache(inAppMessageId = inAppMessage.id)
+            if (inAppMessage.data.isRealTime()) {
+                inAppMessage.data.showCount = inAppMessage.data.showCount + 1
+                updateInAppMessageOnCache(inAppMessage)
+            } else {
+                removeInAppMessageFromCache(inAppMessageId = inAppMessage.id)
+            }
         }
 
         // update next in app message show time
@@ -125,14 +135,60 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         Prefs.inAppMessages = inAppMessages
     }
 
-    override fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?) {
+    override fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean) {
         if (!inAppMessages.isNullOrEmpty()) {
-            // get existing in app messages and save with fetched in app messages
             var existingInAppMessages = Prefs.inAppMessages
             if (existingInAppMessages == null) {
                 existingInAppMessages = mutableListOf()
+                existingInAppMessages.addAll(inAppMessages)
+            } else {
+                if (isRealTime) {
+                    // remove non existing real time in app messages
+                    existingInAppMessages.removeAll { existingInAppMessage ->
+                        existingInAppMessage.data.isRealTime() &&
+                            inAppMessages.firstOrNull { inAppMessage ->
+                                inAppMessage.id == existingInAppMessage.id
+                            } == null
+                    }
+
+                    // find duplicated ones and update them
+                    val updateInAppMessages = inAppMessages.filter { inAppMessage ->
+                        existingInAppMessages.firstOrNull { existingInAppMessage ->
+                            existingInAppMessage.id == inAppMessage.id
+                        } != null
+                    }
+
+                    // update duplicated ones on existing in app messages list and don't update some parameters
+                    updateInAppMessages.forEach { inAppMessage ->
+                        val existingInAppMessage = existingInAppMessages.firstOrNull {
+                            it.id == inAppMessage.id
+                        }
+                        existingInAppMessage?.let {
+                            val nextDisplayTime = it.data.nextDisplayTime
+                            val showCount = it.data.showCount
+                            it.data = inAppMessage.data
+                            it.data.nextDisplayTime = nextDisplayTime
+                            it.data.showCount = showCount
+                        }
+                    }
+
+                    // find new ones and add them
+                    val newInAppMessages = inAppMessages.filter { inAppMessage ->
+                        existingInAppMessages.firstOrNull { existingInAppMessage ->
+                            existingInAppMessage.id == inAppMessage.id
+                        } == null
+                    }
+                    existingInAppMessages.addAll(newInAppMessages)
+                } else {
+                    // remove duplicated in app messages
+                    existingInAppMessages.removeAll { existingInAppMessage ->
+                        inAppMessages.firstOrNull { inAppMessage ->
+                            inAppMessage.id == existingInAppMessage.id
+                        } != null
+                    }
+                    existingInAppMessages.addAll(inAppMessages)
+                }
             }
-            existingInAppMessages.addAll(inAppMessages)
 
             Prefs.inAppMessages = existingInAppMessages
         }
@@ -146,15 +202,14 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
 
     override fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?) {
         setInAppMessageAsClicked(
-            inAppMessageId = inAppMessage.id,
-            inAppMessageDetails = inAppMessage.data.messageDetails,
+            inAppMessage = inAppMessage,
             buttonId = buttonId
         )
     }
 
     override fun inAppMessageDismissed(inAppMessage: InAppMessage) {
         setInAppMessageAsDismissed(
-            inAppMessageDetails = inAppMessage.data.messageDetails
+            inAppMessage = inAppMessage
         )
     }
 

@@ -28,7 +28,7 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
     ) {
         val subscription = Prefs.subscription
         val sdkParameters = Prefs.sdkParameters
-        if (isInboxMessageEnabled(subscription, sdkParameters)&&DengageUtils.foregrounded()) {
+        if (isInboxMessageEnabled(subscription, sdkParameters)&& DengageUtils.foregrounded()) {
             if (!inboxMessages.isNullOrEmpty() && offset == 0 &&
                 System.currentTimeMillis() < Prefs.inboxMessageFetchTime + 600000
             ) {

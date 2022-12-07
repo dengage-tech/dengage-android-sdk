@@ -409,7 +409,7 @@ public class DengageManager {
      * @param tags will be send to api
      */
     public void setTags(@NonNull List<TagItem> tags) {
-        Dengage.INSTANCE.setTags(tags);
+        Dengage.INSTANCE.setTags(tags,_context);
     }
 
     /**

@@ -5,5 +5,5 @@ import java.io.Serializable
 
 class InAppMessage(
     @SerializedName("smsg_id") val id: String,
-    @SerializedName("message_json") val data: InAppMessageData
+    @SerializedName("message_json") var data: InAppMessageData
 ) : Serializable
