@@ -243,6 +243,12 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         fun promptPushPermission() {
             DengageLogger.verbose("In app message: prompt push permission event")
         }
+
+        @JavascriptInterface
+        fun sendClick() {
+            DengageLogger.verbose("In app message: clicked body/button with no Id")
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, null)
+        }
     }
 
 }
