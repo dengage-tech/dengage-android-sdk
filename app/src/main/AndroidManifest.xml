@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dengage.android.kotlin.sample">
+    package="com.dengage.android.kotlin.sample" >
 
     <application
         android:name=".App"
@@ -9,39 +9,67 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DengageAndroid">
+        android:theme="@style/Theme.DengageAndroid" >
+        <activity
+            android:name=".ui.activity.MainActivity2"
+            android:exported="true" >
+
+        <intent-filter>
+
+            <!-- below line is to set the action to our intent to view -->
+            <action android:name="android.intent.action.VIEW" />
+            <!-- on below line we are adding a default category to our intent -->
+            <category android:name="android.intent.category.DEFAULT" />
+            <!-- on below line we are adding a category to make our app browsable -->
+            <category android:name="android.intent.category.BROWSABLE" />
+            <!--
+                on below line we are specifying the host name and
+                the scheme type from which we will be calling our app
+            -->
+            <data
+                android:host="www.chaitanyamunje.com"
+                android:scheme="https" />
+        </intent-filter>
+
+        <!-- below is the same filter as above just the scheme is changed to http -->
+        <!-- so we can open our app with the url starting with https and http as well -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+
+            <data
+                android:host="www.chaitanyamunje.com"
+                android:scheme="http" />
+        </intent-filter>
+        </activity>
         <activity
             android:name=".ui.activity.MainActivity"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Fcm Messaging Service for handling push messages comes from firebase -->
+        </activity> <!-- Fcm Messaging Service for handling push messages comes from firebase -->
         <service
             android:name="com.dengage.sdk.push.FcmMessagingService"
-            android:exported="false">
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service>
-
-        <!-- Hms Messaging Service for handling push messages comes from huawei messaging service -->
+        </service> <!-- Hms Messaging Service for handling push messages comes from huawei messaging service -->
         <service
             android:name="com.dengage.sdk.push.HmsMessagingService"
-            android:exported="false">
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
             </intent-filter>
-        </service>
-
-        <!-- For handling push notifications comes to messaging service classes -->
+        </service> <!-- For handling push notifications comes to messaging service classes -->
         <receiver
             android:name=".push.PushNotificationReceiver"
-            android:exported="false">
+            android:exported="false" >
             <intent-filter>
                 <action android:name="com.dengage.push.intent.RECEIVE" />
                 <action android:name="com.dengage.push.intent.OPEN" />
@@ -50,18 +78,13 @@
                 <action android:name="com.dengage.push.intent.ITEM_CLICK" />
                 <action android:name="com.dengage.push.intent.CAROUSEL_ITEM_CLICK" />
             </intent-filter>
-        </receiver>
-
-        <!-- Event api url of Dengage -->
+        </receiver> <!-- Event api url of Dengage -->
         <meta-data
             android:name="den_event_api_url"
-            android:value="https://event.dengage.com" />
-
-        <!-- Push api url of Dengage -->
+            android:value="https://event.dengage.com" /> <!-- Push api url of Dengage -->
         <meta-data
             android:name="den_push_api_url"
             android:value="https://push.dengage.com" />
-
         <meta-data
             android:name="den_device_id_api_url"
             android:value="https://magento.232.dengage.shobii.com" />
