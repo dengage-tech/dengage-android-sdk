@@ -3,12 +3,10 @@ package com.dengage.sdk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.location.Location
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.AppTracking
-import com.dengage.sdk.domain.geofence.model.GeofenceLocationSource
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.rfm.model.RFMGender
@@ -19,22 +17,19 @@ import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.configuration.ConfigurationCallback
 import com.dengage.sdk.manager.configuration.ConfigurationManager
 import com.dengage.sdk.manager.deviceId.DeviceIdSenderManager
-import com.dengage.sdk.manager.event.EventManager
-import com.dengage.sdk.manager.session.SessionManager
-import com.dengage.sdk.manager.geofence.GeofenceLocationManager
-import com.dengage.sdk.manager.geofence.GeofencePermissionsHelper
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
 import com.dengage.sdk.manager.inappmessage.session.InAppSessionManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
-import com.dengage.sdk.manager.subscription.SubscriptionManager
+import com.dengage.sdk.manager.session.SessionManager
+import com.dengage.sdk.manager.event.EventManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
-
+import com.dengage.sdk.manager.subscription.SubscriptionManager
 object Dengage {
 
     val configurationManager by lazy { ConfigurationManager() }
@@ -45,7 +40,6 @@ object Dengage {
     private val eventManager by lazy { EventManager() }
     private val rfmManager by lazy { RFMManager() }
     private val deviceIdSenderManager by lazy { DeviceIdSenderManager() }
-    private val geofenceManager by lazy { GeofenceLocationManager() }
     private val inAppSessionManager by lazy { InAppSessionManager() }
 
     internal var initialized = false

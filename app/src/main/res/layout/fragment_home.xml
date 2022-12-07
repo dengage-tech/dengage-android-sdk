@@ -82,12 +82,6 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/button_dengage_test_page" />
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnGeofencePage"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/base_component_height"
-                android:layout_marginTop="8dp"
-                android:text="@string/button_geofence" />
         </LinearLayout>
 
     </ScrollView>

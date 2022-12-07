@@ -16,14 +16,9 @@ class GeofenceFragment : BaseDataBindingFragment<FragmentGeofenceBinding>() {
     override fun init() {
         sendPageView("geofence")
 
-        binding.btnRequestLocationPermission.setOnClickListener {
-            val activity = this.activity as AppCompatActivity
-            Dengage.requestLocationPermissions(activity)
-        }
 
-        binding.btnStopGeofencing.setOnClickListener {
-            Dengage.stopGeofence()
-        }
+
+
 
     }
 }

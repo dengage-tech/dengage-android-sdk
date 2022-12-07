@@ -33,9 +33,7 @@ object ServiceFactory {
             ApiType.IN_APP -> {
                 InAppApiProvider.INSTANCE.create(serviceClass)
             }
-            else -> {
-                GeofenceApiProvider.INSTANCE.create(serviceClass)
-            }
+
         }
     }
 }

@@ -257,10 +257,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         subscription: Subscription?,
         sdkParameters: SdkParameters?
     ): Boolean {
-        return subscription != null && sdkParameters?.accountName != null &&
-            sdkParameters.appId != null &&
-            sdkParameters.realTimeInAppEnabled != null &&
-            sdkParameters.realTimeInAppEnabled
+        return true
     }
 
     private fun removeInAppMessageFromCache(inAppMessageId: String) {

@@ -58,9 +58,7 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
             Dengage.showTestPage(requireActivity())
         }
 
-        binding.btnGeofencePage.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeToGeofence())
-        }
+
     }
 
 }

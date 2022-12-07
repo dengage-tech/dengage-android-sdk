@@ -17,7 +17,6 @@ data class SdkParameters(
     @SerializedName("lastFetchTimeInMillis") var lastFetchTimeInMillis: Long = 0,
     @SerializedName("appTrackingEnabled") var appTrackingEnabled: Boolean = false,
     @SerializedName("appTrackingList") var appTrackingList: List<AppTracking>?,
-    @SerializedName("appTrackingList") var appTrackingList: List<AppTracking>?,
     @SerializedName("realTimeInAppEnabled") val realTimeInAppEnabled: Boolean?,
     @SerializedName("realTimeInAppFetchIntervalInMinutes") val realTimeInAppFetchIntervalInMinutes: Int?,
     @SerializedName("realTimeInAppSessionTimeoutMinutes") val realTimeInAppSessionTimeoutMinutes: Int?,

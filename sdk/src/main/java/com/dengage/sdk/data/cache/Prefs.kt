@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.VisitorInfo
-import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.rfm.model.RFMScore
 import com.dengage.sdk.domain.subscription.model.Subscription
@@ -101,23 +100,6 @@ object Prefs {
         get() = preferences.get(PreferenceKey.PREVIOUS_SUBSCRIPTION,null)
         set(value) = preferences.set(PreferenceKey.PREVIOUS_SUBSCRIPTION, value)
 
-    internal var geofenceApiBaseUrl: String
-        get() = preferences.get(PreferenceKey.GEOFENCE_API_BASE_URL) ?: Constants.GEOFENCE_API_URI
-        set(value) = preferences.set(PreferenceKey.GEOFENCE_API_BASE_URL, value)
-
-    internal var geofenceEnabled: Boolean
-        get() = preferences.get(PreferenceKey.GEOFENCE_ENABLED, defaultValue = false) ?: false
-        set(value) = preferences.set(PreferenceKey.GEOFENCE_ENABLED, value)
-
-    internal var geofenceHistory: GeofenceHistory
-        get() = preferences.get(PreferenceKey.GEOFENCE_HISTORY, defaultValue = GeofenceHistory())
-            ?: GeofenceHistory()
-        set(value) = preferences.set(PreferenceKey.GEOFENCE_HISTORY, value)
-
-    internal var geofencePermissionsDenied: Boolean
-        get() = preferences.get(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, defaultValue = false)
-            ?: false
-        set(value) = preferences.set(PreferenceKey.GEOFENCE_PERMISSIONS_DENIED, value)
 
     internal var firstLaunchTime: Long
         get() = preferences.get(PreferenceKey.FIRST_LAUNCH_TIME, 0L) ?: 0L

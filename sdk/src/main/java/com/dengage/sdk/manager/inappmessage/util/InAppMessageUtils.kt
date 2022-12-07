@@ -237,7 +237,7 @@ object InAppMessageUtils {
                 )
             }
             SpecialRuleParameter.MONTH.key -> {
-                val dateFormat = SimpleDateFormat("MMMM")
+                val dateFormat = SimpleDateFormat("MM")
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
@@ -246,12 +246,11 @@ object InAppMessageUtils {
                 )
             }
             SpecialRuleParameter.WEEK_DAY.key -> {
-                val dateFormat = SimpleDateFormat("EEEE")
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = dateFormat.format(Date())
+                    userParam = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
                 )
             }
             SpecialRuleParameter.HOUR.key -> {

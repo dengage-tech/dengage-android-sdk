@@ -4,14 +4,11 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.cache.PrefsOld
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseMvpManager
-import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.GsonHolder
-import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
 class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
