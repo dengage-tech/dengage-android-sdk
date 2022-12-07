@@ -30,7 +30,12 @@ You should add some parameters with meta-data to your application manifest.
 <!-- Push api url of Dengage -->
 <meta-data
     android:name="den_push_api_url"
-    android:value="https://pushdev.dengage.com" />
+    android:value="https://dev-push.dengage.com" />
+
+<!-- Real time inapp api url of Dengage -->
+<meta-data
+    android:name="den_in_app_api_url"
+    android:value="https://dev-push.dengage.com" />
 ```
 
 ### Application Manifest Services

@@ -18,7 +18,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
-        ConfigurationContract.Presenter>(), ConfigurationContract.View {
+    ConfigurationContract.Presenter>(), ConfigurationContract.View {
 
     internal var configurationCallback: ConfigurationCallback? = null
 
@@ -43,6 +43,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             } else {
                 Prefs.eventApiBaseUrl = this
             }
+        }
+        DengageUtils.getMetaData(name = "den_in_app_api_url")?.let {
+            Prefs.inAppApiBaseUrl = it
         }
         DengageUtils.getMetaData(name = "den_geofence_api_url").apply {
             if (this == null) {

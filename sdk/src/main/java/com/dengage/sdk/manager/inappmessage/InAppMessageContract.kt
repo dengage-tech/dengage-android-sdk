@@ -7,7 +7,7 @@ import com.dengage.sdk.manager.base.BaseView
 interface InAppMessageContract {
 
     interface View : BaseView {
-        fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?)
+        fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean)
         fun inAppMessageSetAsDisplayed()
         fun inAppMessageSetAsClicked()
         fun inAppMessageSetAsDismissed()
@@ -15,16 +15,15 @@ interface InAppMessageContract {
 
     interface Presenter : BasePresenter<View> {
         fun getInAppMessages()
-        fun setInAppMessageAsDisplayed(messageDetails: String?)
+        fun setInAppMessageAsDisplayed(inAppMessage: InAppMessage)
         fun setInAppMessageAsClicked(
-            inAppMessageId: String,
-            messageDetails: String?,
+            inAppMessage: InAppMessage,
             buttonId: String?
         )
 
-        fun setInAppMessageAsDismissed(messageDetails: String?)
-
+        fun setInAppMessageAsDismissed(inAppMessage: InAppMessage)
         fun fetchInAppExpiredMessageIds()
+
     }
 
 }

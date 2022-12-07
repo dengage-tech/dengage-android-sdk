@@ -12,7 +12,6 @@ class TransactionalOpenEventTest {
         val messageId = 1
         val messageDetails = "messageDetails"
         val transactionId = "transactionId"
-        val userAgent = "userAgent"
         val integrationKey = "integrationKey"
 
         val transactionalOpenEvent = TransactionalOpenEvent(
@@ -21,7 +20,6 @@ class TransactionalOpenEventTest {
             messageId = messageId,
             messageDetails = messageDetails,
             transactionId = transactionId,
-            userAgent = userAgent,
             integrationKey = integrationKey
         )
 
@@ -30,7 +28,6 @@ class TransactionalOpenEventTest {
         Assert.assertEquals(messageId, transactionalOpenEvent.messageId)
         Assert.assertEquals(messageDetails, transactionalOpenEvent.messageDetails)
         Assert.assertEquals(transactionId, transactionalOpenEvent.transactionId)
-        Assert.assertEquals(userAgent, transactionalOpenEvent.userAgent)
         Assert.assertEquals(integrationKey, transactionalOpenEvent.integrationKey)
     }
 

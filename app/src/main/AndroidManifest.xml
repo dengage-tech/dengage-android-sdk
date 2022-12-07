@@ -62,6 +62,11 @@
             android:name="den_push_api_url"
             android:value="https://dev-push.dengage.com" />
 
+        <!-- Real time inapp api url of Dengage -->
+        <meta-data
+            android:name="den_in_app_api_url"
+            android:value="https://dev-push.dengage.com" />
+
         <!-- Geofence api url of Dengage -->
         <meta-data
             android:name="den_geofence_api_url"

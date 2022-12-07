@@ -11,7 +11,6 @@ class OpenEventTest {
         val itemId = "itemId"
         val messageId = 1
         val messageDetails = "messageDetails"
-        val userAgent = "userAgent"
         val integrationKey = "integrationKey"
 
         val openEvent = OpenEvent(
@@ -19,7 +18,6 @@ class OpenEventTest {
             itemId = itemId,
             messageId = messageId,
             messageDetails = messageDetails,
-            userAgent = userAgent,
             integrationKey = integrationKey
         )
 
@@ -27,7 +25,6 @@ class OpenEventTest {
         Assert.assertEquals(itemId, openEvent.itemId)
         Assert.assertEquals(messageId, openEvent.messageId)
         Assert.assertEquals(messageDetails, openEvent.messageDetails)
-        Assert.assertEquals(userAgent, openEvent.userAgent)
         Assert.assertEquals(integrationKey, openEvent.integrationKey)
     }
 

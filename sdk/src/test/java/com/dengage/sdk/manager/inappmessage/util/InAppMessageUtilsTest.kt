@@ -2,7 +2,6 @@ package com.dengage.sdk.manager.inappmessage.util
 
 import com.dengage.sdk.domain.inappmessage.model.Operator
 import com.dengage.sdk.domain.inappmessage.model.Priority
-import com.dengage.sdk.domain.inappmessage.model.TriggerBy
 import com.dengage.sdk.util.Constants
 import org.junit.Assert
 import org.junit.Test
@@ -297,30 +296,125 @@ class InAppMessageUtilsTest {
     }
 
     @Test
-    fun `findPriorInAppMessage triggerBy test`() {
+    fun `findPriorInAppMessage display timing max show count test`() {
         val id1 = Math.random().toString()
         val id2 = Math.random().toString()
 
         val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
         val expireDate = expireDateFormat.format(Date())
-        val inAppMessageTriggerByEvent = InAppMessageMocker.createInAppMessage(
+        val inAppMessageIsAvailableTiming = InAppMessageMocker.createInAppMessage(
             id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate
+            priority = Priority.MEDIUM,
+            expireDate = expireDate,
+            maxShowCount = 2
         )
-        val inAppMessageTriggerByNavigation = InAppMessageMocker.createInAppMessage(
+        val inAppMessageIsNotAvailableTiming = InAppMessageMocker.createInAppMessage(
             id = id2,
-            priority = Priority.LOW,
-            expireDate = expireDate
+            priority = Priority.HIGH,
+            expireDate = expireDate,
+            maxShowCount = 1
         )
-        inAppMessageTriggerByEvent.data.displayTiming.triggerBy = TriggerBy.EVENT.triggerBy
-        inAppMessageTriggerByNavigation.data.displayTiming.triggerBy = TriggerBy.NAVIGATION.triggerBy
+        inAppMessageIsAvailableTiming.data.showCount = 1
+        inAppMessageIsNotAvailableTiming.data.showCount = 1
 
-        val inAppMessages = listOf(inAppMessageTriggerByEvent, inAppMessageTriggerByNavigation)
+        val inAppMessages = listOf(inAppMessageIsNotAvailableTiming, inAppMessageIsAvailableTiming)
         val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
             inAppMessages = inAppMessages
         )
-        Assert.assertEquals(priorInAppMessage?.id, id2)
+        Assert.assertEquals(priorInAppMessage?.id, id1)
+    }
+
+    @Test
+    fun `findPriorInAppMessage real time test`() {
+        val id1 = Math.random().toString()
+        val id2 = Math.random().toString()
+        val id3 = Math.random().toString()
+        val id4 = Math.random().toString()
+
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val inAppMessageRealTimeLow = InAppMessageMocker.createInAppMessage(
+            id = id4,
+            priority = Priority.LOW,
+            expireDate = expireDate,
+            isRealTime = true
+        )
+        val inAppMessageNotRealTimeLow = InAppMessageMocker.createInAppMessage(
+            id = id2,
+            priority = Priority.LOW,
+            expireDate = expireDate,
+            isRealTime = false
+        )
+        val inAppMessageRealTimeHigh = InAppMessageMocker.createInAppMessage(
+            id = id3,
+            priority = Priority.HIGH,
+            expireDate = expireDate,
+            isRealTime = true
+        )
+        val inAppMessageNotRealTimeHigh = InAppMessageMocker.createInAppMessage(
+            id = id1,
+            priority = Priority.HIGH,
+            expireDate = expireDate,
+            isRealTime = false
+        )
+
+        val inAppMessages = listOf(inAppMessageRealTimeLow, inAppMessageRealTimeHigh, inAppMessageNotRealTimeLow, inAppMessageNotRealTimeHigh)
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = inAppMessages
+        )
+        Assert.assertEquals(priorInAppMessage?.id, id1)
+    }
+
+    @Test
+    fun `In App Comparator real time test`() {
+        val id1 = Math.random().toString()
+        val id2 = Math.random().toString()
+        val id3 = Math.random().toString()
+        val id4 = Math.random().toString()
+        val id5 = Math.random().toString()
+
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val inAppMessageRealTimeLowHasNoRules = InAppMessageMocker.createInAppMessage(
+            id = id5,
+            priority = Priority.LOW,
+            expireDate = expireDate,
+            isRealTime = true,
+            hasRules = false
+        )
+        val inAppMessageRealTimeLow = InAppMessageMocker.createInAppMessage(
+            id = id4,
+            priority = Priority.LOW,
+            expireDate = expireDate,
+            isRealTime = true
+        )
+        val inAppMessageNotRealTimeLow = InAppMessageMocker.createInAppMessage(
+            id = id2,
+            priority = Priority.LOW,
+            expireDate = expireDate,
+            isRealTime = false
+        )
+        val inAppMessageRealTimeHigh = InAppMessageMocker.createInAppMessage(
+            id = id3,
+            priority = Priority.HIGH,
+            expireDate = expireDate,
+            isRealTime = true
+        )
+        val inAppMessageNotRealTimeHigh = InAppMessageMocker.createInAppMessage(
+            id = id1,
+            priority = Priority.HIGH,
+            expireDate = expireDate,
+            isRealTime = false
+        )
+
+        val inAppMessages = listOf(inAppMessageRealTimeLowHasNoRules, inAppMessageRealTimeLow, inAppMessageRealTimeHigh, inAppMessageNotRealTimeLow, inAppMessageNotRealTimeHigh)
+        val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
+
+        Assert.assertEquals(sortedInAppMessages[0].id, id1)
+        Assert.assertEquals(sortedInAppMessages[1].id, id2)
+        Assert.assertEquals(sortedInAppMessages[2].id, id3)
+        Assert.assertEquals(sortedInAppMessages[3].id, id4)
+        Assert.assertEquals(sortedInAppMessages[4].id, id5)
     }
 
     @Test
@@ -403,4 +497,52 @@ class InAppMessageUtilsTest {
             screenName, operator))
     }
 
+    /*@Test
+    fun `findPriorRealTimeInApp category test`() {
+        RealTimeInAppParamHolder.categoryPath = "Category"
+        val id1 = Math.random().toString()
+        val id2 = Math.random().toString()
+
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+
+        val criterionList = mutableListOf<Criterion>()
+        criterionList.add(
+            Criterion(
+                id = 1,
+                parameter = SpecialRuleParameter.CITY.key,
+                dataType = DataType.TEXT.name,
+                operator = Operator.EQUALS.operator,
+                values = listOf("Ankara", "Istanbul")
+            )
+        )
+        criterionList.add(
+            Criterion(
+                id = 2,
+                parameter = SpecialRuleParameter.CATEGORY_PATH.key,
+                dataType = DataType.TEXT.name,
+                operator = Operator.LIKE.operator,
+                values = listOf("Category")
+            )
+        )
+
+        val realTimeInAppMessageMedium = InAppMessageMocker.createRealTimeInAppMessage(
+            id = id1,
+            priority = Priority.MEDIUM,
+            expireDate = expireDate,
+            criterionList = criterionList
+        )
+        val realTimeInAppMessageHigh = InAppMessageMocker.createRealTimeInAppMessage(
+            id = id2,
+            priority = Priority.HIGH,
+            expireDate = expireDate,
+            criterionList = criterionList
+        )
+
+        val inAppMessages = listOf(realTimeInAppMessageHigh, realTimeInAppMessageMedium)
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = inAppMessages
+        )
+        Assert.assertEquals(priorInAppMessage?.id, id2)
+    }*/
 }

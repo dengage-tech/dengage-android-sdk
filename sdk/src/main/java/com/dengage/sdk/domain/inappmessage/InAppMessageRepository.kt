@@ -7,6 +7,8 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.InAppRemovalId
 import com.dengage.sdk.util.extension.getAppId
+import com.dengage.sdk.domain.inappmessage.model.InAppMessageData
+import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.util.extension.getCdKey
 import com.dengage.sdk.util.extension.getType
 import retrofit2.Response
@@ -84,5 +86,37 @@ class InAppMessageRepository {
             appId = sdkParameters.getAppId()
         )
     }
+    suspend fun sendFirstLaunchEvent(
+        accountName: String?,
+        subscription: Subscription?,
+        appId: String?,
+        sessionId: String
+    ): Response<Unit> {
+        return service.sendFirstLaunchEvent(
+            accountName = accountName,
+            contactKey = subscription?.contactKey,
+            deviceId = subscription?.getSafeDeviceId(),
+            appId = appId,
+            sessionId = sessionId
+        )
+    }
+
+    suspend fun sendAppForegroundEvent(
+        accountName: String?,
+        subscription: Subscription,
+        appId: String?,
+        sessionId: String,
+        duration: Long
+    ): Response<Unit> {
+        return service.sendAppForegroundEvent(
+            accountName = accountName,
+            contactKey = subscription.contactKey,
+            deviceId = subscription.getSafeDeviceId(),
+            appId = appId,
+            sessionId = sessionId,
+            duration = duration
+        )
+    }
 
 }
+

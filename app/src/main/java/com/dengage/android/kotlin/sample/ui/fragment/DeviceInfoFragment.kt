@@ -1,5 +1,6 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.os.Build
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentDeviceInfoBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
@@ -23,6 +24,14 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
         binding.tvDeviceId.text = getString(
             R.string.dengage_device_id,
             Dengage.getSubscription()?.deviceId
+        )
+        binding.tvDeviceBrand.text = getString(
+            R.string.dengage_device_brand,
+            Build.BRAND
+        )
+        binding.tvDeviceModel.text = getString(
+            R.string.dengage_device_model,
+            Build.MODEL
         )
         binding.tvAdvertisingId.text = getString(
             R.string.dengage_advertising_id,
