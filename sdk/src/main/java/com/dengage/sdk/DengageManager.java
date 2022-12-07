@@ -425,7 +425,7 @@ public class DengageManager {
      * Use for saving rfm scores to local storage if you will use rfm item sorting
      */
     public void saveRFMScores(@Nullable List<RFMScore> scores) {
-        Dengage.INSTANCE.saveRFMScores(scores);
+        Dengage.INSTANCE.saveRFMScores(scores,_context);
     }
 
     /**
@@ -481,3 +481,4 @@ public class DengageManager {
     }
 
 }
+

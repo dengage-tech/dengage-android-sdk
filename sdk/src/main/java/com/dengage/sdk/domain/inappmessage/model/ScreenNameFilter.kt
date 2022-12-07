@@ -5,5 +5,5 @@ import java.io.Serializable
 
 class ScreenNameFilter(
     @SerializedName("operator") val operator: String,
-    val value: List<String>
+    val value: List<String>?
 ) : Serializable

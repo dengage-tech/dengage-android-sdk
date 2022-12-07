@@ -4,12 +4,11 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.cache.PrefsOld
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseMvpManager
+import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.GsonHolder
-import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
 class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
@@ -95,6 +94,11 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
             Prefs.inAppMessageShowTime = 0L
             Prefs.inAppMessages = null
             Prefs.inboxMessageFetchTime = 0L
+            Prefs.visitCountItems = mutableListOf()
+            Prefs.lastSessionStartTime = 0L
+            Prefs.lastSessionDuration = 0L
+            Prefs.lastSessionVisitTime = 0L
+            SessionManager.getSessionId(force = true)
 
             subscription.contactKey = contactKey
             DengageLogger.debug("contactKey: $contactKey")
@@ -137,9 +141,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         subscription.sdkVersion = DengageUtils.getSdkVersion()
         subscription.language = Locale.getDefault().language
 
-
          subscription.timezone = DengageUtils.getIANAFormatTimeZone()
-
         DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
 
         // save to cache

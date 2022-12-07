@@ -25,9 +25,9 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
             delay(4000)
             if (DengageUtils.foregrounded()) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
-                    Prefs.subscription?.let { callSubscriptionApi(it) }
+                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
-                    Prefs.subscription?.let { callSubscriptionApi(it) }
+                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 }
             }
 

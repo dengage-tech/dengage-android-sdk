@@ -43,6 +43,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
                 Prefs.eventApiBaseUrl = this
             }
         }
+        DengageUtils.getMetaData(name = "den_in_app_api_url")?.let {
+            Prefs.inAppApiBaseUrl = it
+        }
 
         var subscription = Prefs.subscription
         if (subscription == null) {

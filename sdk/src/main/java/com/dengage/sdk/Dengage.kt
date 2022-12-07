@@ -17,35 +17,39 @@ import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.configuration.ConfigurationCallback
 import com.dengage.sdk.manager.configuration.ConfigurationManager
 import com.dengage.sdk.manager.deviceId.DeviceIdSenderManager
-import com.dengage.sdk.manager.event.EventManager
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
+import com.dengage.sdk.manager.inappmessage.session.InAppSessionManager
+import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
-import com.dengage.sdk.manager.subscription.SubscriptionManager
+import com.dengage.sdk.manager.session.SessionManager
+import com.dengage.sdk.manager.event.EventManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
-
+import com.dengage.sdk.manager.subscription.SubscriptionManager
 object Dengage {
 
-     val configurationManager by lazy { ConfigurationManager() }
-     val subscriptionManager by lazy { SubscriptionManager() }
+    val configurationManager by lazy { ConfigurationManager() }
+    val subscriptionManager by lazy { SubscriptionManager() }
     private val inAppMessageManager by lazy { InAppMessageManager() }
     private val inboxMessageManager by lazy { InboxMessageManager() }
     private val tagManager by lazy { TagManager() }
     private val eventManager by lazy { EventManager() }
     private val rfmManager by lazy { RFMManager() }
     private val deviceIdSenderManager by lazy { DeviceIdSenderManager() }
+    private val inAppSessionManager by lazy { InAppSessionManager() }
+
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
      *
      * @param context for local cache operations
      * @param firebaseIntegrationKey for fcm operations, get firebase integration from dengage panel
-     * @param huaweiIntegrationKey for hms operations,  get huawei integration from dengage panel
      * @param firebaseApp for fcm operations, it is optional parameter
+     * @param geoFenceEnabled for geofence tracking, it is optional parameter
      */
     fun init(
         context: Context,
@@ -53,6 +57,7 @@ object Dengage {
         firebaseApp: FirebaseApp? = null
     ) {
         ContextHolder.context = context
+        SessionManager.getSessionId()
 
         subscriptionManager.buildSubscription(
             firebaseIntegrationKey = firebaseIntegrationKey
@@ -67,13 +72,14 @@ object Dengage {
                 configurationManager.configurationCallback = null
             }
 
+            override fun fetchInAppExpiredMessageIds() {
+                inAppMessageManager.fetchInAppExpiredMessageIds()
+            }
+
             override fun sendSubscription(subscription: Subscription) {
                 subscriptionManager.saveSubscription(subscription)
                 subscriptionManager.sendSubscription()
-            }
-
-            override fun fetchInAppExpiredMessageIds() {
-                inAppMessageManager.fetchInAppExpiredMessageIds()
+                inAppSessionManager.sendFirstLaunchEvent()
             }
         }
         configurationManager.configurationCallback = configurationCallback
@@ -243,8 +249,59 @@ object Dengage {
         )
     }
 
-     fun getInAppMessages() {
+    fun getInAppMessages() {
         inAppMessageManager.fetchInAppMessages()
+    }
+
+    /**
+     * Set category path for using in real time in app comparisons
+     */
+    fun setCategoryPath(path: String?) {
+        RealTimeInAppParamHolder.categoryPath = path
+    }
+
+    /**
+     * Set cart item count for using in real time in app comparisons
+     */
+    fun setCartItemCount(count: String?) {
+        RealTimeInAppParamHolder.cartItemCount = count
+    }
+
+    /**
+     * Set cart amount for using in real time in app comparisons
+     */
+    fun setCartAmount(amount: String?) {
+        RealTimeInAppParamHolder.cartAmount = amount
+    }
+
+    /**
+     * Set state for using in real time in app comparisons
+     */
+    fun setState(name: String?) {
+        RealTimeInAppParamHolder.state = name
+    }
+
+    /**
+     * Set city for using in real time in app comparisons
+     */
+    fun setCity(name: String?) {
+        RealTimeInAppParamHolder.city = name
+    }
+
+    internal fun setLastSessionStartTime() {
+        inAppSessionManager.setLastSessionStartTime()
+    }
+
+    internal fun setLastSessionDuration() {
+        inAppSessionManager.setLastSessionDuration()
+    }
+
+    internal fun setLastVisitTime() {
+        inAppSessionManager.setLastVisitTime()
+    }
+
+    internal fun sendAppForegroundEvent() {
+        inAppSessionManager.sendAppForegroundEvent()
     }
 
     fun getInAppExpiredMessageIds() {
@@ -282,6 +339,25 @@ object Dengage {
     }
 
     /**
+     * Show in app message if any available
+     *
+     * @param activity   for showing ui of in app message
+     * @param screenName for showing screen specific in app message
+     * @param params for user specific in app message
+     */
+    fun showRealTimeInApp(
+        activity: Activity,
+        screenName: String? = null,
+        params: HashMap<String, String>? = null
+    ) {
+        inAppMessageManager.setNavigation(
+            activity = activity,
+            screenName = screenName,
+            params = params
+        )
+    }
+
+    /**
      * Send tags
      *
      * @param tags will be send to api
@@ -296,7 +372,6 @@ object Dengage {
     }
 
     fun onMessageReceived(data: Map<String, String?>?) {
-
         DengageLogger.verbose("onMessageReceived method is called")
         if (!data.isNullOrEmpty()) {
             val pushMessage = Message.createFromMap(data)
@@ -310,7 +385,7 @@ object Dengage {
         }
     }
 
-     fun sendBroadcast(json: String, data: Map<String, String?>) {
+    fun sendBroadcast(json: String, data: Map<String, String?>) {
         DengageLogger.verbose("sendBroadcast method is called")
         try {
             val intent = Intent(Constants.PUSH_RECEIVE_EVENT)
@@ -337,7 +412,8 @@ object Dengage {
     /**
      * Use for saving rfm scores to local storage if you will use rfm item sorting
      */
-    fun saveRFMScores(scores: MutableList<RFMScore>?) {
+    fun saveRFMScores(scores: MutableList<RFMScore>?,context: Context? = null) {
+        ContextHolder.resetContext(context)
         rfmManager.saveRFMScores(
             scores = scores
         )
@@ -489,7 +565,8 @@ object Dengage {
      */
     fun sendDeviceEvent(
         tableName: String,
-        data: HashMap<String, Any>,context: Context? = null
+        data: HashMap<String, Any>
+        ,context: Context? = null
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendDeviceEvent(
@@ -511,12 +588,12 @@ object Dengage {
         itemId: String,
         message: Message?
     ) {
-        subscriptionManager.sendSubscription()
         DengageLogger.verbose("sendOpenEvent method is called")
         DengageLogger.verbose(buttonId)
         DengageLogger.verbose(itemId)
         DengageLogger.verbose(message?.toJson())
         try {
+            subscriptionManager.sendSubscription()
             getSubscription()
             if (message == null) {
                 DengageLogger.error("Argument null: message")
@@ -592,5 +669,4 @@ object Dengage {
         DengageLogger.verbose("setPartnerDeviceId method is called")
         subscriptionManager.setPartnerDeviceId(adid = adid)
     }
-
 }
