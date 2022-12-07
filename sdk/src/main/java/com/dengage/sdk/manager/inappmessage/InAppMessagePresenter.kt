@@ -21,27 +21,26 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val setInAppMessageAsDismissed by lazy { SetInAppMessageAsDismissed() }
     private val setRealTimeInAppMessageAsDismissed by lazy { SetRealTimeInAppMessageAsDismissed() }
     private val setInAppMessageAsDisplayed by lazy { SetInAppMessageAsDisplayed() }
+    private val getInAppExpiredMessageIds by lazy { GetInAppExpiredMessageIds() }
     private val setRealTimeInAppMessageAsDisplayed by lazy { SetRealTimeInAppMessageAsDisplayed() }
     private val getVisitorInfo by lazy { GetVisitorInfo() }
-    private val getInAppExpiredMessageIds by lazy { GetInAppExpiredMessageIds() }
-
 
     override fun getInAppMessages() {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
-        if (isInAppMessageEnabled(subscription, sdkParameters) && DengageUtils.foregrounded()
-        ) {
-// control next in app message fetch time
+        if (isInAppMessageEnabled(subscription, sdkParameters)&& DengageUtils.foregrounded()) {
+
+            // control next in app message fetch time
             //if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
             // val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
             Prefs.inAppMessageFetchTime = System.currentTimeMillis() + 0
 
-
             getInAppMessages(this) {
                 onResponse = {
-                    view { fetchedInAppMessages(it, false) }
-                    fetchInAppExpiredMessageIds()
+                    view { fetchedInAppMessages(it,false)
+                        fetchInAppExpiredMessageIds()
+                    }
                 }
                 onError = {
                     Prefs.inAppMessageFetchTime = System.currentTimeMillis()
@@ -260,7 +259,10 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         subscription: Subscription?,
         sdkParameters: SdkParameters?
     ): Boolean {
-        return true
+        return subscription != null && sdkParameters?.accountName != null &&
+                sdkParameters.appId != null &&
+                sdkParameters.realTimeInAppEnabled != null &&
+                sdkParameters.realTimeInAppEnabled
     }
 
     private fun removeInAppMessageFromCache(inAppMessageId: String) {
@@ -277,8 +279,6 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     }
 
     private fun isInAppAvailableInCache(): Boolean {
-        return Prefs.inAppMessages?.let { it.size > 0 } ?: false
+        return Prefs.inAppMessages?.let { it.size > 0} ?: false
     }
-
-
 }
