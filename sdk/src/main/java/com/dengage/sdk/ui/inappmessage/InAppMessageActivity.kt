@@ -224,6 +224,12 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         }
 
         @JavascriptInterface
+        fun sendClick() {
+            DengageLogger.verbose("In app message: clicked body/button with no Id")
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, null)
+        }
+
+        @JavascriptInterface
         fun close() {
             DengageLogger.verbose("In app message: close event")
             this@InAppMessageActivity.finish()

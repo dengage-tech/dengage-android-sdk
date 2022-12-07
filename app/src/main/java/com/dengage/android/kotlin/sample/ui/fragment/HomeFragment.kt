@@ -1,10 +1,13 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.content.Intent
 import androidx.navigation.fragment.findNavController
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentHomeBinding
+import com.dengage.android.kotlin.sample.ui.activity.MainActivity2
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
 import com.dengage.sdk.Dengage
+import com.dengage.sdk.util.extension.launchActivity
 
 class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
