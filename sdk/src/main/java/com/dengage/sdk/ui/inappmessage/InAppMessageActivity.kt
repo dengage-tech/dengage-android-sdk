@@ -230,6 +230,13 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         }
 
         @JavascriptInterface
+        fun sendClick() {
+            DengageLogger.verbose("In app message: clicked body/button with no Id")
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, null)
+        }
+
+
+        @JavascriptInterface
         fun setTags() {
             DengageLogger.verbose("In app message: set tags event")
         }
