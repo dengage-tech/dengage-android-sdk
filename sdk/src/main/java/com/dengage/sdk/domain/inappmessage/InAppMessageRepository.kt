@@ -7,8 +7,6 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.InAppRemovalId
 import com.dengage.sdk.util.extension.getAppId
-import com.dengage.sdk.domain.inappmessage.model.InAppMessageData
-import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.util.extension.getCdKey
 import com.dengage.sdk.util.extension.getType
 import retrofit2.Response
