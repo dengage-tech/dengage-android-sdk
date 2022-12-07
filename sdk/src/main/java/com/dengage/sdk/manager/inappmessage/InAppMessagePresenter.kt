@@ -29,15 +29,18 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     override fun getInAppMessages() {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
-        if (isInAppMessageEnabled(subscription, sdkParameters) &&
-            System.currentTimeMillis() >= Prefs.inAppMessageFetchTime&& DengageUtils.foregrounded()
+        if (isInAppMessageEnabled(subscription, sdkParameters) && DengageUtils.foregrounded()
         ) {
-            val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
-            Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
+// control next in app message fetch time
+            //if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
+
+            // val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
+            Prefs.inAppMessageFetchTime = System.currentTimeMillis() + 0
+
 
             getInAppMessages(this) {
                 onResponse = {
-                    view { fetchedInAppMessages(it,false) }
+                    view { fetchedInAppMessages(it, false) }
                     fetchInAppExpiredMessageIds()
                 }
                 onError = {
@@ -250,7 +253,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         sdkParameters: SdkParameters?
     ): Boolean {
         return subscription != null && sdkParameters?.accountName != null &&
-            sdkParameters.inAppEnabled != null && sdkParameters.inAppEnabled
+                sdkParameters.inAppEnabled != null && sdkParameters.inAppEnabled
     }
 
     private fun isRealTimeInAppMessageEnabled(
