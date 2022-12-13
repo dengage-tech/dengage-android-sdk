@@ -405,7 +405,7 @@ public class DengageManager {
      * @param screenName for showing screen specific in app message
      */
     public void setNavigation(@NonNull Activity activity, @Nullable String screenName) {
-        Dengage.INSTANCE.setNavigation(activity, screenName);
+        Dengage.INSTANCE.setNavigation(activity, screenName,-1);
     }
 
     /**

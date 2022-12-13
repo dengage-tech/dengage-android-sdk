@@ -19,7 +19,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     internal fun setNavigation(
         activity: Activity,
         screenName: String? = null,
-        params: HashMap<String, String>? = null
+        params: HashMap<String, String>? = null, resultCode: Int = -1
     ) {
         // control next in app message show time
         if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
@@ -31,7 +31,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
             val priorInAppMessage =
                 InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params)
             if (priorInAppMessage != null) {
-                showInAppMessage(activity, priorInAppMessage)
+                showInAppMessage(activity, priorInAppMessage,resultCode)
             }
         }
     }
@@ -84,7 +84,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     /**
      * Show in app message dialog on activity screen
      */
-    private fun showInAppMessage(activity: Activity, inAppMessage: InAppMessage) {
+    private fun showInAppMessage(activity: Activity, inAppMessage: InAppMessage,resultCode: Int = -1) {
         setInAppMessageAsDisplayed(
             inAppMessage = inAppMessage
         )
@@ -114,7 +114,24 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    activity.startActivity(InAppMessageActivity.newIntent(activity, inAppMessage))
+                    if (Prefs.handleIntentInApp) {
+                        activity.startActivityForResult(
+                            InAppMessageActivity.newIntent(
+                                activity,
+                                inAppMessage,
+                                resultCode
+                            ),resultCode
+                        )
+
+                    } else {
+                        activity.startActivity(
+                            InAppMessageActivity.newIntent(
+                                activity,
+                                inAppMessage,
+                                -1
+                            )
+                        )
+                    }
                     if (!inAppMessage.data.content.params.shouldAnimate) {
                         activity.overridePendingTransition(0, 0)
                     }

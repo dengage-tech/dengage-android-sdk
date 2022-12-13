@@ -18,7 +18,7 @@
             android:layout_centerHorizontal="true"
             android:layout_margin="30dp"
             app:cardCornerRadius="4dp"
-            app:cardElevation="4dp">
+         >
 
             <RelativeLayout
                 android:id="@+id/vInAppMessage"

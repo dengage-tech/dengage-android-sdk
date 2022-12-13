@@ -284,7 +284,7 @@ open class NotificationReceiver : BroadcastReceiver() {
 
     open fun getPendingIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent? {
         var intent = intent
-            val stackBuilder = TaskStackBuilder.create(context)
+
             val extras = intent.extras
             val packageName = context.packageName
             intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
@@ -293,10 +293,11 @@ open class NotificationReceiver : BroadcastReceiver() {
             if (intent.extras != null) {
                 intent.putExtras(intent.extras!!)
             }
-            stackBuilder.addNextIntentWithParentStack(intent)
-        return  stackBuilder.getPendingIntent(
+
+        return  PendingIntent.getActivity(context,
                 requestCode,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
             )
 
     }

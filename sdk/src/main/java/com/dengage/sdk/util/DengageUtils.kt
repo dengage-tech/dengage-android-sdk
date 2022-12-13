@@ -40,7 +40,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.5.1"
+        return "6.0.6.1"
     }
 
     fun getUserAgent(context: Context): String {
@@ -100,8 +100,13 @@ object DengageUtils {
     }
 
     fun foregrounded(): Boolean {
-        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
-        ActivityManager.getMyMemoryState(appProcessInfo)
-        return appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+        return try {
+            val appProcessInfo = ActivityManager.RunningAppProcessInfo()
+            ActivityManager.getMyMemoryState(appProcessInfo)
+            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+        } catch (e: Exception) {
+            e.printStackTrace()
+            true
+        }
     }
 }

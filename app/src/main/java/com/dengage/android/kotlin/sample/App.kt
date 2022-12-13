@@ -28,6 +28,7 @@ class App : Application() {
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY
         )
         Dengage.setLogStatus(true)
+        Dengage.disableInAppIntentHandling(true)
 
     }
 

@@ -19,7 +19,7 @@ class InAppMessageFragment : BaseDataBindingFragment<FragmentInAppMessageBinding
             val screenName = binding.etScreenName.text.toString().trim()
             Dengage.setNavigation(
                 activity as AppCompatActivity,
-                if (screenName.isEmpty()) null else screenName
+                if (screenName.isEmpty()) null else screenName,123
             )
         }
     }

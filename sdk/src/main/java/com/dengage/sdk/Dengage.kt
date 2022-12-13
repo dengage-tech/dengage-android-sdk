@@ -325,11 +325,11 @@ object Dengage {
      * @param activity for showing ui of in app message
      */
     fun setNavigation(
-        activity: Activity
+        activity: Activity, resultCode: Int = -1
     ) {
         setNavigation(
             activity = activity,
-            screenName = null
+            screenName = null, resultCode
         )
     }
 
@@ -341,11 +341,11 @@ object Dengage {
      */
     fun setNavigation(
         activity: Activity,
-        screenName: String? = null
+        screenName: String? = null, resultCode: Int = -1
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
-            screenName = screenName
+            screenName = screenName, null, resultCode
         )
     }
 
@@ -359,15 +359,16 @@ object Dengage {
     fun showRealTimeInApp(
         activity: Activity,
         screenName: String? = null,
-        params: HashMap<String, String>? = null
+        params: HashMap<String, String>? = null, resultCode: Int = -1
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
             screenName = screenName,
-            params = params
+            params = params,
+            resultCode
+
         )
     }
-
     /**
      * Send tags
      *
@@ -679,5 +680,9 @@ object Dengage {
     {
         DengageLogger.verbose("setPartnerDeviceId method is called")
         subscriptionManager.setPartnerDeviceId(adid = adid)
+    }
+
+    fun disableInAppIntentHandling(handle: Boolean = false) {
+        Prefs.handleIntentInApp = handle
     }
 }
