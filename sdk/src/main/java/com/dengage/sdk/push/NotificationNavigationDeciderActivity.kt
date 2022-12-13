@@ -1,22 +1,63 @@
 package com.dengage.sdk.push
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.TextUtils
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.R
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
+import kotlinx.coroutines.CoroutineScope
 
-class NotificationNavigationDeciderActivity : AppCompatActivity() {
+class NotificationNavigationDeciderActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_notification_navigation_decider)
-
         ContextHolder.resetContext(this.applicationContext)
+
+
+    }
+
+
+    private fun callOpenEvent(message: Message?) {
+
+        Dengage.sendOpenEvent("", "", message)
+
+    }
+
+    private fun sendBroadcast(json: String, jsonDataBundle: Bundle) {
+        DengageLogger.verbose("sendBroadcast method is called")
+        try {
+            val intent = Intent(Constants.PUSH_OPEN_EVENT)
+            intent.putExtra("RAW_DATA", json)
+            DengageLogger.verbose("RAW_DATA: $json")
+            intent.putExtras(jsonDataBundle)
+            intent.setPackage(packageName)
+            sendBroadcast(intent)
+        } catch (e: java.lang.Exception) {
+            DengageLogger.error("sendBroadcast: " + e.message)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            onDestroy()
+        }, 1200)
+
+        Log.d("oops","on Pause")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("oops","on resume")
 
         if (intent != null) {
 
@@ -78,28 +119,17 @@ class NotificationNavigationDeciderActivity : AppCompatActivity() {
 
             startActivity(intent)
 
-            finishAffinity()
+
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                onDestroy()
+            }, 1200)
+
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
 
-    private fun callOpenEvent(message: Message?) {
-
-        Dengage.sendOpenEvent("", "", message)
-
-    }
-
-    private fun sendBroadcast(json: String, jsonDataBundle: Bundle) {
-        DengageLogger.verbose("sendBroadcast method is called")
-        try {
-            val intent = Intent(Constants.PUSH_OPEN_EVENT)
-            intent.putExtra("RAW_DATA", json)
-            DengageLogger.verbose("RAW_DATA: $json")
-            intent.putExtras(jsonDataBundle)
-            intent.setPackage(packageName)
-            sendBroadcast(intent)
-        } catch (e: java.lang.Exception) {
-            DengageLogger.error("sendBroadcast: " + e.message)
-        }
     }
 }

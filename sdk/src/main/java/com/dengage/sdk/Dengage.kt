@@ -30,6 +30,7 @@ import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 import com.dengage.sdk.manager.subscription.SubscriptionManager
+
 object Dengage {
 
     val configurationManager by lazy { ConfigurationManager() }
@@ -105,7 +106,6 @@ object Dengage {
             integrationKey = integrationKey
         )
     }
-
 
 
     /**
@@ -314,11 +314,11 @@ object Dengage {
      * @param activity for showing ui of in app message
      */
     fun setNavigation(
-        activity: Activity
+        activity: Activity, resultCode: Int = -1
     ) {
         setNavigation(
             activity = activity,
-            screenName = null
+            screenName = null, resultCode
         )
     }
 
@@ -330,11 +330,11 @@ object Dengage {
      */
     fun setNavigation(
         activity: Activity,
-        screenName: String? = null
+        screenName: String? = null, resultCode: Int = -1
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
-            screenName = screenName
+            screenName = screenName, null, resultCode
         )
     }
 
@@ -348,12 +348,12 @@ object Dengage {
     fun showRealTimeInApp(
         activity: Activity,
         screenName: String? = null,
-        params: HashMap<String, String>? = null
+        params: HashMap<String, String>? = null, resultCode: Int = -1
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
             screenName = screenName,
-            params = params
+            params = params,resultCode
         )
     }
 
@@ -363,7 +363,7 @@ object Dengage {
      * @param tags will be send to api
      */
     fun setTags(
-        tags: List<TagItem>,context: Context? = null
+        tags: List<TagItem>, context: Context? = null
     ) {
         ContextHolder.resetContext(context)
         tagManager.setTags(
@@ -412,7 +412,7 @@ object Dengage {
     /**
      * Use for saving rfm scores to local storage if you will use rfm item sorting
      */
-    fun saveRFMScores(scores: MutableList<RFMScore>?,context: Context? = null) {
+    fun saveRFMScores(scores: MutableList<RFMScore>?, context: Context? = null) {
         ContextHolder.resetContext(context)
         rfmManager.saveRFMScores(
             scores = scores
@@ -422,7 +422,7 @@ object Dengage {
     /**
      * Use for updating score of category
      */
-    fun categoryView(categoryId: String,context: Context? = null) {
+    fun categoryView(categoryId: String, context: Context? = null) {
         ContextHolder.resetContext(context)
         rfmManager.categoryView(
             categoryId = categoryId
@@ -439,7 +439,7 @@ object Dengage {
         )
     }
 
-    fun pageView(data: HashMap<String, Any>,context: Context? = null) {
+    fun pageView(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.pageView(
             eventDetails = data
@@ -448,7 +448,7 @@ object Dengage {
 
     fun sendCartEvents(
         data: HashMap<String, Any>,
-        eventType: String,context: Context? = null
+        eventType: String, context: Context? = null
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendCartEvents(
@@ -457,49 +457,49 @@ object Dengage {
         )
     }
 
-    fun addToCart(data: HashMap<String, Any>,context: Context? = null) {
+    fun addToCart(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.addToCart(
             eventDetails = data
         )
     }
 
-    fun removeFromCart(data: HashMap<String, Any>,context: Context? = null) {
+    fun removeFromCart(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.removeFromCart(
             eventDetails = data
         )
     }
 
-    fun viewCart(data: HashMap<String, Any>,context: Context? = null) {
+    fun viewCart(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.viewCart(
             eventDetails = data
         )
     }
 
-    fun beginCheckout(data: HashMap<String, Any>,context: Context? = null) {
+    fun beginCheckout(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.beginCheckout(
             eventDetails = data
         )
     }
 
-    fun cancelOrder(data: HashMap<String, Any>,context: Context? = null) {
+    fun cancelOrder(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.cancelOrder(
             eventDetails = data
         )
     }
 
-    fun order(data: HashMap<String, Any>,context: Context? = null) {
+    fun order(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.order(
             eventDetails = data
         )
     }
 
-    fun search(data: HashMap<String, Any>,context: Context? = null) {
+    fun search(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.search(
             eventDetails = data
@@ -508,7 +508,7 @@ object Dengage {
 
     fun sendWishListEvents(
         data: HashMap<String, Any>,
-        eventType: String,context: Context? = null
+        eventType: String, context: Context? = null
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendWishListEvents(
@@ -517,14 +517,14 @@ object Dengage {
         )
     }
 
-    fun addToWishList(data: HashMap<String, Any>,context: Context? = null) {
+    fun addToWishList(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.addToWishList(
             eventDetails = data
         )
     }
 
-    fun removeFromWishList(data: HashMap<String, Any>,context: Context? = null) {
+    fun removeFromWishList(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.removeFromWishList(
             eventDetails = data
@@ -544,7 +544,7 @@ object Dengage {
     fun sendCustomEvent(
         tableName: String,
         key: String,
-        data: HashMap<String, Any>,context: Context? = null
+        data: HashMap<String, Any>, context: Context? = null
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendCustomEvent(
@@ -565,8 +565,7 @@ object Dengage {
      */
     fun sendDeviceEvent(
         tableName: String,
-        data: HashMap<String, Any>
-        ,context: Context? = null
+        data: HashMap<String, Any>, context: Context? = null
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendDeviceEvent(
@@ -664,9 +663,12 @@ object Dengage {
         }
     }
 
-    fun setPartnerDeviceId(adid:String)
-    {
+    fun setPartnerDeviceId(adid: String) {
         DengageLogger.verbose("setPartnerDeviceId method is called")
         subscriptionManager.setPartnerDeviceId(adid = adid)
+    }
+
+    fun disableInAppIntentHandling(handle: Boolean = false) {
+        Prefs.handleIntentInApp = handle
     }
 }
