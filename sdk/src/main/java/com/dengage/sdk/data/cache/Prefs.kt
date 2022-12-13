@@ -143,6 +143,11 @@ object Prefs {
         get() = preferences.get(PreferenceKey.VISITOR_INFO)
         set(value) = preferences.set(PreferenceKey.VISITOR_INFO, value)
 
+    internal var handleIntentInApp: Boolean
+        get() = preferences.get(PreferenceKey.HANDLE_INTENT_INAPP, false) ?: false
+        set(value) = preferences.set(PreferenceKey.HANDLE_INTENT_INAPP, value)
+
+
     fun clear() {
         preferences.edit().clear().apply()
     }
