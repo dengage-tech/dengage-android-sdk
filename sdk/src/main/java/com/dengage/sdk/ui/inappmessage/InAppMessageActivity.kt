@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -20,6 +21,7 @@ import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.R
+import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
@@ -182,14 +184,17 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         var inAppMessageCallback: InAppMessageCallback? = null
 
         const val EXTRA_IN_APP_MESSAGE = "EXTRA_IN_APP_MESSAGE"
+        const val RESULT_CODE = "RESULT_CODE"
 
-        fun newIntent(activity: Activity, inAppMessage: InAppMessage): Intent {
+        fun newIntent(activity: Activity, inAppMessage: InAppMessage, resultCode: Int): Intent {
             val intent = Intent(activity, InAppMessageActivity::class.java).apply {
                 putExtra(EXTRA_IN_APP_MESSAGE, inAppMessage)
+                putExtra(RESULT_CODE, resultCode)
             }
             return intent
         }
     }
+
 
     private inner class JavaScriptInterface {
         @JavascriptInterface
@@ -211,6 +216,15 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     ).show()
                     this@InAppMessageActivity.launchSettingsActivity()
                 }
+            } else if (Prefs.handleIntentInApp) {
+
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                    intent.putExtra("targetUrl", targetUrl)
+                    intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
+                } catch (e: Exception) {
+                    DengageLogger.error(e.message)
+                }
             } else {
                 this@InAppMessageActivity.launchActivity(null, targetUrl)
             }
@@ -221,6 +235,12 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         fun sendClick(buttonId: String?) {
             DengageLogger.verbose("In app message: clicked button $buttonId")
             inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId)
+        }
+
+        @JavascriptInterface
+        fun sendClick() {
+            DengageLogger.verbose("In app message: clicked body/button with no Id")
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, null)
         }
 
         @JavascriptInterface
@@ -242,12 +262,6 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun promptPushPermission() {
             DengageLogger.verbose("In app message: prompt push permission event")
-        }
-
-        @JavascriptInterface
-        fun sendClick() {
-            DengageLogger.verbose("In app message: clicked body/button with no Id")
-            inAppMessageCallback?.inAppMessageClicked(inAppMessage, null)
         }
     }
 

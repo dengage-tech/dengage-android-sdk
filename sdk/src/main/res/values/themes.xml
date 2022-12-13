@@ -20,19 +20,13 @@
         <item name="colorOnSecondary">@android:color/white</item>-
     </style>
 
-    <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.NoActionBar">
-        <!--on below line we are setting background as transparent color-->
-        <item name="android:background">@android:color/transparent</item>
-        <!--on below line we are displaying the windowNotitle as true as we are not displaying our status bar-->
-        <item name="android:windowNoTitle">true</item>
-        <!--on below line we are setting our window background as transparent color-->
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <!--on below line we are setting color background cache hint as null-->
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <!--on below line we are adding a window translucent as true-->
+    <style name="Theme.AppCompat.Translucent" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:windowIsTranslucent">true</item>
-        <!--on below line we are adding a window animationstyle-->
-        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
     </style>
 
     <style name="Theme.AppCompat.Transparent.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
@@ -43,5 +37,4 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
-
 </resources>

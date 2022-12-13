@@ -40,13 +40,13 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.5.3"
+        return "6.0.6.3"
     }
 
     fun getUserAgent(context: Context): String {
         val appLabel = "${getAppLabel(context, "An Android App")}/" +
-            "${getAppVersion(context)} ${Build.MANUFACTURER}/${Build.MODEL} " +
-            "${System.getProperty("http.agent")} Mobile/${Build.ID}"
+                "${getAppVersion(context)} ${Build.MANUFACTURER}/${Build.MODEL} " +
+                "${System.getProperty("http.agent")} Mobile/${Build.ID}"
 
         return appLabel.replace("[^\\x00-\\x7F]".toRegex(), "")
     }
@@ -55,7 +55,8 @@ object DengageUtils {
         val lPackageManager = context.packageManager
         var lApplicationInfo: ApplicationInfo? = null
         try {
-            lApplicationInfo = lPackageManager.getApplicationInfo(context.applicationInfo.packageName, 0)
+            lApplicationInfo =
+                lPackageManager.getApplicationInfo(context.applicationInfo.packageName, 0)
         } catch (e: PackageManager.NameNotFoundException) {
             DengageLogger.error(e.message)
         }
@@ -99,8 +100,13 @@ object DengageUtils {
     }
 
     fun foregrounded(): Boolean {
-        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
-        ActivityManager.getMyMemoryState(appProcessInfo)
-        return appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+        return try {
+            val appProcessInfo = ActivityManager.RunningAppProcessInfo()
+            ActivityManager.getMyMemoryState(appProcessInfo)
+            appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
+        } catch (e: Exception) {
+            e.printStackTrace()
+            true
+        }
     }
 }
