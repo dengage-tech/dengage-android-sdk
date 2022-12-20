@@ -1,6 +1,8 @@
 package com.dengage.android.kotlin.sample
 
 import android.app.Application
+import android.content.IntentFilter
+import com.dengage.android.kotlin.sample.push.PushNotificationReceiver
 import com.dengage.android.kotlin.sample.utils.Constants
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.DengageManager
@@ -29,7 +31,12 @@ class App : Application() {
         )
         Dengage.setLogStatus(true)
         Dengage.disableInAppIntentHandling(true)
-
+      /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
+        registerReceiver(
+            PushNotificationReceiver(),
+            filter
+        )*/
     }
+
 
 }

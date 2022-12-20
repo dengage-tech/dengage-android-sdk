@@ -48,25 +48,25 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
-      /*DengageLogger.verbose("$TAG onPushOpen method is called")
+        DengageLogger.verbose("$TAG onPushOpen method is called")
 
-        var uri: String? = null
-        if (intent.extras != null) {
-            var message = Message.createFromIntent(intent.extras!!)
-            val rawJson = intent.extras!!.getString("RAW_DATA")
-            if (!TextUtils.isEmpty(rawJson)) {
-                message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
-            }
-            uri = intent.extras!!.getString("targetUrl")
-            ContextHolder.context = context
-            Dengage.sendOpenEvent("", "", message)
+          var uri: String? = null
+          if (intent.extras != null) {
+              var message = Message.createFromIntent(intent.extras!!)
+              val rawJson = intent.extras!!.getString("RAW_DATA")
+              if (!TextUtils.isEmpty(rawJson)) {
+                  message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
+              }
+              uri = intent.extras!!.getString("targetUrl")
+              ContextHolder.context = context
+              Dengage.sendOpenEvent("", "", message)
 
-            clearNotification(context, message)
-        } else {
-            DengageLogger.error("$TAG No extra data for push open")
-        }
-        context.launchActivity(intent, uri)*/
-       // Log.d("oops","opened")
+             clearNotification(context, message)
+          } else {
+              DengageLogger.error("$TAG No extra data for push open")
+          }
+         // context.launchActivity(intent, uri)
+        // Log.d("oops","opened")
     }
 
     open fun onPushDismiss(context: Context, intent: Intent) {
@@ -105,7 +105,7 @@ open class NotificationReceiver : BroadcastReceiver() {
 
             DengageLogger.error("$TAG No extra data for push action")
         }
-        context.launchActivity(intent, uri)
+
     }
 
     open fun onItemClick(context: Context, intent: Intent) {
@@ -145,7 +145,7 @@ open class NotificationReceiver : BroadcastReceiver() {
                 "" -> {
                     Dengage.sendOpenEvent("", id, message)
                     clearNotification(context, message)
-                    context.launchActivity(intent, uri)
+                   // context.launchActivity(intent, uri)
                 }
                 "left", "right" -> {
                     if (message.carouselContent.isNullOrEmpty()) {
@@ -282,23 +282,26 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    open fun getPendingIntent(context: Context, requestCode: Int, intent: Intent): PendingIntent? {
-        var intent = intent
+    open fun getPendingIntent(context: Context, requestCode: Int, intentP: Intent): PendingIntent? {
+        var intent = intentP
 
-            val extras = intent.extras
-            val packageName = context.packageName
-            intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
-            intent.putExtras(extras!!)
-            intent.setPackage(packageName)
-            if (intent.extras != null) {
-                intent.putExtras(intent.extras!!)
-            }
+        val extras = intentP.extras
+        val packageName = context.packageName
+        val action = intentP.action
+        intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
+        intent.putExtras(extras!!)
+        intent.setPackage(packageName)
+        intent.action = action
+        if (intent.extras != null) {
+            intent.putExtras(intent.extras!!)
+        }
 
-        return  PendingIntent.getActivity(context,
-                requestCode,
+        return PendingIntent.getActivity(
+            context,
+            requestCode,
             intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
-            )
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
+        )
 
     }
 
