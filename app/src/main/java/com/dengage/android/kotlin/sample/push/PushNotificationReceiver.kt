@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -124,5 +125,8 @@ class PushNotificationReceiver : NotificationReceiver() {
     }
 
 
-
+    override fun onActionClick(context: Context, intent: Intent) {
+        super.onActionClick(context, intent)
+        Log.d("NotificationReceiver:",intent.toString())
+    }
 }

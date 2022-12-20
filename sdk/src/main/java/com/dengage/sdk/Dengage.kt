@@ -401,7 +401,7 @@ object Dengage {
     }
 
     fun onMessageReceived(data: Map<String, String?>?) {
-
+        DengageUtils.registerBroadcast()
         DengageLogger.verbose("onMessageReceived method is called")
         if (!data.isNullOrEmpty()) {
             val pushMessage = Message.createFromMap(data)
