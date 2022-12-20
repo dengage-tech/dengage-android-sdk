@@ -2,12 +2,15 @@ package com.dengage.sdk.util
 
 import android.app.ActivityManager
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.telephony.TelephonyManager
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.Message
+import com.dengage.sdk.push.NotificationReceiver
 import java.util.*
 
 object DengageUtils {
@@ -40,7 +43,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.6.2"
+        return "6.0.7.2"
     }
 
     fun getUserAgent(context: Context): String {
@@ -109,4 +112,41 @@ object DengageUtils {
             true
         }
     }
+
+
+    fun registerBroadcast() {
+        try {
+            val filter = IntentFilter(Constants.PUSH_RECEIVE_EVENT)
+            filter.addAction(Constants.PUSH_OPEN_EVENT)
+            filter.addAction(Constants.PUSH_DELETE_EVENT)
+            filter.addAction(Constants.PUSH_ACTION_CLICK_EVENT)
+            filter.addAction(Constants.PUSH_ITEM_CLICK_EVENT)
+            filter.addAction("com.dengage.push.intent.CAROUSEL_ITEM_CLICK")
+            ContextHolder.context.applicationContext.registerReceiver(
+                NotificationReceiver(),
+                filter
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun unregisterBroadcast() {
+        try {
+            ContextHolder.context.unregisterReceiver(NotificationReceiver())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun sendBroadCast(intent: Intent, context: Context) {
+        try {
+            val broadCastIntent = Intent(intent.action)
+            broadCastIntent.putExtras(intent.extras!!)
+            context.sendBroadcast(broadCastIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
 }

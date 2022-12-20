@@ -21,6 +21,11 @@ class App : Application() {
         )
         Dengage.setLogStatus(true)
         Dengage.disableInAppIntentHandling(true)
+        /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
+      registerReceiver(
+          PushNotificationReceiver(),
+          filter
+      )*/
     }
 
 }
