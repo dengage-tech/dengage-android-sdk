@@ -19,6 +19,11 @@ class App : Application() {
             geofenceEnabled = true
         )
         Dengage.setLogStatus(true)
+        /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
+       registerReceiver(
+           PushNotificationReceiver(),
+           filter
+       )*/
     }
 
 }
