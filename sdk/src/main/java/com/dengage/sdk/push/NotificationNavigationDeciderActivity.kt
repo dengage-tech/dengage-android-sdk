@@ -29,7 +29,7 @@ class NotificationNavigationDeciderActivity : Activity() {
     override fun onResume() {
         super.onResume()
 
-        val sendingIntentObject: Intent
+        var sendingIntentObject: Intent
 
         if (intent != null) {
 
@@ -72,9 +72,19 @@ class NotificationNavigationDeciderActivity : Activity() {
                 }
 
                 DengageUtils.sendBroadCast(intent, this)
+                try {
+                    startActivity(sendingIntentObject)
+                } catch (e: Exception) {
+                    val packageName: String = packageName
 
-                startActivity(sendingIntentObject)
+                    sendingIntentObject =
+                        Intent(this@NotificationNavigationDeciderActivity, getActivity())
 
+                    sendingIntentObject.putExtras(extras)
+
+                    sendingIntentObject.setPackage(packageName)
+                    startActivity(sendingIntentObject)
+                }
 
             } else {
 
