@@ -2,13 +2,10 @@ package com.dengage.sdk.ui.inappmessage
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -19,7 +16,6 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.R
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
@@ -31,6 +27,7 @@ import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchSettingsActivity
 import kotlin.math.roundToInt
+
 
 class InAppMessageActivity : Activity(), View.OnClickListener {
 
@@ -216,16 +213,38 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     ).show()
                     this@InAppMessageActivity.launchSettingsActivity()
                 }
-            } else if (Prefs.handleIntentInApp) {
+            } else if (Prefs.inAppDeeplink.contains(targetUrl)&&Prefs.inAppDeeplink.isNotEmpty()) {
 
                 try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
-                    intent.putExtra("targetUrl", targetUrl)
-                    intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
+                    if(Prefs.retrieveLinkOnSameScreen){
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                        intent.putExtra("targetUrl", targetUrl)
+                        intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
+                    }
+                    else
+                    {
+                        this@InAppMessageActivity.launchActivity(null, targetUrl)
+                    }
                 } catch (e: Exception) {
                     DengageLogger.error(e.message)
                 }
-            } else {
+            }
+            else if(Prefs.retrieveLinkOnSameScreen&&!Prefs.openInAppBrowser)
+            {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                intent.putExtra("targetUrl", targetUrl)
+                intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
+            }
+            else if(Prefs.openInAppBrowser)
+            {
+                val intent = InAppBrowserActivity.Builder.getBuilder()
+                    .withUrl(targetUrl)
+                    .build(this@InAppMessageActivity)
+
+                startActivity(intent)
+            }
+
+            else {
                 this@InAppMessageActivity.launchActivity(null, targetUrl)
             }
 

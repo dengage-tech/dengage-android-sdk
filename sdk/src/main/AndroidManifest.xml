@@ -38,6 +38,8 @@
             android:name=".ui.inappmessage.InAppMessageActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar" />
+        <activity android:name=".ui.inappmessage.InAppBrowserActivity"
+        android:theme="@style/BrowserTheme.NoActionBar"/>
 
         <activity
             android:name=".push.NotificationNavigationDeciderActivity"

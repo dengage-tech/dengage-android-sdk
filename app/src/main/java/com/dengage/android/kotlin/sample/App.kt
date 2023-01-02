@@ -30,7 +30,7 @@ class App : Application() {
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY
         )
         Dengage.setLogStatus(true)
-        Dengage.disableInAppIntentHandling(true)
+        Dengage.inAppLinkConfiguration(openInAppBrowser = true, retrieveLinkOnSameScreen = true,)
       /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
         registerReceiver(
             PushNotificationReceiver(),
