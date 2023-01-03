@@ -114,7 +114,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    if (Prefs.handleIntentInApp) {
+                    if (Prefs.retrieveLinkOnSameScreen) {
                         activity.startActivityForResult(
                             InAppMessageActivity.newIntent(
                                 activity,

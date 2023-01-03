@@ -739,8 +739,13 @@ object Dengage {
         subscriptionManager.setPartnerDeviceId(adid = adid)
     }
 
-
-    fun disableInAppIntentHandling(handle: Boolean = false) {
-        Prefs.handleIntentInApp = handle
+    fun inAppLinkConfiguration(
+        openInAppBrowser: Boolean = false,
+        retrieveLinkOnSameScreen: Boolean = false,
+        inappDeeplink: String = ""
+    ) {
+        Prefs.openInAppBrowser = openInAppBrowser
+        Prefs.retrieveLinkOnSameScreen = retrieveLinkOnSameScreen
+        Prefs.inAppDeeplink = inappDeeplink
     }
 }

@@ -70,6 +70,9 @@
             android:launchMode="singleInstance"
             android:exported="false" />
 
+        <activity android:name=".ui.inappmessage.InAppBrowserActivity"
+            android:theme="@style/BrowserTheme.NoActionBar"/>
+
     </application>
 
 </manifest>

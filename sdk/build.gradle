@@ -71,4 +71,6 @@ dependencies {
 
     // geofence
     implementation "com.google.android.gms:play-services-location:19.0.1"
+
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 }
