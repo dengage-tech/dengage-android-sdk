@@ -56,7 +56,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         }
 
         if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
-            System.currentTimeMillis() >= Prefs.realTimeInAppMessageFetchTime
+            System.currentTimeMillis() >= Prefs.realTimeInAppMessageFetchTime&& DengageUtils.foregrounded()
         ) {
             val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
                 ?: 0) * 60000
