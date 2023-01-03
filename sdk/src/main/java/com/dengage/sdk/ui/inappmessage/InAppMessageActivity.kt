@@ -24,6 +24,7 @@ import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchSettingsActivity
 import kotlin.math.roundToInt
@@ -213,38 +214,30 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     ).show()
                     this@InAppMessageActivity.launchSettingsActivity()
                 }
-            } else if (Prefs.inAppDeeplink.contains(targetUrl)&&Prefs.inAppDeeplink.isNotEmpty()) {
+            } else if (DengageUtils.isDeeplink(targetUrl)) {
 
                 try {
-                    if(Prefs.retrieveLinkOnSameScreen){
+                    if (Prefs.retrieveLinkOnSameScreen) {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                         intent.putExtra("targetUrl", targetUrl)
                         intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
-                    }
-                    else
-                    {
+                    } else {
                         this@InAppMessageActivity.launchActivity(null, targetUrl)
                     }
                 } catch (e: Exception) {
                     DengageLogger.error(e.message)
                 }
-            }
-            else if(Prefs.retrieveLinkOnSameScreen&&!Prefs.openInAppBrowser)
-            {
+            } else if (Prefs.retrieveLinkOnSameScreen && !Prefs.openInAppBrowser) {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                 intent.putExtra("targetUrl", targetUrl)
                 intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
-            }
-            else if(Prefs.openInAppBrowser)
-            {
+            } else if (Prefs.openInAppBrowser) {
                 val intent = InAppBrowserActivity.Builder.getBuilder()
                     .withUrl(targetUrl)
                     .build(this@InAppMessageActivity)
 
                 startActivity(intent)
-            }
-
-            else {
+            } else {
                 this@InAppMessageActivity.launchActivity(null, targetUrl)
             }
 

@@ -149,4 +149,8 @@ object DengageUtils {
         }
     }
 
+
+    fun isDeeplink(targetUrl: String): Boolean {
+        return (targetUrl.contains(Prefs.inAppDeeplink) || Prefs.inAppDeeplink.contains(targetUrl))&&targetUrl.isNotEmpty()
+    }
 }
