@@ -30,7 +30,9 @@ enum class PreferenceKey {
     LAST_SESSION_DURATION,
     LAST_SESSION_VISIT_TIME,
     VISIT_COUNTS,
-    HANDLE_INTENT_INAPP,
+    OPEN_INAPP_BROWSER,
+    RETRIEVE_LINK_ON_SAME_SCREEN,
+    INAPP_DEEPLINK,
     VISITOR_INFO;
 
     override fun toString(): String = name
