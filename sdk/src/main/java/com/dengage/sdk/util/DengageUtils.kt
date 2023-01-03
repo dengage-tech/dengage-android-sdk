@@ -43,7 +43,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.8.2"
+        return "6.0.9.2"
     }
 
     fun getUserAgent(context: Context): String {
@@ -149,4 +149,7 @@ object DengageUtils {
         }
     }
 
+    fun isDeeplink(targetUrl: String): Boolean {
+        return (targetUrl.contains(Prefs.inAppDeeplink) || Prefs.inAppDeeplink.contains(targetUrl))&&targetUrl.isNotEmpty()
+    }
 }

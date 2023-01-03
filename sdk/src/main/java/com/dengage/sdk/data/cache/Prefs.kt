@@ -125,10 +125,17 @@ object Prefs {
         get() = preferences.get(PreferenceKey.VISITOR_INFO)
         set(value) = preferences.set(PreferenceKey.VISITOR_INFO, value)
 
-    internal var handleIntentInApp: Boolean
-        get() = preferences.get(PreferenceKey.HANDLE_INTENT_INAPP, false) ?: false
-        set(value) = preferences.set(PreferenceKey.HANDLE_INTENT_INAPP, value)
+    internal var openInAppBrowser: Boolean
+        get() = preferences.get(PreferenceKey.OPEN_INAPP_BROWSER, false) ?: false
+        set(value) = preferences.set(PreferenceKey.OPEN_INAPP_BROWSER, value)
 
+    internal var retrieveLinkOnSameScreen: Boolean
+        get() = preferences.get(PreferenceKey.RETRIEVE_LINK_ON_SAME_SCREEN, false) ?: false
+        set(value) = preferences.set(PreferenceKey.RETRIEVE_LINK_ON_SAME_SCREEN, value)
+
+    internal var inAppDeeplink: String
+        get() = preferences.get(PreferenceKey.INAPP_DEEPLINK, "") ?: ""
+        set(value) = preferences.set(PreferenceKey.INAPP_DEEPLINK, value)
 
     fun clear() {
         preferences.edit().clear().apply()
