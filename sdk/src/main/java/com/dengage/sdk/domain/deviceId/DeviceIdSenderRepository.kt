@@ -14,6 +14,6 @@ suspend fun sendDeviceIDToServer(
     token: String,
     deviceId:String
 ): Response<Unit> {
-    return service.sendDeviceId(route, token, deviceIdObject = DeviceIdModel(deviceId))
+    return service.sendDeviceId(route, "Bearer $token", deviceIdObject = DeviceIdModel(deviceId))
 }
 }

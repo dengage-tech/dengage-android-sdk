@@ -87,7 +87,7 @@
             android:value="https://push.dengage.com" />
         <meta-data
             android:name="den_device_id_api_url"
-            android:value="https://magento.232.dengage.shobii.com" />
+            android:value="https://magento.232.dengage.shobii.com/rest/" />
 
         <!-- Real time inapp api url of Dengage -->
         <meta-data
