@@ -28,7 +28,8 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         }
 
         binding.btnCountry.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeToCountry())
+           // findNavController().navigate(HomeFragmentDirections.actionHomeToCountry())
+            Dengage.sendDeviceIdToServer("V1/dengage/sync/mobile/customerData","jp8c615tk235gjfd378r9bwjlkzhq6m7")
         }
 
         binding.btnInboxMessages.setOnClickListener {

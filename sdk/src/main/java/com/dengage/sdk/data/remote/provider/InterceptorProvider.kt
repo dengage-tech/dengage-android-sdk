@@ -1,6 +1,7 @@
 package com.dengage.sdk.data.remote.provider
 
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageUtils
 import okhttp3.Interceptor
@@ -78,6 +79,11 @@ class InterceptorProvider {
             put("Cache-Control", "no-cache")
             put("Content-Type", "application/json")
             put("User-Agent", DengageUtils.getUserAgent(ContextHolder.context))
+            if (Constants.deviceToken.isNotEmpty()) {
+                put("Cookie", "PHPSESSID=${Constants.deviceToken}")
+                Constants.deviceToken = ""
+            }
+
         }
         return headers
     }

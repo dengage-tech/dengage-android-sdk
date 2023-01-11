@@ -656,6 +656,7 @@ object Dengage {
                 } else if (route.isNullOrEmpty()) {
                     DengageLogger.error("Device id api route is not provided")
                 } else {
+                    Constants.deviceToken=token
                     deviceIdSenderManager.sendDeviceId("$this$route", token)
                 }
             }
