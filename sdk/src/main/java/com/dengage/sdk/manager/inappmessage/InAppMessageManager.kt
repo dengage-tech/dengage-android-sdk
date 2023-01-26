@@ -8,10 +8,13 @@ import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
 import java.util.*
 
-class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
+class InAppMessageManager :
+    BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
     InAppMessageContract.View, InAppMessageActivity.InAppMessageCallback {
 
     override fun providePresenter() = InAppMessagePresenter()
+
+    private var inAppMessageFetchCallback: InAppMessageFetchCallback? = null
 
     /**
      * Call this method for the pages that you should show in app message if available
@@ -31,7 +34,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
             val priorInAppMessage =
                 InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params)
             if (priorInAppMessage != null) {
-                showInAppMessage(activity, priorInAppMessage,resultCode)
+                showInAppMessage(activity, priorInAppMessage, resultCode)
             }
         }
     }
@@ -39,7 +42,9 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     /**
      * Fetch in app messages if enabled and fetch time is available
      */
-    internal fun fetchInAppMessages() {
+    internal fun fetchInAppMessages(inAppMessageFetchCallbackParam: InAppMessageFetchCallback?) {
+       var inappMessage=inAppMessageFetchCallbackParam
+        inAppMessageFetchCallback=inappMessage
         presenter.getInAppMessages()
     }
 
@@ -50,6 +55,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     internal fun fetchInAppExpiredMessageIds() {
         presenter.fetchInAppExpiredMessageIds()
     }
+
     /**
      * Call service for setting in app message as displayed
      */
@@ -84,7 +90,11 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     /**
      * Show in app message dialog on activity screen
      */
-    private fun showInAppMessage(activity: Activity, inAppMessage: InAppMessage,resultCode: Int = -1) {
+    private fun showInAppMessage(
+        activity: Activity,
+        inAppMessage: InAppMessage,
+        resultCode: Int = -1
+    ) {
         setInAppMessageAsDisplayed(
             inAppMessage = inAppMessage
         )
@@ -93,7 +103,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
             inAppMessage.data.displayTiming.showEveryXMinutes != 0
         ) {
             inAppMessage.data.nextDisplayTime = System.currentTimeMillis() +
-                inAppMessage.data.displayTiming.showEveryXMinutes!! * 60000L
+                    inAppMessage.data.displayTiming.showEveryXMinutes!! * 60000L
             inAppMessage.data.showCount = inAppMessage.data.showCount + 1
             updateInAppMessageOnCache(inAppMessage)
         } else {
@@ -107,7 +117,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
 
         // update next in app message show time
         Prefs.inAppMessageShowTime = System.currentTimeMillis() +
-            ((Prefs.sdkParameters?.inAppMinSecBetweenMessages ?: 0) * 1000)
+                ((Prefs.sdkParameters?.inAppMinSecBetweenMessages ?: 0) * 1000)
 
         // set delay for showing in app message
         val delay = (inAppMessage.data.displayTiming.delay ?: 0) * 1000L
@@ -120,7 +130,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
                                 activity,
                                 inAppMessage,
                                 resultCode
-                            ),resultCode
+                            ), resultCode
                         )
 
                     } else {
@@ -154,7 +164,12 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         Prefs.inAppMessages = inAppMessages
     }
 
-    override fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean) {
+    override fun fetchedInAppMessages(
+        inAppMessages: MutableList<InAppMessage>?,
+        isRealTime: Boolean
+    ) {
+
+        inAppMessageFetchCallback?.inAppMessageFetched(isRealTime)
         if (!inAppMessages.isNullOrEmpty()) {
             var existingInAppMessages = Prefs.inAppMessages
             if (existingInAppMessages == null) {
@@ -165,9 +180,9 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
                     // remove non existing real time in app messages
                     existingInAppMessages.removeAll { existingInAppMessage ->
                         existingInAppMessage.data.isRealTime() &&
-                            inAppMessages.firstOrNull { inAppMessage ->
-                                inAppMessage.id == existingInAppMessage.id
-                            } == null
+                                inAppMessages.firstOrNull { inAppMessage ->
+                                    inAppMessage.id == existingInAppMessage.id
+                                } == null
                     }
 
                     // find duplicated ones and update them

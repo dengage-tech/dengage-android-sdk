@@ -52,7 +52,7 @@ class NotificationNavigationDeciderActivity : Activity() {
 
                     sendingIntentObject =
                         Intent(this@NotificationNavigationDeciderActivity, getActivity())
-
+                    sendingIntentObject.action=intent.action
                     sendingIntentObject.putExtras(extras)
 
                     sendingIntentObject.setPackage(packageName)
@@ -60,14 +60,14 @@ class NotificationNavigationDeciderActivity : Activity() {
                 }
 
 
-                var message: Message? = Message.createFromIntent(extras)
+              //  var message: Message? = Message.createFromIntent(extras)
 
                 val rawJson = extras.getString("RAW_DATA")
 
 
                 if (!TextUtils.isEmpty(rawJson)) {
 
-                    message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
+                  //  message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
 
                 }
 
@@ -81,7 +81,7 @@ class NotificationNavigationDeciderActivity : Activity() {
                         Intent(this@NotificationNavigationDeciderActivity, getActivity())
 
                     sendingIntentObject.putExtras(extras)
-
+                    sendingIntentObject.action=intent.action
                     sendingIntentObject.setPackage(packageName)
                     startActivity(sendingIntentObject)
                 }

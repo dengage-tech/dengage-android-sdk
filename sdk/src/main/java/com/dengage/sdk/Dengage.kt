@@ -24,6 +24,7 @@ import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
 import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.manager.event.EventManager
+import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
@@ -44,6 +45,7 @@ object Dengage {
     private val inAppSessionManager by lazy { InAppSessionManager() }
 
     internal var initialized = false
+    private var isInAppFetched: Boolean = false
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -70,7 +72,13 @@ object Dengage {
         )
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
-                inAppMessageManager.fetchInAppMessages()
+                inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
+                    InAppMessageFetchCallback {
+                    override fun inAppMessageFetched(realTime: Boolean) {
+                        isInAppFetched = true;
+                    }
+
+                })
             }
 
             override fun startAppTracking(appTrackings: List<AppTracking>?) {
@@ -262,7 +270,13 @@ object Dengage {
     }
 
     fun getInAppMessages() {
-        inAppMessageManager.fetchInAppMessages()
+        inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
+            InAppMessageFetchCallback {
+            override fun inAppMessageFetched(realTime: Boolean) {
+                isInAppFetched = true;
+            }
+
+        })
     }
 
     /**
@@ -670,7 +684,7 @@ object Dengage {
                 } else if (route.isNullOrEmpty()) {
                     DengageLogger.error("Device id api route is not provided")
                 } else {
-                    Constants.deviceToken=token
+                    Constants.deviceToken = token
                     deviceIdSenderManager.sendDeviceId("$this$route", token)
                 }
             }
@@ -692,5 +706,9 @@ object Dengage {
         Prefs.openInAppBrowser = openInAppBrowser
         Prefs.retrieveLinkOnSameScreen = retrieveLinkOnSameScreen
         Prefs.inAppDeeplink = inappDeeplink
+    }
+
+    fun isInAppFetched(): Boolean {
+        return isInAppFetched
     }
 }
