@@ -53,6 +53,8 @@ class NotificationNavigationDeciderActivity : Activity() {
                     sendingIntentObject =
                         Intent(this@NotificationNavigationDeciderActivity, getActivity())
 
+                    sendingIntentObject.action=intent.action
+
                     sendingIntentObject.putExtras(extras)
 
                     sendingIntentObject.setPackage(packageName)
@@ -79,6 +81,8 @@ class NotificationNavigationDeciderActivity : Activity() {
 
                     sendingIntentObject =
                         Intent(this@NotificationNavigationDeciderActivity, getActivity())
+
+                    sendingIntentObject.action=intent.action
 
                     sendingIntentObject.putExtras(extras)
 
