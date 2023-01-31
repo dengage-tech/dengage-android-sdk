@@ -127,7 +127,7 @@ object DengageUtils {
                 filter
             )
         } catch (e: Exception) {
-            e.printStackTrace()
+          //  e.printStackTrace()
         }
     }
 
@@ -135,7 +135,7 @@ object DengageUtils {
         try {
             ContextHolder.context.unregisterReceiver(NotificationReceiver())
         } catch (e: Exception) {
-            e.printStackTrace()
+           // e.printStackTrace()
         }
     }
 
