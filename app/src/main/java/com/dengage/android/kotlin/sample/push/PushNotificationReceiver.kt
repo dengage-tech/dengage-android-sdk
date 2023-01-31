@@ -123,10 +123,7 @@ class PushNotificationReceiver : NotificationReceiver() {
             notification
         )
     }
-    override fun onActionClick(context: Context, intent: Intent) {
-        super.onActionClick(context, intent)
-        Log.d("NotificationReceiver:",intent.toString())
-    }
+
 
 
 }

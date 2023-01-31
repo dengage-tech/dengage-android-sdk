@@ -83,7 +83,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    open fun onActionClick(context: Context, intent: Intent) {
+     private fun onActionClick(context: Context, intent: Intent) {
         DengageLogger.verbose("$TAG onActionClick method is called")
 
         var uri: String? = null

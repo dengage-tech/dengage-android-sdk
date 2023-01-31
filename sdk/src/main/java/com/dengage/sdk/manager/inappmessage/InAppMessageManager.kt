@@ -13,6 +13,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
 
     override fun providePresenter() = InAppMessagePresenter()
 
+    private var inAppMessageFetchCallback: InAppMessageFetchCallback? = null
     /**
      * Call this method for the pages that you should show in app message if available
      */
@@ -39,7 +40,9 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     /**
      * Fetch in app messages if enabled and fetch time is available
      */
-    internal fun fetchInAppMessages() {
+    internal fun fetchInAppMessages(inAppMessageFetchCallbackParam: InAppMessageFetchCallback?) {
+        var inappMessage=inAppMessageFetchCallbackParam
+        inAppMessageFetchCallback=inappMessage
         presenter.getInAppMessages()
     }
 
@@ -155,6 +158,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
     }
 
     override fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean) {
+        inAppMessageFetchCallback?.inAppMessageFetched(isRealTime)
         if (!inAppMessages.isNullOrEmpty()) {
             var existingInAppMessages = Prefs.inAppMessages
             if (existingInAppMessages == null) {
