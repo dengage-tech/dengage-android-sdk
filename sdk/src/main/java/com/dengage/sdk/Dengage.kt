@@ -37,7 +37,7 @@ import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
-
+import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
 object Dengage {
 
      val configurationManager by lazy { ConfigurationManager() }
@@ -52,6 +52,8 @@ object Dengage {
     private val inAppSessionManager by lazy { InAppSessionManager() }
 
     internal var initialized = false
+
+    private var isInAppFetched: Boolean = false
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -77,7 +79,13 @@ object Dengage {
         )
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
-                inAppMessageManager.fetchInAppMessages()
+                inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
+                    InAppMessageFetchCallback {
+                    override fun inAppMessageFetched(realTime: Boolean) {
+                        isInAppFetched = true;
+                    }
+
+                })
             }
 
             override fun startAppTracking(appTrackings: List<AppTracking>?) {
@@ -269,7 +277,13 @@ object Dengage {
     }
 
      fun getInAppMessages() {
-        inAppMessageManager.fetchInAppMessages()
+         inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
+             InAppMessageFetchCallback {
+             override fun inAppMessageFetched(realTime: Boolean) {
+                 isInAppFetched = true;
+             }
+
+         })
     }
 
     fun getInAppExpiredMessageIds() {
@@ -739,6 +753,10 @@ object Dengage {
         Prefs.openInAppBrowser = openInAppBrowser
         Prefs.retrieveLinkOnSameScreen = retrieveLinkOnSameScreen
         Prefs.inAppDeeplink = inappDeeplink
+    }
+
+    fun isInAppFetched(): Boolean {
+        return isInAppFetched
     }
 
 }
