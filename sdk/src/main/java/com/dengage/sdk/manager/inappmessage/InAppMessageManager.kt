@@ -117,24 +117,16 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    if (Prefs.retrieveLinkOnSameScreen) {
-                        activity.startActivityForResult(
-                            InAppMessageActivity.newIntent(
-                                activity,
-                                inAppMessage,
-                                resultCode
-                            ),resultCode
-                        )
 
-                    } else {
-                        activity.startActivity(
-                            InAppMessageActivity.newIntent(
-                                activity,
-                                inAppMessage,
-                                -1
-                            )
-                        )
-                    }
+                    activity.startActivityForResult(
+                        InAppMessageActivity.newIntent(
+                            activity,
+                            inAppMessage,
+                            resultCode
+                        ),resultCode
+                    )
+
+
                     if (!inAppMessage.data.content.params.shouldAnimate) {
                         activity.overridePendingTransition(0, 0)
                     }
@@ -159,6 +151,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
 
     override fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean) {
         inAppMessageFetchCallback?.inAppMessageFetched(isRealTime)
+
         if (!inAppMessages.isNullOrEmpty()) {
             var existingInAppMessages = Prefs.inAppMessages
             if (existingInAppMessages == null) {
