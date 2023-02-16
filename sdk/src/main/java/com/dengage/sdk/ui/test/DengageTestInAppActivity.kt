@@ -63,7 +63,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             inAppMessages.add(0, it)
             Prefs.inAppMessages = inAppMessages
 
-            Dengage.setNavigation(this)
+            Dengage.setNavigation(this,1232)
         }
     }
 

@@ -755,12 +755,9 @@ object Dengage {
     }
 
     fun inAppLinkConfiguration(
-        openInAppBrowser: Boolean = false,
-        retrieveLinkOnSameScreen: Boolean = false,
         inappDeeplink: String = ""
     ) {
-        Prefs.openInAppBrowser = openInAppBrowser
-        Prefs.retrieveLinkOnSameScreen = retrieveLinkOnSameScreen
+
         Prefs.inAppDeeplink = inappDeeplink
     }
 

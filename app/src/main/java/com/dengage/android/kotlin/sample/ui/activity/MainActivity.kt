@@ -32,6 +32,12 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.d("oops","sdsd $data")
+    }
+
+
     override fun onSupportNavigateUp(): Boolean =
         findNavController(R.id.navigationHostFragment).navigateUp()
 

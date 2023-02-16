@@ -117,7 +117,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    if (Prefs.retrieveLinkOnSameScreen) {
+
                         activity.startActivityForResult(
                             InAppMessageActivity.newIntent(
                                 activity,
@@ -126,15 +126,7 @@ class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessa
                             ),resultCode
                         )
 
-                    } else {
-                        activity.startActivity(
-                            InAppMessageActivity.newIntent(
-                                activity,
-                                inAppMessage,
-                                -1
-                            )
-                        )
-                    }
+
                     if (!inAppMessage.data.content.params.shouldAnimate) {
                         activity.overridePendingTransition(0, 0)
                     }

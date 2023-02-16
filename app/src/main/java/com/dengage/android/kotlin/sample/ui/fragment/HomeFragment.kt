@@ -14,7 +14,7 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
     override fun init() {
         sendPageView("home")
-
+            //Dengage.inAppLinkConfiguration("pazarma.app")
         binding.btnDeviceInfo.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
         }

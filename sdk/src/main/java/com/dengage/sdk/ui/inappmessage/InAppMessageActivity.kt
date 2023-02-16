@@ -33,6 +33,7 @@ import kotlin.math.roundToInt
 class InAppMessageActivity : Activity(), View.OnClickListener {
 
     private lateinit var inAppMessage: InAppMessage
+    private var isAndroidUrlNPresent: Boolean? =false;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,6 +107,8 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         }
 
         vHtmlContent.visibility = View.VISIBLE
+
+           isAndroidUrlNPresent = contentParams.html?.contains("Dn.androidUrlN")
 
         webView.apply {
 
@@ -203,7 +206,33 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         @JavascriptInterface
         fun androidUrl(targetUrl: String) {
-            DengageLogger.verbose("In app message: android target url event $targetUrl")
+            if(isAndroidUrlNPresent == false) {
+                DengageLogger.verbose("In app message: android target url event $targetUrl")
+
+                if (targetUrl == "Dn.promptPushPermission()") {
+                    if (!this@InAppMessageActivity.areNotificationsEnabled()) {
+                        Toast.makeText(
+                            this@InAppMessageActivity,
+                            "You need to enable push permission",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        this@InAppMessageActivity.launchSettingsActivity()
+                    }
+                } else {
+                    try {
+                        this@InAppMessageActivity.launchActivity(null, targetUrl)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+
+
+        }
+
+        @JavascriptInterface
+        fun androidUrlN(targetUrl: String,inAppBrowser : Boolean , retrieveOnSameLink : Boolean) {
+            DengageLogger.verbose("In app message: android target url n event $targetUrl")
 
             if (targetUrl == "Dn.promptPushPermission()") {
                 if (!this@InAppMessageActivity.areNotificationsEnabled()) {
@@ -217,7 +246,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             } else if (DengageUtils.isDeeplink(targetUrl)) {
 
                 try {
-                    if (Prefs.retrieveLinkOnSameScreen) {
+                    if (retrieveOnSameLink) {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                         intent.putExtra("targetUrl", targetUrl)
                         intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
@@ -227,11 +256,11 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                 } catch (e: Exception) {
                     DengageLogger.error(e.message)
                 }
-            } else if (Prefs.retrieveLinkOnSameScreen && !Prefs.openInAppBrowser) {
+            } else if (retrieveOnSameLink && !inAppBrowser) {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                 intent.putExtra("targetUrl", targetUrl)
                 intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
-            } else if (Prefs.openInAppBrowser) {
+            } else if (inAppBrowser) {
                 val intent = InAppBrowserActivity.Builder.getBuilder()
                     .withUrl(targetUrl)
                     .build(this@InAppMessageActivity)
@@ -257,7 +286,15 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         @JavascriptInterface
         fun close() {
-            DengageLogger.verbose("In app message: close event")
+            if(isAndroidUrlNPresent == false) {
+                DengageLogger.verbose("In app message: close event")
+                this@InAppMessageActivity.finish()
+            }
+        }
+
+        @JavascriptInterface
+        fun closeN() {
+            DengageLogger.verbose("In app message: close event n")
             this@InAppMessageActivity.finish()
         }
 
@@ -269,6 +306,11 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun iosUrl(targetUrl: String) {
             DengageLogger.verbose("In app message: ios target url event $targetUrl")
+        }
+
+        @JavascriptInterface
+        fun iosUrlN(targetUrl: String,inAppBrowser : Boolean , retrieveOnSameLink : Boolean) {
+            DengageLogger.verbose("In app message: ios target url n event $targetUrl")
         }
 
         @JavascriptInterface
