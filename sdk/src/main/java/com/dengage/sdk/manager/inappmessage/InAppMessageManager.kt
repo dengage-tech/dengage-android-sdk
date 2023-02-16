@@ -8,14 +8,12 @@ import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
 import java.util.*
 
-class InAppMessageManager :
-    BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
+class InAppMessageManager : BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
     InAppMessageContract.View, InAppMessageActivity.InAppMessageCallback {
 
     override fun providePresenter() = InAppMessagePresenter()
 
     private var inAppMessageFetchCallback: InAppMessageFetchCallback? = null
-
     /**
      * Call this method for the pages that you should show in app message if available
      */
@@ -34,7 +32,7 @@ class InAppMessageManager :
             val priorInAppMessage =
                 InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params)
             if (priorInAppMessage != null) {
-                showInAppMessage(activity, priorInAppMessage, resultCode)
+                showInAppMessage(activity, priorInAppMessage,resultCode)
             }
         }
     }
@@ -43,7 +41,7 @@ class InAppMessageManager :
      * Fetch in app messages if enabled and fetch time is available
      */
     internal fun fetchInAppMessages(inAppMessageFetchCallbackParam: InAppMessageFetchCallback?) {
-       var inappMessage=inAppMessageFetchCallbackParam
+        var inappMessage=inAppMessageFetchCallbackParam
         inAppMessageFetchCallback=inappMessage
         presenter.getInAppMessages()
     }
@@ -55,7 +53,6 @@ class InAppMessageManager :
     internal fun fetchInAppExpiredMessageIds() {
         presenter.fetchInAppExpiredMessageIds()
     }
-
     /**
      * Call service for setting in app message as displayed
      */
@@ -90,11 +87,7 @@ class InAppMessageManager :
     /**
      * Show in app message dialog on activity screen
      */
-    private fun showInAppMessage(
-        activity: Activity,
-        inAppMessage: InAppMessage,
-        resultCode: Int = -1
-    ) {
+    private fun showInAppMessage(activity: Activity, inAppMessage: InAppMessage,resultCode: Int = -1) {
         setInAppMessageAsDisplayed(
             inAppMessage = inAppMessage
         )
@@ -124,24 +117,16 @@ class InAppMessageManager :
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 activity.runOnUiThread {
-                    if (Prefs.retrieveLinkOnSameScreen) {
-                        activity.startActivityForResult(
-                            InAppMessageActivity.newIntent(
-                                activity,
-                                inAppMessage,
-                                resultCode
-                            ), resultCode
-                        )
 
-                    } else {
-                        activity.startActivity(
-                            InAppMessageActivity.newIntent(
-                                activity,
-                                inAppMessage,
-                                -1
-                            )
-                        )
-                    }
+                    activity.startActivityForResult(
+                        InAppMessageActivity.newIntent(
+                            activity,
+                            inAppMessage,
+                            resultCode
+                        ),resultCode
+                    )
+
+
                     if (!inAppMessage.data.content.params.shouldAnimate) {
                         activity.overridePendingTransition(0, 0)
                     }
@@ -164,12 +149,9 @@ class InAppMessageManager :
         Prefs.inAppMessages = inAppMessages
     }
 
-    override fun fetchedInAppMessages(
-        inAppMessages: MutableList<InAppMessage>?,
-        isRealTime: Boolean
-    ) {
-
+    override fun fetchedInAppMessages(inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean) {
         inAppMessageFetchCallback?.inAppMessageFetched(isRealTime)
+
         if (!inAppMessages.isNullOrEmpty()) {
             var existingInAppMessages = Prefs.inAppMessages
             if (existingInAppMessages == null) {
