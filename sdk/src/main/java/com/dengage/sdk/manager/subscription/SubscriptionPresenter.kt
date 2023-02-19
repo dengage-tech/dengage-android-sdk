@@ -4,7 +4,6 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.subscription.usecase.SendSubscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
-import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +22,7 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
     override fun sendSubscription(subscription: Subscription) {
         scope.launch {
             delay(4000)
-            if (DengageUtils.foregrounded()) {
+            if (DengageUtils.isAppInForeground()) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
                      Prefs.subscription?.let { callSubscriptionApi(it) }
                 } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {

@@ -102,7 +102,7 @@ object DengageUtils {
         return ""
     }
 
-    fun foregrounded(): Boolean {
+    fun isAppInForeground(): Boolean {
         return try {
             val appProcessInfo = ActivityManager.RunningAppProcessInfo()
             ActivityManager.getMyMemoryState(appProcessInfo)
