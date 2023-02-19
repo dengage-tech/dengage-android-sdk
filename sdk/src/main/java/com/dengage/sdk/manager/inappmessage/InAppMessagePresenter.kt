@@ -33,7 +33,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             //if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
             // val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
-            Prefs.inAppMessageFetchTime = System.currentTimeMillis() + 0
+           // Prefs.inAppMessageFetchTime = System.currentTimeMillis() + 0
 
             getInAppMessages(this) {
                 onResponse = {
@@ -42,7 +42,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     }
                 }
                 onError = {
-                    Prefs.inAppMessageFetchTime = System.currentTimeMillis()
+                  //  Prefs.inAppMessageFetchTime = System.currentTimeMillis()
                     view { showError(it) }
                 }
                 params = GetInAppMessages.Params(
