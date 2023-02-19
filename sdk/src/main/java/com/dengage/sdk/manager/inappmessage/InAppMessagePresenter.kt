@@ -5,7 +5,6 @@ import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.usecase.GetVisitorInfo
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.usecase.*
-import com.dengage.sdk.domain.inappmessage.usecase.*
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
 import com.dengage.sdk.util.DengageUtils
@@ -28,13 +27,13 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     override fun getInAppMessages() {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
-        if (isInAppMessageEnabled(subscription, sdkParameters)&& DengageUtils.foregrounded()) {
+        if (isInAppMessageEnabled(subscription, sdkParameters)&& DengageUtils.isAppInForeground()) {
 
             // control next in app message fetch time
             //if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
            // val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
-            Prefs.inAppMessageFetchTime = System.currentTimeMillis() + 0
+           // Prefs.inAppMessageFetchTime = System.currentTimeMillis() + 0
 
             getInAppMessages(this) {
                 onResponse = {
@@ -43,7 +42,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     }
                 }
                 onError = {
-                    Prefs.inAppMessageFetchTime = System.currentTimeMillis()
+                 //   Prefs.inAppMessageFetchTime = System.currentTimeMillis()
                     view { showError(it) }
                 }
                 params = GetInAppMessages.Params(
@@ -56,7 +55,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         }
 
         if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
-            System.currentTimeMillis() >= Prefs.realTimeInAppMessageFetchTime&& DengageUtils.foregrounded()
+            System.currentTimeMillis() >= Prefs.realTimeInAppMessageFetchTime&& DengageUtils.isAppInForeground()
         ) {
             val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
                 ?: 0) * 60000
