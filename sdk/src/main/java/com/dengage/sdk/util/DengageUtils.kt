@@ -43,7 +43,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.11.3"
+        return "6.0.12.3"
     }
 
     fun getUserAgent(context: Context): String {
@@ -102,7 +102,7 @@ object DengageUtils {
         return ""
     }
 
-    fun foregrounded(): Boolean {
+    fun isAppInForeground(): Boolean {
         return try {
             val appProcessInfo = ActivityManager.RunningAppProcessInfo()
             ActivityManager.getMyMemoryState(appProcessInfo)

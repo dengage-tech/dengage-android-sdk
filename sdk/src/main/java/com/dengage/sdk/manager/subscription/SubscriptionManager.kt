@@ -19,10 +19,17 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     override fun providePresenter() = SubscriptionPresenter()
 
+    var firebaseIntegrationKey : String? = null
+    var huaweiIntegrationKey : String? =null
+
      fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
     ) {
+
+         this.firebaseIntegrationKey = firebaseIntegrationKey
+         this.huaweiIntegrationKey = huaweiIntegrationKey
+
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
             Prefs.subscription = PrefsOld.subscription
@@ -48,8 +55,9 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     internal fun setToken(token: String?) {
         val subscription = Prefs.subscription
 
-        if (subscription != null) {
-            subscription.token = token
+        if (subscription != null&&subscription.token.isNullOrEmpty()) {
+
+            if(subscription.tokenType == "A") subscription.integrationKey= this.firebaseIntegrationKey.toString() else this.huaweiIntegrationKey.toString()
 
             saveSubscription(subscription = subscription)
 
