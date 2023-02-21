@@ -55,9 +55,11 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     internal fun setToken(token: String?) {
         val subscription = Prefs.subscription
 
-        if (subscription != null&&subscription.token.isNullOrEmpty()) {
+        if (subscription != null&&!subscription.token.isNullOrEmpty()) {
 
             if(subscription.tokenType == "A") subscription.integrationKey= this.firebaseIntegrationKey.toString() else this.huaweiIntegrationKey.toString()
+
+            subscription.token = token
 
             saveSubscription(subscription = subscription)
 
