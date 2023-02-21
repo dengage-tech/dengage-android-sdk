@@ -15,6 +15,7 @@ import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.google.firebase.FirebaseApp
 import java.util.*
+import com.dengage.sdk.util.*
 import java.util.concurrent.TimeUnit
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
@@ -135,12 +136,14 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             onTokenResult = {
                 subscription.tokenType = TokenType.FIREBASE.type
                 subscription.token = it
+                subscription.integrationKey=Constants.GOOGLE_KEY_LOCAL
                 configurationCallback?.sendSubscription(subscription)
             }
         )
 
         ConfigurationUtils.getGmsAdvertisingId {
             subscription.advertisingId = it
+            subscription.integrationKey=Constants.GOOGLE_KEY_LOCAL
             configurationCallback?.sendSubscription(subscription)
         }
     }
@@ -150,12 +153,14 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             onTokenResult = {
                 subscription.tokenType = TokenType.HUAWEI.type
                 subscription.token = it
+                subscription.integrationKey=Constants.HUAWEI_KEY_LOCAL
                 configurationCallback?.sendSubscription(subscription)
             }
         )
 
         ConfigurationUtils.getHmsAdvertisingId {
             subscription.advertisingId = it
+            subscription.integrationKey=Constants.HUAWEI_KEY_LOCAL
             configurationCallback?.sendSubscription(subscription)
         }
     }

@@ -10,13 +10,13 @@ import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.GsonHolder
 import java.util.*
+import com.dengage.sdk.util.*
 
 class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
     SubscriptionContract.View {
 
     override fun providePresenter() = SubscriptionPresenter()
-    var firebaseIntegrationKey : String? = null
-    var huaweiIntegrationKey : String? =null
+
 
      fun buildSubscription(
         firebaseIntegrationKey: String?,
@@ -28,8 +28,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
             PrefsOld.subscription = null
         }
 
-         this.firebaseIntegrationKey = firebaseIntegrationKey
-         this.huaweiIntegrationKey = huaweiIntegrationKey
+
 
         var subscription = Prefs.subscription
         if (subscription == null) {
@@ -50,9 +49,9 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     internal fun setToken(token: String?) {
         val subscription = Prefs.subscription
 
-        if (subscription != null&&!subscription.token.isNullOrEmpty()) {
+        if (subscription != null&&subscription.token.isNullOrEmpty()) {
 
-            if(subscription.tokenType == "A") subscription.integrationKey= this.firebaseIntegrationKey.toString() else this.huaweiIntegrationKey.toString()
+            if(subscription.tokenType == "A") subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL else Constants.HUAWEI_KEY_LOCAL
 
             subscription.token = token
 

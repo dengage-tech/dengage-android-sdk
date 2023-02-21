@@ -15,6 +15,9 @@ object Constants {
     const val PUSH_ACTION_CLICK_EVENT = "com.dengage.push.intent.ACTION_CLICK"
     const val NOTIFICATION_CHANNEL_ID = "3374143"
     const val NOTIFICATION_CHANNEL_NAME = "General"
+
+    internal var HUAWEI_KEY_LOCAL=""
+    internal var GOOGLE_KEY_LOCAL=""
     var deviceToken=""
 }
 
