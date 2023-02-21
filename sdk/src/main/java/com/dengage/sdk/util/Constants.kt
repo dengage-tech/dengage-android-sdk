@@ -36,5 +36,8 @@ object Constants {
     const val GEOFENCE_FETCH_HISTORY_MAX_COUNT = 100
     const val GEOFENCE_EVENT_HISTORY_MAX_COUNT = 100
 
+    internal var HUAWEI_KEY_LOCAL=""
+    internal var GOOGLE_KEY_LOCAL=""
+
     var deviceToken=""
 }

@@ -75,10 +75,13 @@ object Dengage {
         ContextHolder.context = context
         SessionManager.getSessionId()
 
-        subscriptionManager.buildSubscription(
-            firebaseIntegrationKey = firebaseIntegrationKey,
-            huaweiIntegrationKey = huaweiIntegrationKey
-        )
+
+        if (huaweiIntegrationKey != null) {
+            Constants.HUAWEI_KEY_LOCAL=huaweiIntegrationKey
+        }
+        if (firebaseIntegrationKey != null) {
+            Constants.GOOGLE_KEY_LOCAL=firebaseIntegrationKey
+        }
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
                 inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :

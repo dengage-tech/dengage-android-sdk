@@ -6,10 +6,7 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.session.SessionManager
-import com.dengage.sdk.util.ContextHolder
-import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.DengageUtils
-import com.dengage.sdk.util.GsonHolder
+import com.dengage.sdk.util.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -19,16 +16,14 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     override fun providePresenter() = SubscriptionPresenter()
 
-    var firebaseIntegrationKey : String? = null
-    var huaweiIntegrationKey : String? =null
+
 
      fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
     ) {
 
-         this.firebaseIntegrationKey = firebaseIntegrationKey
-         this.huaweiIntegrationKey = huaweiIntegrationKey
+
 
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
@@ -55,9 +50,9 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     internal fun setToken(token: String?) {
         val subscription = Prefs.subscription
 
-        if (subscription != null&&!subscription.token.isNullOrEmpty()) {
+        if (subscription != null&&subscription.token.isNullOrEmpty()) {
 
-            if(subscription.tokenType == "A") subscription.integrationKey= this.firebaseIntegrationKey.toString() else this.huaweiIntegrationKey.toString()
+            if(subscription.tokenType == "A") subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL else Constants.HUAWEI_KEY_LOCAL
 
             subscription.token = token
 
