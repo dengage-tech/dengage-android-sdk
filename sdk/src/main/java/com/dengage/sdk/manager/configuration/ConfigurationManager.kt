@@ -154,6 +154,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
         ConfigurationUtils.getGmsAdvertisingId {
             subscription.advertisingId = it
+            subscription.integrationKey=Constants.GOOGLE_KEY_LOCAL
             configurationCallback?.sendSubscription(subscription)
         }
     }
@@ -170,6 +171,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
         ConfigurationUtils.getHmsAdvertisingId {
             subscription.advertisingId = it
+            subscription.integrationKey=Constants.HUAWEI_KEY_LOCAL
             configurationCallback?.sendSubscription(subscription)
         }
     }
