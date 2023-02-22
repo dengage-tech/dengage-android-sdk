@@ -316,6 +316,14 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun promptPushPermission() {
             DengageLogger.verbose("In app message: prompt push permission event")
+            if (!this@InAppMessageActivity.areNotificationsEnabled()) {
+                Toast.makeText(
+                    this@InAppMessageActivity,
+                    "You need to enable push permission",
+                    Toast.LENGTH_LONG
+                ).show()
+                this@InAppMessageActivity.launchSettingsActivity()
+            }
         }
     }
 
