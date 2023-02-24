@@ -137,7 +137,7 @@ internal object GeofenceState {
         lastLocationLatitude = location.latitude.toFloat()
         lastLocationLongitude = location.longitude.toFloat()
         lastLocationAccuracy = location.accuracy
-        lastLocationProvider = location.provider
+        lastLocationProvider = location.provider.toString()
         lastLocationTime = location.time
     }
 
@@ -160,7 +160,7 @@ internal object GeofenceState {
         lastMovedLocationLatitude = location.latitude.toFloat()
         lastMovedLocationLongitude = location.longitude.toFloat()
         lastMovedLocationAccuracy = location.accuracy
-        lastMovedLocationProvider = location.provider
+        lastMovedLocationProvider = location.provider.toString()
         lastMovedLocationTime = location.time
     }
 
@@ -190,7 +190,7 @@ internal object GeofenceState {
         lastFailedStoppedLocationLatitude = location.latitude.toFloat()
         lastFailedStoppedLocationLongitude = location.longitude.toFloat()
         lastFailedStoppedLocationAccuracy = location.accuracy
-        lastFailedStoppedLocationProvider = location.provider
+        lastFailedStoppedLocationProvider = location.provider.toString()
         lastFailedStoppedLocationTime = location.time
     }
 
