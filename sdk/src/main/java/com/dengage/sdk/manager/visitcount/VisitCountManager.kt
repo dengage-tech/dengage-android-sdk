@@ -7,7 +7,6 @@ import java.util.*
 
 object VisitCountManager {
 
-    private val dateFormatWithOutHours = SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH)
 
     fun updateVisitCount() {
         val dateTimeWithOutHour = findDateTimeWithOutHour(System.currentTimeMillis())
@@ -51,6 +50,7 @@ object VisitCountManager {
     private fun findDateTimeWithOutHour(
         timeInMillis: Long
     ): Long {
+        val dateFormatWithOutHours = SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH)
         val date = Date(timeInMillis)
         val formattedDate = dateFormatWithOutHours.format(date)
         return dateFormatWithOutHours.parse(formattedDate)!!.time
