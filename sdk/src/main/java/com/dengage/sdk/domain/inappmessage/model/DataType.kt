@@ -13,7 +13,7 @@ enum class DataType {
     BOOL,
 
     @SerializedName("TEXTLIST")
-    TEXT_LIST,
+    TEXTLIST,
 
     @SerializedName("DATETIME")
     DATETIME,

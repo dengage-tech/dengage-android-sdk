@@ -63,22 +63,22 @@ object InAppMessageUtils {
         // Also control nextDisplayTime for showEveryXMinutes type in app messages
         val inAppMessageWithoutScreenName = sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
             inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
-                inAppMessage.data.isDisplayTimeAvailable() &&
-                operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
+                    inAppMessage.data.isDisplayTimeAvailable() &&
+                    operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
         }
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
         } else {
             val inAppMessageWithScreenName = sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.isDisplayTimeAvailable() &&
-                    inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
-                        operateScreenValues(
-                            screenNameFilter.value,
-                            screenName,
-                            screenNameFilter.operator
-                        )
-                    } != null &&
-                    operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
+                        inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
+                            operateScreenValues(
+                                screenNameFilter.value,
+                                screenName,
+                                screenNameFilter.operator
+                            )
+                        } != null &&
+                        operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
             }
             inAppMessageWithScreenName ?: inAppMessageWithoutScreenName
         }
@@ -237,7 +237,7 @@ object InAppMessageUtils {
                 )
             }
             SpecialRuleParameter.MONTH.key -> {
-                val dateFormat = SimpleDateFormat("MMMM")
+                val dateFormat = SimpleDateFormat("MM")
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
@@ -246,12 +246,11 @@ object InAppMessageUtils {
                 )
             }
             SpecialRuleParameter.WEEK_DAY.key -> {
-                val dateFormat = SimpleDateFormat("EEEE")
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = dateFormat.format(Date())
+                    userParam = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
                 )
             }
             SpecialRuleParameter.HOUR.key -> {
@@ -352,7 +351,7 @@ object InAppMessageUtils {
             }
             SpecialRuleParameter.SEGMENT.key -> {
                 if (visitorInfo?.segments.isNullOrEmpty()) {
-                    true
+                    false
                 } else {
                     val segments = visitorInfo?.segments?.map {
                         it.toString()
@@ -367,7 +366,7 @@ object InAppMessageUtils {
             }
             SpecialRuleParameter.TAG.key -> {
                 if (visitorInfo?.tags.isNullOrEmpty()) {
-                    true
+                    false
                 } else {
                     val tags = visitorInfo?.tags?.map {
                         it.toString()
@@ -398,7 +397,7 @@ object InAppMessageUtils {
         userParam: List<String>?
     ): Boolean {
         // visitor rules only work with IN and NOT_IN operator
-        if (ruleParam != null && userParam != null && dataType == DataType.TEXT_LIST.name) {
+        if (ruleParam != null && userParam != null && dataType == DataType.TEXTLIST.name) {
             val ruleContainsUserParam = userParam.firstOrNull {
                 ruleParam.contains(it)
             } != null
@@ -565,7 +564,7 @@ object InAppMessageUtils {
                                 val firstRuleParam = convertedRuleParam.first()
                                 val lastRuleParam = convertedRuleParam.last()
                                 return (convertedUserParam in (firstRuleParam + 1) until lastRuleParam) ||
-                                    (convertedUserParam in (lastRuleParam + 1) until firstRuleParam)
+                                        (convertedUserParam in (lastRuleParam + 1) until firstRuleParam)
                             }
                         } catch (e: Exception) {
                             return true
@@ -593,7 +592,7 @@ object InAppMessageUtils {
                                 val firstRuleParam = convertedRuleParam.first()
                                 val lastRuleParam = convertedRuleParam.last()
                                 return convertedUserParam !in (firstRuleParam + 1) until lastRuleParam &&
-                                    convertedUserParam !in (lastRuleParam + 1) until firstRuleParam
+                                        convertedUserParam !in (lastRuleParam + 1) until firstRuleParam
                             }
                         } catch (e: Exception) {
                             return true
