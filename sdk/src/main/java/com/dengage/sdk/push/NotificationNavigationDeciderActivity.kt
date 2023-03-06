@@ -108,7 +108,7 @@ class NotificationNavigationDeciderActivity : Activity() {
     private fun killActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             DengageUtils.unregisterBroadcast()
-            onDestroy()
+            finishAffinity()
         }, 1200)
     }
 }
