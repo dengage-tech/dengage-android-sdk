@@ -50,10 +50,17 @@ object VisitCountManager {
     private fun findDateTimeWithOutHour(
         timeInMillis: Long
     ): Long {
-        val dateFormatWithOutHours = SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH)
-        val date = Date(timeInMillis)
-        val formattedDate = dateFormatWithOutHours.format(date)
-        return dateFormatWithOutHours.parse(formattedDate)!!.time
+        try {
+            val dateFormatWithOutHours = SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH)
+            val date = Date(timeInMillis)
+            val formattedDate = dateFormatWithOutHours.format(date)
+            return dateFormatWithOutHours.parse(formattedDate)!!.time
+        }
+        catch (e:Exception)
+        {
+            e.printStackTrace()
+        }
+        return 0L
     }
 
 }
