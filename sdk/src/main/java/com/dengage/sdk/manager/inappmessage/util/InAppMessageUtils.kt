@@ -351,7 +351,7 @@ object InAppMessageUtils {
             }
             SpecialRuleParameter.SEGMENT.key -> {
                 if (visitorInfo?.segments.isNullOrEmpty()) {
-                    true
+                    false
                 } else {
                     val segments = visitorInfo?.segments?.map {
                         it.toString()
@@ -366,7 +366,7 @@ object InAppMessageUtils {
             }
             SpecialRuleParameter.TAG.key -> {
                 if (visitorInfo?.tags.isNullOrEmpty()) {
-                    true
+                    false
                 } else {
                     val tags = visitorInfo?.tags?.map {
                         it.toString()
@@ -397,7 +397,7 @@ object InAppMessageUtils {
         userParam: List<String>?
     ): Boolean {
         // visitor rules only work with IN and NOT_IN operator
-        if (ruleParam != null && userParam != null && dataType == DataType.TEXT_LIST.name) {
+        if (ruleParam != null && userParam != null && dataType == DataType.TEXTLIST.name) {
             val ruleContainsUserParam = userParam.firstOrNull {
                 ruleParam.contains(it)
             } != null
