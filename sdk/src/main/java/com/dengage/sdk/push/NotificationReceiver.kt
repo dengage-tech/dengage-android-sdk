@@ -45,6 +45,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         DengageLogger.verbose("$TAG onPushReceive method is called")
         intent.extras ?: return
         prepareAndShowPush(context, intent)
+        Constants.isActivityPerformed=false
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
