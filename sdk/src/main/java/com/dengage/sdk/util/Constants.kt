@@ -40,4 +40,6 @@ object Constants {
     internal var GOOGLE_KEY_LOCAL=""
 
     var deviceToken=""
+
+    var isActivityPerformed =false
 }

@@ -67,7 +67,6 @@
         <activity
             android:name=".push.NotificationNavigationDeciderActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
-            android:launchMode="singleInstance"
             android:exported="false" />
 
         <activity android:name=".ui.inappmessage.InAppBrowserActivity"
