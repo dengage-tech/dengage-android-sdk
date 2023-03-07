@@ -37,4 +37,6 @@ object Constants {
     const val GEOFENCE_EVENT_HISTORY_MAX_COUNT = 100
 
     var deviceToken=""
+
+    var isActivityPerformed =false
 }
