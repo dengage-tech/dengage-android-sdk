@@ -69,13 +69,17 @@ object Dengage {
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
-        geofenceEnabled: Boolean = false
+        geofenceEnabled: Boolean = false,
+        deviceId: String?=null
     ) {
         initialized = true
         ContextHolder.context = context
         SessionManager.getSessionId()
 
-
+        if(!deviceId.isNullOrEmpty())
+        {
+            Constants.deviceId=deviceId.toString()
+        }
         if (huaweiIntegrationKey != null) {
             Constants.HUAWEI_KEY_LOCAL=huaweiIntegrationKey
         }

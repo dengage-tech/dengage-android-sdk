@@ -142,9 +142,14 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
      fun saveSubscription(subscription: Subscription) {
         DengageLogger.verbose("saveSubscription method is called")
 
-        if (subscription.deviceId.isNullOrEmpty()) {
-            subscription.deviceId = DengageUtils.getDeviceId()
-        }
+         if(Constants.deviceId.isNullOrEmpty()) {
+             subscription.deviceId = DengageUtils.getDeviceId()
+         }
+         else
+         {
+             subscription.deviceId=Constants.deviceId
+         }
+
         subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
         subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
         subscription.sdkVersion = DengageUtils.getSdkVersion()
