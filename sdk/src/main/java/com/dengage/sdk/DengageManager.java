@@ -82,7 +82,7 @@ public class DengageManager {
      */
     public DengageManager init() {
         try {
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  null,geofenceStatus);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  null,geofenceStatus,"");
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
@@ -100,7 +100,7 @@ public class DengageManager {
     public DengageManager initWithFirebaseInstance(@NonNull FirebaseApp firebaseApp) {
         try {
             // create in app message manager and start new session
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  firebaseApp,geofenceStatus);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  firebaseApp,geofenceStatus,"");
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
