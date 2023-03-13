@@ -56,11 +56,15 @@ object Dengage {
     fun init(
         context: Context,
         firebaseIntegrationKey: String? = null,
-        firebaseApp: FirebaseApp? = null
+        firebaseApp: FirebaseApp? = null,
+        deviceId: String?=null
     ) {
         ContextHolder.context = context
         SessionManager.getSessionId()
-
+        if(!deviceId.isNullOrEmpty())
+        {
+            Constants.deviceId=deviceId.toString()
+        }
         subscriptionManager.buildSubscription(
             firebaseIntegrationKey = firebaseIntegrationKey
         )

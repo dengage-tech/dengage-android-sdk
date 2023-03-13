@@ -83,7 +83,7 @@ public class DengageManager {
      */
     public DengageManager init() {
         try {
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, null);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, null,"");
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
@@ -101,7 +101,7 @@ public class DengageManager {
     public DengageManager initWithFirebaseInstance(@NonNull FirebaseApp firebaseApp) {
         try {
             // create in app message manager and start new session
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  firebaseApp);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  firebaseApp,"");
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }

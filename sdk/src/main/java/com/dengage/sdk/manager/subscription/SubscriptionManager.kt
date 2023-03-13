@@ -5,10 +5,7 @@ import com.dengage.sdk.data.cache.PrefsOld
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.session.SessionManager
-import com.dengage.sdk.util.ContextHolder
-import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.DengageUtils
-import com.dengage.sdk.util.GsonHolder
+import com.dengage.sdk.util.*
 import java.util.*
 
 class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
@@ -133,9 +130,16 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
      fun saveSubscription(subscription: Subscription) {
         DengageLogger.verbose("saveSubscription method is called")
 
-        if (subscription.deviceId.isNullOrEmpty()) {
-            subscription.deviceId = DengageUtils.getDeviceId()
-        }
+         if (subscription.deviceId.isNullOrEmpty()) {
+             subscription.deviceId = DengageUtils.getDeviceId()
+             if(Constants.deviceId.isNullOrEmpty()) {
+                 subscription.deviceId = DengageUtils.getDeviceId()
+             }
+             else
+             {
+                 subscription.deviceId=Constants.deviceId
+             }
+         }
         subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
         subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
         subscription.sdkVersion = DengageUtils.getSdkVersion()
