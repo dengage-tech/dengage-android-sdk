@@ -18,6 +18,7 @@ object Constants {
 
     internal var HUAWEI_KEY_LOCAL=""
     internal var GOOGLE_KEY_LOCAL=""
+    internal var deviceId=""
     var deviceToken=""
 
    var isActivityPerformed =false

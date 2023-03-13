@@ -2,11 +2,14 @@ package com.dengage.android.kotlin.sample
 
 import android.app.Application
 import android.content.IntentFilter
+import android.os.Looper
 import com.dengage.android.kotlin.sample.push.PushNotificationReceiver
 import com.dengage.android.kotlin.sample.utils.Constants
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.DengageManager
 import com.dengage.sdk.util.DengageLifecycleTracker
+import com.dengage.sdk.util.DengageUtils
+import java.util.logging.Handler
 
 class App : Application() {
     /*lateinit var dengageManager: DengageManager
@@ -27,9 +30,12 @@ class App : Application() {
 
         Dengage.init(
             context = applicationContext,
-            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY
+            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
+            deviceId = "hasdaslkdasd"
         )
         Dengage.setLogStatus(true)
+
+
         Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
       /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
         registerReceiver(
