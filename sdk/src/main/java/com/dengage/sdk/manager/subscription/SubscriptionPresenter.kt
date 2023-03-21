@@ -1,5 +1,7 @@
 package com.dengage.sdk.manager.subscription
 
+import android.os.Handler
+import android.os.Looper
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.subscription.usecase.SendSubscription
@@ -15,22 +17,18 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
     SubscriptionContract.Presenter {
 
     private val sendSubscription by lazy { SendSubscription() }
-    private val scope = CoroutineScope(Dispatchers.IO)
-
     private var sendSubscriptionTryCount = 0
 
     override fun sendSubscription(subscription: Subscription) {
-        scope.launch {
-            delay(4000)
+        Handler(Looper.getMainLooper()).postDelayed({
             if (DengageUtils.isAppInForeground()) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
-                     Prefs.subscription?.let { callSubscriptionApi(it) }
+                    Prefs.subscription?.let { callSubscriptionApi(it) }
                 } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
-                     Prefs.subscription?.let { callSubscriptionApi(it) }
+                    Prefs.subscription?.let { callSubscriptionApi(it) }
                 }
             }
-
-        }
+        }, 4000)
     }
 
 
