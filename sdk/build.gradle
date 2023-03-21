@@ -69,6 +69,6 @@ dependencies {
     // huawei
     api 'com.huawei.hms:push:6.3.0.304'
     api 'com.huawei.hms:ads-identifier:3.4.39.302'
-    implementation 'com.google.code.gson:gson:2.10.1'
+    api 'com.google.code.gson:gson:2.10.1'
 
 }
