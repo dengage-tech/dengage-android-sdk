@@ -20,7 +20,7 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
         binding.btnDeviceInfo.setOnClickListener {
             //findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
-        Dengage.sendDeviceIdToServer("V1/dengage/sync/mobile/customerData","jp8c615tk235gjfd378r9bwjlkzhq6m7")
+        Dengage.getLastPushPayload()
 
         }
 

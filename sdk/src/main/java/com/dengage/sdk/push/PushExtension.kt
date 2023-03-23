@@ -159,13 +159,16 @@ fun Context.startActivities(clazz: Class<out Activity>?, activityIntent: Intent)
 }
 
 fun Context.clearNotification(message: Message?) {
-    if (!message?.carouselContent.isNullOrEmpty()) {
-        for (item in message?.carouselContent!!) {
-            item.removeFileFromStorage()
+    try {
+        if (!message?.carouselContent.isNullOrEmpty()) {
+            for (item in message?.carouselContent!!) {
+                item.removeFileFromStorage()
+            }
         }
+        val manager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
+        manager?.cancel(message?.messageSource, message?.messageId!!)
     }
-    val manager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
-    manager?.cancel(message?.messageSource, message?.messageId!!)
+    catch (e:Exception){}
 }
 
 fun Context.areNotificationsEnabled(): Boolean {

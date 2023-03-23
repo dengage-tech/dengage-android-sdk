@@ -19,6 +19,7 @@ import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
 import com.dengage.sdk.util.*
+import com.dengage.sdk.util.extension.storeToPref
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
 
@@ -348,6 +349,7 @@ open class NotificationReceiver : BroadcastReceiver() {
             return
         }
         val message = Message.createFromIntent(intent.extras!!)
+        message.storeToPref()
         when {
             message.notificationType === NotificationType.CAROUSEL -> {
                 DengageLogger.verbose("$TAG this is a carousel notification")
