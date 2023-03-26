@@ -349,7 +349,6 @@ open class NotificationReceiver : BroadcastReceiver() {
             return
         }
         val message = Message.createFromIntent(intent.extras!!)
-        message.storeToPref()
         when {
             message.notificationType === NotificationType.CAROUSEL -> {
                 DengageLogger.verbose("$TAG this is a carousel notification")

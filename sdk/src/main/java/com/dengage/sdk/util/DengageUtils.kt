@@ -7,9 +7,12 @@ import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.DeadObjectException
 import android.telephony.TelephonyManager
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.push.model.Message
+import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.push.NotificationReceiver
 import java.util.*
 
@@ -78,7 +81,15 @@ object DengageUtils {
             )
             val bundle = applicationInfo.metaData
             bundle.getString(name)
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (e: Exception) {
+            null
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+            null
+        }
+        catch (e: DeadObjectException)
+        {
             null
         }
     }
@@ -152,5 +163,32 @@ object DengageUtils {
 
     fun isDeeplink(targetUrl: String): Boolean {
         return targetUrl.startsWith(Prefs.inAppDeeplink,ignoreCase = true) &&targetUrl.isNotEmpty()
+    }
+
+    fun getSdkDefaultObj():SdkParameters
+    {
+        return SdkParameters(
+            appId="",
+            accountId=0,
+            accountName="",
+            eventsEnabled=false,
+            inboxEnabled=false,
+            inAppEnabled = false,
+            subscriptionEnabled = false,
+            inAppFetchIntervalInMin = 0,
+            expiredMessagesFetchIntervalInMin = 0,
+            inAppMinSecBetweenMessages = 0,
+            lastFetchTimeInMillis = 0,
+            appTrackingEnabled = false,
+            appTrackingList = ArrayList(),
+            realTimeInAppEnabled = false,
+            realTimeInAppFetchIntervalInMinutes = 0,
+            realTimeInAppSessionTimeoutMinutes = 0
+        )
+    }
+
+    fun getSubscriptionDefaultObj() : Subscription
+    {
+        return Subscription()
     }
 }
