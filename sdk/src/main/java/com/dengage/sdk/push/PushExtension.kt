@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
+import android.os.DeadObjectException
 import android.text.TextUtils
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.text.isDigitsOnly
@@ -24,16 +25,21 @@ import java.io.File
 import java.io.FileInputStream
 
 fun String?.getSoundUri(context: Context): Uri {
-    val id = if (TextUtils.isEmpty(this)) {
-        0
-    } else {
-        context.resources.getIdentifier(this, "raw", context.packageName)
+    try {
+        val id = if (TextUtils.isEmpty(this)) {
+            0
+        } else {
+            context.resources.getIdentifier(this, "raw", context.packageName)
+        }
+        return if (id != 0) {
+            Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + id)
+        } else {
+            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        }
     }
-    return if (id != 0) {
-        Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.packageName + "/" + id)
-    } else {
-        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-    }
+    catch (e:Exception){}
+    catch (e:Throwable){}
+    return Uri.parse("")
 }
 
 fun Context.getSmallIconId(): Int {
@@ -57,85 +63,123 @@ fun Context.getSmallIconId(): Int {
         DengageLogger.verbose("Application Icon Not Found")
         -1
     }
+    catch (ex: Throwable)
+    { ex.printStackTrace()
+        -1
+    }
+    catch (e: DeadObjectException)
+    {
+        e.printStackTrace()
+        -1
+    }
 }
 
 fun Context.getSmallIconColorId(): Int {
-    val smallIcon = DengageUtils.getMetaData(
-        context = this,
-        name = "den_push_small_icon_color"
-    )
-    return if (!TextUtils.isEmpty(smallIcon)) {
-        val appIconColorId = this.getColorResourceId(smallIcon)
-        DengageLogger.verbose("Application icon: $smallIcon")
-        appIconColorId
-    } else {
-        -1 // in case metadata not provided in AndroidManifest
+    try {
+        val smallIcon = DengageUtils.getMetaData(
+            context = this,
+            name = "den_push_small_icon_color"
+        )
+        return if (!TextUtils.isEmpty(smallIcon)) {
+            val appIconColorId = this.getColorResourceId(smallIcon)
+            DengageLogger.verbose("Application icon: $smallIcon")
+            appIconColorId
+        } else {
+            -1 // in case metadata not provided in AndroidManifest
+        }
     }
+    catch (e:Exception){}
+    catch (e:Throwable){}
+    return -1
 }
 
 fun Context.getColorResourceId(resourceName: String?): Int {
-    if (TextUtils.isEmpty(resourceName)) return 0
-    return if (resourceName!!.isDigitsOnly()) 0 else try {
-        this.resources.getIdentifier(resourceName, "color", this.packageName)
-    } catch (e: Exception) {
-        try {
-            return drawable::class.java.getField(resourceName).getInt(null)
-        } catch (ignored: Throwable) {
-            DengageLogger.verbose("Color resource id not found $resourceName")
+    try {
+        if (TextUtils.isEmpty(resourceName)) return 0
+        return if (resourceName!!.isDigitsOnly()) 0 else try {
+            this.resources.getIdentifier(resourceName, "color", this.packageName)
+        } catch (e: Exception) {
+            try {
+                return drawable::class.java.getField(resourceName).getInt(null)
+            } catch (ignored: Throwable) {
+                DengageLogger.verbose("Color resource id not found $resourceName")
+            }
+            e.printStackTrace()
+            0
         }
-        e.printStackTrace()
-        0
     }
+    catch (e:Exception){}
+    catch (e:Throwable){}
+    return -1
 }
 
 fun Context.getResourceId(resourceName: String?): Int {
-    if (TextUtils.isEmpty(resourceName)) return 0
-    return if (resourceName!!.isDigitsOnly()) 0 else try {
-        this.resources.getIdentifier(resourceName, "drawable", this.packageName)
-    } catch (e: Exception) {
-        try {
-            return drawable::class.java.getField(resourceName).getInt(null)
-        } catch (ignored: Throwable) {
-            DengageLogger.verbose("Resource id not found $resourceName")
+    try {
+        if (TextUtils.isEmpty(resourceName)) return 0
+        return if (resourceName!!.isDigitsOnly()) 0 else try {
+            this.resources.getIdentifier(resourceName, "drawable", this.packageName)
+        } catch (e: Exception) {
+            try {
+                return drawable::class.java.getField(resourceName).getInt(null)
+            } catch (ignored: Throwable) {
+                DengageLogger.verbose("Resource id not found $resourceName")
+            }
+            e.printStackTrace()
+            0
         }
-        e.printStackTrace()
-        0
     }
+    catch (e:Exception){}
+    catch (e:Throwable){}
+    return -1
 }
 
 fun CarouselItem.removeFileFromStorage(): Boolean {
-    val file = File(mediaFileLocation, "$mediaFileName.png")
-    return if (file.exists()) {
-        file.delete()
-    } else {
-        false
+    try {
+        val file = File(mediaFileLocation, "$mediaFileName.png")
+        return if (file.exists()) {
+            file.delete()
+        } else {
+            false
+        }
     }
+    catch (e:Exception){}
+    catch (e:Throwable){}
+    return false
 }
 
 fun CarouselItem.loadFileFromStorage(): Bitmap? {
-    val file = File(mediaFileLocation, "$mediaFileName.png")
-    return if (file.exists()) {
-        BitmapFactory.decodeStream(FileInputStream(file))
-    } else {
-        null
+    try {
+        val file = File(mediaFileLocation, "$mediaFileName.png")
+        return if (file.exists()) {
+            BitmapFactory.decodeStream(FileInputStream(file))
+        } else {
+            null
+        }
     }
+    catch (e:Exception){}
+    catch (e:Throwable){}
+    return null
 }
 
 fun Context.launchActivity(intent: Intent?, uri: String?) {
-    val clazz: Class<out Activity?> = getActivity() ?: return
-    val activityIntent = if (!uri.isNullOrEmpty()) {
-        Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-    } else {
-        Intent(this, clazz)
-    }
-    if (intent != null && intent.extras != null) {
-        activityIntent.putExtras(intent.extras!!)
-    }
     try {
-        startActivities(clazz, activityIntent)
-    } catch (e: Exception) {
-        e.printStackTrace()
+        val clazz: Class<out Activity?> = getActivity() ?: return
+        val activityIntent = if (!uri.isNullOrEmpty()) {
+            Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+        } else {
+            Intent(this, clazz)
+        }
+        if (intent != null && intent.extras != null) {
+            activityIntent.putExtras(intent.extras!!)
+        }
+        try {
+            startActivities(clazz, activityIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
+    catch (e:Exception){}
+    catch (e:Throwable){}
 }
 
 fun Context.getActivity(): Class<out Activity>? {
@@ -148,6 +192,15 @@ fun Context.getActivity(): Class<out Activity>? {
     } catch (e: ClassNotFoundException) {
         // do nothing
     }
+    catch (ex: Throwable)
+    { ex.printStackTrace()
+
+    }
+    catch (e: DeadObjectException)
+    {
+        e.printStackTrace()
+
+    }
     return clazz
 }
 
@@ -159,13 +212,23 @@ fun Context.startActivities(clazz: Class<out Activity>?, activityIntent: Intent)
 }
 
 fun Context.clearNotification(message: Message?) {
-    if (!message?.carouselContent.isNullOrEmpty()) {
-        for (item in message?.carouselContent!!) {
-            item.removeFileFromStorage()
+    try {
+        if (!message?.carouselContent.isNullOrEmpty()) {
+            for (item in message?.carouselContent!!) {
+                item.removeFileFromStorage()
+            }
         }
+        val manager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
+        manager?.cancel(message?.messageSource, message?.messageId!!)
     }
-    val manager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
-    manager?.cancel(message?.messageSource, message?.messageId!!)
+    catch (ex:Exception)
+    {
+
+    }
+    catch (ex:Throwable)
+    {
+
+    }
 }
 
 fun Context.areNotificationsEnabled(): Boolean {

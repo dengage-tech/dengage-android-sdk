@@ -2,6 +2,7 @@ package com.dengage.sdk.manager.configuration
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.os.DeadObjectException
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.configuration.model.SdkParameters
@@ -10,12 +11,12 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.configuration.util.ConfigurationUtils
-import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.google.firebase.FirebaseApp
 import java.util.*
+import com.dengage.sdk.util.*
 import java.util.concurrent.TimeUnit
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
@@ -88,7 +89,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
     @SuppressLint("QueryPermissionsNeeded")
     internal fun getAppTrackingTags(appTrackings: List<AppTracking>?): MutableList<TagItem> {
         val tagItems = mutableListOf<TagItem>()
-
+try{
         // tracking time will be 0 for first tracking
         if (Prefs.appTrackingTime != 0L) {
             // time diff between now and last tracking time
@@ -112,7 +113,16 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             tagItems.add(TagItem("app-${app.alias}", if (isInstalled) "true" else "false"))
         }
         Prefs.appTrackingTime = Calendar.getInstance().timeInMillis
+}
+catch (ex: Throwable)
+{ ex.printStackTrace()
 
+}
+catch (e: DeadObjectException)
+{
+    e.printStackTrace()
+
+}
         return tagItems
     }
 

@@ -11,6 +11,7 @@ import com.dengage.sdk.Dengage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.launchActivity
+import com.dengage.sdk.util.extension.storeToPref
 
 class NotificationNavigationDeciderActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,23 +23,64 @@ class NotificationNavigationDeciderActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        if (!Constants.isActivityPerformed) {
-            var sendingIntentObject: Intent
+        try {
+            if (!Constants.isActivityPerformed) {
+                var sendingIntentObject: Intent
 
-            if (intent != null) {
+                if (intent != null) {
 
-                val extras = intent.extras
+                    val extras = intent.extras
 
-                val uri: String?
+                    val uri: String?
 
-                if (extras != null) {
+                    if (extras != null) {
 
-                    uri = extras.getString("targetUrl")
+                        uri = extras.getString("targetUrl")
 
 
-                    if (uri != null && !TextUtils.isEmpty(uri)) {
+                        if (uri != null && !TextUtils.isEmpty(uri)) {
 
-                        sendingIntentObject = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                            sendingIntentObject = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+
+                        } else {
+
+                            val packageName: String = packageName
+
+                            sendingIntentObject =
+                                Intent(this@NotificationNavigationDeciderActivity, getActivity())
+                            sendingIntentObject.action = intent.action
+                            sendingIntentObject.putExtras(extras)
+
+                            sendingIntentObject.setPackage(packageName)
+
+                        }
+
+
+                        var message: Message? = Message.createFromIntent(extras)
+                        message?.storeToPref()
+                        val rawJson = extras.getString("RAW_DATA")
+
+
+                        if (!TextUtils.isEmpty(rawJson)) {
+
+                            //  message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
+
+                        }
+
+                        DengageUtils.sendBroadCast(intent, this)
+                        try {
+                            startActivity(sendingIntentObject)
+                        } catch (e: Exception) {
+                            val packageName: String = packageName
+
+                            sendingIntentObject =
+                                Intent(this@NotificationNavigationDeciderActivity, getActivity())
+
+                            sendingIntentObject.putExtras(extras)
+                            sendingIntentObject.action = intent.action
+                            sendingIntentObject.setPackage(packageName)
+                            startActivity(sendingIntentObject)
+                        }
 
                     } else {
 
@@ -46,58 +88,47 @@ class NotificationNavigationDeciderActivity : Activity() {
 
                         sendingIntentObject =
                             Intent(this@NotificationNavigationDeciderActivity, getActivity())
-                        sendingIntentObject.action = intent.action
-                        sendingIntentObject.putExtras(extras)
 
                         sendingIntentObject.setPackage(packageName)
-
-                    }
-
-
-                    //  var message: Message? = Message.createFromIntent(extras)
-
-                    val rawJson = extras.getString("RAW_DATA")
-
-
-                    if (!TextUtils.isEmpty(rawJson)) {
-
-                        //  message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
-
-                    }
-
-                    DengageUtils.sendBroadCast(intent, this)
-                    try {
                         startActivity(sendingIntentObject)
-                    } catch (e: Exception) {
-                        val packageName: String = packageName
 
-                        sendingIntentObject =
-                            Intent(this@NotificationNavigationDeciderActivity, getActivity())
-
-                        sendingIntentObject.putExtras(extras)
-                        sendingIntentObject.action = intent.action
-                        sendingIntentObject.setPackage(packageName)
-                        startActivity(sendingIntentObject)
                     }
-
-                } else {
-
-                    val packageName: String = packageName
-
-                    sendingIntentObject =
-                        Intent(this@NotificationNavigationDeciderActivity, getActivity())
-
-                    sendingIntentObject.setPackage(packageName)
-                    startActivity(sendingIntentObject)
-
+                    killActivity()
                 }
-                killActivity()
+            } else {
+                if (DengageUtils.isAppInForeground()) {
+                    launchActivity(null, null)
+                    finishAffinity()
+                }
             }
-        } else {
-            if (DengageUtils.isAppInForeground()) {
-                launchActivity(null, null)
-                finishAffinity()
-            }
+        }
+        catch (ex:Exception)
+        { ex.printStackTrace()
+
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
+        }
+        catch (ex :IncompatibleClassChangeError)
+        { ex.printStackTrace()
+
+        }
+        catch (ex :NoSuchFieldError)
+        { ex.printStackTrace()
+
+        }
+        catch (ex :NoSuchMethodError)
+        { ex.printStackTrace()
+
+        }
+        catch (ex:java.lang.AssertionError)
+        {
+            ex.printStackTrace()
+        }
+        catch (ex:AssertionError)
+        {
+            ex.printStackTrace()
         }
     }
 
