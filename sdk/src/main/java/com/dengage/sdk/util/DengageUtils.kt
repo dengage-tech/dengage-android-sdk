@@ -7,9 +7,12 @@ import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.DeadObjectException
 import android.telephony.TelephonyManager
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.push.model.Message
+import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.push.NotificationReceiver
 import java.util.*
 
@@ -30,6 +33,10 @@ object DengageUtils {
             DengageLogger.error(e.message)
             ""
         }
+        catch (e:Throwable)
+        {
+            ""
+        }
     }
 
     fun getAppVersion(context: Context): String? {
@@ -40,18 +47,33 @@ object DengageUtils {
             DengageLogger.error(e.message)
             null
         }
+        catch (e:Throwable)
+        {
+            null
+        }
     }
 
     fun getSdkVersion(): String {
-        return "6.0.21.4"
+        return "6.0.23.4"
     }
 
     fun getUserAgent(context: Context): String {
-        val appLabel = "${getAppLabel(context, "An Android App")}/" +
-                "${getAppVersion(context)} ${Build.MANUFACTURER}/${Build.MODEL} " +
-                "${System.getProperty("http.agent")} Mobile/${Build.ID}"
+        try {
+            val appLabel = "${getAppLabel(context, "An Android App")}/" +
+                    "${getAppVersion(context)} ${Build.MANUFACTURER}/${Build.MODEL} " +
+                    "${System.getProperty("http.agent")} Mobile/${Build.ID}"
 
-        return appLabel.replace("[^\\x00-\\x7F]".toRegex(), "")
+            return appLabel.replace("[^\\x00-\\x7F]".toRegex(), "")
+        }
+        catch (e:Exception)
+        {
+
+        }
+        catch (e:Throwable)
+        {
+
+        }
+        return ""
     }
 
     private fun getAppLabel(context: Context, defaultText: String?): String? {
@@ -60,8 +82,16 @@ object DengageUtils {
         try {
             lApplicationInfo =
                 lPackageManager.getApplicationInfo(context.applicationInfo.packageName, 0)
-        } catch (e: PackageManager.NameNotFoundException) {
-            DengageLogger.error(e.message)
+        } catch (e: Exception) {
+
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
+        }
+        catch (e: DeadObjectException)
+        {
+
         }
         return (if (lApplicationInfo != null) lPackageManager.getApplicationLabel(lApplicationInfo) else defaultText) as String?
     }
@@ -78,7 +108,16 @@ object DengageUtils {
             )
             val bundle = applicationInfo.metaData
             bundle.getString(name)
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (e: Exception) {
+            null
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+            null
+        }
+        catch (e: DeadObjectException)
+        {
+            e.printStackTrace()
             null
         }
     }
@@ -99,6 +138,10 @@ object DengageUtils {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
+        }
         return ""
     }
 
@@ -108,8 +151,16 @@ object DengageUtils {
             ActivityManager.getMyMemoryState(appProcessInfo)
             appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
         } catch (e: Exception) {
-            e.printStackTrace()
-            true
+
+            return false
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+            return false
+        }
+        catch (e: DeadObjectException)
+        {
+            return false
         }
     }
 
@@ -127,7 +178,11 @@ object DengageUtils {
                 filter
             )
         } catch (e: Exception) {
-           // e.printStackTrace()
+          //  e.printStackTrace()
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
         }
     }
 
@@ -135,7 +190,11 @@ object DengageUtils {
         try {
             ContextHolder.context.unregisterReceiver(NotificationReceiver())
         } catch (e: Exception) {
-           // e.printStackTrace()
+
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
         }
     }
 
@@ -145,10 +204,43 @@ object DengageUtils {
             broadCastIntent.putExtras(intent.extras!!)
             context.sendBroadcast(broadCastIntent)
         } catch (e: Exception) {
-            e.printStackTrace()
+
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
         }
     }
+
+
     fun isDeeplink(targetUrl: String): Boolean {
         return targetUrl.startsWith(Prefs.inAppDeeplink,ignoreCase = true) &&targetUrl.isNotEmpty()
+    }
+
+    fun getSdkDefaultObj():SdkParameters
+    {
+        return SdkParameters(
+            appId="",
+            accountId=0,
+            accountName="",
+            eventsEnabled=false,
+            inboxEnabled=false,
+            inAppEnabled = false,
+            subscriptionEnabled = false,
+            inAppFetchIntervalInMin = 0,
+            expiredMessagesFetchIntervalInMin = 0,
+            inAppMinSecBetweenMessages = 0,
+            lastFetchTimeInMillis = 0,
+            appTrackingEnabled = false,
+            appTrackingList = ArrayList(),
+            realTimeInAppEnabled = false,
+            realTimeInAppFetchIntervalInMinutes = 0,
+            realTimeInAppSessionTimeoutMinutes = 0
+        )
+    }
+
+    fun getSubscriptionDefaultObj() : Subscription
+    {
+        return Subscription()
     }
 }

@@ -15,17 +15,48 @@ import java.util.*
  * @return The value associated with this key, defValue if there isn't any
  */
 inline fun <reified T : Any> SharedPreferences.get(key: Any, defaultValue: T? = null): T? {
-    val keyName = key.toString()
-    return when (T::class) {
-        String::class -> getString(keyName, defaultValue as? String) as T?
-        Int::class -> getInt(keyName, defaultValue as? Int ?: -1) as T?
-        Boolean::class -> getBoolean(keyName, defaultValue as? Boolean ?: false) as T?
-        Float::class -> getFloat(keyName, defaultValue as? Float ?: -1f) as T?
-        Long::class -> getLong(keyName, defaultValue as? Long ?: -1) as T?
-        else -> getString(keyName, null)?.let {
-            GsonHolder.fromJson(it)
+    try {
+        val keyName = key.toString()
+        return when (T::class) {
+            String::class -> getString(keyName, defaultValue as? String) as T?
+            Int::class -> getInt(keyName, defaultValue as? Int ?: -1) as T?
+            Boolean::class -> getBoolean(keyName, defaultValue as? Boolean ?: false) as T?
+            Float::class -> getFloat(keyName, defaultValue as? Float ?: -1f) as T?
+            Long::class -> getLong(keyName, defaultValue as? Long ?: -1) as T?
+            else -> getString(keyName, null)?.let {
+                GsonHolder.fromJson(it)
+            }
         }
     }
+    catch (ex: Exception)
+    { ex.printStackTrace()
+        return null
+    }
+    catch (ex: Throwable)
+    { ex.printStackTrace()
+        return null
+    }
+    catch (ex :IncompatibleClassChangeError)
+    { ex.printStackTrace()
+        return  null
+    }
+    catch (ex :NoSuchFieldError)
+    { ex.printStackTrace()
+        return null
+    }
+    catch (ex :NoSuchMethodError)
+    { ex.printStackTrace()
+        return  null
+    }
+    catch (ex:java.lang.AssertionError)
+    {
+        return  null
+    }
+    catch (ex:AssertionError)
+    {
+        return  null
+    }
+
 }
 
 /**
@@ -35,15 +66,45 @@ inline fun <reified T : Any> SharedPreferences.get(key: Any, defaultValue: T? = 
  * @param value The new set for the preference.
  */
 fun SharedPreferences.set(key: Any, value: Any?, immediately: Boolean = false) {
-    val keyName = key.toString()
-    when (value) {
-        is String? -> edit(immediately) { it.putString(keyName, value) }
-        is Int -> edit(immediately) { it.putInt(keyName, value) }
-        is Boolean -> edit(immediately) { it.putBoolean(keyName, value) }
-        is Float -> edit(immediately) { it.putFloat(keyName, value) }
-        is Long -> edit(immediately) { it.putLong(keyName, value) }
-        is Date -> edit(immediately) { it.putLong(keyName, value.time) }
-        else -> edit(immediately) { it.putString(keyName, GsonHolder.toJson(value)) }
+    try {
+        val keyName = key.toString()
+        when (value) {
+            is String? -> edit(immediately) { it.putString(keyName, value) }
+            is Int -> edit(immediately) { it.putInt(keyName, value) }
+            is Boolean -> edit(immediately) { it.putBoolean(keyName, value) }
+            is Float -> edit(immediately) { it.putFloat(keyName, value) }
+            is Long -> edit(immediately) { it.putLong(keyName, value) }
+            is Date -> edit(immediately) { it.putLong(keyName, value.time) }
+            else -> edit(immediately) { it.putString(keyName, GsonHolder.toJson(value)) }
+        }
+    }
+    catch (ex: Exception)
+    { ex.printStackTrace()
+
+    }
+    catch (ex: Throwable)
+    { ex.printStackTrace()
+
+    }
+    catch (ex :IncompatibleClassChangeError)
+    { ex.printStackTrace()
+
+    }
+    catch (ex :NoSuchFieldError)
+    { ex.printStackTrace()
+
+    }
+    catch (ex :NoSuchMethodError)
+    { ex.printStackTrace()
+
+    }
+    catch (ex:java.lang.AssertionError)
+    {
+        ex.printStackTrace()
+    }
+    catch (ex:AssertionError)
+    {
+        ex.printStackTrace()
     }
 }
 

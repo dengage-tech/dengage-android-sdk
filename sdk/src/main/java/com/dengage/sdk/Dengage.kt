@@ -38,6 +38,7 @@ import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
+import com.dengage.sdk.push.clearNotification
 object Dengage {
 
      val configurationManager by lazy { ConfigurationManager() }
@@ -759,4 +760,13 @@ object Dengage {
         return isInAppFetched
     }
 
+
+    fun getLastPushPayload() :String
+    {
+        val pushPayload = Prefs.lastPushPayload
+        Prefs.lastPushPayload=null
+        ContextHolder.context.applicationContext.clearNotification(pushPayload)
+        return pushPayload?.toJson() ?: ""
+
+    }
 }
