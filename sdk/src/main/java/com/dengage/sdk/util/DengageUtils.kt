@@ -58,11 +58,22 @@ object DengageUtils {
     }
 
     fun getUserAgent(context: Context): String {
-        val appLabel = "${getAppLabel(context, "An Android App")}/" +
-                "${getAppVersion(context)} ${Build.MANUFACTURER}/${Build.MODEL} " +
-                "${System.getProperty("http.agent")} Mobile/${Build.ID}"
+        try {
+            val appLabel = "${getAppLabel(context, "An Android App")}/" +
+                    "${getAppVersion(context)} ${Build.MANUFACTURER}/${Build.MODEL} " +
+                    "${System.getProperty("http.agent")} Mobile/${Build.ID}"
 
-        return appLabel.replace("[^\\x00-\\x7F]".toRegex(), "")
+            return appLabel.replace("[^\\x00-\\x7F]".toRegex(), "")
+        }
+        catch (e:Exception)
+        {
+
+        }
+        catch (e:Throwable)
+        {
+
+        }
+        return ""
     }
 
     private fun getAppLabel(context: Context, defaultText: String?): String? {

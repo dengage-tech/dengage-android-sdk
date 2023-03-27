@@ -30,13 +30,44 @@ fun SdkParameters.getAppId(): String {
     }
 }
 
+fun Any?.toJson(): String {
+    try{
+    return GsonHolder.gson.toJson(this)
+
+} catch (ex: Exception)
+{ ex.printStackTrace()
+
+}
+catch (ex: Throwable)
+{ ex.printStackTrace()
+
+}
+catch (ex :IncompatibleClassChangeError)
+{ ex.printStackTrace()
+
+}
+catch (ex :NoSuchFieldError)
+{ ex.printStackTrace()
+
+}
+catch (ex :NoSuchMethodError)
+{ ex.printStackTrace()
+
+}
+catch (ex:java.lang.AssertionError)
+{
+    ex.printStackTrace()
+}
+catch (ex:AssertionError)
+{
+    ex.printStackTrace()
+}
+return ""
+}
+
 fun Message.storeToPref() {
     try {
         Prefs.lastPushPayload = this
     }
     catch (e:Exception){}
-}
-
-fun Any?.toJson(): String {
-    return GsonHolder.gson.toJson(this)
 }
