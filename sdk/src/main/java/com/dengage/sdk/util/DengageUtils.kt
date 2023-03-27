@@ -33,6 +33,10 @@ object DengageUtils {
             DengageLogger.error(e.message)
             ""
         }
+        catch (e:Throwable)
+        {
+            ""
+        }
     }
 
     fun getAppVersion(context: Context): String? {
@@ -41,6 +45,10 @@ object DengageUtils {
             pInfo.versionName
         } catch (e: Exception) {
             DengageLogger.error(e.message)
+            null
+        }
+        catch (e:Throwable)
+        {
             null
         }
     }
@@ -63,8 +71,16 @@ object DengageUtils {
         try {
             lApplicationInfo =
                 lPackageManager.getApplicationInfo(context.applicationInfo.packageName, 0)
-        } catch (e: PackageManager.NameNotFoundException) {
-            DengageLogger.error(e.message)
+        } catch (e: Exception) {
+
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
+        }
+        catch (e: DeadObjectException)
+        {
+
         }
         return (if (lApplicationInfo != null) lPackageManager.getApplicationLabel(lApplicationInfo) else defaultText) as String?
     }
@@ -90,6 +106,7 @@ object DengageUtils {
         }
         catch (e: DeadObjectException)
         {
+            e.printStackTrace()
             null
         }
     }
@@ -110,6 +127,10 @@ object DengageUtils {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
+        }
         return ""
     }
 
@@ -119,8 +140,16 @@ object DengageUtils {
             ActivityManager.getMyMemoryState(appProcessInfo)
             appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
         } catch (e: Exception) {
-            e.printStackTrace()
-            true
+
+            return false
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+            return false
+        }
+        catch (e: DeadObjectException)
+        {
+            return false
         }
     }
 
@@ -140,13 +169,21 @@ object DengageUtils {
         } catch (e: Exception) {
           //  e.printStackTrace()
         }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
+        }
     }
 
     fun unregisterBroadcast() {
         try {
             ContextHolder.context.unregisterReceiver(NotificationReceiver())
         } catch (e: Exception) {
-           // e.printStackTrace()
+
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
         }
     }
 
@@ -156,7 +193,11 @@ object DengageUtils {
             broadCastIntent.putExtras(intent.extras!!)
             context.sendBroadcast(broadCastIntent)
         } catch (e: Exception) {
-            e.printStackTrace()
+
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
         }
     }
 

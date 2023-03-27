@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
+import android.os.DeadObjectException
 import android.text.TextUtils
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.text.isDigitsOnly
@@ -55,6 +56,15 @@ fun Context.getSmallIconId(): Int {
         }
     } catch (e: PackageManager.NameNotFoundException) {
         DengageLogger.verbose("Application Icon Not Found")
+        -1
+    }
+    catch (ex: Throwable)
+    { ex.printStackTrace()
+        -1
+    }
+    catch (e: DeadObjectException)
+    {
+        e.printStackTrace()
         -1
     }
 }
@@ -147,6 +157,15 @@ fun Context.getActivity(): Class<out Activity>? {
         clazz = Class.forName(className) as Class<out Activity>?
     } catch (e: ClassNotFoundException) {
         // do nothing
+    }
+    catch (ex: Throwable)
+    { ex.printStackTrace()
+
+    }
+    catch (e: DeadObjectException)
+    {
+        e.printStackTrace()
+
     }
     return clazz
 }
