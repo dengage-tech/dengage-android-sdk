@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.DeadObjectException
 import android.provider.Settings
 import android.text.TextUtils
 import com.dengage.sdk.util.DengageLogger
@@ -30,6 +31,7 @@ fun Context.launchActivity(intent: Intent?, uri: String?) {
     } catch (e: Exception) {
         DengageLogger.error(e.message)
     }
+    catch (e:Throwable){}
 }
 
 fun Context.getActivityClass(): Class<out Activity>? {
@@ -42,6 +44,15 @@ fun Context.getActivityClass(): Class<out Activity>? {
     } catch (e: Exception) {
         DengageLogger.error(e.message)
     }
+    catch (ex: Throwable)
+    { ex.printStackTrace()
+
+    }
+    catch (e: DeadObjectException)
+    {
+        e.printStackTrace()
+
+    }
     return clazz
 }
 
@@ -53,19 +64,34 @@ fun Context.startActivityFromClass(clazz: Class<out Activity>?, activityIntent: 
 }
 
 fun Context.launchSettingsActivity() {
-    val intent = Intent()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-        intent.putExtra(Settings.EXTRA_APP_PACKAGE, this.packageName)
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-        intent.putExtra("app_package", this.packageName)
-        intent.putExtra("app_uid", this.applicationInfo.uid)
-    } else {
-        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-        intent.addCategory(Intent.CATEGORY_DEFAULT)
-        intent.data = Uri.parse("package:$this.packageName")
-    }
+    try {
+        val intent = Intent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, this.packageName)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            intent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+            intent.putExtra("app_package", this.packageName)
+            intent.putExtra("app_uid", this.applicationInfo.uid)
+        } else {
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            intent.addCategory(Intent.CATEGORY_DEFAULT)
+            intent.data = Uri.parse("package:$this.packageName")
+        }
 
-    this.startActivity(intent)
+        this.startActivity(intent)
+    }
+    catch (ex: Exception)
+    { ex.printStackTrace()
+
+    }
+    catch (ex: Throwable)
+    { ex.printStackTrace()
+
+    }
+    catch (e: DeadObjectException)
+    {
+        e.printStackTrace()
+
+    }
 }

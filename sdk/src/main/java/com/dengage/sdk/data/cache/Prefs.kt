@@ -11,6 +11,7 @@ import com.dengage.sdk.domain.visitcount.model.VisitCountItem
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageUtils
+import com.dengage.sdk.domain.push.model.Message
 
 object Prefs {
 
@@ -35,7 +36,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.IN_APP_API_BASE_URL, value)
 
     internal var sdkParameters: SdkParameters?
-        get() = preferences.get(PreferenceKey.SDK_PARAMETERS)
+        get() = preferences.get(PreferenceKey.SDK_PARAMETERS)?:DengageUtils.getSdkDefaultObj()
         set(value) = preferences.set(PreferenceKey.SDK_PARAMETERS, value)
 
     internal var appTrackingTime: Long
@@ -43,7 +44,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.APP_TRACKING_TIME, value)
 
     internal var inAppMessages: MutableList<InAppMessage>?
-        get() = preferences.get(PreferenceKey.IN_APP_MESSAGES)
+        get() = preferences.get(PreferenceKey.IN_APP_MESSAGES)?:mutableListOf()
         set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGES, value)
 
     internal var inAppMessageFetchTime: Long
@@ -69,7 +70,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.NOTIFICATION_CHANNEL_NAME, value)
 
     internal var subscription: Subscription?
-        get() = preferences.get(PreferenceKey.SUBSCRIPTION)
+        get() = preferences.get(PreferenceKey.SUBSCRIPTION) ?:DengageUtils.getSubscriptionDefaultObj()
         set(value) = preferences.set(PreferenceKey.SUBSCRIPTION, value)
 
     internal var inboxMessageFetchTime: Long
@@ -89,7 +90,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.LOG_VISIBILITY, value)
 
     internal var rfmScores: MutableList<RFMScore>?
-        get() = preferences.get(PreferenceKey.RFM_SCORES)
+        get() = preferences.get(PreferenceKey.RFM_SCORES) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.RFM_SCORES, value)
 
     internal var subscriptionCallTime: Long
@@ -97,7 +98,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.SUBSCRIPTION_CALL_TIME, value)
 
     internal var previouSubscription: Subscription?
-        get() = preferences.get(PreferenceKey.PREVIOUS_SUBSCRIPTION,null)
+        get() = preferences.get(PreferenceKey.PREVIOUS_SUBSCRIPTION) ?:DengageUtils.getSubscriptionDefaultObj()
         set(value) = preferences.set(PreferenceKey.PREVIOUS_SUBSCRIPTION, value)
 
 
@@ -122,12 +123,16 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.VISIT_COUNTS, value)
 
     internal var visitorInfo: VisitorInfo?
-        get() = preferences.get(PreferenceKey.VISITOR_INFO)
+        get() = preferences.get(PreferenceKey.VISITOR_INFO) ?:VisitorInfo()
         set(value) = preferences.set(PreferenceKey.VISITOR_INFO, value)
 
     internal var inAppDeeplink: String
         get() = preferences.get(PreferenceKey.INAPP_DEEPLINK, "") ?: ""
         set(value) = preferences.set(PreferenceKey.INAPP_DEEPLINK, value)
+
+    internal var lastPushPayload: Message?
+        get() = preferences.get(PreferenceKey.LAST_MESSAGE_PUSH_PAYLOAD, null)
+        set(value) = preferences.set(PreferenceKey.LAST_MESSAGE_PUSH_PAYLOAD, value)
 
     fun clear() {
         preferences.edit().clear().apply()
