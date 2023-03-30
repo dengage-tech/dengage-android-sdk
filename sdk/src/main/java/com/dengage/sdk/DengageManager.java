@@ -164,7 +164,7 @@ public class DengageManager {
 
     public void buildSubscription() {
         try {
-            Dengage.INSTANCE.getSubscriptionManager().buildSubscription(firebaseIntegrationKey);
+            Dengage.INSTANCE.getSubscriptionManager().buildSubscription(firebaseIntegrationKey,"");
         } catch (Exception ex) {
             DengageLogger.INSTANCE.error("buildSubscription: " + ex.getMessage());
 

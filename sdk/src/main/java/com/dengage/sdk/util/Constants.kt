@@ -16,8 +16,6 @@ object Constants {
     const val NOTIFICATION_CHANNEL_ID = "3374143"
     const val NOTIFICATION_CHANNEL_NAME = "General"
     var deviceToken=""
-    internal var deviceId=""
-    internal var GOOGLE_KEY_LOCAL=""
     var isActivityPerformed =false
 }
 

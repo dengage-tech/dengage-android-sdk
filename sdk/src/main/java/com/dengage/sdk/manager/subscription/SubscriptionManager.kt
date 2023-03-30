@@ -13,14 +13,26 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     override fun providePresenter() = SubscriptionPresenter()
 
+    private var firebaseIntegrationKey:String?=null
+
+
+    private var deviceId:String?=null
+
      fun buildSubscription(
-        firebaseIntegrationKey: String?
+        firebaseIntegrationKey: String?,
+        deviceId: String?
     ) {
+
+         this.firebaseIntegrationKey=firebaseIntegrationKey
+
+         this.deviceId=deviceId
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
             Prefs.subscription = PrefsOld.subscription
             PrefsOld.subscription = null
         }
+
+
 
         var subscription = Prefs.subscription
         if (subscription == null) {
@@ -41,9 +53,13 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     internal fun setToken(token: String?) {
         val subscription = Prefs.subscription
 
-        if (subscription != null) {
+        if (subscription != null&&subscription.token.isNullOrEmpty()) {
+
+            subscription.integrationKey=
+                firebaseIntegrationKey.toString()
+
             subscription.token = token
-            subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL
+
             saveSubscription(subscription = subscription)
 
             // send to api
@@ -130,16 +146,19 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
      fun saveSubscription(subscription: Subscription) {
         DengageLogger.verbose("saveSubscription method is called")
 
-         if (subscription.deviceId.isNullOrEmpty()) {
-             subscription.deviceId = DengageUtils.getDeviceId()
-             if(Constants.deviceId.isNullOrEmpty()) {
-                 subscription.deviceId = DengageUtils.getDeviceId()
-             }
-             else
-             {
-                 subscription.deviceId=Constants.deviceId
-             }
-         }
+        if (subscription.deviceId.isNullOrEmpty()) {
+            if(deviceId.isNullOrEmpty()) {
+                subscription.deviceId = DengageUtils.getDeviceId()
+            }
+            else
+            {
+                subscription.deviceId=deviceId
+            }
+        }
+         else if (!subscription.deviceId.equals(deviceId)&&!deviceId.isNullOrEmpty())
+        {
+            subscription.deviceId=deviceId
+        }
         subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
         subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
         subscription.sdkVersion = DengageUtils.getSdkVersion()

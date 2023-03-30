@@ -17,6 +17,7 @@ import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.google.firebase.FirebaseApp
 import java.util.*
+import com.dengage.sdk.util.*
 import java.util.concurrent.TimeUnit
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
@@ -27,7 +28,8 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
     override fun providePresenter() = ConfigurationPresenter()
 
     internal fun init(
-        firebaseApp: FirebaseApp?
+        firebaseApp: FirebaseApp?,
+        firebaseIntegrationKey: String? = null
     ) {
         DengageUtils.getMetaData(name = "den_push_api_url").apply {
             if (this == null) {
@@ -59,7 +61,8 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             DengageLogger.verbose("Google Play Services are available. Firebase services will be used")
             initWithGoogle(
                 subscription = subscription,
-                firebaseApp = firebaseApp
+                firebaseApp = firebaseApp,
+                firebaseIntegrationKey= firebaseIntegrationKey
             )
         }
     }
@@ -129,19 +132,24 @@ catch (e: DeadObjectException)
         }
     }
 
-    private fun initWithGoogle(subscription: Subscription, firebaseApp: FirebaseApp?) {
+    private fun initWithGoogle(subscription: Subscription, firebaseApp: FirebaseApp?,  firebaseIntegrationKey: String? = null) {
         ConfigurationUtils.getFirebaseToken(
             firebaseApp = firebaseApp,
             onTokenResult = {
                 subscription.tokenType = TokenType.FIREBASE.type
                 subscription.token = it
-                subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL
+                if (firebaseIntegrationKey != null) {
+                    subscription.integrationKey=firebaseIntegrationKey
+                }
                 configurationCallback?.sendSubscription(subscription)
             }
         )
 
         ConfigurationUtils.getGmsAdvertisingId {
             subscription.advertisingId = it
+            if (firebaseIntegrationKey != null) {
+                subscription.integrationKey=firebaseIntegrationKey
+            }
             configurationCallback?.sendSubscription(subscription)
         }
     }
