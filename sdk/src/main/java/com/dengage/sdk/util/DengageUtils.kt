@@ -217,7 +217,7 @@ object DengageUtils {
         return targetUrl.startsWith(Prefs.inAppDeeplink,ignoreCase = true) &&targetUrl.isNotEmpty()
     }
 
-    fun getSdkDefaultObj():SdkParameters
+   /* fun getSdkDefaultObj():SdkParameters
     {
         return SdkParameters(
             appId="",
@@ -242,5 +242,5 @@ object DengageUtils {
     fun getSubscriptionDefaultObj() : Subscription
     {
         return Subscription()
-    }
+    }*/
 }

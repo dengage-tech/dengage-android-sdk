@@ -36,7 +36,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.IN_APP_API_BASE_URL, value)
 
     internal var sdkParameters: SdkParameters?
-        get() = preferences.get(PreferenceKey.SDK_PARAMETERS)?:DengageUtils.getSdkDefaultObj()
+        get() = preferences.get(PreferenceKey.SDK_PARAMETERS)
         set(value) = preferences.set(PreferenceKey.SDK_PARAMETERS, value)
 
     internal var appTrackingTime: Long
@@ -70,7 +70,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.NOTIFICATION_CHANNEL_NAME, value)
 
     internal var subscription: Subscription?
-        get() = preferences.get(PreferenceKey.SUBSCRIPTION) ?:DengageUtils.getSubscriptionDefaultObj()
+        get() = preferences.get(PreferenceKey.SUBSCRIPTION)
         set(value) = preferences.set(PreferenceKey.SUBSCRIPTION, value)
 
     internal var inboxMessageFetchTime: Long
@@ -98,7 +98,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.SUBSCRIPTION_CALL_TIME, value)
 
     internal var previouSubscription: Subscription?
-        get() = preferences.get(PreferenceKey.PREVIOUS_SUBSCRIPTION) ?:DengageUtils.getSubscriptionDefaultObj()
+        get() = preferences.get(PreferenceKey.PREVIOUS_SUBSCRIPTION)
         set(value) = preferences.set(PreferenceKey.PREVIOUS_SUBSCRIPTION, value)
 
 
