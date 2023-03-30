@@ -20,8 +20,8 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
         binding.btnDeviceInfo.setOnClickListener {
             //findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
-        Dengage.getLastPushPayload()
-
+        //Dengage.getLastPushPayload()
+Dengage.setDeviceId("sdss")
         }
 
         binding.btnUserPermission.setOnClickListener {

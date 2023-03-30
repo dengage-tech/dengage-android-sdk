@@ -17,11 +17,23 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     override fun providePresenter() = SubscriptionPresenter()
 
+    private var firebaseIntegrationKey:String?=null
+
+    private var huaweiIntegrationKey:String?=null
+
+    private var deviceId:String?=null
 
      fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
+        deviceId: String?
     ) {
+
+         this.firebaseIntegrationKey=firebaseIntegrationKey
+
+         this.huaweiIntegrationKey=huaweiIntegrationKey
+
+         this.deviceId=deviceId
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
             Prefs.subscription = PrefsOld.subscription
@@ -51,7 +63,8 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
         if (subscription != null&&subscription.token.isNullOrEmpty()) {
 
-            if(subscription.tokenType == "A") subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL else Constants.HUAWEI_KEY_LOCAL
+            if(subscription.tokenType == "A") subscription.integrationKey=
+                firebaseIntegrationKey.toString() else huaweiIntegrationKey
 
             subscription.token = token
 
@@ -142,12 +155,12 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         DengageLogger.verbose("saveSubscription method is called")
 
         if (subscription.deviceId.isNullOrEmpty()) {
-            if(Constants.deviceId.isNullOrEmpty()) {
+            if(deviceId.isNullOrEmpty()) {
                 subscription.deviceId = DengageUtils.getDeviceId()
             }
             else
             {
-                subscription.deviceId=Constants.deviceId
+                subscription.deviceId=deviceId
             }
         }
         subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)

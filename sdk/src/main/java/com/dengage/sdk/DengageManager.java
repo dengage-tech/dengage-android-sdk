@@ -169,7 +169,7 @@ public class DengageManager {
 
     public void buildSubscription() {
         try {
-            Dengage.INSTANCE.getSubscriptionManager().buildSubscription(firebaseIntegrationKey, huaweiIntegrationKey);
+            Dengage.INSTANCE.getSubscriptionManager().buildSubscription(firebaseIntegrationKey, huaweiIntegrationKey,"");
         } catch (Exception ex) {
             DengageLogger.INSTANCE.error("buildSubscription: " + ex.getMessage());
 
