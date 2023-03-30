@@ -146,6 +146,7 @@ catch (e: DeadObjectException)
             onTokenResult = {
                 subscription.tokenType = TokenType.FIREBASE.type
                 subscription.token = it
+                subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL
                 configurationCallback?.sendSubscription(subscription)
             }
         )

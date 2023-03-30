@@ -38,6 +38,7 @@ object Constants {
 
     var deviceToken=""
     internal var deviceId=""
+    internal var GOOGLE_KEY_LOCAL=""
 
     var isActivityPerformed =false
 }

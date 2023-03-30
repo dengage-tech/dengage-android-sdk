@@ -47,6 +47,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
         if (subscription != null) {
             subscription.token = token
+            subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL
 
             saveSubscription(subscription = subscription)
 

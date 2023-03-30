@@ -79,9 +79,9 @@ object Dengage {
         {
             Constants.deviceId=deviceId.toString()
         }
-        subscriptionManager.buildSubscription(
-            firebaseIntegrationKey = firebaseIntegrationKey
-        )
+        if (firebaseIntegrationKey != null) {
+            Constants.GOOGLE_KEY_LOCAL=firebaseIntegrationKey
+        }
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
                 inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
