@@ -11,6 +11,7 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.configuration.util.ConfigurationUtils
+import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
@@ -134,6 +135,7 @@ catch (e: DeadObjectException)
             onTokenResult = {
                 subscription.tokenType = TokenType.FIREBASE.type
                 subscription.token = it
+                subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL
                 configurationCallback?.sendSubscription(subscription)
             }
         )
