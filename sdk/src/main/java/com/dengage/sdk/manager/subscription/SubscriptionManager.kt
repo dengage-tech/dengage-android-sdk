@@ -163,6 +163,10 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
                 subscription.deviceId=deviceId
             }
         }
+         else if (!subscription.deviceId.equals(deviceId)&&!deviceId.isNullOrEmpty())
+        {
+            subscription.deviceId=deviceId
+        }
         subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
         subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
         subscription.sdkVersion = DengageUtils.getSdkVersion()
