@@ -75,13 +75,9 @@ object Dengage {
         initialized = true
         ContextHolder.context = context
         SessionManager.getSessionId()
-        if(!deviceId.isNullOrEmpty())
-        {
-            Constants.deviceId=deviceId.toString()
-        }
-        if (firebaseIntegrationKey != null) {
-            Constants.GOOGLE_KEY_LOCAL=firebaseIntegrationKey
-        }
+
+        subscriptionManager.buildSubscription(firebaseIntegrationKey,deviceId)
+
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
                 inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
@@ -112,7 +108,8 @@ object Dengage {
 
         configurationManager.init(
             firebaseApp = firebaseApp,
-            geofenceEnabled = geofenceEnabled
+            geofenceEnabled = geofenceEnabled,
+            firebaseIntegrationKey = firebaseIntegrationKey
         )
 
         configurationManager.getSdkParameters()

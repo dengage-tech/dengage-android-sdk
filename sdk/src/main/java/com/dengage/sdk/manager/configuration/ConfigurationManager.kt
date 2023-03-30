@@ -11,6 +11,7 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.configuration.util.ConfigurationUtils
+import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
@@ -28,6 +29,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
     internal fun init(
         firebaseApp: FirebaseApp?,
+        firebaseIntegrationKey: String? = null,
         geofenceEnabled: Boolean
     ) {
         DengageUtils.getMetaData(name = "den_push_api_url").apply {
@@ -66,11 +68,12 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             Prefs.subscription = subscription
         }
 
-        if (ConfigurationUtils.isGooglePlayServicesAvailable() ) {
-            DengageLogger.verbose("Google Play Services Service are available. Firebase services will be used")
+        if (ConfigurationUtils.isGooglePlayServicesAvailable()) {
+            DengageLogger.verbose("Google Play Services are available. Firebase services will be used")
             initWithGoogle(
                 subscription = subscription,
-                firebaseApp = firebaseApp
+                firebaseApp = firebaseApp,
+                firebaseIntegrationKey= firebaseIntegrationKey
             )
         }
     }
@@ -140,19 +143,24 @@ catch (e: DeadObjectException)
         }
     }
 
-    private fun initWithGoogle(subscription: Subscription, firebaseApp: FirebaseApp?) {
+    private fun initWithGoogle(subscription: Subscription, firebaseApp: FirebaseApp?,  firebaseIntegrationKey: String? = null) {
         ConfigurationUtils.getFirebaseToken(
             firebaseApp = firebaseApp,
             onTokenResult = {
                 subscription.tokenType = TokenType.FIREBASE.type
                 subscription.token = it
-                subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL
+                if (firebaseIntegrationKey != null) {
+                    subscription.integrationKey=firebaseIntegrationKey
+                }
                 configurationCallback?.sendSubscription(subscription)
             }
         )
 
         ConfigurationUtils.getGmsAdvertisingId {
             subscription.advertisingId = it
+            if (firebaseIntegrationKey != null) {
+                subscription.integrationKey=firebaseIntegrationKey
+            }
             configurationCallback?.sendSubscription(subscription)
         }
     }
