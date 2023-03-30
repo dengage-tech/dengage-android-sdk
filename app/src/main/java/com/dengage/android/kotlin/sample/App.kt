@@ -31,7 +31,7 @@ class App : Application() {
         Dengage.init(
             context = applicationContext,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
-            deviceId = "hasdaslkdasd"
+            deviceId = "ha"
         )
         Dengage.setLogStatus(true)
 
