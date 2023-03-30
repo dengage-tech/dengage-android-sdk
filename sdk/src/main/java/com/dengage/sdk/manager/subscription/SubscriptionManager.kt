@@ -4,32 +4,43 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.cache.PrefsOld
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseMvpManager
-import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.session.SessionManager
-import com.dengage.sdk.util.*
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import com.dengage.sdk.util.ContextHolder
+import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
+import com.dengage.sdk.util.GsonHolder
 import java.util.*
+import com.dengage.sdk.util.*
 
 class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
     SubscriptionContract.View {
 
     override fun providePresenter() = SubscriptionPresenter()
 
+    private var firebaseIntegrationKey:String?=null
 
+    private var huaweiIntegrationKey:String?=null
+
+    private var deviceId:String?=null
 
      fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
+        deviceId: String?
     ) {
 
+         this.firebaseIntegrationKey=firebaseIntegrationKey
 
+         this.huaweiIntegrationKey=huaweiIntegrationKey
 
+         this.deviceId=deviceId
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
             Prefs.subscription = PrefsOld.subscription
             PrefsOld.subscription = null
         }
+
+
 
         var subscription = Prefs.subscription
         if (subscription == null) {
@@ -52,7 +63,8 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
         if (subscription != null&&subscription.token.isNullOrEmpty()) {
 
-            if(subscription.tokenType == "A") subscription.integrationKey= Constants.GOOGLE_KEY_LOCAL else Constants.HUAWEI_KEY_LOCAL
+            if(subscription.tokenType == "A") subscription.integrationKey=
+                firebaseIntegrationKey.toString() else huaweiIntegrationKey
 
             subscription.token = token
 
@@ -142,14 +154,19 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
      fun saveSubscription(subscription: Subscription) {
         DengageLogger.verbose("saveSubscription method is called")
 
-         if(Constants.deviceId.isNullOrEmpty()) {
-             subscription.deviceId = DengageUtils.getDeviceId()
-         }
-         else
-         {
-             subscription.deviceId=Constants.deviceId
-         }
-
+        if (subscription.deviceId.isNullOrEmpty()) {
+            if(deviceId.isNullOrEmpty()) {
+                subscription.deviceId = DengageUtils.getDeviceId()
+            }
+            else
+            {
+                subscription.deviceId=deviceId
+            }
+        }
+         else if (!subscription.deviceId.equals(deviceId)&&!deviceId.isNullOrEmpty())
+        {
+            subscription.deviceId=deviceId
+        }
         subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
         subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
         subscription.sdkVersion = DengageUtils.getSdkVersion()
@@ -188,7 +205,6 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         }
     }
 
-
     internal fun setPartnerDeviceId(adid: String?) {
         val subscription = Prefs.subscription
 
@@ -203,6 +219,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
             presenter.sendSubscription(subscription = subscription)
         }
     }
+
     override fun subscriptionSent() = Unit
 
 }
