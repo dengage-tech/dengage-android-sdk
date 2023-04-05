@@ -2,6 +2,9 @@ package com.dengage.android.kotlin.sample.utils
 
 object Constants {
 
-    const val FIREBASE_APP_INTEGRATION_KEY = "7Abfdu4FsdxwpNEijnKAmMCNJOt0lk1Bg7akUz_p_l_ZnjIas4NjHtq9JsAZqShYDXeaCynWdYdqhguva_s_l_1m7JHoWBmlBDciP5We5avGFeuwUP0gHfRz3K7_p_l_umzPlk2ygutnuO3rdq7CPZDaYG8kt45dBw_e_q__e_q_"
+    const val FIREBASE_APP_INTEGRATION_KEY = "GJziF0vBKYsBVA_s_l_3X6ksCkJBr5nKKgsaJHxMZuwglXwsz_p_l_7_s_l__p_l_X5vjH9Kcu7FaaOtDq_p_l_wo9bTsjU7WoNpLj563OgsJDFzjDLw6See7_p_l_XZfAmOBYRqByJ09w_p_l_1zKmNBqAJ"
+    var mToken=""
+    var cartId=""
 
+    var itemId=""
 }
