@@ -1,5 +1,6 @@
 package com.dengage.sdk.domain.deviceId
 
+import com.dengage.sdk.SenderDeviceIdResponse
 import com.dengage.sdk.data.remote.api.ApiType
 import com.dengage.sdk.data.remote.api.service
 import com.dengage.sdk.domain.deviceId.model.DeviceIdModel
@@ -13,7 +14,7 @@ suspend fun sendDeviceIDToServer(
     route: String,
     token: String,
     deviceId:String
-): Response<Unit> {
+): List<SenderDeviceIdResponse> {
     return service.sendDeviceId(route, "Bearer $token", deviceIdObject = DeviceIdModel(deviceId))
 }
 }

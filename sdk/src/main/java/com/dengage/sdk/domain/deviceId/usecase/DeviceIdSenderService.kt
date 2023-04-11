@@ -1,6 +1,7 @@
 package com.dengage.sdk.domain.deviceId.usecase
 
 
+import com.dengage.sdk.SenderDeviceIdResponse
 import com.dengage.sdk.domain.deviceId.model.DeviceIdModel
 import retrofit2.Response
 import retrofit2.http.*
@@ -13,5 +14,5 @@ interface DeviceIdSenderService {
         @Url fullUrl: String,
         @Header("Authorization") token: String,
         @Body deviceIdObject: DeviceIdModel,
-    ): Response<Unit>
+    ): List<SenderDeviceIdResponse>
 }
