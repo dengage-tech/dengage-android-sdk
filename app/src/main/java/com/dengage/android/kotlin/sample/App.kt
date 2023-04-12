@@ -3,6 +3,7 @@ package com.dengage.android.kotlin.sample
 import android.app.Application
 import com.dengage.android.kotlin.sample.utils.Constants
 import com.dengage.sdk.Dengage
+import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.util.DengageLifecycleTracker
 
 class App : Application() {

@@ -7,6 +7,7 @@ import android.location.Location
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.geofence.model.GeofenceLocationSource
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
@@ -71,13 +72,15 @@ object Dengage {
         huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
         geofenceEnabled: Boolean = false,
-        deviceId: String?=null
+        deviceId: String?=null,
+        deviceConfigurationPreference : DeviceConfigurationPreference?= DeviceConfigurationPreference.Google
+
     ) {
         initialized = true
         ContextHolder.context = context
         SessionManager.getSessionId()
 
-        subscriptionManager.buildSubscription(firebaseIntegrationKey,huaweiIntegrationKey,deviceId)
+        subscriptionManager.buildSubscription(firebaseIntegrationKey,huaweiIntegrationKey,deviceId,deviceConfigurationPreference)
 
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
@@ -111,7 +114,9 @@ object Dengage {
             firebaseApp = firebaseApp,
             geofenceEnabled = geofenceEnabled,
             firebaseIntegrationKey = firebaseIntegrationKey,
-            huaweiIntegrationKey = huaweiIntegrationKey
+            huaweiIntegrationKey = huaweiIntegrationKey,
+            deviceConfigurationPreference= deviceConfigurationPreference
+
         )
 
         configurationManager.getSdkParameters()

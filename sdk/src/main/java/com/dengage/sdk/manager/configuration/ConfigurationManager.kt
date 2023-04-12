@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.DeadObjectException
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.TokenType
@@ -31,7 +32,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         firebaseApp: FirebaseApp?,
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
-        geofenceEnabled: Boolean
+        geofenceEnabled: Boolean,
+        deviceConfigurationPreference : DeviceConfigurationPreference?= DeviceConfigurationPreference.Google
+
     ) {
         DengageUtils.getMetaData(name = "den_push_api_url").apply {
             if (this == null) {
@@ -71,12 +74,17 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
         if (ConfigurationUtils.isGooglePlayServicesAvailable() && ConfigurationUtils.isHuaweiMobileServicesAvailable()) {
             DengageLogger.verbose("Google Play Services and Huawei Mobile Service are available. Firebase services will be used")
-            initWithGoogle(
-                subscription = subscription,
-                firebaseApp = firebaseApp,
-               firebaseIntegrationKey= firebaseIntegrationKey
-
-            )
+           if(deviceConfigurationPreference == DeviceConfigurationPreference.Google) {
+               initWithGoogle(
+                   subscription = subscription,
+                   firebaseApp = firebaseApp,
+                   firebaseIntegrationKey = firebaseIntegrationKey)
+           } else{
+               initWithHuawei(
+                   subscription = subscription,
+                   huaweiIntegrationKey= huaweiIntegrationKey
+               )
+           }
         } else if (ConfigurationUtils.isHuaweiMobileServicesAvailable()) {
             DengageLogger.verbose("Huawei Mobile Services is available")
             initWithHuawei(
