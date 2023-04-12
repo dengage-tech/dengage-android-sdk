@@ -2,6 +2,8 @@ package com.dengage.sdk.manager.subscription
 
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.cache.PrefsOld
+import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
+import com.dengage.sdk.domain.configuration.model.TokenType
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.session.SessionManager
@@ -23,15 +25,21 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     private var deviceId:String?=null
 
-     fun buildSubscription(
+    private var deviceConfigurationPreference :DeviceConfigurationPreference?=null
+
+
+    fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
-        deviceId: String?
+        deviceId: String?,
+        deviceConfigurationPreference : DeviceConfigurationPreference?
     ) {
 
-         this.firebaseIntegrationKey=firebaseIntegrationKey
+        this.deviceConfigurationPreference = deviceConfigurationPreference
 
-         this.huaweiIntegrationKey=huaweiIntegrationKey
+        this.firebaseIntegrationKey = firebaseIntegrationKey
+
+         this.huaweiIntegrationKey = huaweiIntegrationKey
 
          this.deviceId=deviceId
         // this is for migration from old sdk
@@ -63,8 +71,11 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
         if (subscription != null&&subscription.token.isNullOrEmpty()) {
 
-            if(subscription.tokenType == "A") subscription.integrationKey=
+            if(deviceConfigurationPreference == DeviceConfigurationPreference.Google) subscription.tokenType = TokenType.FIREBASE.type else subscription.tokenType = TokenType.HUAWEI.type
+
+            if(subscription.tokenType == TokenType.FIREBASE.type) subscription.integrationKey=
                 firebaseIntegrationKey.toString() else huaweiIntegrationKey
+
 
             subscription.token = token
 

@@ -1,12 +1,13 @@
 package com.dengage.android.kotlin.sample
 
 import android.app.Application
-import android.content.IntentFilter
+import android.content.Context
 import android.os.Looper
 import com.dengage.android.kotlin.sample.push.PushNotificationReceiver
 import com.dengage.android.kotlin.sample.utils.Constants
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.DengageManager
+import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.util.DengageLifecycleTracker
 import com.dengage.sdk.util.DengageUtils
 import java.util.logging.Handler
@@ -27,9 +28,9 @@ class App : Application() {
             .setLogStatus(true)
             .setFirebaseIntegrationKey(Constants.FIREBASE_APP_INTEGRATION_KEY)
             .init()*/
-
+             val context :Context  = this
         Dengage.init(
-            context = applicationContext,
+            context = context,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
             deviceId = "ha"
         )

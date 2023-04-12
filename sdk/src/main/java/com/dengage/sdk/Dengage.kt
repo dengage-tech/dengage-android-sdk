@@ -6,6 +6,7 @@ import android.content.Intent
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
@@ -62,13 +63,14 @@ object Dengage {
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
-        deviceId: String?=null
+        deviceId: String?=null,
+        deviceConfigurationPreference :DeviceConfigurationPreference?=DeviceConfigurationPreference.Google
     ) {
         initialized = true
         ContextHolder.context = context
         SessionManager.getSessionId()
 
-        subscriptionManager.buildSubscription(firebaseIntegrationKey,huaweiIntegrationKey,deviceId)
+        subscriptionManager.buildSubscription(firebaseIntegrationKey,huaweiIntegrationKey,deviceId,deviceConfigurationPreference)
 
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
@@ -101,7 +103,8 @@ object Dengage {
         configurationManager.init(
             firebaseApp = firebaseApp,
             firebaseIntegrationKey=firebaseIntegrationKey,
-            huaweiIntegrationKey=huaweiIntegrationKey
+            huaweiIntegrationKey=huaweiIntegrationKey,
+            deviceConfigurationPreference= deviceConfigurationPreference
         )
         configurationManager.getSdkParameters()
     }
