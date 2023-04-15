@@ -54,7 +54,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.26.2"
+        return "6.0.27.2"
     }
 
     fun getUserAgent(context: Context): String {
@@ -127,8 +127,18 @@ object DengageUtils {
     }
 
     fun showDengageNotification(data: Map<String, String>): Boolean {
-        val message = Message.createFromMap(data)
-        return Constants.MESSAGE_SOURCE == message.messageSource
+        try {
+            val message = Message.createFromMap(data)
+            return Constants.MESSAGE_SOURCE == message.messageSource
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+        }
+        catch (ex: Throwable)
+        { ex.printStackTrace()
+
+        }
+        return false
     }
 
 
