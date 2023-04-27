@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.DeadObjectException
 import android.telephony.TelephonyManager
+import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.push.model.Message
@@ -54,7 +55,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.27.3"
+        return "6.0.28.3"
     }
 
     fun getUserAgent(context: Context): String {
@@ -253,4 +254,22 @@ object DengageUtils {
     {
         return Subscription()
     }*/
+
+    fun restartApplication(): Boolean {
+        var restartApplication = false
+        try {
+            if (Prefs.restartApplicationAfterPushClick == true) {
+                restartApplication = true
+            }
+            if (!restartApplication) {
+                restartApplication = Dengage.getCurrentActivity() == null
+            }
+
+        } catch (e: Exception) {
+
+            restartApplication = true
+        }
+
+        return restartApplication
+    }
 }

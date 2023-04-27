@@ -29,6 +29,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
+        ContextHolder.resetContext(context)
         DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
 
         when (intent?.action) {

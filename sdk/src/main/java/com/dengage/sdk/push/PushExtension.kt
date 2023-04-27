@@ -17,6 +17,8 @@ import android.os.DeadObjectException
 import android.text.TextUtils
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.text.isDigitsOnly
+import com.dengage.sdk.Dengage
+import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.util.DengageLogger
@@ -36,9 +38,9 @@ fun String?.getSoundUri(context: Context): Uri {
         } else {
             RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         }
+    } catch (e: Exception) {
+    } catch (e: Throwable) {
     }
-    catch (e:Exception){}
-    catch (e:Throwable){}
     return Uri.parse("")
 }
 
@@ -62,13 +64,10 @@ fun Context.getSmallIconId(): Int {
     } catch (e: PackageManager.NameNotFoundException) {
         DengageLogger.verbose("Application Icon Not Found")
         -1
-    }
-    catch (ex: Throwable)
-    { ex.printStackTrace()
+    } catch (ex: Throwable) {
+        ex.printStackTrace()
         -1
-    }
-    catch (e: DeadObjectException)
-    {
+    } catch (e: DeadObjectException) {
         e.printStackTrace()
         -1
     }
@@ -87,9 +86,9 @@ fun Context.getSmallIconColorId(): Int {
         } else {
             -1 // in case metadata not provided in AndroidManifest
         }
+    } catch (e: Exception) {
+    } catch (e: Throwable) {
     }
-    catch (e:Exception){}
-    catch (e:Throwable){}
     return -1
 }
 
@@ -107,9 +106,9 @@ fun Context.getColorResourceId(resourceName: String?): Int {
             e.printStackTrace()
             0
         }
+    } catch (e: Exception) {
+    } catch (e: Throwable) {
     }
-    catch (e:Exception){}
-    catch (e:Throwable){}
     return -1
 }
 
@@ -127,9 +126,9 @@ fun Context.getResourceId(resourceName: String?): Int {
             e.printStackTrace()
             0
         }
+    } catch (e: Exception) {
+    } catch (e: Throwable) {
     }
-    catch (e:Exception){}
-    catch (e:Throwable){}
     return -1
 }
 
@@ -141,9 +140,9 @@ fun CarouselItem.removeFileFromStorage(): Boolean {
         } else {
             false
         }
+    } catch (e: Exception) {
+    } catch (e: Throwable) {
     }
-    catch (e:Exception){}
-    catch (e:Throwable){}
     return false
 }
 
@@ -155,9 +154,9 @@ fun CarouselItem.loadFileFromStorage(): Bitmap? {
         } else {
             null
         }
+    } catch (e: Exception) {
+    } catch (e: Throwable) {
     }
-    catch (e:Exception){}
-    catch (e:Throwable){}
     return null
 }
 
@@ -177,27 +176,29 @@ fun Context.launchActivity(intent: Intent?, uri: String?) {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    } catch (e: Exception) {
+    } catch (e: Throwable) {
     }
-    catch (e:Exception){}
-    catch (e:Throwable){}
 }
 
 fun Context.getActivity(): Class<out Activity>? {
-    val packageName = packageName
-    val launchIntent = packageManager.getLaunchIntentForPackage(packageName) ?: return null
-    val className = launchIntent.component!!.className
     var clazz: Class<out Activity>? = null
+
     try {
+        if (!DengageUtils.restartApplication()) {
+            return Dengage.getCurrentActivity()?.javaClass
+        }
+        val packageName = packageName
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName) ?: return null
+        val className = launchIntent.component!!.className
+
         clazz = Class.forName(className) as Class<out Activity>?
     } catch (e: ClassNotFoundException) {
         // do nothing
-    }
-    catch (ex: Throwable)
-    { ex.printStackTrace()
+    } catch (ex: Throwable) {
+        ex.printStackTrace()
 
-    }
-    catch (e: DeadObjectException)
-    {
+    } catch (e: DeadObjectException) {
         e.printStackTrace()
 
     }
@@ -220,13 +221,9 @@ fun Context.clearNotification(message: Message?) {
         }
         val manager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         manager?.cancel(message?.messageSource, message?.messageId!!)
-    }
-    catch (ex:Exception)
-    {
+    } catch (ex: Exception) {
 
-    }
-    catch (ex:Throwable)
-    {
+    } catch (ex: Throwable) {
 
     }
 }
@@ -248,4 +245,6 @@ fun Context.areNotificationsEnabled(): Boolean {
     } else {
         NotificationManagerCompat.from(this).areNotificationsEnabled()
     }
+
+
 }
