@@ -9,65 +9,108 @@ object DengageLogger {
     val dengageLogs = mutableListOf<String>()
 
     fun debug(message: String?) {
-        addToLogs(
-            type = "Debug",
-            message = message
-        )
-        if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
-            Log.d(LOGGER_TAG, message!!)
+        try {
+            addToLogs(
+                type = "Debug",
+                message = message
+            )
+            if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
+                Log.d(LOGGER_TAG, message!!)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
         }
     }
 
     fun error(message: String?) {
-        addToLogs(
-            type = "Error",
-            message = message
-        )
-        if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
-            Log.e(LOGGER_TAG, message!!)
+        try {
+            addToLogs(
+                type = "Error",
+                message = message
+            )
+            if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
+                Log.e(LOGGER_TAG, message!!)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
         }
     }
 
     fun warning(message: String?) {
-        addToLogs(
-            type = "Warning",
-            message = message
-        )
-        if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
-            Log.w(LOGGER_TAG, message!!)
+        try {
+            addToLogs(
+                type = "Warning",
+                message = message
+            )
+            if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
+                Log.w(LOGGER_TAG, message!!)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
         }
     }
 
     fun info(message: String?) {
-        addToLogs(
-            type = "Info",
-            message = message
-        )
-        if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
-            Log.i(LOGGER_TAG, message!!)
+        try {
+            addToLogs(
+                type = "Info",
+                message = message
+            )
+            if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
+                Log.i(LOGGER_TAG, message!!)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
         }
     }
 
     fun verbose(message: String?) {
-        addToLogs(
-            type = "Verbose",
-            message = message
-        )
-        if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
-            Log.v(LOGGER_TAG, message!!)
+        try {
+            addToLogs(
+                type = "Verbose",
+                message = message
+            )
+            if (Prefs.logVisibility && message.isNullOrEmpty().not()) {
+                Log.v(LOGGER_TAG, message!!)
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
         }
     }
 
     fun addToLogs(type: String, message: String?) {
         try {
-            if (message.isNullOrEmpty()) return
+            try {
+                if (message.isNullOrEmpty()) return
 
-            if (dengageLogs.size >= 200) {
-                dengageLogs.removeLast()
+                if (dengageLogs.size >= 200) {
+                    dengageLogs.removeLast()
+                }
+                dengageLogs.add(0, "$type: $message")
+            } catch (e: Exception) {
+                return
             }
-            dengageLogs.add(0, "$type: $message")
         } catch (e: Exception) {
-            return
+            e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
         }
     }
 }

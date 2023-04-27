@@ -1,5 +1,6 @@
 package com.dengage.sdk
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -39,6 +40,7 @@ import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
 import com.dengage.sdk.push.clearNotification
+@SuppressLint("StaticFieldLeak")
 object Dengage {
 
      val configurationManager by lazy { ConfigurationManager() }
@@ -55,6 +57,8 @@ object Dengage {
     internal var initialized = false
 
     private var isInAppFetched: Boolean = false
+
+    private  var currentActivity:Activity? =null
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -73,7 +77,8 @@ object Dengage {
         deviceId: String?=null
     ) {
         initialized = true
-        ContextHolder.context = context
+        ContextHolder.resetContext(context = context)
+
         SessionManager.getSessionId()
 
         subscriptionManager.buildSubscription(firebaseIntegrationKey,deviceId)
@@ -83,7 +88,7 @@ object Dengage {
                 inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
                     InAppMessageFetchCallback {
                     override fun inAppMessageFetched(realTime: Boolean) {
-                        isInAppFetched = true;
+                        isInAppFetched = true
                     }
 
                 })
@@ -765,5 +770,20 @@ object Dengage {
         ContextHolder.context.applicationContext.clearNotification(pushPayload)
         return pushPayload?.toJson() ?: ""
 
+    }
+
+    fun setCurrentActivity(activity: Activity)
+    {
+        currentActivity=activity
+    }
+
+    internal fun getCurrentActivity() : Activity?
+    {
+        return currentActivity
+    }
+
+    fun restartApplicationAfterPushClick(restartApplication:Boolean)
+    {
+        Prefs.restartApplicationAfterPushClick = restartApplication
     }
 }

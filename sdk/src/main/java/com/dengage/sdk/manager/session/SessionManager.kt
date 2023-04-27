@@ -13,22 +13,27 @@ object SessionManager {
     }
 
     fun getSessionId(force: Boolean = false): String {
-        var sessionId = Prefs.appSessionId
-        if (force || isExpired()) {
-            sessionId = DengageUtils.generateUUID()
-            Prefs.appSessionId = sessionId
+        try {
+            var sessionId = Prefs.appSessionId
+            if (force || isExpired()) {
+                sessionId = DengageUtils.generateUUID()
+                Prefs.appSessionId = sessionId
 
-            val expireCalendar = Calendar.getInstance()
-            expireCalendar.add(
-                Calendar.MINUTE,
-                Prefs.sdkParameters?.realTimeInAppSessionTimeoutMinutes ?: 30
-            )
-            Prefs.appSessionTime = expireCalendar.time.time
+                val expireCalendar = Calendar.getInstance()
+                expireCalendar.add(
+                    Calendar.MINUTE,
+                    Prefs.sdkParameters?.realTimeInAppSessionTimeoutMinutes ?: 30
+                )
+                Prefs.appSessionTime = expireCalendar.time.time
 
-            VisitCountManager.updateVisitCount()
-            RealTimeInAppParamHolder.pageViewVisitCount = 0
+                VisitCountManager.updateVisitCount()
+                RealTimeInAppParamHolder.pageViewVisitCount = 0
+            }
+            return sessionId
         }
-        return sessionId
+        catch (e:Exception){
+            return ""
+        }
     }
 
 }
