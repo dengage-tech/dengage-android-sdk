@@ -134,6 +134,12 @@ object Prefs {
         get() = preferences.get(PreferenceKey.LAST_MESSAGE_PUSH_PAYLOAD, null)
         set(value) = preferences.set(PreferenceKey.LAST_MESSAGE_PUSH_PAYLOAD, value)
 
+
+    internal var restartApplicationAfterPushClick: Boolean?
+        get() = preferences.get(PreferenceKey.RESTART_APPLICATION_AFTER_PUSH_CLICK, true)
+        set(value) = preferences.set(PreferenceKey.RESTART_APPLICATION_AFTER_PUSH_CLICK, value)
+
+
     fun clear() {
         preferences.edit().clear().apply()
     }

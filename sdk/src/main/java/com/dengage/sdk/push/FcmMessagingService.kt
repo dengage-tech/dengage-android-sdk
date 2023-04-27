@@ -11,7 +11,7 @@ open class FcmMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        ContextHolder.context = applicationContext
+        ContextHolder.resetContext(context = this)
         Dengage.onNewToken(token = token)
     }
 
@@ -19,7 +19,7 @@ open class FcmMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
 
         if (DengageUtils.showDengageNotification(remoteMessage.data)) {
-            ContextHolder.context = applicationContext
+            ContextHolder.resetContext(context = this)
             Dengage.onMessageReceived(remoteMessage.data)
         }
     }

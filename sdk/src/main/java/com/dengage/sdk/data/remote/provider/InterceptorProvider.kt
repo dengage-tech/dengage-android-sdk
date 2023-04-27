@@ -10,6 +10,7 @@ import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.*
+import kotlin.collections.ArrayList
 
 class InterceptorProvider {
 
@@ -34,17 +35,23 @@ class InterceptorProvider {
     }
 
     private fun createLoggingInterceptors(): List<Interceptor> {
-        return arrayListOf(
-            if (Prefs.logVisibility) {
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
+        try {
+            return arrayListOf(
+                if (Prefs.logVisibility) {
+                    HttpLoggingInterceptor().apply {
+                        level = HttpLoggingInterceptor.Level.BODY
+                    }
+                } else {
+                    HttpLoggingInterceptor().apply {
+                        level = HttpLoggingInterceptor.Level.NONE
+                    }
                 }
-            } else {
-                HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.NONE
-                }
-            }
-        )
+            )
+        }
+        catch (e:Exception)
+        {
+            return ArrayList()
+        }
     }
 
     private fun createEmptyBodyInterceptor(): Interceptor {

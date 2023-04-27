@@ -2,12 +2,14 @@ package com.dengage.sdk.push
 
 import android.app.Activity
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
-import com.dengage.sdk.Dengage
+import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.launchActivity
@@ -69,7 +71,7 @@ class NotificationNavigationDeciderActivity : Activity() {
 
                         DengageUtils.sendBroadCast(intent, this)
                         try {
-                            startActivity(sendingIntentObject)
+                            startActivityLocal(sendingIntentObject)
                         } catch (e: Exception) {
                             val packageName: String = packageName
 
@@ -79,7 +81,7 @@ class NotificationNavigationDeciderActivity : Activity() {
                             sendingIntentObject.putExtras(extras)
                             sendingIntentObject.action = intent.action
                             sendingIntentObject.setPackage(packageName)
-                            startActivity(sendingIntentObject)
+                            startActivityLocal(sendingIntentObject)
                         }
 
                     } else {
@@ -90,7 +92,7 @@ class NotificationNavigationDeciderActivity : Activity() {
                             Intent(this@NotificationNavigationDeciderActivity, getActivity())
 
                         sendingIntentObject.setPackage(packageName)
-                        startActivity(sendingIntentObject)
+                        startActivityLocal(sendingIntentObject)
 
                     }
                     killActivity()
@@ -98,7 +100,10 @@ class NotificationNavigationDeciderActivity : Activity() {
             } else {
                 if (DengageUtils.isAppInForeground()) {
                     launchActivity(null, null)
-                    finishAffinity()
+                    if(Prefs.restartApplicationAfterPushClick == false)
+                        finish()
+                    else
+                        finishAffinity()
                 }
             }
         }
@@ -136,7 +141,18 @@ class NotificationNavigationDeciderActivity : Activity() {
         Constants.isActivityPerformed = true
         Handler(Looper.getMainLooper()).postDelayed({
             DengageUtils.unregisterBroadcast()
-            finishAffinity()
+            if(Prefs.restartApplicationAfterPushClick == false)
+                finish()
+            else
+                finishAffinity()
         }, 1200)
+    }
+
+    private fun startActivityLocal(intent :Intent)
+    {
+        if(Prefs.restartApplicationAfterPushClick == false) {
+            intent.flags = FLAG_ACTIVITY_CLEAR_TOP or FLAG_ACTIVITY_SINGLE_TOP
+        }
+        startActivity(intent)
     }
 }
