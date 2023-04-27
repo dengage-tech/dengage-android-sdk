@@ -32,7 +32,8 @@ enum class PreferenceKey {
     VISIT_COUNTS,
     INAPP_DEEPLINK,
     VISITOR_INFO,
-    LAST_MESSAGE_PUSH_PAYLOAD
+    LAST_MESSAGE_PUSH_PAYLOAD,
+    RESTART_APPLICATION_AFTER_PUSH_CLICK
     ;
 
     override fun toString(): String = name

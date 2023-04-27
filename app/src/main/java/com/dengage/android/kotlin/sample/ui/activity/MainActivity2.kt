@@ -13,6 +13,7 @@ class MainActivity2 : AppCompatActivity() {
 
         Log.d("oops", intent.toString())
 
-        Dengage.setNavigation(this)
+        Dengage.setCurrentActivity(this)
+        Dengage.restartApplicationAfterPushClick(true)
     }
 }

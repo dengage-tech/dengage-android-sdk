@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.DeadObjectException
 import android.telephony.TelephonyManager
+import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.push.model.Message
@@ -32,9 +33,7 @@ object DengageUtils {
         } catch (e: Exception) {
             DengageLogger.error(e.message)
             ""
-        }
-        catch (e:Throwable)
-        {
+        } catch (e: Throwable) {
             ""
         }
     }
@@ -46,15 +45,13 @@ object DengageUtils {
         } catch (e: Exception) {
             DengageLogger.error(e.message)
             null
-        }
-        catch (e:Throwable)
-        {
+        } catch (e: Throwable) {
             null
         }
     }
 
     fun getSdkVersion(): String {
-        return "6.0.27.1"
+        return "6.0.28.1"
     }
 
     fun getUserAgent(context: Context): String {
@@ -64,13 +61,9 @@ object DengageUtils {
                     "${System.getProperty("http.agent")} Mobile/${Build.ID}"
 
             return appLabel.replace("[^\\x00-\\x7F]".toRegex(), "")
-        }
-        catch (e:Exception)
-        {
+        } catch (e: Exception) {
 
-        }
-        catch (e:Throwable)
-        {
+        } catch (e: Throwable) {
 
         }
         return ""
@@ -84,13 +77,10 @@ object DengageUtils {
                 lPackageManager.getApplicationInfo(context.applicationInfo.packageName, 0)
         } catch (e: Exception) {
 
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
 
-        }
-        catch (e: DeadObjectException)
-        {
+        } catch (e: DeadObjectException) {
 
         }
         return (if (lApplicationInfo != null) lPackageManager.getApplicationLabel(lApplicationInfo) else defaultText) as String?
@@ -110,13 +100,10 @@ object DengageUtils {
             bundle.getString(name)
         } catch (e: Exception) {
             null
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
             null
-        }
-        catch (e: DeadObjectException)
-        {
+        } catch (e: DeadObjectException) {
             e.printStackTrace()
             null
         }
@@ -130,14 +117,12 @@ object DengageUtils {
         try {
             val message = Message.createFromMap(data)
             return Constants.MESSAGE_SOURCE == message.messageSource
-        }
-     catch (e: Exception) {
-        e.printStackTrace()
-    }
-    catch (ex: Throwable)
-    { ex.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
 
-    }
+        }
         return false
     }
 
@@ -147,9 +132,8 @@ object DengageUtils {
             return TimeZone.getDefault().id
         } catch (e: Exception) {
             e.printStackTrace()
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
 
         }
         return ""
@@ -163,13 +147,10 @@ object DengageUtils {
         } catch (e: Exception) {
 
             return false
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
             return false
-        }
-        catch (e: DeadObjectException)
-        {
+        } catch (e: DeadObjectException) {
             return false
         }
     }
@@ -188,10 +169,9 @@ object DengageUtils {
                 filter
             )
         } catch (e: Exception) {
-          //  e.printStackTrace()
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
+            //  e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
 
         }
     }
@@ -201,9 +181,8 @@ object DengageUtils {
             ContextHolder.context.unregisterReceiver(NotificationReceiver())
         } catch (e: Exception) {
 
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
 
         }
     }
@@ -215,42 +194,62 @@ object DengageUtils {
             context.sendBroadcast(broadCastIntent)
         } catch (e: Exception) {
 
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
 
         }
     }
 
 
     fun isDeeplink(targetUrl: String): Boolean {
-        return targetUrl.startsWith(Prefs.inAppDeeplink,ignoreCase = true) &&targetUrl.isNotEmpty()
+        return targetUrl.startsWith(
+            Prefs.inAppDeeplink,
+            ignoreCase = true
+        ) && targetUrl.isNotEmpty()
     }
 
-  /*  fun getSdkDefaultObj():SdkParameters
-    {
-        return SdkParameters(
-            appId="",
-            accountId=0,
-            accountName="",
-            eventsEnabled=false,
-            inboxEnabled=false,
-            inAppEnabled = false,
-            subscriptionEnabled = false,
-            inAppFetchIntervalInMin = 0,
-            expiredMessagesFetchIntervalInMin = 0,
-            inAppMinSecBetweenMessages = 0,
-            lastFetchTimeInMillis = 0,
-            appTrackingEnabled = false,
-            appTrackingList = ArrayList(),
-            realTimeInAppEnabled = false,
-            realTimeInAppFetchIntervalInMinutes = 0,
-            realTimeInAppSessionTimeoutMinutes = 0
-        )
-    }
+    /*  fun getSdkDefaultObj():SdkParameters
+      {
+          return SdkParameters(
+              appId="",
+              accountId=0,
+              accountName="",
+              eventsEnabled=false,
+              inboxEnabled=false,
+              inAppEnabled = false,
+              subscriptionEnabled = false,
+              inAppFetchIntervalInMin = 0,
+              expiredMessagesFetchIntervalInMin = 0,
+              inAppMinSecBetweenMessages = 0,
+              lastFetchTimeInMillis = 0,
+              appTrackingEnabled = false,
+              appTrackingList = ArrayList(),
+              realTimeInAppEnabled = false,
+              realTimeInAppFetchIntervalInMinutes = 0,
+              realTimeInAppSessionTimeoutMinutes = 0
+          )
+      }
 
-    fun getSubscriptionDefaultObj() : Subscription
-    {
-        return Subscription()
-    }*/
+      fun getSubscriptionDefaultObj() : Subscription
+      {
+          return Subscription()
+      }*/
+
+    fun restartApplication(): Boolean {
+        var restartApplication = false
+        try {
+            if (Prefs.restartApplicationAfterPushClick == true) {
+                restartApplication = true
+            }
+            if (!restartApplication) {
+                restartApplication = Dengage.getCurrentActivity() == null
+            }
+
+        } catch (e: Exception) {
+
+            restartApplication = true
+        }
+
+        return restartApplication
+    }
 }

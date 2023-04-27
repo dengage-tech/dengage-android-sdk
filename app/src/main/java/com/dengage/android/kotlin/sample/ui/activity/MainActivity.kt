@@ -40,4 +40,22 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d("TAG", data.toString())
     }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent != null) {
+            PushDataParser.parseIntent(intent, pushMessageCallback = object : PushMessageCallback {
+                override fun dataFetched(message: Message) {
+                    Log.d("logs",GsonHolder.toJson(message))
+                }
+
+                override fun onActionClick(intent: Intent, message: Message, clickedId: String) {
+                    Log.d("logs","dsd " +
+                            ""+GsonHolder.toJson(message)+" sdsd "+clickedId)
+                }
+
+
+            })
+        }
+    }
 }

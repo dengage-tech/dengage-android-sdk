@@ -30,6 +30,8 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
+        ContextHolder.resetContext(context)
+
         DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
 
         when (intent?.action) {
@@ -46,28 +48,28 @@ open class NotificationReceiver : BroadcastReceiver() {
         DengageLogger.verbose("$TAG onPushReceive method is called")
         intent.extras ?: return
         prepareAndShowPush(context, intent)
-        Constants.isActivityPerformed=false
+        Constants.isActivityPerformed = false
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
         DengageLogger.verbose("$TAG onPushOpen method is called")
 
-          var uri: String? = null
-          if (intent.extras != null) {
-              var message = Message.createFromIntent(intent.extras!!)
-              val rawJson = intent.extras!!.getString("RAW_DATA")
-              if (!TextUtils.isEmpty(rawJson)) {
-                  message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
-              }
-              uri = intent.extras!!.getString("targetUrl")
-              ContextHolder.context = context
-              Dengage.sendOpenEvent("", "", message)
+        var uri: String? = null
+        if (intent.extras != null) {
+            var message = Message.createFromIntent(intent.extras!!)
+            val rawJson = intent.extras!!.getString("RAW_DATA")
+            if (!TextUtils.isEmpty(rawJson)) {
+                message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
+            }
+            uri = intent.extras!!.getString("targetUrl")
 
-             clearNotification(context, message)
-          } else {
-              DengageLogger.error("$TAG No extra data for push open")
-          }
-         // context.launchActivity(intent, uri)
+            Dengage.sendOpenEvent("", "", message)
+
+            clearNotification(context, message)
+        } else {
+            DengageLogger.error("$TAG No extra data for push open")
+        }
+        // context.launchActivity(intent, uri)
         // Log.d("oops","opened")
     }
 
@@ -99,7 +101,7 @@ open class NotificationReceiver : BroadcastReceiver() {
 
             val id = intent.extras!!.getString("id", "")
 
-            ContextHolder.context = context
+
             Dengage.sendOpenEvent(id, "", message)
 
             clearNotification(context, message)
@@ -142,12 +144,11 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
 
         message?.let {
-            ContextHolder.context = context
             when (navigation) {
                 "" -> {
                     Dengage.sendOpenEvent("", id, message)
                     clearNotification(context, message)
-                   // context.launchActivity(intent, uri)
+                    // context.launchActivity(intent, uri)
                 }
                 "left", "right" -> {
                     if (message.carouselContent.isNullOrEmpty()) {

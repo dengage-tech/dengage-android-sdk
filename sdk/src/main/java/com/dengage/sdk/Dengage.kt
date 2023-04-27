@@ -1,5 +1,6 @@
 package com.dengage.sdk
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -34,6 +35,7 @@ import com.google.firebase.FirebaseApp
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.push.clearNotification
 
+@SuppressLint("StaticFieldLeak")
 object Dengage {
 
     val configurationManager by lazy { ConfigurationManager() }
@@ -48,6 +50,7 @@ object Dengage {
 
     internal var initialized = false
     private var isInAppFetched: Boolean = false
+    private  var currentActivity:Activity? =null
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -63,14 +66,19 @@ object Dengage {
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
-        deviceId: String?=null,
-        deviceConfigurationPreference :DeviceConfigurationPreference?=DeviceConfigurationPreference.Google
+        deviceId: String? = null,
+        deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google
     ) {
         initialized = true
-        ContextHolder.context = context
+        ContextHolder.resetContext(context = context)
         SessionManager.getSessionId()
 
-        subscriptionManager.buildSubscription(firebaseIntegrationKey,huaweiIntegrationKey,deviceId,deviceConfigurationPreference)
+        subscriptionManager.buildSubscription(
+            firebaseIntegrationKey,
+            huaweiIntegrationKey,
+            deviceId,
+            deviceConfigurationPreference
+        )
 
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
@@ -102,9 +110,9 @@ object Dengage {
 
         configurationManager.init(
             firebaseApp = firebaseApp,
-            firebaseIntegrationKey=firebaseIntegrationKey,
-            huaweiIntegrationKey=huaweiIntegrationKey,
-            deviceConfigurationPreference= deviceConfigurationPreference
+            firebaseIntegrationKey = firebaseIntegrationKey,
+            huaweiIntegrationKey = huaweiIntegrationKey,
+            deviceConfigurationPreference = deviceConfigurationPreference
         )
         configurationManager.getSdkParameters()
     }
@@ -278,7 +286,7 @@ object Dengage {
         inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
             InAppMessageFetchCallback {
             override fun inAppMessageFetched(realTime: Boolean) {
-                isInAppFetched = true;
+                isInAppFetched = true
             }
 
         })
@@ -713,12 +721,26 @@ object Dengage {
         return isInAppFetched
     }
 
-    fun getLastPushPayload() :String
-    {
+    fun getLastPushPayload(): String {
         val pushPayload = Prefs.lastPushPayload
-        Prefs.lastPushPayload=null
+        Prefs.lastPushPayload = null
         ContextHolder.context.applicationContext.clearNotification(pushPayload)
         return pushPayload?.toJson() ?: ""
 
+    }
+
+    fun setCurrentActivity(activity: Activity)
+    {
+        currentActivity=activity
+    }
+
+    internal fun getCurrentActivity() : Activity?
+    {
+       return currentActivity
+    }
+
+    fun restartApplicationAfterPushClick(restartApplication:Boolean)
+    {
+        Prefs.restartApplicationAfterPushClick = restartApplication
     }
 }
