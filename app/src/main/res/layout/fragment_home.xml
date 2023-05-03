@@ -34,7 +34,7 @@
                 android:text="@string/button_contact_key" />
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btnCountry"
+                android:id="@+id/btnOpenTC"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/base_component_height"
                 android:layout_marginTop="8dp"

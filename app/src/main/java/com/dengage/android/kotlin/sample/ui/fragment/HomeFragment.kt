@@ -20,8 +20,7 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
         binding.btnDeviceInfo.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
-        //Dengage.getLastPushPayload()
-//Dengage.setDeviceId("sdss")
+
 
         }
 
@@ -33,8 +32,7 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
             findNavController().navigate(HomeFragmentDirections.actionHomeToContactKey())
         }
 
-        binding.btnCountry.setOnClickListener {
-           // findNavController().navigate(HomeFragmentDirections.actionHomeToCountry())
+        binding.btnOpenTC.setOnClickListener {
             startActivity(Intent(activity,MainActivity2::class.java))
             activity?.finishAffinity()
         }
