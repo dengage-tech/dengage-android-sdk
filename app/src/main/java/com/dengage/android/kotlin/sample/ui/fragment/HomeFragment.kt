@@ -19,10 +19,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         sendPageView("home")
 
         binding.btnDeviceInfo.setOnClickListener {
-            //findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
+            findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
         //Dengage.getLastPushPayload()
 //Dengage.setDeviceId("sdss")
-            startActivity(Intent(activity,MainActivity2::class.java))
+
         }
 
         binding.btnUserPermission.setOnClickListener {
@@ -34,7 +34,9 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         }
 
         binding.btnCountry.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeToCountry())
+           // findNavController().navigate(HomeFragmentDirections.actionHomeToCountry())
+            startActivity(Intent(activity,MainActivity2::class.java))
+            activity?.finishAffinity()
         }
 
         binding.btnInboxMessages.setOnClickListener {

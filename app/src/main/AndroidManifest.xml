@@ -13,7 +13,9 @@
         android:theme="@style/Theme.DengageAndroid" >
         <activity
             android:name=".ui.activity.MainActivity2"
-            android:exported="true" >
+            android:theme="@style/Theme.AppCompat.Transparent.NoActionBar"
+            android:exported="true"
+            >
 
         <intent-filter>
 

@@ -38,7 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/base_component_height"
                 android:layout_marginTop="8dp"
-                android:text="@string/button_country" />
+                android:text="open transparent activity" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnInboxMessages"
