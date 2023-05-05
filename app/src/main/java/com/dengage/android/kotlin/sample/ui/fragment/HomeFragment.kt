@@ -1,8 +1,10 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.content.Intent
 import androidx.navigation.fragment.findNavController
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentHomeBinding
+import com.dengage.android.kotlin.sample.ui.activity.MainActivity2
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
 import com.dengage.sdk.Dengage
 
@@ -16,15 +18,15 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         sendPageView("home")
 
         binding.btnDeviceInfo.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
+           findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
         //Dengage.getLastPushPayload()
 //Dengage.setDeviceId("sdss")
-           // startActivity(Intent(activity,MainActivity2::class.java))
+            //startActivity(Intent(activity, MainActivity2::class.java))
         }
 
         binding.btnUserPermission.setOnClickListener {
-          findNavController().navigate(HomeFragmentDirections.actionHomeToUserPermission())
-            //activity?.let { it1 -> Dengage.setNavigation(it1,"hasnain123") }
+        //  findNavController().navigate(HomeFragmentDirections.actionHomeToUserPermission())
+            activity?.let { it1 -> Dengage.setNavigation(it1,"hasnain123") }
         }
 
         binding.btnContactKey.setOnClickListener {
@@ -33,13 +35,14 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         }
 
         binding.btnCountry.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeToCountry())
-          //  activity?.let { it1 -> Dengage.setNavigation(it1,"hasnain") }
+          //  findNavController().navigate(HomeFragmentDirections.actionHomeToCountry())
+            activity?.let { it1 -> Dengage.setNavigation(it1,"hasnain") }
 
         }
 
         binding.btnInboxMessages.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeToInboxMessages())
+           // findNavController().navigate(HomeFragmentDirections.actionHomeToInboxMessages())
+            Dengage.removeInAppMessageDisplay()
         }
 
         binding.btnCustomEvents.setOnClickListener {

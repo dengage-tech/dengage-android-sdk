@@ -743,4 +743,9 @@ object Dengage {
     {
         Prefs.restartApplicationAfterPushClick = restartApplication
     }
+
+    fun removeInAppMessageDisplay()
+    {
+        inAppMessageManager.cancelTimer()
+    }
 }
