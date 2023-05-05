@@ -246,7 +246,7 @@ class InAppMessageManager :
         // todo send tags
     }
 
-    private fun cancelTimer() {
+     fun cancelTimer() {
         try {
             timer.cancel()
             timer.purge()
