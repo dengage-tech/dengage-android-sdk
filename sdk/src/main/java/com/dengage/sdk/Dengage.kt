@@ -50,7 +50,7 @@ object Dengage {
 
     internal var initialized = false
     private var isInAppFetched: Boolean = false
-    private  var currentActivity:Activity? =null
+    private var currentActivity: Activity? = null
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -729,23 +729,23 @@ object Dengage {
 
     }
 
-    fun setCurrentActivity(activity: Activity)
-    {
-        currentActivity=activity
+    fun setCurrentActivity(activity: Activity) {
+        currentActivity = activity
     }
 
-    internal fun getCurrentActivity() : Activity?
-    {
-       return currentActivity
+    internal fun getCurrentActivity(): Activity? {
+        return currentActivity
     }
 
-    fun restartApplicationAfterPushClick(restartApplication:Boolean)
-    {
+    fun restartApplicationAfterPushClick(restartApplication: Boolean) {
         Prefs.restartApplicationAfterPushClick = restartApplication
     }
 
-    fun removeInAppMessageDisplay()
-    {
+    fun removeInAppMessageDisplay() {
         inAppMessageManager.cancelTimer()
+    }
+
+    fun setDevelopmentStatus(isDebug: Boolean? = false) {
+        Prefs.isDevelopmentStatusDebug = isDebug
     }
 }
