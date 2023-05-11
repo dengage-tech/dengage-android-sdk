@@ -16,7 +16,8 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         sendPageView("home")
 
         binding.btnDeviceInfo.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
+           // findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
+            Dengage.setDevelopmentStatus(false)
         }
 
         binding.btnUserPermission.setOnClickListener {
