@@ -47,9 +47,10 @@ class InterceptorProvider {
                     }
                 }
             )
-        }
-        catch (e:Exception)
-        {
+
+        } catch (e: Exception) {
+            return ArrayList()
+        } catch (e: Exception) {
             return ArrayList()
         }
     }

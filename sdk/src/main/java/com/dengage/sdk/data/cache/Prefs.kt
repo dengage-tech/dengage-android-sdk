@@ -156,6 +156,11 @@ object Prefs {
         get() = preferences.get(PreferenceKey.RESTART_APPLICATION_AFTER_PUSH_CLICK, true)
         set(value) = preferences.set(PreferenceKey.RESTART_APPLICATION_AFTER_PUSH_CLICK, value)
 
+    internal var isDevelopmentStatusDebug: Boolean?
+        get() = preferences.get(PreferenceKey.DEVELOPMENT_STATUS, false)
+        set(value) = preferences.set(PreferenceKey.DEVELOPMENT_STATUS, value)
+
+
     fun clear() {
         preferences.edit().clear().apply()
     }
