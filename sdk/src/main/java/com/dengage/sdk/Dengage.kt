@@ -810,4 +810,8 @@ object Dengage {
     {
         inAppMessageManager.cancelTimer()
     }
+
+    fun setDevelopmentStatus(isDebug: Boolean? = false) {
+        Prefs.isDevelopmentStatusDebug = isDebug
+    }
 }

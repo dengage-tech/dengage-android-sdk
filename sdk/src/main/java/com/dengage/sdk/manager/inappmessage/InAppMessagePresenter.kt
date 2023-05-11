@@ -29,12 +29,12 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         val subscription = Prefs.subscription
         if (isInAppMessageEnabled(subscription, sdkParameters)&& DengageUtils.isAppInForeground()) {
 
-            // control next in app message fetch time
-            //if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
+            if(Prefs.isDevelopmentStatusDebug == false) {
+                  if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
-           // val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
-           // Prefs.inAppMessageFetchTime = System.currentTimeMillis() + 0
-
+                val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
+                Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
+            }
             getInAppMessages(this) {
                 onResponse = {
                     view { fetchedInAppMessages(it,false)
