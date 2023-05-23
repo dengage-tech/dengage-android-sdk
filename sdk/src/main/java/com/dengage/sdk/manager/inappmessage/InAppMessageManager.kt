@@ -34,8 +34,9 @@ class InAppMessageManager :
             cancelTimer()
             ContextHolder.resetContext(activity)
             // control next in app message show time
-            if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
-
+            if(Prefs.isDevelopmentStatusDebug==false){
+                if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
+            }
             val inAppMessages =
                 InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
             Prefs.inAppMessages = inAppMessages
