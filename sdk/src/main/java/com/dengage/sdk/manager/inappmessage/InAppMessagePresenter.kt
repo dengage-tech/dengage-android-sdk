@@ -25,72 +25,88 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val getVisitorInfo by lazy { GetVisitorInfo() }
 
     override fun getInAppMessages() {
-        val sdkParameters = Prefs.sdkParameters
-        val subscription = Prefs.subscription
-        if (isInAppMessageEnabled(subscription, sdkParameters)&& DengageUtils.isAppInForeground()) {
+        try {
+            val sdkParameters = Prefs.sdkParameters
+            val subscription = Prefs.subscription
+            if (isInAppMessageEnabled(subscription,
+                    sdkParameters) && DengageUtils.isAppInForeground()
+            ) {
 
-            if(Prefs.isDevelopmentStatusDebug == false) {
-                if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
-                val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
-                Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
-            }
-            getInAppMessages(this) {
-                onResponse = {
-                    view { fetchedInAppMessages(it,false)
-                        fetchInAppExpiredMessageIds()
-                    }
+                if (Prefs.isDevelopmentStatusDebug == false) {
+                    if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
+
+                    val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
+                    Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
                 }
-                onError = {
-                 //   Prefs.inAppMessageFetchTime = System.currentTimeMillis()
-                    view { showError(it) }
-                }
-                params = GetInAppMessages.Params(
-                    account = sdkParameters?.accountName!!,
-                    subscription = Prefs.subscription!!,
-                    sdkParameters = sdkParameters
-
-                )
-            }
-        }
-
-        if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
-            System.currentTimeMillis() >= Prefs.realTimeInAppMessageFetchTime&& DengageUtils.isAppInForeground()
-        ) {
-            val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
-                ?: 0) * 60000
-            Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
-
-            getRealTimeInAppMessages(this) {
-                onResponse = {
-                    view {
-                        fetchedInAppMessages(it, true)
-                    }
-                }
-                onError = {
-                    Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
-                    view { showError(it) }
-                }
-                params = GetRealTimeInAppMessages.Params(
-                    accountId = sdkParameters?.accountName!!,
-                    appId = sdkParameters.appId!!
-                )
-            }
-
-            // get visitor info for segments and tags defined to user
-            if (subscription != null && sdkParameters != null) {
-                getVisitorInfo(this) {
+                getInAppMessages(this) {
                     onResponse = {
-                        Prefs.visitorInfo = it
+                        view {
+                            fetchedInAppMessages(it, false)
+                            fetchInAppExpiredMessageIds()
+                        }
                     }
-                    params = GetVisitorInfo.Params(
-                        accountName = sdkParameters.accountName,
-                        contactKey = subscription.contactKey,
-                        deviceId = subscription.getSafeDeviceId(),
+                    onError = {
+                        //  Prefs.inAppMessageFetchTime = System.currentTimeMillis()
+                        view { showError(it) }
+                    }
+                    params = GetInAppMessages.Params(
+                        account = sdkParameters?.accountName!!,
+                        subscription = Prefs.subscription!!,
+                        sdkParameters = sdkParameters
+
                     )
                 }
             }
+
+            if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
+                DengageUtils.isAppInForeground()
+            ) {
+
+                if (Prefs.isDevelopmentStatusDebug == false) {
+                    if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
+
+                    val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
+                        ?: 0) * 60000
+                    Prefs.realTimeInAppMessageFetchTime =
+                        System.currentTimeMillis() + nextFetchTimePlus
+
+                }
+
+                getRealTimeInAppMessages(this) {
+                    onResponse = {
+                        view {
+                            fetchedInAppMessages(it, true)
+                        }
+                    }
+                    onError = {
+                        Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
+                        view { showError(it) }
+                    }
+                    params = GetRealTimeInAppMessages.Params(
+                        accountId = sdkParameters?.accountName!!,
+                        appId = sdkParameters.appId!!
+                    )
+                }
+
+                // get visitor info for segments and tags defined to user
+                if (subscription != null && sdkParameters != null) {
+                    getVisitorInfo(this) {
+                        onResponse = {
+                            Prefs.visitorInfo = it
+                        }
+                        params = GetVisitorInfo.Params(
+                            accountName = sdkParameters.accountName,
+                            contactKey = subscription.contactKey,
+                            deviceId = subscription.getSafeDeviceId(),
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
+
     }
 
     override fun setInAppMessageAsDisplayed(inAppMessage: InAppMessage) {
@@ -132,7 +148,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     override fun setInAppMessageAsClicked(
         inAppMessage: InAppMessage,
-        buttonId: String?
+        buttonId: String?,
     ) {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
@@ -248,7 +264,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     private fun isInAppMessageEnabled(
         subscription: Subscription?,
-        sdkParameters: SdkParameters?
+        sdkParameters: SdkParameters?,
     ): Boolean {
         return subscription != null && sdkParameters?.accountName != null &&
                 sdkParameters.inAppEnabled != null && sdkParameters.inAppEnabled
@@ -256,12 +272,12 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     private fun isRealTimeInAppMessageEnabled(
         subscription: Subscription?,
-        sdkParameters: SdkParameters?
+        sdkParameters: SdkParameters?,
     ): Boolean {
         return subscription != null && sdkParameters?.accountName != null &&
-            sdkParameters.appId != null &&
-            sdkParameters.realTimeInAppEnabled != null &&
-            sdkParameters.realTimeInAppEnabled
+                sdkParameters.appId != null &&
+                sdkParameters.realTimeInAppEnabled != null &&
+                sdkParameters.realTimeInAppEnabled
     }
 
     private fun removeInAppMessageFromCache(inAppMessageId: String) {
@@ -278,6 +294,6 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     }
 
     private fun isInAppAvailableInCache(): Boolean {
-        return Prefs.inAppMessages?.let { it.size > 0} ?: false
+        return Prefs.inAppMessages?.let { it.size > 0 } ?: false
     }
 }
