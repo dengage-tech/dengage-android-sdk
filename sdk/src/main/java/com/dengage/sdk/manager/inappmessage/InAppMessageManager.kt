@@ -6,6 +6,7 @@ import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
+import com.dengage.sdk.util.ContextHolder
 import java.util.*
 
 class InAppMessageManager :
@@ -27,22 +28,27 @@ class InAppMessageManager :
         activity: Activity,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        resultCode: Int = -1
+        resultCode: Int = -1,
     ) {
-        cancelTimer()
-
-        // control next in app message show time
-        if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
-
-        val inAppMessages =
-            InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
-        Prefs.inAppMessages = inAppMessages
-        if (!inAppMessages.isNullOrEmpty()) {
-            val priorInAppMessage =
-                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params)
-            if (priorInAppMessage != null) {
-                showInAppMessage(activity, priorInAppMessage, resultCode)
+        try {
+            cancelTimer()
+            ContextHolder.resetContext(activity)
+            // control next in app message show time
+            if(Prefs.isDevelopmentStatusDebug==false){
+                if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
             }
+            val inAppMessages =
+                InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
+            Prefs.inAppMessages = inAppMessages
+            if (!inAppMessages.isNullOrEmpty()) {
+                val priorInAppMessage =
+                    InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params)
+                if (priorInAppMessage != null) {
+                    showInAppMessage(activity, priorInAppMessage, resultCode)
+                }
+            }
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
     }
 
@@ -50,7 +56,7 @@ class InAppMessageManager :
      * Fetch in app messages if enabled and fetch time is available
      */
     internal fun fetchInAppMessages(inAppMessageFetchCallbackParam: InAppMessageFetchCallback?) {
-        var inappMessage = inAppMessageFetchCallbackParam
+        val inappMessage = inAppMessageFetchCallbackParam
         inAppMessageFetchCallback = inappMessage
         presenter.getInAppMessages()
     }
@@ -76,7 +82,7 @@ class InAppMessageManager :
      * Call service for setting in app message as clicked
      */
     private fun setInAppMessageAsClicked(
-        inAppMessage: InAppMessage, buttonId: String?
+        inAppMessage: InAppMessage, buttonId: String?,
     ) {
         presenter.setInAppMessageAsClicked(
             inAppMessage = inAppMessage, buttonId = buttonId
@@ -96,7 +102,7 @@ class InAppMessageManager :
      * Show in app message dialog on activity screen
      */
     private fun showInAppMessage(
-        activity: Activity, inAppMessage: InAppMessage, resultCode: Int = -1
+        activity: Activity, inAppMessage: InAppMessage, resultCode: Int = -1,
     ) {
         try {
             // set delay for showing in app message
@@ -163,7 +169,7 @@ class InAppMessageManager :
     }
 
     override fun fetchedInAppMessages(
-        inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean
+        inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean,
     ) {
         inAppMessageFetchCallback?.inAppMessageFetched(isRealTime)
 
@@ -246,7 +252,7 @@ class InAppMessageManager :
         // todo send tags
     }
 
-     fun cancelTimer() {
+    fun cancelTimer() {
         try {
             timer.cancel()
             timer.purge()
