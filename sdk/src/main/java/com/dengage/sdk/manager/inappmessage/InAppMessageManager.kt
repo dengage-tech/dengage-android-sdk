@@ -32,8 +32,9 @@ class InAppMessageManager :
         cancelTimer()
 
         // control next in app message show time
+        if(Prefs.isDevelopmentStatusDebug==false){
         if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
-
+        }
         val inAppMessages =
             InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
         Prefs.inAppMessages = inAppMessages
@@ -53,6 +54,11 @@ class InAppMessageManager :
         val inappMessage = inAppMessageFetchCallbackParam
         inAppMessageFetchCallback = inappMessage
         presenter.getInAppMessages()
+    }
+
+    internal fun fetchVisitorInfo()
+    {
+        presenter.getVisitorInfo()
     }
 
 

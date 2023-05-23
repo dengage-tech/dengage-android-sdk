@@ -8,5 +8,6 @@ data class Criterion(
     @SerializedName("parameter") val parameter: String,
     @SerializedName("dataType") val dataType: String,
     @SerializedName("comparison") val operator: String,
-    @SerializedName("values") val values: List<String>?
+    @SerializedName("values") val values: List<String>?,
+    @SerializedName("valueSource") val valueSource: String,
 ) : Serializable

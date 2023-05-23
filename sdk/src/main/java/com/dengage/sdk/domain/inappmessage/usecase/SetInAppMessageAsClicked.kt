@@ -15,13 +15,15 @@ class SetInAppMessageAsClicked : CoroutineUseCase<Response<Unit>, SetInAppMessag
             account = params!!.account,
             subscription = params.subscription,
             messageDetails = params.messageDetails,
-            buttonId = params.buttonId
+            buttonId = params.buttonId,
+            contentId = params.contentId
         )
 
     data class Params(
         val account: String,
         val subscription: Subscription,
         val messageDetails: String?,
-        val buttonId: String?
+        val buttonId: String?,
+        val contentId: String?
     )
 }

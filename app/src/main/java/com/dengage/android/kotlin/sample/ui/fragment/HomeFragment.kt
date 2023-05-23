@@ -5,6 +5,9 @@ import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentHomeBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
 import com.dengage.sdk.Dengage
+import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
+import org.joda.time.DateTime
+import java.util.Calendar
 
 class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
@@ -16,8 +19,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         sendPageView("home")
 
         binding.btnDeviceInfo.setOnClickListener {
-           // findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
-            Dengage.setDevelopmentStatus(false)
+            findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
+            Dengage.setDevelopmentStatus(true)
+
+
         }
 
         binding.btnUserPermission.setOnClickListener {

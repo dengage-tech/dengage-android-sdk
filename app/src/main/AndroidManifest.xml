@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.dengage.android.kotlin.sample">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:name=".App"
@@ -58,6 +59,9 @@
             android:name="den_device_id_api_url"
             android:value="https://magento.232.dengage.shobii.com/rest/" />
 
+        <meta-data
+            android:name="den_in_app_api_url"
+            android:value="https://dev-push.dengage.com" />
 
         <!-- <meta-data
              android:name="den_push_small_icon"

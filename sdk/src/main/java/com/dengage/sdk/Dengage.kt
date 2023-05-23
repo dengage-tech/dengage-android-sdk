@@ -136,6 +136,7 @@ object Dengage {
     fun setDeviceId(deviceId: String) {
         DengageLogger.verbose("setDeviceId method is called")
         subscriptionManager.setDeviceId(deviceId = deviceId)
+        inAppMessageManager.fetchVisitorInfo()
     }
 
     /**
@@ -607,6 +608,7 @@ object Dengage {
         itemId: String,
         message: Message?
     ) {
+
         DengageLogger.verbose("sendOpenEvent method is called")
         DengageLogger.verbose(buttonId)
         DengageLogger.verbose(itemId)

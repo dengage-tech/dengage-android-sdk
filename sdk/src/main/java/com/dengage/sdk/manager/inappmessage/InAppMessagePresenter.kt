@@ -27,23 +27,26 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     override fun getInAppMessages() {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
-        if (isInAppMessageEnabled(subscription, sdkParameters)&& DengageUtils.isAppInForeground()) {
+        if (isInAppMessageEnabled(subscription,
+                sdkParameters) && DengageUtils.isAppInForeground()
+        ) {
 
 
-            if(Prefs.isDevelopmentStatusDebug == false) {
-                  if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
+            if (Prefs.isDevelopmentStatusDebug == false) {
+                if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
                 val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
                 Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
             }
             getInAppMessages(this) {
                 onResponse = {
-                    view { fetchedInAppMessages(it,false)
+                    view {
+                        fetchedInAppMessages(it, false)
                         fetchInAppExpiredMessageIds()
                     }
                 }
                 onError = {
-                  //  Prefs.inAppMessageFetchTime = System.currentTimeMillis()
+                    //  Prefs.inAppMessageFetchTime = System.currentTimeMillis()
                     view { showError(it) }
                 }
                 params = GetInAppMessages.Params(
@@ -56,11 +59,17 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         }
 
         if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
-            System.currentTimeMillis() >= Prefs.realTimeInAppMessageFetchTime && DengageUtils.isAppInForeground()
+            DengageUtils.isAppInForeground()
         ) {
-            val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
-                ?: 0) * 60000
-            Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
+
+            if (Prefs.isDevelopmentStatusDebug == false) {
+                if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
+
+                val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
+                    ?: 0) * 60000
+                Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
+
+            }
 
             getRealTimeInAppMessages(this) {
                 onResponse = {
@@ -79,18 +88,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             }
 
             // get visitor info for segments and tags defined to user
-            if (subscription != null && sdkParameters != null) {
-                getVisitorInfo(this) {
-                    onResponse = {
-                        Prefs.visitorInfo = it
-                    }
-                    params = GetVisitorInfo.Params(
-                        accountName = sdkParameters.accountName,
-                        contactKey = subscription.contactKey,
-                        deviceId = subscription.getSafeDeviceId(),
-                    )
-                }
-            }
+            getVisitorInfo()
         }
     }
 
@@ -124,7 +122,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     params = SetInAppMessageAsDisplayed.Params(
                         account = sdkParameters?.accountName!!,
                         subscription = Prefs.subscription!!,
-                        messageDetails = inAppMessage.data.messageDetails
+                        messageDetails = inAppMessage.data.messageDetails,
+                        contentId = inAppMessage.data.content.contentId
                     )
                 }
             }
@@ -133,7 +132,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     override fun setInAppMessageAsClicked(
         inAppMessage: InAppMessage,
-        buttonId: String?
+        buttonId: String?,
     ) {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
@@ -172,9 +171,27 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         account = sdkParameters?.accountName!!,
                         subscription = Prefs.subscription!!,
                         messageDetails = inAppMessage.data.messageDetails,
-                        buttonId = buttonId
+                        buttonId = buttonId,
+                        contentId = inAppMessage.data.content.contentId
                     )
                 }
+            }
+        }
+    }
+
+    override fun getVisitorInfo() {
+        val sdkParameters = Prefs.sdkParameters
+        val subscription = Prefs.subscription
+        if (subscription != null && sdkParameters != null) {
+            getVisitorInfo(this) {
+                onResponse = {
+                    Prefs.visitorInfo = it
+                }
+                params = GetVisitorInfo.Params(
+                    accountName = sdkParameters.accountName,
+                    contactKey = subscription.contactKey,
+                    deviceId = subscription.getSafeDeviceId(),
+                )
             }
         }
     }
@@ -209,7 +226,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     params = SetInAppMessageAsDismissed.Params(
                         account = sdkParameters?.accountName!!,
                         subscription = Prefs.subscription!!,
-                        messageDetails = inAppMessage.data.messageDetails
+                        messageDetails = inAppMessage.data.messageDetails,
+                        contentId = inAppMessage.data.content.contentId
                     )
                 }
             }
@@ -249,7 +267,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     private fun isInAppMessageEnabled(
         subscription: Subscription?,
-        sdkParameters: SdkParameters?
+        sdkParameters: SdkParameters?,
     ): Boolean {
         return subscription != null && sdkParameters?.accountName != null &&
                 sdkParameters.inAppEnabled != null && sdkParameters.inAppEnabled
@@ -257,7 +275,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     private fun isRealTimeInAppMessageEnabled(
         subscription: Subscription?,
-        sdkParameters: SdkParameters?
+        sdkParameters: SdkParameters?,
     ): Boolean {
         return subscription != null && sdkParameters?.accountName != null &&
                 sdkParameters.appId != null &&
@@ -279,6 +297,6 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     }
 
     private fun isInAppAvailableInCache(): Boolean {
-        return Prefs.inAppMessages?.let { it.size > 0} ?: false
+        return Prefs.inAppMessages?.let { it.size > 0 } ?: false
     }
 }

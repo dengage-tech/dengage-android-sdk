@@ -28,7 +28,8 @@ interface InAppMessageService {
         @Query("cdkey") cdKey: String,
         @Query("did") deviceId: String,
         @Query("type") type: String,
-        @Query("message_details") messageDetails: String?
+        @Query("message_details") messageDetails: String?,
+        @Query("content_id") contentId: String?
     ): Response<Unit>
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
@@ -39,7 +40,8 @@ interface InAppMessageService {
         @Query("did") deviceId: String,
         @Query("type") type: String,
         @Query("message_details") messageDetails: String?,
-        @Query("button_id") buttonId: String?
+        @Query("button_id") buttonId: String?,
+        @Query("content_id") contentId: String?
     ): Response<Unit>
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
@@ -49,7 +51,8 @@ interface InAppMessageService {
         @Query("cdkey") cdKey: String,
         @Query("did") deviceId: String,
         @Query("type") type: String,
-        @Query("message_details") messageDetails: String?
+        @Query("message_details") messageDetails: String?,
+        @Query("content_id") contentId: String?
     ): Response<Unit>
 
 
@@ -62,7 +65,7 @@ interface InAppMessageService {
     ): MutableList<InAppRemovalId>?
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
-    @GET("/api/realtime-inapp/account/{accountId}/{appId}/real-time/in-app/campaign")
+    @GET("/api/realtime-inapp/{accountId}/{appId}/campaign.json")
     suspend fun getRealTimeInAppMessages(
         @Path("accountId") accountId: String,
         @Path("appId") appId: String?,

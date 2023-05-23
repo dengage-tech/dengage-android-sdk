@@ -14,12 +14,17 @@ class SetInAppMessageAsDismissed : CoroutineUseCase<Response<Unit>, SetInAppMess
         repository.setInAppMessageAsDismissed(
             account = params!!.account,
             subscription = params.subscription,
-            messageDetails = params.messageDetails
+            messageDetails = params.messageDetails,
+            contentId = params.contentId
+
+
+
         )
 
     data class Params(
         val account: String,
         val subscription: Subscription,
-        val messageDetails: String?
+        val messageDetails: String?,
+        val contentId: String?
     )
 }
