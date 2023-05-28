@@ -42,8 +42,8 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         }
 
         binding.btnInboxMessages.setOnClickListener {
-           // findNavController().navigate(HomeFragmentDirections.actionHomeToInboxMessages())
-            Dengage.removeInAppMessageDisplay()
+            findNavController().navigate(HomeFragmentDirections.actionHomeToInboxMessages())
+                // Dengage.removeInAppMessageDisplay()
         }
 
         binding.btnCustomEvents.setOnClickListener {
