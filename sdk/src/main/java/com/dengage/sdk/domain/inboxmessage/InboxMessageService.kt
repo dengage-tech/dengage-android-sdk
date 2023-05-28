@@ -1,6 +1,7 @@
 package com.dengage.sdk.domain.inboxmessage
 
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -17,7 +18,7 @@ interface InboxMessageService {
         @Query("type") type: String,
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
-    ): MutableList<InboxMessage>?
+    ): ResponseBody
 
     @Headers("CONNECT_TIMEOUT:10000", "READ_TIMEOUT:10000", "WRITE_TIMEOUT:10000")
     @GET("/api/pi/setAsClicked")
