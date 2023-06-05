@@ -32,14 +32,16 @@ class InAppMessageRepository {
     suspend fun setInAppMessageAsDisplayed(
         account: String,
         subscription: Subscription,
-        messageDetails: String?
+        messageDetails: String?,
+        contentId: String?,
     ): Response<Unit> {
         return service.setInAppMessageAsDisplayed(
             account = account,
             cdKey = subscription.getCdKey(),
             deviceId = subscription.getSafeDeviceId(),
             type = subscription.getType(),
-            messageDetails = messageDetails
+            messageDetails = messageDetails,
+            contentId=contentId
         )
     }
 
@@ -47,7 +49,8 @@ class InAppMessageRepository {
         account: String,
         subscription: Subscription,
         messageDetails: String?,
-        buttonId: String?
+        buttonId: String?,
+        contentId: String?,
     ): Response<Unit> {
         return service.setInAppMessageAsClicked(
             account = account,
@@ -55,23 +58,27 @@ class InAppMessageRepository {
             deviceId = subscription.getSafeDeviceId(),
             type = subscription.getType(),
             messageDetails = messageDetails,
-            buttonId = buttonId
+            buttonId = buttonId,
+            contentId=contentId
         )
     }
 
     suspend fun setInAppMessageAsDismissed(
         account: String,
         subscription: Subscription,
-        messageDetails: String?
+        messageDetails: String?,
+        contentId: String?,
     ): Response<Unit> {
         return service.setInAppMessageAsDismissed(
             account = account,
             cdKey = subscription.getCdKey(),
             deviceId = subscription.getSafeDeviceId(),
             type = subscription.getType(),
-            messageDetails = messageDetails
+            messageDetails = messageDetails,
+            contentId=contentId
         )
     }
+
 
     suspend fun GetInAppExpiredMessageIds(
         account: String,
@@ -117,4 +124,3 @@ class InAppMessageRepository {
     }
 
 }
-

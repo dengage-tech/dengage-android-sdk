@@ -72,4 +72,5 @@ dependencies {
     api 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     api 'com.google.code.gson:gson:2.10.1'
 
+    api 'joda-time:joda-time:2.12.5'
 }

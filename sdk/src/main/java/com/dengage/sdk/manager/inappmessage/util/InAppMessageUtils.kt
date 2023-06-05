@@ -7,11 +7,13 @@ import android.os.Build
 import android.util.TypedValue
 import androidx.core.text.isDigitsOnly
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.cache.Prefs.visitorInfo
 import com.dengage.sdk.domain.inappmessage.model.*
 import com.dengage.sdk.manager.visitcount.VisitCountManager
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.GsonHolder
+import org.joda.time.DateTime
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -26,7 +28,7 @@ object InAppMessageUtils {
      */
     fun findNotExpiredInAppMessages(
         untilDate: Date,
-        inAppMessages: List<InAppMessage>?
+        inAppMessages: List<InAppMessage>?,
     ): MutableList<InAppMessage>? {
         if (inAppMessages == null) return null
         val notExpiredMessages = mutableListOf<InAppMessage>()
@@ -52,7 +54,7 @@ object InAppMessageUtils {
     fun findPriorInAppMessage(
         inAppMessages: List<InAppMessage>,
         screenName: String? = null,
-        params: HashMap<String, String>? = null
+        params: HashMap<String, String>? = null,
     ): InAppMessage? {
         // sort list with comparator
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
@@ -61,32 +63,36 @@ object InAppMessageUtils {
         // if screen name is not empty, find in app message that screen name filter has screen name value
         // if screen name is not empty and could not found in app message with screen name filter, use in app message without screen name filter
         // Also control nextDisplayTime for showEveryXMinutes type in app messages
-        val inAppMessageWithoutScreenName = sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
-            inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
-                    inAppMessage.data.isDisplayTimeAvailable() &&
-                    operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
-        }
+        val inAppMessageWithoutScreenName =
+            sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
+                inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
+                        inAppMessage.data.isDisplayTimeAvailable() &&
+                        operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
+                            params)
+            }
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
         } else {
-            val inAppMessageWithScreenName = sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
-                inAppMessage.data.isDisplayTimeAvailable() &&
-                        inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
-                            operateScreenValues(
-                                screenNameFilter.value,
-                                screenName,
-                                screenNameFilter.operator
-                            )
-                        } != null &&
-                        operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
-            }
+            val inAppMessageWithScreenName =
+                sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
+                    inAppMessage.data.isDisplayTimeAvailable() &&
+                            inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
+                                operateScreenValues(
+                                    screenNameFilter.value,
+                                    screenName,
+                                    screenNameFilter.operator
+                                )
+                            } != null &&
+                            operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
+                                params)
+                }
             inAppMessageWithScreenName ?: inAppMessageWithoutScreenName
         }
     }
 
     private fun operateRealTimeValues(
         displayRuleSet: DisplayRuleSet?,
-        params: HashMap<String, String>?
+        params: HashMap<String, String>?,
     ): Boolean {
         if (displayRuleSet != null) {
             when (displayRuleSet.logicOperator) {
@@ -107,7 +113,7 @@ object InAppMessageUtils {
 
     private fun operateDisplayRule(
         displayRule: DisplayRule,
-        params: HashMap<String, String>?
+        params: HashMap<String, String>?,
     ): Boolean {
         when (displayRule.logicOperator) {
             LogicOperator.AND.name -> {
@@ -127,10 +133,11 @@ object InAppMessageUtils {
     @SuppressLint("SimpleDateFormat")
     private fun operateCriterion(
         criterion: Criterion,
-        params: HashMap<String, String>?
+        params: HashMap<String, String>?,
     ): Boolean {
         val subscription = Prefs.subscription
         val visitorInfo = Prefs.visitorInfo
+
         return when (criterion.parameter) {
             SpecialRuleParameter.CATEGORY_PATH.key -> {
                 operateRuleParameter(
@@ -339,7 +346,8 @@ object InAppMessageUtils {
                                 operator = criterion.operator,
                                 dataType = DataType.INT.name,
                                 ruleParam = listOf(visitCount.count.toString()),
-                                userParam = VisitCountManager.findVisitCountSinceDays(visitCount.timeAmount).toString()
+                                userParam = VisitCountManager.findVisitCountSinceDays(visitCount.timeAmount)
+                                    .toString()
                             )
                         }
                     } else {
@@ -379,22 +387,129 @@ object InAppMessageUtils {
                     )
                 }
             }
-            else -> {
-                operateRuleParameter(
-                    operator = criterion.operator,
-                    dataType = criterion.dataType,
-                    ruleParam = criterion.values,
-                    userParam = params?.get(criterion.parameter)
-                )
+
+            checkVisitorInfoAttr(criterion.parameter) -> {
+                if (criterion.parameter == SpecialRuleParameter.BIRTH_DATE.key) {
+                    return birthCriteriaValid(criterion.values, getVisitorInfoAttrValue(criterion))
+                }
+                else if (criterion.dataType== DataType.DATETIME.name)
+                {
+                    operateRuleParameter(
+                        operator = criterion.operator,
+                        dataType = criterion.dataType,
+                        ruleParam = criterion.values,
+                        userParam = changeDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS","yyyy-MM-dd HH:mm:ss",DateTime.now().toLocalDateTime().toString())
+                    )
+
+                }
+                else {
+                    operateRuleParameter(
+                        operator = criterion.operator,
+                        dataType = criterion.dataType,
+                        ruleParam = criterion.values,
+                        userParam = getVisitorInfoAttrValue(criterion).toString()
+                    )
+                }
             }
+
+            else -> {
+                if (!criterion.parameter.contains("dn.")) {
+                    operateRuleParameter(
+                        operator = criterion.operator,
+                        dataType = criterion.dataType,
+                        ruleParam = criterion.values,
+                        userParam = params?.get(criterion.parameter)
+                    )
+                } else {
+                    return false
+                }
+            }
+
         }
+    }
+
+
+    private fun birthCriteriaValid(values: List<String>?, birthDateVisitoInfo: String?): Boolean {
+        try {
+            if (values.isNullOrEmpty()) return false
+            val birthComparisonValue = values[0]
+            if (birthComparisonValue.contains("-")) {
+                val days =birthComparisonValue.replace("-", "").toInt()
+                for (i in 0..days)
+                {
+                    if (DateTime.now().minusDays(days).plusDays(i).toString()
+                            .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
+                    ) {
+                        return true
+                    }
+                }
+
+            } else if (birthComparisonValue == "0") {
+                val birthDateBasedOnComparison = DateTime.now().toLocalDateTime()
+                if (birthDateBasedOnComparison.toString()
+                        .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
+                ) {
+                    return true
+                }
+            } else {
+                val days =birthComparisonValue.replace("-", "").toInt()
+                for (i in 0..days)
+                {
+                    if (DateTime.now().plusDays(days).minusDays(i).toString()
+                            .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
+                    ) {
+                        return true
+                    }
+                }
+
+
+            }
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
+        }
+        return false
+
+    }
+
+    private fun checkVisitorInfoAttr(parameter: String): String? {
+        try {
+            val attr: HashMap<String, String>? = visitorInfo?.attr
+            if (attr?.contains(parameter) == true) {
+                return parameter
+            }
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
+        }
+
+        /* if(parameter == "dn.master_contact.birth_date") {
+             return "dn.master_contact.birth_date"
+         }*/
+        return ""
+    }
+
+    private fun getVisitorInfoAttrValue(parameter: Criterion): String? {
+        try {
+            val attr: HashMap<String, String>? = visitorInfo?.attr
+
+            if (attr?.contains(parameter.parameter) == true) {
+                return attr[parameter.parameter]
+            }
+
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
+        }
+
+        /*if(parameter.parameter == "dn.master_contact.birth_date") {
+            return "2023-05-29 04:04:09"
+        }*/
+        return ""
     }
 
     private fun operateVisitorRuleParameter(
         operator: String,
         dataType: String,
         ruleParam: List<String>?,
-        userParam: List<String>?
+        userParam: List<String>?,
     ): Boolean {
         // visitor rules only work with IN and NOT_IN operator
         if (ruleParam != null && userParam != null && dataType == DataType.TEXTLIST.name) {
@@ -417,7 +532,7 @@ object InAppMessageUtils {
         operator: String,
         dataType: String,
         ruleParam: List<String>?,
-        userParam: String?
+        userParam: String?,
     ): Boolean {
         if (ruleParam.isNullOrEmpty() || userParam == null) return true
         when (operator) {
@@ -428,22 +543,34 @@ object InAppMessageUtils {
                 return ruleParam.firstOrNull { it.lowercase() == userParam.lowercase() } == null
             }
             Operator.LIKE.operator -> {
-                return ruleParam.firstOrNull { userParam.lowercase().contains(it.lowercase()) } != null
+                return ruleParam.firstOrNull {
+                    userParam.lowercase().contains(it.lowercase())
+                } != null
             }
             Operator.NOT_LIKE.operator -> {
-                return ruleParam.firstOrNull { userParam.lowercase().contains(it.lowercase()) } == null
+                return ruleParam.firstOrNull {
+                    userParam.lowercase().contains(it.lowercase())
+                } == null
             }
             Operator.STARTS_WITH.operator -> {
-                return ruleParam.firstOrNull { userParam.lowercase().startsWith(it.lowercase()) } != null
+                return ruleParam.firstOrNull {
+                    userParam.lowercase().startsWith(it.lowercase())
+                } != null
             }
             Operator.NOT_STARTS_WITH.operator -> {
-                return ruleParam.firstOrNull { userParam.lowercase().startsWith(it.lowercase()) } == null
+                return ruleParam.firstOrNull {
+                    userParam.lowercase().startsWith(it.lowercase())
+                } == null
             }
             Operator.ENDS_WITH.operator -> {
-                return ruleParam.firstOrNull { userParam.lowercase().endsWith(it.lowercase()) } != null
+                return ruleParam.firstOrNull {
+                    userParam.lowercase().endsWith(it.lowercase())
+                } != null
             }
             Operator.NOT_ENDS_WITH.operator -> {
-                return ruleParam.firstOrNull { userParam.lowercase().endsWith(it.lowercase()) } == null
+                return ruleParam.firstOrNull {
+                    userParam.lowercase().endsWith(it.lowercase())
+                } == null
             }
             Operator.IN.operator -> {
                 return ruleParam.firstOrNull { it.lowercase() == userParam.lowercase() } != null
@@ -610,7 +737,7 @@ object InAppMessageUtils {
     fun operateScreenValues(
         screenNameFilterValue: List<String>?,
         screenName: String,
-        operator: String
+        operator: String,
     ): Boolean {
         val screenNameFilterValueSafe = screenNameFilterValue?.firstOrNull() ?: ""
         when (operator) {
@@ -658,6 +785,29 @@ object InAppMessageUtils {
 
     fun getPixelsByPercentage(screenSize: Int, margin: Int?): Int {
         return (screenSize * (margin ?: 0)) / 100
+    }
+
+    private fun changeDateFormat(
+        currentFormat: String,
+        requiredFormat: String,
+        dateString: String,
+    ): String {
+        var result = ""
+        if (dateString.isNullOrEmpty()) {
+            return result
+        }
+        val formatterOld = SimpleDateFormat(currentFormat, Locale.getDefault())
+        val formatterNew = SimpleDateFormat(requiredFormat, Locale.getDefault())
+        var date: Date? = null
+        try {
+            date = formatterOld.parse(dateString)
+        } catch (e: ParseException) {
+            e.printStackTrace()
+        }
+        if (date != null) {
+            result = formatterNew.format(date)
+        }
+        return result
     }
 
 }

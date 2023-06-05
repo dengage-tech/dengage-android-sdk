@@ -1,6 +1,8 @@
 package com.dengage.sdk.manager.inappmessage
 
+import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BasePresenter
 import com.dengage.sdk.manager.base.BaseView
 
@@ -20,10 +22,11 @@ interface InAppMessageContract {
             inAppMessage: InAppMessage,
             buttonId: String?
         )
+        fun getVisitorInfo()
 
-        fun setInAppMessageAsDismissed(inAppMessage: InAppMessage)
+
         fun fetchInAppExpiredMessageIds()
-
+        fun setInAppMessageAsDismissed(inAppMessage: InAppMessage)
     }
 
 }
