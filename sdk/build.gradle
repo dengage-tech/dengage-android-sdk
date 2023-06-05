@@ -71,4 +71,6 @@ dependencies {
     api 'com.huawei.hms:ads-identifier:3.4.39.302'
     api 'com.google.code.gson:gson:2.10.1'
 
+    api 'joda-time:joda-time:2.12.5'
+
 }
