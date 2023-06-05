@@ -27,5 +27,6 @@ enum class SpecialRuleParameter(val key: String) {
     PUSH_PERMISSION("dn.wp_perm"),
     VISIT_COUNT("dn.visit_count"),
     SEGMENT("dn.segment"),
-    TAG("dn.tag")
+    TAG("dn.tag"),
+    BIRTH_DATE("dn.master_contact.birth_date")
 }
