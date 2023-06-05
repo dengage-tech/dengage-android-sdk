@@ -434,13 +434,16 @@ object InAppMessageUtils {
             if (values.isNullOrEmpty()) return false
             val birthComparisonValue = values[0]
             if (birthComparisonValue.contains("-")) {
-                val birthDateBasedOnComparison =
-                    DateTime.now().minus((birthComparisonValue.replace("-", "")).toLong())
-                if (birthDateBasedOnComparison.toString()
-                        .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
-                ) {
-                    return true
+                val days =birthComparisonValue.replace("-", "").toInt()
+                for (i in 0..days)
+                {
+                    if (DateTime.now().minusDays(days).plusDays(i).toString()
+                            .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
+                    ) {
+                        return true
+                    }
                 }
+
             } else if (birthComparisonValue == "0") {
                 val birthDateBasedOnComparison = DateTime.now().toLocalDateTime()
                 if (birthDateBasedOnComparison.toString()
@@ -449,12 +452,14 @@ object InAppMessageUtils {
                     return true
                 }
             } else {
-                val birthDateBasedOnComparison =
-                    birthDateVisitoInfo?.toLong()?.let { DateTime.now().plus(it) }
-                if (birthDateBasedOnComparison.toString()
-                        .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
-                ) {
-                    return true
+                val days =birthComparisonValue.replace("-", "").toInt()
+                for (i in 0..days)
+                {
+                    if (DateTime.now().plusDays(days).minusDays(i).toString()
+                            .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
+                    ) {
+                        return true
+                    }
                 }
 
 

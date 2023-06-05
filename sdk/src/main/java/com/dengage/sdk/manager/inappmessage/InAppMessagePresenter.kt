@@ -30,7 +30,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         if (isInAppMessageEnabled(subscription,
                 sdkParameters) && DengageUtils.isAppInForeground()
         ) {
-
+            getVisitorInfo()
 
             if (Prefs.isDevelopmentStatusDebug == false) {
                 if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
@@ -88,7 +88,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             }
 
             // get visitor info for segments and tags defined to user
-            getVisitorInfo()
+
         }
     }
 
@@ -185,6 +185,11 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         if (subscription != null && sdkParameters != null) {
             getVisitorInfo(this) {
                 onResponse = {
+                  /*  it.attr?.put("dn.master_contact.subscription_date","2023-06-04T15:08:59.429Z")
+                    it.attr?.put("dn.master_contact.name","hasnain1234")
+                    it.attr?.put("dn.master_contact.birth_date","2023-06-01")
+                   // it.attr?.put("dn.master_contact.subscription_date","2023-06-04T15:08:59.429Z")
+*/
                     Prefs.visitorInfo = it
                 }
                 params = GetVisitorInfo.Params(
