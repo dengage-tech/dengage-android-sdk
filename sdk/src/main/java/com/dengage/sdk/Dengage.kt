@@ -34,6 +34,8 @@ import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.push.clearNotification
+import java.util.*
+import kotlin.collections.HashMap
 
 @SuppressLint("StaticFieldLeak")
 object Dengage {
@@ -432,6 +434,7 @@ object Dengage {
         try {
             val intent = Intent(Constants.PUSH_RECEIVE_EVENT)
             intent.putExtra("RAW_DATA", json)
+            intent.putExtra("requestCode", Random().nextInt())
             DengageLogger.verbose("RAW_DATA: $json")
             for ((key, value) in data) {
                 intent.putExtra(key, value)

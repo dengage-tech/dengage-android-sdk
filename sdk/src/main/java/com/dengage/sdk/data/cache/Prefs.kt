@@ -142,8 +142,20 @@ object Prefs {
         get() = preferences.get(PreferenceKey.DEVELOPMENT_STATUS, false)
         set(value) = preferences.set(PreferenceKey.DEVELOPMENT_STATUS, value)
 
-
     fun clear() {
         preferences.edit().clear().apply()
     }
+
+    fun addDynamicValue(messageDetails:String,value: Boolean) {
+        val editor: SharedPreferences.Editor = preferences.edit()
+        editor.putBoolean(messageDetails, value)
+        editor.apply()
+    }
+
+    fun getDynamicValue(messageDetails:String) :Boolean {
+        return preferences.getBoolean(messageDetails,false)
+
+    }
+
+
 }

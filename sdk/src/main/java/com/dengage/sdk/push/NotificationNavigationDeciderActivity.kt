@@ -2,8 +2,7 @@ package com.dengage.sdk.push
 
 import android.app.Activity
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
-import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+import android.content.Intent.*
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -16,17 +15,26 @@ import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.storeToPref
 
 class NotificationNavigationDeciderActivity : Activity() {
+    var launchActivity: Boolean = true
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ContextHolder.resetContext(this.applicationContext)
 
     }
 
+    override fun onRestart() {
+        super.onRestart()
+    }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+    }
     override fun onResume() {
         super.onResume()
         try {
-            if (!Constants.isActivityPerformed) {
+
+
+
                 var sendingIntentObject: Intent
 
                 if (intent != null) {
@@ -58,9 +66,14 @@ class NotificationNavigationDeciderActivity : Activity() {
                         }
 
 
-                        var message: Message? = Message.createFromIntent(extras)
+                        val message: Message? = Message.createFromIntent(extras)
                         message?.storeToPref()
                         val rawJson = extras.getString("RAW_DATA")
+                        if(message?.messageDetails?.let { Prefs.getDynamicValue(it) } ==true){
+                            launchDefaultActivity()
+                          launchActivity=false
+                        }
+                        else message?.messageDetails?.let { Prefs.addDynamicValue(it,true) }
 
 
                         if (!TextUtils.isEmpty(rawJson)) {
@@ -97,15 +110,7 @@ class NotificationNavigationDeciderActivity : Activity() {
                     }
                     killActivity()
                 }
-            } else {
-                if (DengageUtils.isAppInForeground()) {
-                    launchActivity(null, null)
-                    if(Prefs.restartApplicationAfterPushClick == false)
-                    finish()
-                    else
-                        finishAffinity()
-                }
-            }
+
         }
         catch (ex:Exception)
         { ex.printStackTrace()
@@ -138,9 +143,9 @@ class NotificationNavigationDeciderActivity : Activity() {
     }
 
     private fun killActivity() {
-        Constants.isActivityPerformed = true
+
         Handler(Looper.getMainLooper()).postDelayed({
-            DengageUtils.unregisterBroadcast()
+           // DengageUtils.unregisterBroadcast()
             if(Prefs.restartApplicationAfterPushClick == false)
                 finish()
             else
@@ -150,9 +155,20 @@ class NotificationNavigationDeciderActivity : Activity() {
 
     private fun startActivityLocal(intent :Intent)
     {
-        if(Prefs.restartApplicationAfterPushClick == false) {
-            intent.flags = FLAG_ACTIVITY_CLEAR_TOP or FLAG_ACTIVITY_SINGLE_TOP
+        if(launchActivity) {
+            if (Prefs.restartApplicationAfterPushClick == false) {
+                intent.flags = FLAG_ACTIVITY_CLEAR_TOP or FLAG_ACTIVITY_SINGLE_TOP or FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(intent)
         }
-        startActivity(intent)
+    }
+
+    private fun launchDefaultActivity()
+    {
+        launchActivity(null, null)
+        /*if(Prefs.restartApplicationAfterPushClick == false)
+            finish()
+        else
+            finishAffinity()*/
     }
 }

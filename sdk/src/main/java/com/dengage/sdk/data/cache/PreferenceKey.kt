@@ -35,6 +35,7 @@ enum class PreferenceKey {
     LAST_MESSAGE_PUSH_PAYLOAD,
     RESTART_APPLICATION_AFTER_PUSH_CLICK,
     DEVELOPMENT_STATUS,
+    NOTIFICATION_IDENTIFIER,
     ;
 
     override fun toString(): String = name

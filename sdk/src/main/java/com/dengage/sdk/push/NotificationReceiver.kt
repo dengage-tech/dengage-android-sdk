@@ -30,23 +30,30 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
-        ContextHolder.resetContext(context)
+        try {
+            ContextHolder.resetContext(context)
 
-        DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
+            DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
+            Log.d("calledsdsd", "${intent?.action} ")
 
-        when (intent?.action) {
-            Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
-            Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
-            Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
-            Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
-            Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            when (intent?.action) {
+                Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
+                Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
+                Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
+                Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
+                Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            }
         }
+        catch (e:Exception){}
+        catch (e:Throwable){}
     }
 
     open fun onPushReceive(context: Context, intent: Intent) {
         ContextHolder.resetContext(context)
         DengageLogger.verbose("$TAG onPushReceive method is called")
         intent.extras ?: return
+        Log.d("calledsdsd","recieve ")
+
         prepareAndShowPush(context, intent)
         Constants.isActivityPerformed = false
     }
@@ -191,7 +198,7 @@ open class NotificationReceiver : BroadcastReceiver() {
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        manager?.notify(message.messageSource, message.messageId, notification)
+        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification) }
     }
 
     open fun onTextNotificationRender(
@@ -202,7 +209,8 @@ open class NotificationReceiver : BroadcastReceiver() {
     ) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        manager?.notify(message.messageSource, message.messageId, notification)
+      // Log.d("calledsdsd","idjdsa ${message.messageDetails}")
+        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification) }
     }
 
     protected open fun onCarouselRender(
@@ -291,19 +299,23 @@ open class NotificationReceiver : BroadcastReceiver() {
         val extras = intentP.extras
         val packageName = context.packageName
         val action = intentP.action
+        extras?.putInt("requestCode",requestCode)
         intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
         intent.putExtras(extras!!)
         intent.setPackage(packageName)
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+       // intentP.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.action = action
         if (intent.extras != null) {
             intent.putExtras(intent.extras!!)
         }
+        Log.d("calledsdsd","$requestCode")
 
         return PendingIntent.getActivity(
             context,
             requestCode,
             intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
+            PendingIntent.FLAG_MUTABLE
         )
 
     }
@@ -319,7 +331,7 @@ open class NotificationReceiver : BroadcastReceiver() {
             context,
             requestCode,
             intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
@@ -334,89 +346,97 @@ open class NotificationReceiver : BroadcastReceiver() {
             context,
             requestCode,
             intentParam,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
     }
 
     private fun prepareAndShowPush(context: Context?, intent: Intent?) {
-        DengageLogger.verbose("$TAG prepareAndShowPush method is called")
-        if (intent?.extras == null) {
-            DengageLogger.verbose("$TAG prepareAndShowPush intent extras null")
-            return
-        }
-        if (context == null) {
-            DengageLogger.verbose("$TAG prepareAndShowPush context null")
-            return
-        }
-        val message = Message.createFromIntent(intent.extras!!)
-        when {
-            message.notificationType === NotificationType.CAROUSEL -> {
-                DengageLogger.verbose("$TAG this is a carousel notification")
-                val imageUrls = message.carouselContent?.map {
-                    it.mediaUrl
-                }
+        try {
+            Log.d("calledsdsd", "shoow ")
 
-                message.carouselContent?.let {
-                    ImageDownloadUtils.downloadImages(
-                        context = context,
-                        imageUrls = imageUrls,
-                        onComplete = { imageFileNames, imageFilePaths ->
-                            message.carouselContent.forEachIndexed { index, carouselItem ->
-                                carouselItem.mediaFileLocation = imageFilePaths[index]
-                                carouselItem.mediaFileName = imageFileNames[index]
+            DengageLogger.verbose("$TAG prepareAndShowPush method is called")
+            if (intent?.extras == null) {
+                DengageLogger.verbose("$TAG prepareAndShowPush intent extras null")
+                return
+            }
+            if (context == null) {
+                DengageLogger.verbose("$TAG prepareAndShowPush context null")
+                return
+            }
+            val message = Message.createFromIntent(intent.extras!!)
+            message.messageDetails?.let { Prefs.addDynamicValue(it,false) }
+            when {
+                message.notificationType === NotificationType.CAROUSEL -> {
+                    DengageLogger.verbose("$TAG this is a carousel notification")
+                    val imageUrls = message.carouselContent?.map {
+                        it.mediaUrl
+                    }
+
+                    message.carouselContent?.let {
+                        ImageDownloadUtils.downloadImages(
+                            context = context,
+                            imageUrls = imageUrls,
+                            onComplete = { imageFileNames, imageFilePaths ->
+                                message.carouselContent.forEachIndexed { index, carouselItem ->
+                                    carouselItem.mediaFileLocation = imageFilePaths[index]
+                                    carouselItem.mediaFileName = imageFileNames[index]
+                                }
+                                intent.putExtra("RAW_DATA", message.toJson())
+
+                                if (message.carouselContent.isNullOrEmpty()) {
+                                    DengageLogger.error("$TAG carousel content is empty")
+                                } else {
+                                    val size = message.carouselContent.size
+                                    val current = 0
+                                    val left = (current - 1 + size) % size
+                                    val right = (current + 1) % size
+
+                                    intent.putExtra("current", current)
+                                    onCarouselRender(
+                                        context = context,
+                                        intent = intent,
+                                        message = message,
+                                        leftCarouselItem = message.carouselContent[left],
+                                        currentCarouselItem = message.carouselContent[current],
+                                        rightCarouselItem = message.carouselContent[right],
+                                    )
+                                }
                             }
-                            intent.putExtra("RAW_DATA", message.toJson())
+                        )
+                    }
+                }
+                message.notificationType === NotificationType.RICH -> {
+                    DengageLogger.verbose("$TAG this is a rich notification")
 
-                            if (message.carouselContent.isNullOrEmpty()) {
-                                DengageLogger.error("$TAG carousel content is empty")
-                            } else {
-                                val size = message.carouselContent.size
-                                val current = 0
-                                val left = (current - 1 + size) % size
-                                val right = (current + 1) % size
-
-                                intent.putExtra("current", current)
-                                onCarouselRender(
-                                    context = context,
-                                    intent = intent,
-                                    message = message,
-                                    leftCarouselItem = message.carouselContent[left],
-                                    currentCarouselItem = message.carouselContent[current],
-                                    rightCarouselItem = message.carouselContent[right],
+                    ImageDownloadUtils.downloadImage(
+                        imageUrl = message.mediaUrl,
+                        onComplete = { bitmap ->
+                            bitmap?.let {
+                                val notificationBuilder: NotificationCompat.Builder =
+                                    getNotificationBuilder(context, intent, message)
+                                onRichNotificationRender(
+                                    context,
+                                    intent,
+                                    message,
+                                    bitmap,
+                                    notificationBuilder
                                 )
                             }
                         }
                     )
                 }
-            }
-            message.notificationType === NotificationType.RICH -> {
-                DengageLogger.verbose("$TAG this is a rich notification")
-
-                ImageDownloadUtils.downloadImage(
-                    imageUrl = message.mediaUrl,
-                    onComplete = { bitmap ->
-                        bitmap?.let {
-                            val notificationBuilder: NotificationCompat.Builder =
-                                getNotificationBuilder(context, intent, message)
-                            onRichNotificationRender(
-                                context,
-                                intent,
-                                message,
-                                bitmap,
-                                notificationBuilder
-                            )
-                        }
-                    }
-                )
-            }
-            else -> {
-                DengageLogger.verbose("$TAG this is a text notification")
-                val notificationBuilder: NotificationCompat.Builder =
-                    getNotificationBuilder(context, intent, message)
-                onTextNotificationRender(context, intent, message, notificationBuilder)
+                else -> {
+                    DengageLogger.verbose("$TAG this is a text notification")
+                    val notificationBuilder: NotificationCompat.Builder =
+                        getNotificationBuilder(context, intent, message)
+                    Log.d("calledsdsd", "in textNotification ")
+                    onTextNotificationRender(context, intent, message, notificationBuilder)
+                }
             }
         }
+        catch (e:Exception){}
+        catch (e:Throwable){}
     }
 
     private fun getNotificationBuilder(
