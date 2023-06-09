@@ -32,7 +32,9 @@ class App : Application() {
         Dengage.init(
             context = context,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
-            deviceConfigurationPreference = DeviceConfigurationPreference.Huawei
+            deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
+            contactKey = "ck",
+            partnerDeviceId = "pdi",
         )
         Dengage.setLogStatus(true)
 

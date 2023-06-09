@@ -85,7 +85,7 @@ public class DengageManager {
      */
     public DengageManager init() {
         try {
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, huaweiIntegrationKey, null,"",null);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, huaweiIntegrationKey, null,"",null,"","");
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
@@ -103,7 +103,7 @@ public class DengageManager {
     public DengageManager initWithFirebaseInstance(@NonNull FirebaseApp firebaseApp) {
         try {
             // create in app message manager and start new session
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, huaweiIntegrationKey, firebaseApp,"",null);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, huaweiIntegrationKey, firebaseApp,"",null,"","");
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
@@ -170,7 +170,7 @@ public class DengageManager {
 
     public void buildSubscription() {
         try {
-            Dengage.INSTANCE.getSubscriptionManager().buildSubscription(firebaseIntegrationKey, huaweiIntegrationKey,"",null);
+            Dengage.INSTANCE.getSubscriptionManager().buildSubscription(firebaseIntegrationKey, huaweiIntegrationKey,"",null,"","");
         } catch (Exception ex) {
             DengageLogger.INSTANCE.error("buildSubscription: " + ex.getMessage());
 

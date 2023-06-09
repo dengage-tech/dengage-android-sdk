@@ -67,8 +67,11 @@ object Dengage {
         huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
         deviceId: String? = null,
-        deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google
-    ) {
+        deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
+        contactKey: String? = null,
+        partnerDeviceId: String? = null,
+
+        ) {
         initialized = true
         ContextHolder.resetContext(context = context)
         SessionManager.getSessionId()
@@ -77,7 +80,9 @@ object Dengage {
             firebaseIntegrationKey,
             huaweiIntegrationKey,
             deviceId,
-            deviceConfigurationPreference
+            deviceConfigurationPreference,
+            contactKey,
+            partnerDeviceId
         )
 
         val configurationCallback = object : ConfigurationCallback {
@@ -248,7 +253,7 @@ object Dengage {
     fun getInboxMessages(
         limit: Int,
         offset: Int,
-        dengageCallback: DengageCallback<MutableList<InboxMessage>>
+        dengageCallback: DengageCallback<MutableList<InboxMessage>>,
     ) {
         inboxMessageManager.getInboxMessages(
             limit = limit,
@@ -263,7 +268,7 @@ object Dengage {
      * @param messageId id of inbox message that will be deleted.
      */
     fun deleteInboxMessage(
-        messageId: String
+        messageId: String,
     ) {
         inboxMessageManager.deleteInboxMessage(
             messageId = messageId
@@ -276,7 +281,7 @@ object Dengage {
      * @param messageId id of inbox message that will be marked as read.
      */
     fun setInboxMessageAsClicked(
-        messageId: String
+        messageId: String,
     ) {
         inboxMessageManager.setInboxMessageAsClicked(
             messageId = messageId
@@ -354,7 +359,7 @@ object Dengage {
      * @param activity for showing ui of in app message
      */
     fun setNavigation(
-        activity: Activity, resultCode: Int = -1
+        activity: Activity, resultCode: Int = -1,
     ) {
         setNavigation(
             activity = activity,
@@ -370,7 +375,7 @@ object Dengage {
      */
     fun setNavigation(
         activity: Activity,
-        screenName: String? = null, resultCode: Int = -1
+        screenName: String? = null, resultCode: Int = -1,
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
@@ -388,7 +393,7 @@ object Dengage {
     fun showRealTimeInApp(
         activity: Activity,
         screenName: String? = null,
-        params: HashMap<String, String>? = null, resultCode: Int = -1
+        params: HashMap<String, String>? = null, resultCode: Int = -1,
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
@@ -405,7 +410,7 @@ object Dengage {
      * @param tags will be send to api
      */
     fun setTags(
-        tags: List<TagItem>, context: Context? = null
+        tags: List<TagItem>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         tagManager.setTags(
@@ -491,7 +496,7 @@ object Dengage {
 
     fun sendCartEvents(
         data: HashMap<String, Any>,
-        eventType: String, context: Context? = null
+        eventType: String, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendCartEvents(
@@ -551,7 +556,7 @@ object Dengage {
 
     fun sendWishListEvents(
         data: HashMap<String, Any>,
-        eventType: String, context: Context? = null
+        eventType: String, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendWishListEvents(
@@ -587,7 +592,7 @@ object Dengage {
     fun sendCustomEvent(
         tableName: String,
         key: String,
-        data: HashMap<String, Any>, context: Context? = null
+        data: HashMap<String, Any>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendCustomEvent(
@@ -608,7 +613,7 @@ object Dengage {
      */
     fun sendDeviceEvent(
         tableName: String,
-        data: HashMap<String, Any>, context: Context? = null
+        data: HashMap<String, Any>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendDeviceEvent(
@@ -628,7 +633,7 @@ object Dengage {
     fun sendOpenEvent(
         buttonId: String,
         itemId: String,
-        message: Message?
+        message: Message?,
     ) {
         DengageLogger.verbose("sendOpenEvent method is called")
         DengageLogger.verbose(buttonId)
@@ -713,7 +718,7 @@ object Dengage {
     }
 
     fun inAppLinkConfiguration(
-        inappDeeplink: String = ""
+        inappDeeplink: String = "",
     ) {
         Prefs.inAppDeeplink = inappDeeplink
     }

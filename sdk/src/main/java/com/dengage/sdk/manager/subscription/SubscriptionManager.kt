@@ -14,40 +14,50 @@ import com.dengage.sdk.util.GsonHolder
 import java.util.*
 import com.dengage.sdk.util.*
 
-class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
+class SubscriptionManager :
+    BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
     SubscriptionContract.View {
 
     override fun providePresenter() = SubscriptionPresenter()
 
-    private var firebaseIntegrationKey:String?=null
+    private var firebaseIntegrationKey: String? = null
 
-    private var huaweiIntegrationKey:String?=null
+    private var huaweiIntegrationKey: String? = null
 
-    private var deviceId:String?=null
+    private var deviceId: String? = null
 
-    private var deviceConfigurationPreference :DeviceConfigurationPreference?=null
+    private var contactKey: String? = null
+
+    private var partnerDeviceId: String? = null
+
+    private var deviceConfigurationPreference: DeviceConfigurationPreference? = null
 
 
     fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
         deviceId: String?,
-        deviceConfigurationPreference : DeviceConfigurationPreference?
+        deviceConfigurationPreference: DeviceConfigurationPreference?,
+        contactKey: String?,
+        partnerDeviceId: String?,
     ) {
 
         this.deviceConfigurationPreference = deviceConfigurationPreference
 
         this.firebaseIntegrationKey = firebaseIntegrationKey
 
-         this.huaweiIntegrationKey = huaweiIntegrationKey
+        this.huaweiIntegrationKey = huaweiIntegrationKey
 
-         this.deviceId=deviceId
+        this.deviceId = deviceId
+
+        this.partnerDeviceId = partnerDeviceId
+
+        this.contactKey = contactKey
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
             Prefs.subscription = PrefsOld.subscription
             PrefsOld.subscription = null
         }
-
 
 
         var subscription = Prefs.subscription
@@ -69,11 +79,12 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     internal fun setToken(token: String?) {
         val subscription = Prefs.subscription
 
-        if (subscription != null&&subscription.token.isNullOrEmpty()) {
+        if (subscription != null && subscription.token.isNullOrEmpty()) {
 
-            if(deviceConfigurationPreference == DeviceConfigurationPreference.Google) subscription.tokenType = TokenType.FIREBASE.type else subscription.tokenType = TokenType.HUAWEI.type
+            if (deviceConfigurationPreference == DeviceConfigurationPreference.Google) subscription.tokenType =
+                TokenType.FIREBASE.type else subscription.tokenType = TokenType.HUAWEI.type
 
-            if(subscription.tokenType == TokenType.FIREBASE.type) subscription.integrationKey=
+            if (subscription.tokenType == TokenType.FIREBASE.type) subscription.integrationKey =
                 firebaseIntegrationKey.toString() else huaweiIntegrationKey
 
 
@@ -162,32 +173,37 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         }
     }
 
-     fun saveSubscription(subscription: Subscription) {
-        DengageLogger.verbose("saveSubscription method is called")
+    fun saveSubscription(subscription: Subscription) {
+        try {
+            DengageLogger.verbose("saveSubscription method is called")
 
-        if (subscription.deviceId.isNullOrEmpty()) {
-            if(deviceId.isNullOrEmpty()) {
-                subscription.deviceId = DengageUtils.getDeviceId()
+            if (subscription.deviceId.isNullOrEmpty()) {
+                if (deviceId.isNullOrEmpty()) {
+                    subscription.deviceId = DengageUtils.getDeviceId()
+                } else {
+                    subscription.deviceId = deviceId
+                }
+            } else if (!subscription.deviceId.equals(deviceId) && !deviceId.isNullOrEmpty()) {
+                subscription.deviceId = deviceId
             }
-            else
-            {
-                subscription.deviceId=deviceId
-            }
-        }
-         else if (!subscription.deviceId.equals(deviceId)&&!deviceId.isNullOrEmpty())
-        {
-            subscription.deviceId=deviceId
-        }
-        subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
-        subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
-        subscription.sdkVersion = DengageUtils.getSdkVersion()
-        subscription.language = Locale.getDefault().language
 
-         subscription.timezone = DengageUtils.getIANAFormatTimeZone()
-        DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
+            if (!contactKey.isNullOrEmpty()) subscription.contactKey = this.contactKey
+            if (!partnerDeviceId.isNullOrEmpty()) subscription.partnerDeviceId =
+                this.partnerDeviceId
 
-        // save to cache
-        Prefs.subscription = subscription
+            subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
+            subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
+            subscription.sdkVersion = DengageUtils.getSdkVersion()
+            subscription.language = Locale.getDefault().language
+
+            subscription.timezone = DengageUtils.getIANAFormatTimeZone()
+            DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
+
+            // save to cache
+            Prefs.subscription = subscription
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
+        }
     }
 
     internal fun setFirebaseIntegrationKey(integrationKey: String) {
