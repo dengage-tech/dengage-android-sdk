@@ -77,7 +77,9 @@ object Dengage {
         firebaseApp: FirebaseApp? = null,
         geofenceEnabled: Boolean = false,
         deviceId: String? = null,
-        deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google
+        deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
+        contactKey: String? = null,
+        partnerDeviceId: String? = null,
 
     ) {
         initialized = true
@@ -89,7 +91,9 @@ object Dengage {
             firebaseIntegrationKey,
             huaweiIntegrationKey,
             deviceId,
-            deviceConfigurationPreference
+            deviceConfigurationPreference,
+            contactKey,
+            partnerDeviceId
         )
 
         val configurationCallback = object : ConfigurationCallback {

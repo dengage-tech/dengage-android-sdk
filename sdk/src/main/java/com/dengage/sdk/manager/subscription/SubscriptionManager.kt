@@ -28,11 +28,17 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     private var deviceConfigurationPreference : DeviceConfigurationPreference?=null
 
+    private var contactKey: String? = null
+
+    private var partnerDeviceId: String? = null
+
     fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
         deviceId: String?,
-        deviceConfigurationPreference : DeviceConfigurationPreference?
+        deviceConfigurationPreference : DeviceConfigurationPreference?,
+        contactKey: String?,
+        partnerDeviceId: String?
 
     ) {
 
@@ -43,6 +49,10 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
          this.huaweiIntegrationKey=huaweiIntegrationKey
 
          this.deviceId=deviceId
+
+        this.partnerDeviceId = partnerDeviceId
+
+        this.contactKey = contactKey
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
             Prefs.subscription = PrefsOld.subscription
@@ -164,6 +174,7 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     }
 
      fun saveSubscription(subscription: Subscription) {
+         try {
         DengageLogger.verbose("saveSubscription method is called")
 
         if (subscription.deviceId.isNullOrEmpty()) {
@@ -179,6 +190,9 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         {
             subscription.deviceId=deviceId
         }
+             if (!contactKey.isNullOrEmpty()) subscription.contactKey = this.contactKey
+             if (!partnerDeviceId.isNullOrEmpty()) subscription.partnerDeviceId =
+                 this.partnerDeviceId
         subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
         subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
         subscription.sdkVersion = DengageUtils.getSdkVersion()
@@ -189,6 +203,9 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
         // save to cache
         Prefs.subscription = subscription
+         } catch (e: Exception) {
+         } catch (e: Throwable) {
+         }
     }
 
     internal fun setFirebaseIntegrationKey(integrationKey: String) {

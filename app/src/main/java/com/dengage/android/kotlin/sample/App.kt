@@ -18,7 +18,9 @@ class App : Application() {
             context = applicationContext,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
             huaweiIntegrationKey = "jki",
-            geofenceEnabled = true
+            geofenceEnabled = true,
+            contactKey = "jj",
+            partnerDeviceId = "k,"
         )
         Dengage.setLogStatus(true)
 
