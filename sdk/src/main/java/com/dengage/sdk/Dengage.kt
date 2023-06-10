@@ -69,7 +69,7 @@ object Dengage {
         deviceId: String? = null,
         deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
         contactKey: String? = null,
-        partnerDeviceId: String? = null,
+        partnerDeviceId: String? = null
 
         ) {
         initialized = true

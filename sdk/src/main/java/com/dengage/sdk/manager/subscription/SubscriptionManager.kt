@@ -39,7 +39,7 @@ class SubscriptionManager :
         deviceId: String?,
         deviceConfigurationPreference: DeviceConfigurationPreference?,
         contactKey: String?,
-        partnerDeviceId: String?,
+        partnerDeviceId: String?
     ) {
 
         this.deviceConfigurationPreference = deviceConfigurationPreference
