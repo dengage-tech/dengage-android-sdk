@@ -52,6 +52,9 @@ class InterceptorProvider {
         {
             return ArrayList()
         }
+        catch (e:Throwable){
+            return ArrayList()
+        }
     }
 
     private fun createEmptyBodyInterceptor(): Interceptor {
