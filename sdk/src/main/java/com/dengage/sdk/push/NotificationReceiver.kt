@@ -30,7 +30,7 @@ open class NotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         ContextHolder.resetContext(context)
-
+        try {
         DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
 
         when (intent?.action) {
@@ -39,6 +39,9 @@ open class NotificationReceiver : BroadcastReceiver() {
             Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
             Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
             Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+        }
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
         }
     }
 

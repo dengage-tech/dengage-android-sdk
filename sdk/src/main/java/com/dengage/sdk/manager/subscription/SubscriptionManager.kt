@@ -18,14 +18,24 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
 
     private var deviceId:String?=null
 
+    private var contactKey: String? = null
+
+    private var partnerDeviceId: String? = null
+
      fun buildSubscription(
         firebaseIntegrationKey: String?,
-        deviceId: String?
+        deviceId: String?,
+        contactKey: String?,
+        partnerDeviceId: String?
     ) {
 
          this.firebaseIntegrationKey=firebaseIntegrationKey
 
          this.deviceId=deviceId
+
+         this.partnerDeviceId = partnerDeviceId
+
+         this.contactKey = contactKey
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
             Prefs.subscription = PrefsOld.subscription

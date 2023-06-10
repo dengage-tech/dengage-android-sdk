@@ -74,14 +74,17 @@ object Dengage {
         firebaseIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
         geofenceEnabled: Boolean = false,
-        deviceId: String?=null
+        deviceId: String?=null,
+        contactKey: String? = null,
+        partnerDeviceId: String? = null
     ) {
         initialized = true
         ContextHolder.resetContext(context = context)
 
         SessionManager.getSessionId()
 
-        subscriptionManager.buildSubscription(firebaseIntegrationKey,deviceId)
+        subscriptionManager.buildSubscription(firebaseIntegrationKey,deviceId, contactKey,
+            partnerDeviceId)
 
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
