@@ -9,7 +9,6 @@ import android.media.AudioAttributes
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -19,7 +18,6 @@ import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
 import com.dengage.sdk.util.*
-import com.dengage.sdk.util.extension.storeToPref
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
 
@@ -30,17 +28,21 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
-        ContextHolder.resetContext(context)
+        try {
+            ContextHolder.resetContext(context)
 
-        DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
+            DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
 
-        when (intent?.action) {
-            Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
-            Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
-            Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
-            Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
-            Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            when (intent?.action) {
+                Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
+                Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
+                Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
+                Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
+                Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            }
         }
+        catch (_:Exception){}
+        catch (_:Throwable){}
     }
 
     open fun onPushReceive(context: Context, intent: Intent) {
