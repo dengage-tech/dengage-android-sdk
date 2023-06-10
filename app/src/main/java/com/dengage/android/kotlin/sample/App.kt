@@ -18,7 +18,9 @@ class App : Application() {
         Dengage.init(
             context = applicationContext,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
-            deviceId = "ssss"
+            deviceId = "ssss",
+            contactKey = "opo",
+            partnerDeviceId = "kklkl"
         )
         Dengage.setLogStatus(true)
         Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")

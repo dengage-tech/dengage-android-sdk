@@ -29,16 +29,20 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
-        ContextHolder.resetContext(context)
+        try {
+            ContextHolder.resetContext(context)
 
-        DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
+            DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
 
-        when (intent?.action) {
-            Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
-            Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
-            Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
-            Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
-            Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            when (intent?.action) {
+                Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
+                Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
+                Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
+                Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
+                Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            }
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
         }
     }
 
@@ -47,7 +51,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         DengageLogger.verbose("$TAG onPushReceive method is called")
         intent.extras ?: return
         prepareAndShowPush(context, intent)
-        Constants.isActivityPerformed=false
+        Constants.isActivityPerformed = false
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
@@ -86,7 +90,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-     private fun onActionClick(context: Context, intent: Intent) {
+    private fun onActionClick(context: Context, intent: Intent) {
         DengageLogger.verbose("$TAG onActionClick method is called")
 
         var uri: String? = null
@@ -183,7 +187,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         intent: Intent,
         message: Message,
         bitmap: Bitmap,
-        notificationBuilder: NotificationCompat.Builder
+        notificationBuilder: NotificationCompat.Builder,
     ) {
         val style = NotificationCompat.BigPictureStyle().bigPicture(bitmap)
         notificationBuilder.setLargeIcon(bitmap)
@@ -198,7 +202,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         context: Context,
         intent: Intent,
         message: Message,
-        notificationBuilder: NotificationCompat.Builder
+        notificationBuilder: NotificationCompat.Builder,
     ) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
@@ -211,7 +215,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         message: Message,
         leftCarouselItem: CarouselItem,
         currentCarouselItem: CarouselItem,
-        rightCarouselItem: CarouselItem
+        rightCarouselItem: CarouselItem,
     ) = Unit
 
     protected open fun getContentIntent(extras: Bundle?, packageName: String?): Intent {
@@ -266,7 +270,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         carouselView: RemoteViews,
         imageViewId: Int,
         carouselItem: CarouselItem,
-        onComplete: (() -> Unit)? = null
+        onComplete: (() -> Unit)? = null,
     ) {
         val cachedFileBitmap = carouselItem.loadFileFromStorage()
         if (cachedFileBitmap == null) {
@@ -312,7 +316,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     open fun getCarouselDirectionIntent(
         context: Context,
         requestCode: Int,
-        intent: Intent
+        intent: Intent,
     ): PendingIntent? {
 
         return PendingIntent.getBroadcast(
@@ -327,7 +331,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     fun getDeletePendingIntent(
         context: Context,
         requestCode: Int,
-        intentParam: Intent
+        intentParam: Intent,
     ): PendingIntent {
 
         return PendingIntent.getBroadcast(
@@ -422,7 +426,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     private fun getNotificationBuilder(
         context: Context,
         intent: Intent,
-        message: Message
+        message: Message,
     ): NotificationCompat.Builder {
         val extras = intent.extras
         val random = Random()

@@ -8,30 +8,40 @@ import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.util.*
 import java.util.*
 
-class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
+class SubscriptionManager :
+    BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),
     SubscriptionContract.View {
 
     override fun providePresenter() = SubscriptionPresenter()
 
-    private var firebaseIntegrationKey:String?=null
+    private var firebaseIntegrationKey: String? = null
 
 
-    private var deviceId:String?=null
+    private var deviceId: String? = null
 
-     fun buildSubscription(
+    private var contactKey: String? = null
+
+    private var partnerDeviceId: String? = null
+
+    fun buildSubscription(
         firebaseIntegrationKey: String?,
-        deviceId: String?
+        deviceId: String?,
+        contactKey: String?,
+        partnerDeviceId: String?,
     ) {
 
-         this.firebaseIntegrationKey=firebaseIntegrationKey
+        this.firebaseIntegrationKey = firebaseIntegrationKey
 
-         this.deviceId=deviceId
+        this.deviceId = deviceId
+
+        this.partnerDeviceId = partnerDeviceId
+
+        this.contactKey = contactKey
         // this is for migration from old sdk
         if (PrefsOld.subscription != null) {
             Prefs.subscription = PrefsOld.subscription
             PrefsOld.subscription = null
         }
-
 
 
         var subscription = Prefs.subscription
@@ -53,9 +63,9 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
     internal fun setToken(token: String?) {
         val subscription = Prefs.subscription
 
-        if (subscription != null&&subscription.token.isNullOrEmpty()) {
+        if (subscription != null && subscription.token.isNullOrEmpty()) {
 
-            subscription.integrationKey=
+            subscription.integrationKey =
                 firebaseIntegrationKey.toString()
 
             subscription.token = token
@@ -143,32 +153,36 @@ class SubscriptionManager : BaseMvpManager<SubscriptionContract.View, Subscripti
         }
     }
 
-     fun saveSubscription(subscription: Subscription) {
-        DengageLogger.verbose("saveSubscription method is called")
+    fun saveSubscription(subscription: Subscription) {
+        try {
+            DengageLogger.verbose("saveSubscription method is called")
 
-        if (subscription.deviceId.isNullOrEmpty()) {
-            if(deviceId.isNullOrEmpty()) {
-                subscription.deviceId = DengageUtils.getDeviceId()
+            if (subscription.deviceId.isNullOrEmpty()) {
+                if (deviceId.isNullOrEmpty()) {
+                    subscription.deviceId = DengageUtils.getDeviceId()
+                } else {
+                    subscription.deviceId = deviceId
+                }
+            } else if (!subscription.deviceId.equals(deviceId) && !deviceId.isNullOrEmpty()) {
+                subscription.deviceId = deviceId
             }
-            else
-            {
-                subscription.deviceId=deviceId
-            }
-        }
-         else if (!subscription.deviceId.equals(deviceId)&&!deviceId.isNullOrEmpty())
-        {
-            subscription.deviceId=deviceId
-        }
-        subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
-        subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
-        subscription.sdkVersion = DengageUtils.getSdkVersion()
-        subscription.language = Locale.getDefault().language
 
-         subscription.timezone = DengageUtils.getIANAFormatTimeZone()
-        DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
+            if (!contactKey.isNullOrEmpty()) subscription.contactKey = this.contactKey
+            if (!partnerDeviceId.isNullOrEmpty()) subscription.partnerDeviceId =
+                this.partnerDeviceId
+            subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
+            subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
+            subscription.sdkVersion = DengageUtils.getSdkVersion()
+            subscription.language = Locale.getDefault().language
 
-        // save to cache
-        Prefs.subscription = subscription
+            subscription.timezone = DengageUtils.getIANAFormatTimeZone()
+            DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
+
+            // save to cache
+            Prefs.subscription = subscription
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
+        }
     }
 
     internal fun setFirebaseIntegrationKey(integrationKey: String) {

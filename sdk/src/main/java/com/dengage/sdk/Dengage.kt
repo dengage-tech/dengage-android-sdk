@@ -33,6 +33,7 @@ import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.push.clearNotification
+
 @SuppressLint("StaticFieldLeak")
 object Dengage {
 
@@ -45,9 +46,10 @@ object Dengage {
     private val rfmManager by lazy { RFMManager() }
     private val deviceIdSenderManager by lazy { DeviceIdSenderManager() }
     private val inAppSessionManager by lazy { InAppSessionManager() }
-    private  var currentActivity:Activity? =null
+    private var currentActivity: Activity? = null
 
     private var isInAppFetched: Boolean = false
+
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
      *
@@ -60,14 +62,19 @@ object Dengage {
         context: Context,
         firebaseIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
-        deviceId: String?=null
+        deviceId: String? = null,
+        contactKey: String? = null,
+        partnerDeviceId: String? = null,
     ) {
 
         ContextHolder.resetContext(context = context)
 
         SessionManager.getSessionId()
 
-        subscriptionManager.buildSubscription(firebaseIntegrationKey,deviceId)
+        subscriptionManager.buildSubscription(firebaseIntegrationKey,
+            deviceId,
+            contactKey,
+            partnerDeviceId)
 
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
@@ -99,7 +106,7 @@ object Dengage {
 
         configurationManager.init(
             firebaseApp = firebaseApp,
-            firebaseIntegrationKey=firebaseIntegrationKey
+            firebaseIntegrationKey = firebaseIntegrationKey
         )
         configurationManager.getSdkParameters()
     }
@@ -228,7 +235,7 @@ object Dengage {
     fun getInboxMessages(
         limit: Int,
         offset: Int,
-        dengageCallback: DengageCallback<MutableList<InboxMessage>>
+        dengageCallback: DengageCallback<MutableList<InboxMessage>>,
     ) {
         inboxMessageManager.getInboxMessages(
             limit = limit,
@@ -243,7 +250,7 @@ object Dengage {
      * @param messageId id of inbox message that will be deleted.
      */
     fun deleteInboxMessage(
-        messageId: String
+        messageId: String,
     ) {
         inboxMessageManager.deleteInboxMessage(
             messageId = messageId
@@ -256,7 +263,7 @@ object Dengage {
      * @param messageId id of inbox message that will be marked as read.
      */
     fun setInboxMessageAsClicked(
-        messageId: String
+        messageId: String,
     ) {
         inboxMessageManager.setInboxMessageAsClicked(
             messageId = messageId
@@ -334,7 +341,7 @@ object Dengage {
      * @param activity for showing ui of in app message
      */
     fun setNavigation(
-        activity: Activity, resultCode: Int = -1
+        activity: Activity, resultCode: Int = -1,
     ) {
         setNavigation(
             activity = activity,
@@ -350,7 +357,7 @@ object Dengage {
      */
     fun setNavigation(
         activity: Activity,
-        screenName: String? = null, resultCode: Int = -1
+        screenName: String? = null, resultCode: Int = -1,
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
@@ -368,12 +375,12 @@ object Dengage {
     fun showRealTimeInApp(
         activity: Activity,
         screenName: String? = null,
-        params: HashMap<String, String>? = null, resultCode: Int = -1
+        params: HashMap<String, String>? = null, resultCode: Int = -1,
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
             screenName = screenName,
-            params = params,resultCode
+            params = params, resultCode
         )
     }
 
@@ -383,7 +390,7 @@ object Dengage {
      * @param tags will be send to api
      */
     fun setTags(
-        tags: List<TagItem>, context: Context? = null
+        tags: List<TagItem>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         tagManager.setTags(
@@ -469,7 +476,7 @@ object Dengage {
 
     fun sendCartEvents(
         data: HashMap<String, Any>,
-        eventType: String, context: Context? = null
+        eventType: String, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendCartEvents(
@@ -529,7 +536,7 @@ object Dengage {
 
     fun sendWishListEvents(
         data: HashMap<String, Any>,
-        eventType: String, context: Context? = null
+        eventType: String, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendWishListEvents(
@@ -565,7 +572,7 @@ object Dengage {
     fun sendCustomEvent(
         tableName: String,
         key: String,
-        data: HashMap<String, Any>, context: Context? = null
+        data: HashMap<String, Any>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendCustomEvent(
@@ -586,7 +593,7 @@ object Dengage {
      */
     fun sendDeviceEvent(
         tableName: String,
-        data: HashMap<String, Any>, context: Context? = null
+        data: HashMap<String, Any>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendDeviceEvent(
@@ -606,7 +613,7 @@ object Dengage {
     fun sendOpenEvent(
         buttonId: String,
         itemId: String,
-        message: Message?
+        message: Message?,
     ) {
         DengageLogger.verbose("sendOpenEvent method is called")
         DengageLogger.verbose(buttonId)
@@ -676,7 +683,7 @@ object Dengage {
                 } else if (route.isNullOrEmpty()) {
                     DengageLogger.error("Device id api route is not provided")
                 } else {
-                    Constants.deviceToken=token
+                    Constants.deviceToken = token
                     deviceIdSenderManager.sendDeviceId("$this$route", token)
                 }
             }
@@ -691,7 +698,7 @@ object Dengage {
     }
 
     fun inAppLinkConfiguration(
-        inappDeeplink: String = ""
+        inappDeeplink: String = "",
     ) {
         Prefs.inAppDeeplink = inappDeeplink
     }
@@ -700,32 +707,27 @@ object Dengage {
         return isInAppFetched
     }
 
-    fun getLastPushPayload() :String
-    {
+    fun getLastPushPayload(): String {
         val pushPayload = Prefs.lastPushPayload
-        Prefs.lastPushPayload=null
+        Prefs.lastPushPayload = null
         ContextHolder.context.applicationContext.clearNotification(pushPayload)
         return pushPayload?.toJson() ?: ""
 
     }
 
-    fun setCurrentActivity(activity: Activity)
-    {
-        currentActivity=activity
+    fun setCurrentActivity(activity: Activity) {
+        currentActivity = activity
     }
 
-    internal fun getCurrentActivity() : Activity?
-    {
+    internal fun getCurrentActivity(): Activity? {
         return currentActivity
     }
 
-    fun restartApplicationAfterPushClick(restartApplication:Boolean)
-    {
+    fun restartApplicationAfterPushClick(restartApplication: Boolean) {
         Prefs.restartApplicationAfterPushClick = restartApplication
     }
 
-    fun removeInAppMessageDisplay()
-    {
+    fun removeInAppMessageDisplay() {
         inAppMessageManager.cancelTimer()
     }
 
