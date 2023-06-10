@@ -64,7 +64,7 @@ object Dengage {
         firebaseApp: FirebaseApp? = null,
         deviceId: String? = null,
         contactKey: String? = null,
-        partnerDeviceId: String? = null,
+        partnerDeviceId: String? = null
     ) {
 
         ContextHolder.resetContext(context = context)

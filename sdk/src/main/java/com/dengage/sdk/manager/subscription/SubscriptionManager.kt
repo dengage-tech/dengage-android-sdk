@@ -27,7 +27,7 @@ class SubscriptionManager :
         firebaseIntegrationKey: String?,
         deviceId: String?,
         contactKey: String?,
-        partnerDeviceId: String?,
+        partnerDeviceId: String?
     ) {
 
         this.firebaseIntegrationKey = firebaseIntegrationKey
