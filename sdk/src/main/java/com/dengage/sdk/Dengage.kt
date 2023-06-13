@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
+import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.domain.configuration.model.AppTracking
@@ -19,21 +20,25 @@ import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.configuration.ConfigurationCallback
 import com.dengage.sdk.manager.configuration.ConfigurationManager
 import com.dengage.sdk.manager.deviceId.DeviceIdSenderManager
+import com.dengage.sdk.manager.event.EventManager
+import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
 import com.dengage.sdk.manager.inappmessage.session.InAppSessionManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
 import com.dengage.sdk.manager.session.SessionManager
-import com.dengage.sdk.manager.event.EventManager
-import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
+import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
+import com.dengage.sdk.push.clearNotification
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
+import com.google.android.play.core.review.ReviewInfo
+import com.google.android.play.core.review.ReviewManager
+import com.google.android.play.core.review.ReviewManagerFactory
+import com.google.android.play.core.tasks.Task
 import com.google.firebase.FirebaseApp
-import com.dengage.sdk.manager.subscription.SubscriptionManager
-import com.dengage.sdk.push.clearNotification
 
 @SuppressLint("StaticFieldLeak")
 object Dengage {
@@ -419,17 +424,21 @@ object Dengage {
     }
 
     fun onMessageReceived(data: Map<String, String?>?) {
-        DengageUtils.registerBroadcast()
-        DengageLogger.verbose("onMessageReceived method is called")
-        if (!data.isNullOrEmpty()) {
-            val pushMessage = Message.createFromMap(data)
-            val json = pushMessage.toJson()
-            DengageLogger.verbose("Message Json: $json")
-            val source = pushMessage.messageSource
-            if (Constants.MESSAGE_SOURCE == source) {
-                DengageLogger.debug("There is a message that received from dEngage")
-                sendBroadcast(json, data)
+        try {
+            DengageUtils.registerBroadcast()
+            DengageLogger.verbose("onMessageReceived method is called")
+            if (!data.isNullOrEmpty()) {
+                val pushMessage = Message.createFromMap(data)
+                val json = pushMessage.toJson()
+                DengageLogger.verbose("Message Json: $json")
+                val source = pushMessage.messageSource
+                if (Constants.MESSAGE_SOURCE == source) {
+                    DengageLogger.debug("There is a message that received from dEngage")
+                    sendBroadcast(json, data)
+                }
             }
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
     }
 
@@ -753,5 +762,25 @@ object Dengage {
 
     fun setDevelopmentStatus(isDebug: Boolean? = false) {
         Prefs.isDevelopmentStatusDebug = isDebug
+    }
+
+    fun showRatingDialog(activity: Activity, reviewDialogCallback: ReviewDialogCallback) {
+        val reviewManager: ReviewManager = ReviewManagerFactory.create(activity)
+        val request: Task<ReviewInfo> = reviewManager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful()) {
+                // We got the ReviewInfo object successfully
+                val reviewInfo: ReviewInfo = task.getResult()
+                val flow: Task<Void> = reviewManager.launchReviewFlow(activity, reviewInfo)
+                flow.addOnCompleteListener { reviewFlowTask ->
+
+                    reviewDialogCallback.onCompletion()
+                }
+            } else {
+                reviewDialogCallback.onError()
+                // There was an error obtaining the ReviewInfo object
+                // You can handle the error case here
+            }
+        }
     }
 }
