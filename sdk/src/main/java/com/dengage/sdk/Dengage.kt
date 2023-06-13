@@ -7,6 +7,7 @@ import android.content.Intent
 import android.location.Location
 import android.text.TextUtils
 import com.dengage.sdk.callback.DengageCallback
+import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.geofence.model.GeofenceLocationSource
@@ -40,11 +41,16 @@ import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
 import com.dengage.sdk.push.clearNotification
+import com.google.android.play.core.review.ReviewInfo
+import com.google.android.play.core.review.ReviewManager
+import com.google.android.play.core.review.ReviewManagerFactory
+import com.google.android.play.core.tasks.Task
+
 @SuppressLint("StaticFieldLeak")
 object Dengage {
 
-     val configurationManager by lazy { ConfigurationManager() }
-     val subscriptionManager by lazy { SubscriptionManager() }
+    val configurationManager by lazy { ConfigurationManager() }
+    val subscriptionManager by lazy { SubscriptionManager() }
     private val inAppMessageManager by lazy { InAppMessageManager() }
     private val inboxMessageManager by lazy { InboxMessageManager() }
     private val tagManager by lazy { TagManager() }
@@ -58,7 +64,7 @@ object Dengage {
 
     private var isInAppFetched: Boolean = false
 
-    private  var currentActivity:Activity? =null
+    private var currentActivity: Activity? = null
 
     /**
      * Use to init Fcm or Hms configuration and sdk parameters
@@ -74,16 +80,16 @@ object Dengage {
         firebaseIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
         geofenceEnabled: Boolean = false,
-        deviceId: String?=null,
+        deviceId: String? = null,
         contactKey: String? = null,
-        partnerDeviceId: String? = null
+        partnerDeviceId: String? = null,
     ) {
         initialized = true
         ContextHolder.resetContext(context = context)
 
         SessionManager.getSessionId()
 
-        subscriptionManager.buildSubscription(firebaseIntegrationKey,deviceId, contactKey,
+        subscriptionManager.buildSubscription(firebaseIntegrationKey, deviceId, contactKey,
             partnerDeviceId)
 
         val configurationCallback = object : ConfigurationCallback {
@@ -252,7 +258,7 @@ object Dengage {
     fun getInboxMessages(
         limit: Int,
         offset: Int,
-        dengageCallback: DengageCallback<MutableList<InboxMessage>>
+        dengageCallback: DengageCallback<MutableList<InboxMessage>>,
     ) {
         inboxMessageManager.getInboxMessages(
             limit = limit,
@@ -267,7 +273,7 @@ object Dengage {
      * @param messageId id of inbox message that will be deleted.
      */
     fun deleteInboxMessage(
-        messageId: String
+        messageId: String,
     ) {
         inboxMessageManager.deleteInboxMessage(
             messageId = messageId
@@ -280,21 +286,21 @@ object Dengage {
      * @param messageId id of inbox message that will be marked as read.
      */
     fun setInboxMessageAsClicked(
-        messageId: String
+        messageId: String,
     ) {
         inboxMessageManager.setInboxMessageAsClicked(
             messageId = messageId
         )
     }
 
-     fun getInAppMessages() {
-         inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
-             InAppMessageFetchCallback {
-             override fun inAppMessageFetched(realTime: Boolean) {
-                 isInAppFetched = true;
-             }
+    fun getInAppMessages() {
+        inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
+            InAppMessageFetchCallback {
+            override fun inAppMessageFetched(realTime: Boolean) {
+                isInAppFetched = true;
+            }
 
-         })
+        })
     }
 
     fun getInAppExpiredMessageIds() {
@@ -358,7 +364,7 @@ object Dengage {
      * @param activity for showing ui of in app message
      */
     fun setNavigation(
-        activity: Activity, resultCode: Int = -1
+        activity: Activity, resultCode: Int = -1,
     ) {
         setNavigation(
             activity = activity,
@@ -374,11 +380,11 @@ object Dengage {
      */
     fun setNavigation(
         activity: Activity,
-        screenName: String? = null, resultCode: Int = -1
+        screenName: String? = null, resultCode: Int = -1,
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
-            screenName = screenName,null, resultCode
+            screenName = screenName, null, resultCode
         )
     }
 
@@ -392,7 +398,7 @@ object Dengage {
     fun showRealTimeInApp(
         activity: Activity,
         screenName: String? = null,
-        params: HashMap<String, String>? = null, resultCode: Int = -1
+        params: HashMap<String, String>? = null, resultCode: Int = -1,
     ) {
         inAppMessageManager.setNavigation(
             activity = activity,
@@ -408,7 +414,7 @@ object Dengage {
      * @param tags will be send to api
      */
     fun setTags(
-        tags: List<TagItem>,context: Context? = null
+        tags: List<TagItem>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         tagManager.setTags(
@@ -417,21 +423,25 @@ object Dengage {
     }
 
     fun onMessageReceived(data: Map<String, String?>?) {
-        DengageUtils.registerBroadcast()
-        DengageLogger.verbose("onMessageReceived method is called")
-        if (!data.isNullOrEmpty()) {
-            val pushMessage = Message.createFromMap(data)
-            val json = pushMessage.toJson()
-            DengageLogger.verbose("Message Json: $json")
-            val source = pushMessage.messageSource
-            if (Constants.MESSAGE_SOURCE == source) {
-                DengageLogger.debug("There is a message that received from dEngage")
-                sendBroadcast(json, data)
+        try {
+            DengageUtils.registerBroadcast()
+            DengageLogger.verbose("onMessageReceived method is called")
+            if (!data.isNullOrEmpty()) {
+                val pushMessage = Message.createFromMap(data)
+                val json = pushMessage.toJson()
+                DengageLogger.verbose("Message Json: $json")
+                val source = pushMessage.messageSource
+                if (Constants.MESSAGE_SOURCE == source) {
+                    DengageLogger.debug("There is a message that received from dEngage")
+                    sendBroadcast(json, data)
+                }
             }
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
     }
 
-     fun sendBroadcast(json: String, data: Map<String, String?>) {
+    fun sendBroadcast(json: String, data: Map<String, String?>) {
         DengageLogger.verbose("sendBroadcast method is called")
         try {
             val intent = Intent(Constants.PUSH_RECEIVE_EVENT)
@@ -467,7 +477,7 @@ object Dengage {
     /**
      * Use for updating score of category
      */
-    fun categoryView(categoryId: String,context: Context? = null) {
+    fun categoryView(categoryId: String, context: Context? = null) {
         ContextHolder.resetContext(context)
         rfmManager.categoryView(
             categoryId = categoryId
@@ -484,7 +494,7 @@ object Dengage {
         )
     }
 
-    fun pageView(data: HashMap<String, Any>,context: Context? = null) {
+    fun pageView(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.pageView(
             eventDetails = data
@@ -493,7 +503,7 @@ object Dengage {
 
     fun sendCartEvents(
         data: HashMap<String, Any>,
-        eventType: String,context: Context? = null
+        eventType: String, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendCartEvents(
@@ -502,49 +512,49 @@ object Dengage {
         )
     }
 
-    fun addToCart(data: HashMap<String, Any>,context: Context? = null) {
+    fun addToCart(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.addToCart(
             eventDetails = data
         )
     }
 
-    fun removeFromCart(data: HashMap<String, Any>,context: Context? = null) {
+    fun removeFromCart(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.removeFromCart(
             eventDetails = data
         )
     }
 
-    fun viewCart(data: HashMap<String, Any>,context: Context? = null) {
+    fun viewCart(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.viewCart(
             eventDetails = data
         )
     }
 
-    fun beginCheckout(data: HashMap<String, Any>,context: Context? = null) {
+    fun beginCheckout(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.beginCheckout(
             eventDetails = data
         )
     }
 
-    fun cancelOrder(data: HashMap<String, Any>,context: Context? = null) {
+    fun cancelOrder(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.cancelOrder(
             eventDetails = data
         )
     }
 
-    fun order(data: HashMap<String, Any>,context: Context? = null) {
+    fun order(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.order(
             eventDetails = data
         )
     }
 
-    fun search(data: HashMap<String, Any>,context: Context? = null) {
+    fun search(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.search(
             eventDetails = data
@@ -553,7 +563,7 @@ object Dengage {
 
     fun sendWishListEvents(
         data: HashMap<String, Any>,
-        eventType: String,context: Context? = null
+        eventType: String, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendWishListEvents(
@@ -562,14 +572,14 @@ object Dengage {
         )
     }
 
-    fun addToWishList(data: HashMap<String, Any>,context: Context? = null) {
+    fun addToWishList(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.addToWishList(
             eventDetails = data
         )
     }
 
-    fun removeFromWishList(data: HashMap<String, Any>,context: Context? = null) {
+    fun removeFromWishList(data: HashMap<String, Any>, context: Context? = null) {
         ContextHolder.resetContext(context)
         eventManager.removeFromWishList(
             eventDetails = data
@@ -589,7 +599,7 @@ object Dengage {
     fun sendCustomEvent(
         tableName: String,
         key: String,
-        data: HashMap<String, Any>,context: Context? = null
+        data: HashMap<String, Any>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendCustomEvent(
@@ -610,7 +620,7 @@ object Dengage {
      */
     fun sendDeviceEvent(
         tableName: String,
-        data: HashMap<String, Any>,context: Context? = null
+        data: HashMap<String, Any>, context: Context? = null,
     ) {
         ContextHolder.resetContext(context)
         eventManager.sendDeviceEvent(
@@ -630,7 +640,7 @@ object Dengage {
     fun sendOpenEvent(
         buttonId: String,
         itemId: String,
-        message: Message?
+        message: Message?,
     ) {
         subscriptionManager.sendSubscription()
         DengageLogger.verbose("sendOpenEvent method is called")
@@ -714,18 +724,23 @@ object Dengage {
         geofenceManager.stopGeofence()
     }
 
-     fun startGeofence() {
+    fun startGeofence() {
         geofenceManager.startTracking()
     }
 
-     fun handleLocation(context: Context, location: Location, source: GeofenceLocationSource, geofenceRequestId: String?) {
+    fun handleLocation(
+        context: Context,
+        location: Location,
+        source: GeofenceLocationSource,
+        geofenceRequestId: String?,
+    ) {
         if (!initialized) {
             init(context = context, geofenceEnabled = Prefs.geofenceEnabled)
         }
         geofenceManager.handleLocation(location, source, geofenceRequestId)
     }
 
-     fun handleBootCompleted(context: Context) {
+    fun handleBootCompleted(context: Context) {
         if (!initialized) {
             init(context = context, geofenceEnabled = Prefs.geofenceEnabled)
         }
@@ -740,7 +755,7 @@ object Dengage {
                 } else if (route.isNullOrEmpty()) {
                     DengageLogger.error("Device id api route is not provided")
                 } else {
-                    Constants.deviceToken=token
+                    Constants.deviceToken = token
                     deviceIdSenderManager.sendDeviceId("$this$route", token)
                 }
             }
@@ -750,14 +765,13 @@ object Dengage {
     }
 
 
-    fun setPartnerDeviceId(adid:String)
-    {
+    fun setPartnerDeviceId(adid: String) {
         DengageLogger.verbose("setPartnerDeviceId method is called")
         subscriptionManager.setPartnerDeviceId(adid = adid)
     }
 
     fun inAppLinkConfiguration(
-        inappDeeplink: String = ""
+        inappDeeplink: String = "",
     ) {
         Prefs.inAppDeeplink = inappDeeplink
     }
@@ -767,36 +781,51 @@ object Dengage {
     }
 
 
-    fun getLastPushPayload() :String
-    {
+    fun getLastPushPayload(): String {
         val pushPayload = Prefs.lastPushPayload
-        Prefs.lastPushPayload=null
+        Prefs.lastPushPayload = null
         ContextHolder.context.applicationContext.clearNotification(pushPayload)
         return pushPayload?.toJson() ?: ""
 
     }
 
-    fun setCurrentActivity(activity: Activity)
-    {
-        currentActivity=activity
+    fun setCurrentActivity(activity: Activity) {
+        currentActivity = activity
     }
 
-    internal fun getCurrentActivity() : Activity?
-    {
+    internal fun getCurrentActivity(): Activity? {
         return currentActivity
     }
 
-    fun restartApplicationAfterPushClick(restartApplication:Boolean)
-    {
+    fun restartApplicationAfterPushClick(restartApplication: Boolean) {
         Prefs.restartApplicationAfterPushClick = restartApplication
     }
 
-    fun removeInAppMessageDisplay()
-    {
+    fun removeInAppMessageDisplay() {
         inAppMessageManager.cancelTimer()
     }
 
     fun setDevelopmentStatus(isDebug: Boolean? = false) {
         Prefs.isDevelopmentStatusDebug = isDebug
+    }
+
+    fun showRatingDialog(activity: Activity, reviewDialogCallback: ReviewDialogCallback) {
+        val reviewManager: ReviewManager = ReviewManagerFactory.create(activity)
+        val request: Task<ReviewInfo> = reviewManager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful()) {
+                // We got the ReviewInfo object successfully
+                val reviewInfo: ReviewInfo = task.getResult()
+                val flow: Task<Void> = reviewManager.launchReviewFlow(activity, reviewInfo)
+                flow.addOnCompleteListener { reviewFlowTask ->
+
+                    reviewDialogCallback.onCompletion()
+                }
+            } else {
+                reviewDialogCallback.onError()
+                // There was an error obtaining the ReviewInfo object
+                // You can handle the error case here
+            }
+        }
     }
 }

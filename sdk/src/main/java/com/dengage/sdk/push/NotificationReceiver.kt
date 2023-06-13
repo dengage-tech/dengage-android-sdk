@@ -9,7 +9,6 @@ import android.media.AudioAttributes
 import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -29,20 +28,21 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
-        ContextHolder.resetContext(context)
         try {
-        DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
+            ContextHolder.resetContext(context)
 
-        when (intent?.action) {
-            Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
-            Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
-            Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
-            Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
-            Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
+
+            when (intent?.action) {
+                Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
+                Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
+                Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
+                Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
+                Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            }
         }
-        } catch (_: Exception) {
-        } catch (_: Throwable) {
-        }
+        catch (_:Exception){}
+        catch (_:Throwable){}
     }
 
     open fun onPushReceive(context: Context, intent: Intent) {
@@ -50,7 +50,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         DengageLogger.verbose("$TAG onPushReceive method is called")
         intent.extras ?: return
         prepareAndShowPush(context, intent)
-        Constants.isActivityPerformed=false
+        Constants.isActivityPerformed = false
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
@@ -64,7 +64,7 @@ open class NotificationReceiver : BroadcastReceiver() {
                 message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
             }
             uri = intent.extras!!.getString("targetUrl")
-            ContextHolder.context = context
+
             Dengage.sendOpenEvent("", "", message)
 
             clearNotification(context, message)
@@ -103,7 +103,7 @@ open class NotificationReceiver : BroadcastReceiver() {
 
             val id = intent.extras!!.getString("id", "")
 
-            ContextHolder.context = context
+
             Dengage.sendOpenEvent(id, "", message)
 
             clearNotification(context, message)
@@ -146,7 +146,6 @@ open class NotificationReceiver : BroadcastReceiver() {
         }
 
         message?.let {
-            ContextHolder.context = context
             when (navigation) {
                 "" -> {
                     Dengage.sendOpenEvent("", id, message)
