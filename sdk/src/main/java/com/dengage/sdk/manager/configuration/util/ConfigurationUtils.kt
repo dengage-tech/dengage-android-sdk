@@ -7,6 +7,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
+import java.util.concurrent.Executors
 
 
 object ConfigurationUtils {
@@ -22,26 +23,35 @@ object ConfigurationUtils {
 
 
     fun getFirebaseToken(firebaseApp: FirebaseApp?, onTokenResult: (String) -> Unit) {
-        DengageLogger.debug("Getting Firebase Token")
-        val firebaseMessaging: FirebaseMessaging = if (firebaseApp == null) {
-            FirebaseMessaging.getInstance()
-        } else {
-            firebaseApp[FirebaseMessaging::class.java] ?: FirebaseMessaging.getInstance()
-        }
+        try {
+            DengageLogger.debug("Getting Firebase Token")
+            val executor = Executors.newSingleThreadExecutor()
+            executor.execute {
 
-        firebaseMessaging.token.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val token = task.result
-                if (token == null) {
-                    DengageLogger.error("Firebase token is null")
+
+                val firebaseMessaging: FirebaseMessaging = if (firebaseApp == null) {
+                    FirebaseMessaging.getInstance()
                 } else {
-                    DengageLogger.debug("Firebase token is $token")
-                    onTokenResult.invoke(token)
+                    firebaseApp[FirebaseMessaging::class.java] ?: FirebaseMessaging.getInstance()
                 }
-            } else {
-                DengageLogger.error("Firebase InstanceId Failed: " + task.exception?.message)
+
+                firebaseMessaging.token.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val token = task.result
+                        if (token == null) {
+                            DengageLogger.error("Firebase token is null")
+                        } else {
+                            DengageLogger.debug("Firebase token is $token")
+                            onTokenResult.invoke(token)
+                        }
+                    } else {
+                        DengageLogger.error("Firebase InstanceId Failed: " + task.exception?.message)
+                    }
+                }
             }
         }
+        catch (_:Exception){}
+        catch (_:Throwable){}
     }
 
 
