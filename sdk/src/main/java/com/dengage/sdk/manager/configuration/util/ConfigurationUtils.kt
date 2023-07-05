@@ -11,6 +11,7 @@ import com.huawei.agconnect.AGConnectOptionsBuilder
 import com.huawei.hms.aaid.HmsInstanceId
 import com.huawei.hms.api.HuaweiApiAvailability
 import com.huawei.hms.common.ApiException
+import java.util.concurrent.Executors
 
 object ConfigurationUtils {
 
@@ -31,26 +32,35 @@ object ConfigurationUtils {
     }
 
     fun getFirebaseToken(firebaseApp: FirebaseApp?, onTokenResult: (String) -> Unit) {
-        DengageLogger.debug("Getting Firebase Token")
-        val firebaseMessaging: FirebaseMessaging = if (firebaseApp == null) {
-            FirebaseMessaging.getInstance()
-        } else {
-            firebaseApp[FirebaseMessaging::class.java] ?: FirebaseMessaging.getInstance()
-        }
+        try {
+            DengageLogger.debug("Getting Firebase Token")
+            val executor = Executors.newSingleThreadExecutor()
+            executor.execute {
 
-        firebaseMessaging.token.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val token = task.result
-                if (token == null) {
-                    DengageLogger.error("Firebase token is null")
+
+                val firebaseMessaging: FirebaseMessaging = if (firebaseApp == null) {
+                    FirebaseMessaging.getInstance()
                 } else {
-                    DengageLogger.debug("Firebase token is $token")
-                    onTokenResult.invoke(token)
+                    firebaseApp[FirebaseMessaging::class.java] ?: FirebaseMessaging.getInstance()
                 }
-            } else {
-                DengageLogger.error("Firebase InstanceId Failed: " + task.exception?.message)
+
+                firebaseMessaging.token.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val token = task.result
+                        if (token == null) {
+                            DengageLogger.error("Firebase token is null")
+                        } else {
+                            DengageLogger.debug("Firebase token is $token")
+                            onTokenResult.invoke(token)
+                        }
+                    } else {
+                        DengageLogger.error("Firebase InstanceId Failed: " + task.exception?.message)
+                    }
+                }
             }
         }
+        catch (_:Exception){}
+        catch (_:Throwable){}
     }
 
     fun getHuaweiToken(onTokenResult: (String) -> Unit) {
