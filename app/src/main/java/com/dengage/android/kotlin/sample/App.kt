@@ -17,13 +17,11 @@ class App : Application() {
 
         Dengage.init(
             context = applicationContext,
-            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
-            deviceId = "ssss",
-            contactKey = "opo",
-            partnerDeviceId = "kklkl"
+            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY
         )
         Dengage.setLogStatus(true)
         Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
+
         /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
       registerReceiver(
           PushNotificationReceiver(),

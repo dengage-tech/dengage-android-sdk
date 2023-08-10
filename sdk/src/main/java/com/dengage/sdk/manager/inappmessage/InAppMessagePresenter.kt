@@ -30,7 +30,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         if (isInAppMessageEnabled(subscription,
                 sdkParameters) && DengageUtils.isAppInForeground()
         ) {
-            getVisitorInfo()
+
 
             if (Prefs.isDevelopmentStatusDebug == false) {
                 if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
@@ -61,7 +61,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
             DengageUtils.isAppInForeground()
         ) {
-
+            getVisitorInfo()
             if (Prefs.isDevelopmentStatusDebug == false) {
                 if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
 
@@ -86,8 +86,6 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     appId = sdkParameters.appId!!
                 )
             }
-
-            // get visitor info for segments and tags defined to user
 
         }
     }

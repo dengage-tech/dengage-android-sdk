@@ -1,10 +1,12 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.util.Log
 import androidx.navigation.fragment.findNavController
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentHomeBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
 import com.dengage.sdk.Dengage
+import com.dengage.sdk.callback.ReviewDialogCallback
 
 class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
@@ -16,9 +18,25 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         sendPageView("home")
 
         binding.btnDeviceInfo.setOnClickListener {
-           // findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
-            Dengage.setDevelopmentStatus(false)
+             findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
+            // Dengage.setDevelopmentStatus(false)
+       /*     activity?.let { it1 ->
+                Dengage.showRatingDialog(activity = it1,
+                    reviewDialogCallback = object : ReviewDialogCallback {
+                        override fun onCompletion() {
+                            // this@InAppMessageActivity.finish()
+                            Log.d("oops", "complete")
+                        }
+
+                        override fun onError() {
+
+                            Log.d("oops", "error")
+                        }
+
+                    })
+            }*/
         }
+
 
         binding.btnUserPermission.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToUserPermission())

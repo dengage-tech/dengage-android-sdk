@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dengage.android.kotlin.sample">
+    package="com.dengage.android.kotlin.sample" >
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:name=".App"
@@ -33,7 +34,7 @@
         <!-- For handling push notifications comes to messaging service classes -->
         <receiver
             android:name=".push.PushNotificationReceiver"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.dengage.push.intent.RECEIVE" />
                 <action android:name="com.dengage.push.intent.OPEN" />
