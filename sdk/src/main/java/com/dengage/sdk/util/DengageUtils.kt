@@ -14,7 +14,9 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.subscription.model.Subscription
+import com.dengage.sdk.push.NRTrampoline
 import com.dengage.sdk.push.NotificationReceiver
+import com.dengage.sdk.util.Constants.isBCRegistered
 import java.util.*
 
 object DengageUtils {
@@ -164,10 +166,13 @@ object DengageUtils {
             filter.addAction(Constants.PUSH_ACTION_CLICK_EVENT)
             filter.addAction(Constants.PUSH_ITEM_CLICK_EVENT)
             filter.addAction("com.dengage.push.intent.CAROUSEL_ITEM_CLICK")
-            ContextHolder.context.applicationContext.registerReceiver(
-                NotificationReceiver(),
-                filter
-            )
+            if (!isAppInForeground() &&!isBCRegistered) {
+                ContextHolder.context.applicationContext.registerReceiver(
+                    NRTrampoline(),
+                    filter
+                )
+
+            }
         } catch (e: Exception) {
             //  e.printStackTrace()
         } catch (ex: Throwable) {
@@ -178,9 +183,11 @@ object DengageUtils {
 
     fun unregisterBroadcast() {
         try {
-            ContextHolder.context.unregisterReceiver(NotificationReceiver())
-        } catch (e: Exception) {
 
+                ContextHolder.context.applicationContext.unregisterReceiver(NRTrampoline())
+
+        } catch (e: Exception) {
+e.printStackTrace()
         } catch (ex: Throwable) {
             ex.printStackTrace()
 

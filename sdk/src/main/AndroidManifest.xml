@@ -44,7 +44,8 @@
         <activity
             android:name=".push.NotificationNavigationDeciderActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
-            android:exported="false" />
+            android:launchMode="singleTask"
+            android:exported="true" />
     </application>
 
 </manifest>
