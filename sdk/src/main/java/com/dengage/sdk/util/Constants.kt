@@ -17,5 +17,6 @@ object Constants {
     const val NOTIFICATION_CHANNEL_NAME = "General"
     var deviceToken=""
     var isActivityPerformed =false
+    var isBCRegistered =false
 }
 

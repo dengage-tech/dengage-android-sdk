@@ -21,10 +21,10 @@ import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
 
-open class NotificationReceiver : BroadcastReceiver() {
+open class NRTrampoline : BroadcastReceiver() {
 
     companion object {
-        private const val TAG = "NotificationReceiver:"
+        private const val TAG = "NRTrampoline:"
     }
 
     override fun onReceive(context: Context, intent: Intent?) {
@@ -32,13 +32,15 @@ open class NotificationReceiver : BroadcastReceiver() {
             ContextHolder.resetContext(context)
 
             DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
+            if (!Constants.isBCRegistered) {
 
-            when (intent?.action) {
-                Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
-                Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
-                Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
-                Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
-                Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+                when (intent?.action) {
+                    Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
+                    Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
+                    Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
+                    Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
+                    Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+                }
             }
         }
         catch (_:Exception){}
@@ -54,6 +56,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
+        Constants.isBCRegistered =true
         DengageLogger.verbose("$TAG onPushOpen method is called")
 
         var uri: String? = null
@@ -64,6 +67,7 @@ open class NotificationReceiver : BroadcastReceiver() {
                 message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
             }
             uri = intent.extras!!.getString("targetUrl")
+
             Dengage.sendOpenEvent("", "", message)
 
             clearNotification(context, message)

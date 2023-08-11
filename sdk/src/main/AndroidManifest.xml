@@ -42,7 +42,8 @@
         <activity
             android:name=".push.NotificationNavigationDeciderActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
-            android:exported="false" />
+            android:launchMode="singleTask"
+            android:exported="true" />
 
         <activity android:name=".ui.inappmessage.InAppBrowserActivity"
             android:theme="@style/BrowserTheme.NoActionBar"/>
