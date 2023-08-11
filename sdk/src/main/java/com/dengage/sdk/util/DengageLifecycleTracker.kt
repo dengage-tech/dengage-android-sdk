@@ -29,6 +29,7 @@ open class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
 
     override fun onActivityStopped(activity: Activity) {
         startedActivityCount--
+        ContextHolder.resetContext(activity.applicationContext)
         if (startedActivityCount == 0) {
             Dengage.setLastVisitTime()
             Dengage.setLastSessionDuration()

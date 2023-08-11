@@ -342,12 +342,12 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             reviewDialogCallback = object : ReviewDialogCallback {
                 override fun onCompletion() {
                     this@InAppMessageActivity.finish()
-                    Toast.makeText(this@InAppMessageActivity,"complete",Toast.LENGTH_LONG).show()
+                  //  Toast.makeText(this@InAppMessageActivity,"complete",Toast.LENGTH_LONG).show()
                 }
 
                 override fun onError() {
                     this@InAppMessageActivity.finish()
-                    Toast.makeText(this@InAppMessageActivity,"error",Toast.LENGTH_LONG).show()
+                   // Toast.makeText(this@InAppMessageActivity,"error",Toast.LENGTH_LONG).show()
 
                 }
 
