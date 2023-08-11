@@ -25,69 +25,74 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val getVisitorInfo by lazy { GetVisitorInfo() }
 
     override fun getInAppMessages() {
-        val sdkParameters = Prefs.sdkParameters
-        val subscription = Prefs.subscription
-        getVisitorInfo()
+        try {
+            val sdkParameters = Prefs.sdkParameters
+            val subscription = Prefs.subscription
+            getVisitorInfo()
 
-        if (isInAppMessageEnabled(subscription,
-                sdkParameters) && DengageUtils.isAppInForeground()
-        ) {
+            if (isInAppMessageEnabled(subscription,
+                    sdkParameters) && DengageUtils.isAppInForeground()
+            ) {
 
 
-            if (Prefs.isDevelopmentStatusDebug == false) {
-                if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
+                if (Prefs.isDevelopmentStatusDebug == false) {
+                    if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
-                val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
-                Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
-            }
-            getInAppMessages(this) {
-                onResponse = {
-                    view {
-                        fetchedInAppMessages(it, false)
-                        fetchInAppExpiredMessageIds()
+                    val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
+                    Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
+                }
+                getInAppMessages(this) {
+                    onResponse = {
+                        view {
+                            fetchedInAppMessages(it, false)
+                            fetchInAppExpiredMessageIds()
+                        }
                     }
-                }
-                onError = {
-                    //  Prefs.inAppMessageFetchTime = System.currentTimeMillis()
-                    view { showError(it) }
-                }
-                params = GetInAppMessages.Params(
-                    account = sdkParameters?.accountName!!,
-                    subscription = Prefs.subscription!!,
-                    sdkParameters = sdkParameters
-
-                )
-            }
-        }
-
-        if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
-            DengageUtils.isAppInForeground()
-        ) {
-            if (Prefs.isDevelopmentStatusDebug == false) {
-                if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
-
-                val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
-                    ?: 0) * 60000
-                Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
-
-            }
-
-            getRealTimeInAppMessages(this) {
-                onResponse = {
-                    view {
-                        fetchedInAppMessages(it, true)
+                    onError = {
+                        //  Prefs.inAppMessageFetchTime = System.currentTimeMillis()
+                        view { showError(it) }
                     }
+                    params = GetInAppMessages.Params(
+                        account = sdkParameters?.accountName!!,
+                        subscription = Prefs.subscription!!,
+                        sdkParameters = sdkParameters
+
+                    )
                 }
-                onError = {
-                    Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
-                    view { showError(it) }
-                }
-                params = GetRealTimeInAppMessages.Params(
-                    accountId = sdkParameters?.accountName!!,
-                    appId = sdkParameters.appId!!
-                )
             }
 
+            if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
+                DengageUtils.isAppInForeground()
+            ) {
+                if (Prefs.isDevelopmentStatusDebug == false) {
+                    if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
+
+                    val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
+                        ?: 0) * 60000
+                    Prefs.realTimeInAppMessageFetchTime =
+                        System.currentTimeMillis() + nextFetchTimePlus
+
+                }
+
+                getRealTimeInAppMessages(this) {
+                    onResponse = {
+                        view {
+                            fetchedInAppMessages(it, true)
+                        }
+                    }
+                    onError = {
+                        Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
+                        view { showError(it) }
+                    }
+                    params = GetRealTimeInAppMessages.Params(
+                        accountId = sdkParameters?.accountName!!,
+                        appId = sdkParameters.appId!!
+                    )
+                }
+
+            }
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
     }
 
@@ -181,7 +186,9 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     override fun getVisitorInfo() {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
-        if (isRealTimeInAppMessageEnabled(subscription,sdkParameters)&&shouldFetchVisitorInfo()) {
+        if (isRealTimeInAppMessageEnabled(subscription,
+                sdkParameters) && shouldFetchVisitorInfo()
+        ) {
 
 
             getVisitorInfo(this) {
@@ -308,8 +315,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         return Prefs.inAppMessages?.let { it.size > 0 } ?: false
     }
 
-    private fun shouldFetchVisitorInfo():Boolean
-    {
+    private fun shouldFetchVisitorInfo(): Boolean {
         if (System.currentTimeMillis() < Prefs.visitorInfoFetchTime) return false
 
         val nextFetchTimePlus = 2 * 60000
