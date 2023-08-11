@@ -160,7 +160,9 @@ object Prefs {
         get() = preferences.get(PreferenceKey.DEVELOPMENT_STATUS, false)
         set(value) = preferences.set(PreferenceKey.DEVELOPMENT_STATUS, value)
 
-
+    internal var visitorInfoFetchTime: Long
+        get() = preferences.get(PreferenceKey.VISITOR_INFO_FETCH_TIME, 0) ?: 0
+        set(value) = preferences.set(PreferenceKey.VISITOR_INFO_FETCH_TIME, value)
     fun clear() {
         preferences.edit().clear().apply()
     }

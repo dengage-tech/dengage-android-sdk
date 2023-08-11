@@ -41,4 +41,7 @@ object Constants {
     internal var GOOGLE_KEY_LOCAL=""
 
     var isActivityPerformed =false
+
+
+    var isBCRegistered =false
 }

@@ -16,7 +16,9 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.dengage.sdk.Dengage
 import com.dengage.sdk.R
+import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
@@ -33,7 +35,8 @@ import kotlin.math.roundToInt
 class InAppMessageActivity : Activity(), View.OnClickListener {
 
     private lateinit var inAppMessage: InAppMessage
-    private var isAndroidUrlNPresent: Boolean? =false;
+    private var isAndroidUrlNPresent: Boolean? = false
+    private var isRatingDialog: Boolean? = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +53,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     }
 
     private fun setContentPosition(
-        contentParams: ContentParams
+        contentParams: ContentParams,
     ) {
         val cardInAppMessage = findViewById<CardView>(R.id.cardInAppMessage)
         val params = RelativeLayout.LayoutParams(
@@ -109,6 +112,8 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         vHtmlContent.visibility = View.VISIBLE
 
         isAndroidUrlNPresent = contentParams.html?.contains("Dn.androidUrlN")
+
+        isRatingDialog = contentParams.html?.contains("Dn.showRating") //false
 
         webView.apply {
 
@@ -206,7 +211,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         @JavascriptInterface
         fun androidUrl(targetUrl: String) {
-            if(isAndroidUrlNPresent == false) {
+            if (isAndroidUrlNPresent == false) {
                 DengageLogger.verbose("In app message: android target url event $targetUrl")
 
                 if (targetUrl == "Dn.promptPushPermission()") {
@@ -233,8 +238,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun androidUrlN(targetUrl: String,inAppBrowser : Boolean , retrieveOnSameLink : Boolean) {
             DengageLogger.verbose("In app message: android target url n event $targetUrl")
-
-            if (targetUrl == "Dn.promptPushPermission()") {
+            if (targetUrl.equals("DN.SHOWRATING()",ignoreCase = true)) {
+                showRating()
+            } else if (targetUrl == "Dn.promptPushPermission()") {
                 if (!this@InAppMessageActivity.areNotificationsEnabled()) {
                     Toast.makeText(
                         this@InAppMessageActivity,
@@ -286,16 +292,20 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         @JavascriptInterface
         fun close() {
-            if(isAndroidUrlNPresent == false) {
-                DengageLogger.verbose("In app message: close event")
-                this@InAppMessageActivity.finish()
+            if (isAndroidUrlNPresent == false) {
+                if(isRatingDialog==false) {
+                    DengageLogger.verbose("In app message: close event")
+                    this@InAppMessageActivity.finish()
+                }
             }
         }
 
         @JavascriptInterface
         fun closeN() {
             DengageLogger.verbose("In app message: close event n")
-            this@InAppMessageActivity.finish()
+            if(isRatingDialog==false) {
+                this@InAppMessageActivity.finish()
+            }
         }
 
         @JavascriptInterface
@@ -309,7 +319,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         }
 
         @JavascriptInterface
-        fun iosUrlN(targetUrl: String,inAppBrowser : Boolean , retrieveOnSameLink : Boolean) {
+        fun iosUrlN(targetUrl: String, inAppBrowser: Boolean, retrieveOnSameLink: Boolean) {
             DengageLogger.verbose("In app message: ios target url n event $targetUrl")
         }
 
@@ -325,6 +335,24 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                 this@InAppMessageActivity.launchSettingsActivity()
             }
         }
+    }
+
+    fun showRating() {
+        Dengage.showRatingDialog(activity = this@InAppMessageActivity,
+            reviewDialogCallback = object : ReviewDialogCallback {
+                override fun onCompletion() {
+                    this@InAppMessageActivity.finish()
+                    //  Toast.makeText(this@InAppMessageActivity,"complete",Toast.LENGTH_LONG).show()
+                }
+
+                override fun onError() {
+                    this@InAppMessageActivity.finish()
+                    // Toast.makeText(this@InAppMessageActivity,"error",Toast.LENGTH_LONG).show()
+
+                }
+
+            })
+        // finish()
     }
 
 }
