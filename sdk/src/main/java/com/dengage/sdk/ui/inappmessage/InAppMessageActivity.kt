@@ -113,7 +113,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         isAndroidUrlNPresent = contentParams.html?.contains("Dn.androidUrlN")
 
-        isRatingDialog = /*contentParams.html?.contains("Dn.showRating")*/ false
+        isRatingDialog = contentParams.html?.contains("Dn.showRating") //false
 
         webView.apply {
 
