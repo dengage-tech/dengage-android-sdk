@@ -40,4 +40,6 @@ object Constants {
     var deviceToken=""
 
     var isActivityPerformed =false
+
+    var isBCRegistered =false
 }

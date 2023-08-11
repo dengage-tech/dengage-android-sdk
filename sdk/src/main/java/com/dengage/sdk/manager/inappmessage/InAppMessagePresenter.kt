@@ -27,10 +27,12 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     override fun getInAppMessages() {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
+        getVisitorInfo()
+
         if (isInAppMessageEnabled(subscription,
                 sdkParameters) && DengageUtils.isAppInForeground()
         ) {
-            getVisitorInfo()
+
 
             if (Prefs.isDevelopmentStatusDebug == false) {
                 if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
@@ -61,7 +63,6 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
             DengageUtils.isAppInForeground()
         ) {
-
             if (Prefs.isDevelopmentStatusDebug == false) {
                 if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
 
@@ -86,8 +87,6 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     appId = sdkParameters.appId!!
                 )
             }
-
-            // get visitor info for segments and tags defined to user
 
         }
     }
@@ -182,7 +181,9 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     override fun getVisitorInfo() {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
-        if (subscription != null && sdkParameters != null) {
+        if (isRealTimeInAppMessageEnabled(subscription,sdkParameters)&&shouldFetchVisitorInfo()) {
+
+
             getVisitorInfo(this) {
                 onResponse = {
                     /*  it.attr?.put("dn.master_contact.subscription_date","2023-06-04T15:08:59.429Z")
@@ -192,11 +193,13 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
   */
                     Prefs.visitorInfo = it
                 }
-                params = GetVisitorInfo.Params(
-                    accountName = sdkParameters.accountName,
-                    contactKey = subscription.contactKey,
-                    deviceId = subscription.getSafeDeviceId(),
-                )
+                params = subscription?.getSafeDeviceId()?.let {
+                    GetVisitorInfo.Params(
+                        accountName = sdkParameters?.accountName,
+                        contactKey = subscription.getContactKeyForVisitorInfoParameter(),
+                        deviceId = it,
+                    )
+                }
             }
         }
     }
@@ -303,5 +306,14 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     private fun isInAppAvailableInCache(): Boolean {
         return Prefs.inAppMessages?.let { it.size > 0 } ?: false
+    }
+
+    private fun shouldFetchVisitorInfo():Boolean
+    {
+        if (System.currentTimeMillis() < Prefs.visitorInfoFetchTime) return false
+
+        val nextFetchTimePlus = 2 * 60000
+        Prefs.visitorInfoFetchTime = System.currentTimeMillis() + nextFetchTimePlus
+        return true
     }
 }

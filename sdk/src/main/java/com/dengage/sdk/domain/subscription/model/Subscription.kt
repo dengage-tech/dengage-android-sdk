@@ -26,4 +26,9 @@ data class Subscription(
     fun getSafeDeviceId(): String {
         return deviceId ?: ""
     }
+
+    fun getContactKeyForVisitorInfoParameter() :String?
+    {
+        if(contactKey.isNullOrEmpty()) return null else return contactKey
+    }
 }
