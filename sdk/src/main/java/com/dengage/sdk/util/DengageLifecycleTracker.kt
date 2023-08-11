@@ -14,6 +14,7 @@ open class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
     override fun onActivityStarted(activity: Activity) {
         if (startedActivityCount == 0) {
             // app went to foreground
+            ContextHolder.resetContext(activity.applicationContext)
             Dengage.getInAppMessages()
 
             Dengage.setLastSessionStartTime()
