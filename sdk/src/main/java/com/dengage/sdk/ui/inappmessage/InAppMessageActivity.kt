@@ -113,7 +113,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         isAndroidUrlNPresent = contentParams.html?.contains("Dn.androidUrlN")
 
-        isRatingDialog = contentParams.html?.contains("Dn.showRating") ///false
+        isRatingDialog = contentParams.html?.contains("Dn.showRating") //false
 
         webView.apply {
 
@@ -341,18 +341,14 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         Dengage.showRatingDialog(activity = this@InAppMessageActivity,
             reviewDialogCallback = object : ReviewDialogCallback {
                 override fun onCompletion() {
-                    this@InAppMessageActivity.finish()
-                    //  Toast.makeText(this@InAppMessageActivity,"complete",Toast.LENGTH_LONG).show()
                 }
 
                 override fun onError() {
-                    this@InAppMessageActivity.finish()
-                    // Toast.makeText(this@InAppMessageActivity,"error",Toast.LENGTH_LONG).show()
 
                 }
 
             })
-        // finish()
+        finish()
     }
 
 }
