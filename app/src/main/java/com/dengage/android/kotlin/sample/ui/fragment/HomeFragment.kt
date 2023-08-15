@@ -1,6 +1,7 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
 import android.util.Log
+import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentHomeBinding
@@ -18,23 +19,23 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         sendPageView("home")
 
         binding.btnDeviceInfo.setOnClickListener {
-             findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
+            findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
             // Dengage.setDevelopmentStatus(false)
-       /*     activity?.let { it1 ->
-                Dengage.showRatingDialog(activity = it1,
-                    reviewDialogCallback = object : ReviewDialogCallback {
-                        override fun onCompletion() {
-                            // this@InAppMessageActivity.finish()
-                            Log.d("oops", "complete")
-                        }
+            /*     activity?.let { it1 ->
+                     Dengage.showRatingDialog(activity = it1,
+                         reviewDialogCallback = object : ReviewDialogCallback {
+                             override fun onCompletion() {
+                                 // this@InAppMessageActivity.finish()
+                                 Log.d("oops", "complete")
+                             }
 
-                        override fun onError() {
+                             override fun onError() {
 
-                            Log.d("oops", "error")
-                        }
+                                 Log.d("oops", "error")
+                             }
 
-                    })
-            }*/
+                         })
+                 }*/
         }
 
 
@@ -48,7 +49,7 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
         binding.btnCountry.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToCountry())
-           // Dengage.sendDeviceIdToServer("V1/dengage/sync/mobile/customerData","jp8c615tk235gjfd378r9bwjlkzhq6m7")
+            // Dengage.sendDeviceIdToServer("V1/dengage/sync/mobile/customerData","jp8c615tk235gjfd378r9bwjlkzhq6m7")
         }
 
         binding.btnInboxMessages.setOnClickListener {
@@ -56,7 +57,8 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         }
 
         binding.btnCustomEvents.setOnClickListener {
-            findNavController().navigate(HomeFragmentDirections.actionHomeToCustomEvent())
+            //findNavController().navigate(HomeFragmentDirections.actionHomeToCustomEvent())
+            showRating2()
         }
 
         binding.btnInAppMessage.setOnClickListener {
@@ -68,8 +70,43 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         }
 
         binding.btnDengageTestPage.setOnClickListener {
-            Dengage.showTestPage(requireActivity())
+            //  Dengage.showTestPage(requireActivity())
+            showRating()
         }
     }
+    fun showRating() {
+        Dengage.showRatingDialog(activity = requireActivity(),
+            reviewDialogCallback = object : ReviewDialogCallback {
+                override fun onCompletion() {
+                    //requireActivity().finish()
+                    Toast.makeText(requireActivity(),"complete 1", Toast.LENGTH_LONG).show()
+                }
 
+                override fun onError() {
+                   // requireActivity().finish()
+                    Toast.makeText(requireActivity(),"error 1", Toast.LENGTH_LONG).show()
+
+                }
+
+            })
+         requireActivity().finish()
+    }
+
+    fun showRating2() {
+        Dengage.showRatingDialog(activity = requireActivity(),
+            reviewDialogCallback = object : ReviewDialogCallback {
+                override fun onCompletion() {
+                     requireActivity().finish()
+                    Toast.makeText(requireActivity(),"complete", Toast.LENGTH_LONG).show()
+                }
+
+                override fun onError() {
+                    requireActivity().finish()
+                    Toast.makeText(requireActivity(),"error", Toast.LENGTH_LONG).show()
+
+                }
+
+            })
+        //requireActivity().finish()
+    }
 }
