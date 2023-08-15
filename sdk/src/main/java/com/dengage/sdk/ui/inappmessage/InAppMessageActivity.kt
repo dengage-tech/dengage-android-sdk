@@ -341,18 +341,14 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         Dengage.showRatingDialog(activity = this@InAppMessageActivity,
             reviewDialogCallback = object : ReviewDialogCallback {
                 override fun onCompletion() {
-                    this@InAppMessageActivity.finish()
-                    //  Toast.makeText(this@InAppMessageActivity,"complete",Toast.LENGTH_LONG).show()
                 }
 
                 override fun onError() {
-                    this@InAppMessageActivity.finish()
-                    // Toast.makeText(this@InAppMessageActivity,"error",Toast.LENGTH_LONG).show()
 
                 }
 
             })
-        // finish()
+        finish()
     }
 
 }
