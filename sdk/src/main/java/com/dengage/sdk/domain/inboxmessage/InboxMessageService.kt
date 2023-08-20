@@ -5,6 +5,7 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Headers
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface InboxMessageService {
@@ -18,6 +19,7 @@ interface InboxMessageService {
         @Query("type") type: String,
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
+        @Query("appId") appId: String?
     ): ResponseBody
 
     @Headers("CONNECT_TIMEOUT:10000", "READ_TIMEOUT:10000", "WRITE_TIMEOUT:10000")
