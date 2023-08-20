@@ -19,6 +19,7 @@ class InboxMessageRepository {
         subscription: Subscription,
         limit: Int,
         offset: Int,
+        appId : String
     ): MutableList<InboxMessage>? {
         val response = InboxMessageParser.parseInboxResponse( service.getInboxMessages(
             account = account,
@@ -26,7 +27,8 @@ class InboxMessageRepository {
             deviceId = subscription.getSafeDeviceId(),
             type = subscription.getType(),
             limit = limit,
-            offset = offset
+            offset = offset,
+            appId = appId
         ).string())
 
         return response
