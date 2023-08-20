@@ -18,6 +18,7 @@ interface InboxMessageService {
         @Query("type") type: String,
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
+        @Query("appId") appId: String?
     ): ResponseBody
 
     @Headers("CONNECT_TIMEOUT:10000", "READ_TIMEOUT:10000", "WRITE_TIMEOUT:10000")

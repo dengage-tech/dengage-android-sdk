@@ -15,13 +15,15 @@ class GetInboxMessages : CoroutineUseCase<MutableList<InboxMessage>?, GetInboxMe
             account = params!!.account,
             subscription = params.subscription,
             limit = params.limit,
-            offset = params.offset
+            offset = params.offset,
+            appId = params.appId
         )
 
     data class Params(
         val account: String,
         val subscription: Subscription,
         val limit: Int,
-        val offset: Int
+        val offset: Int,
+        val appId: String
     )
 }
