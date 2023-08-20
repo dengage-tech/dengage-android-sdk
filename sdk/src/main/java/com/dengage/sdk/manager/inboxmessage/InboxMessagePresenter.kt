@@ -51,7 +51,8 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
                         account = sdkParameters?.accountName!!,
                         subscription = Prefs.subscription!!,
                         limit = limit,
-                        offset = offset
+                        offset = offset,
+                        appId = sdkParameters.appId!!
                     )
                 }
             }
