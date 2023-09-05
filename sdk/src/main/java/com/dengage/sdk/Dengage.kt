@@ -144,6 +144,8 @@ object Dengage {
             geofenceManager.startTracking()
         }
 
+        DengageUtils.registerInAppBroadcast()
+
     }
 
 

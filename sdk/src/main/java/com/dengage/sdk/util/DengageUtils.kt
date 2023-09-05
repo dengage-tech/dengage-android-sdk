@@ -14,6 +14,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.subscription.model.Subscription
+import com.dengage.sdk.inapp.InAppBroadcastReceiver
 import com.dengage.sdk.push.NRTrampoline
 import com.dengage.sdk.push.NotificationReceiver
 import com.dengage.sdk.util.Constants.isBCRegistered
@@ -57,7 +58,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.39.3"
+        return "6.0.40.3"
     }
 
     fun getUserAgent(context: Context): String {
@@ -275,5 +276,35 @@ object DengageUtils {
         }
 
         return restartApplication
+    }
+
+    fun registerInAppBroadcast() {
+        try {
+            val intentFilter = IntentFilter(Constants.DEEPLINK_RETRIEVE_EVENT)
+            ContextHolder.context.applicationContext.registerReceiver(
+                InAppBroadcastReceiver(),
+                intentFilter
+            )
+
+
+        } catch (e: Exception) {
+            //  e.printStackTrace()
+        } catch (ex: Throwable) {
+            //  ex.printStackTrace()
+
+        }
+    }
+
+    fun unregisterInAppBroadcast() {
+        try {
+
+            ContextHolder.context.applicationContext.unregisterReceiver(InAppBroadcastReceiver())
+
+        } catch (e: Exception) {
+            //   e.printStackTrace()
+        } catch (ex: Throwable) {
+            //  ex.printStackTrace()
+
+        }
     }
 }
