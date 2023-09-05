@@ -15,6 +15,7 @@ object Constants {
     const val PUSH_ACTION_CLICK_EVENT = "com.dengage.push.intent.ACTION_CLICK"
     const val NOTIFICATION_CHANNEL_ID = "3374143"
     const val NOTIFICATION_CHANNEL_NAME = "General"
+    const val DEEPLINK_RETRIEVE_EVENT = "com.dengage.inapp.LINK_RETRIEVAL"
 
     internal var deviceId=""
     var deviceToken=""

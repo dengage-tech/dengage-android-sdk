@@ -19,10 +19,11 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
         binding.btnDeviceInfo.setOnClickListener {
            findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
-           // Dengage.setDevelopmentStatus(isDebug = true)
+           Dengage.setDevelopmentStatus(isDebug = true)
         //Dengage.getLastPushPayload()
 //Dengage.setDeviceId("sdss")
             //startActivity(Intent(activity, MainActivity2::class.java))
+
         }
 
         binding.btnUserPermission.setOnClickListener {

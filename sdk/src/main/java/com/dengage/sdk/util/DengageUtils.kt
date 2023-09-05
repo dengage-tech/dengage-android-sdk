@@ -1,5 +1,6 @@
 package com.dengage.sdk.util
 
+import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.subscription.model.Subscription
+import com.dengage.sdk.inapp.InAppBroadcastReceiver
 import com.dengage.sdk.push.NRTrampoline
 import com.dengage.sdk.push.NotificationReceiver
 import com.dengage.sdk.util.Constants.isBCRegistered
@@ -53,7 +55,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.39.1"
+        return "6.0.40.1"
     }
 
     fun getUserAgent(context: Context): String {
@@ -90,7 +92,7 @@ object DengageUtils {
 
     fun getMetaData(
         context: Context? = null,
-        name: String
+        name: String,
     ): String? {
         return try {
             val applicationInfo = (context
@@ -166,7 +168,7 @@ object DengageUtils {
             filter.addAction(Constants.PUSH_ACTION_CLICK_EVENT)
             filter.addAction(Constants.PUSH_ITEM_CLICK_EVENT)
             filter.addAction("com.dengage.push.intent.CAROUSEL_ITEM_CLICK")
-            if (!isAppInForeground() &&!isBCRegistered) {
+            if (!isAppInForeground() && !isBCRegistered) {
                 ContextHolder.context.applicationContext.registerReceiver(
                     NRTrampoline(),
                     filter
@@ -184,12 +186,42 @@ object DengageUtils {
     fun unregisterBroadcast() {
         try {
 
-                ContextHolder.context.applicationContext.unregisterReceiver(NRTrampoline())
+            ContextHolder.context.applicationContext.unregisterReceiver(NRTrampoline())
 
         } catch (e: Exception) {
-e.printStackTrace()
+//e.printStackTrace()
         } catch (ex: Throwable) {
-            ex.printStackTrace()
+          //  ex.printStackTrace()
+
+        }
+    }
+
+    fun registerInAppBroadcast() {
+        try {
+            val intentFilter = IntentFilter(Constants.DEEPLINK_RETRIEVE_EVENT)
+                ContextHolder.context.applicationContext.registerReceiver(
+                    InAppBroadcastReceiver(),
+                    intentFilter
+                )
+
+
+        } catch (e: Exception) {
+           //  e.printStackTrace()
+        } catch (ex: Throwable) {
+          //  ex.printStackTrace()
+
+        }
+    }
+
+    fun unregisterInAppBroadcast() {
+        try {
+
+            ContextHolder.context.applicationContext.unregisterReceiver(InAppBroadcastReceiver())
+
+        } catch (e: Exception) {
+         //   e.printStackTrace()
+        } catch (ex: Throwable) {
+          //  ex.printStackTrace()
 
         }
     }
@@ -198,11 +230,11 @@ e.printStackTrace()
         try {
             val broadCastIntent = Intent(intent.action)
             broadCastIntent.putExtras(intent.extras!!)
-            context.sendBroadcast(broadCastIntent)
+            ContextHolder.context.applicationContext.sendBroadcast(broadCastIntent)
         } catch (e: Exception) {
 
         } catch (ex: Throwable) {
-            ex.printStackTrace()
+           // ex.printStackTrace()
 
         }
     }

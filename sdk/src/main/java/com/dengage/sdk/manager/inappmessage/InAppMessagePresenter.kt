@@ -316,6 +316,9 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     }
 
     private fun shouldFetchVisitorInfo(): Boolean {
+
+        if(!DengageUtils.isAppInForeground()) return false
+
         if (System.currentTimeMillis() < Prefs.visitorInfoFetchTime) return false
 
         val nextFetchTimePlus = 2 * 60000
