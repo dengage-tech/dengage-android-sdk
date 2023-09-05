@@ -44,4 +44,6 @@ object Constants {
 
 
     var isBCRegistered =false
+
+    const val DEEPLINK_RETRIEVE_EVENT = "com.dengage.inapp.LINK_RETRIEVAL"
 }
