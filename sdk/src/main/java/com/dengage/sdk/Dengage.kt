@@ -114,6 +114,7 @@ object Dengage {
             firebaseIntegrationKey = firebaseIntegrationKey
         )
         configurationManager.getSdkParameters()
+        DengageUtils.registerInAppBroadcast()
     }
 
     /**
@@ -749,7 +750,6 @@ object Dengage {
         val request: Task<ReviewInfo> = reviewManager.requestReviewFlow()
         request.addOnCompleteListener { task ->
             if (task.isSuccessful()) {
-                // We got the ReviewInfo object successfully
                 val reviewInfo: ReviewInfo = task.getResult()
                 val flow: Task<Void> = reviewManager.launchReviewFlow(activity, reviewInfo)
                 flow.addOnCompleteListener { reviewFlowTask ->
@@ -758,8 +758,7 @@ object Dengage {
                 }
             } else {
                 reviewDialogCallback.onError()
-                // There was an error obtaining the ReviewInfo object
-                // You can handle the error case here
+
             }
         }
     }

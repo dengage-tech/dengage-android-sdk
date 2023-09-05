@@ -19,12 +19,12 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.R
 import com.dengage.sdk.callback.ReviewDialogCallback
-import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.push.areNotificationsEnabled
+import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
@@ -140,6 +140,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         when (v?.id) {
             R.id.vInAppMessageContainer -> {
                 if (inAppMessage.data.content.params.dismissOnTouchOutside != false) {
+                    inAppMessageDismissed()
                     finish()
                 }
             }
@@ -154,7 +155,6 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     }
 
     override fun onDestroy() {
-        inAppMessageDismissed()
         inAppMessageCallback = null
         super.onDestroy()
     }
@@ -206,6 +206,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun dismiss() {
             DengageLogger.verbose("In app message: dismiss event")
+            inAppMessageDismissed()
             this@InAppMessageActivity.finish()
         }
 
@@ -255,7 +256,11 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     if (retrieveOnSameLink) {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                         intent.putExtra("targetUrl", targetUrl)
-                        intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
+                        DengageUtils.sendBroadCast(intent.apply { this.action=Constants.DEEPLINK_RETRIEVE_EVENT },this@InAppMessageActivity.applicationContext)
+                        intent.extras?.let {
+                            setResult(it.getInt(RESULT_CODE), intent)
+                        }
+
                     } else {
                         this@InAppMessageActivity.launchActivity(null, targetUrl)
                     }
@@ -265,6 +270,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             } else if (retrieveOnSameLink && !inAppBrowser) {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                 intent.putExtra("targetUrl", targetUrl)
+                DengageUtils.sendBroadCast(intent.apply { this.action=Constants.DEEPLINK_RETRIEVE_EVENT },this@InAppMessageActivity.applicationContext)
                 intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
             } else if (inAppBrowser) {
                 val intent = InAppBrowserActivity.Builder.getBuilder()
@@ -341,7 +347,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         Dengage.showRatingDialog(activity = this@InAppMessageActivity,
             reviewDialogCallback = object : ReviewDialogCallback {
                 override fun onCompletion() {
-                   }
+                }
 
                 override fun onError() {
 
