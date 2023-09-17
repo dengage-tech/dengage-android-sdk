@@ -121,7 +121,7 @@ catch (e: DeadObjectException)
      fun getSdkParameters() {
         val subscription = Prefs.subscription
         if (subscription?.integrationKey.isNullOrEmpty()) return
-
+         if(!DengageUtils.isAppInForeground()) return
         // if 24 hours passed after getting sdk params, you should get again
         val sdkParameters = Prefs.sdkParameters
         if (sdkParameters != null &&
