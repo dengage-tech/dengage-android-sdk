@@ -55,6 +55,7 @@ object InAppMessageUtils {
         inAppMessages: List<InAppMessage>,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
+        isRealTime: Boolean = false
     ): InAppMessage? {
         // sort list with comparator
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
@@ -68,13 +69,12 @@ object InAppMessageUtils {
                 inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
                         inAppMessage.data.isDisplayTimeAvailable() &&
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                            params)
+                            params,isRealTime)
             }
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
         } else {
-            val inAppMessageWithScreenName =
-                sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
+          return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                     inAppMessage.data.isDisplayTimeAvailable() &&
                             inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
                                 operateScreenValues(
@@ -84,26 +84,27 @@ object InAppMessageUtils {
                                 )
                             } != null &&
                             operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                                params)
+                                params,isRealTime)
                 }
-            inAppMessageWithScreenName ?: inAppMessageWithoutScreenName
+
         }
     }
 
     private fun operateRealTimeValues(
         displayRuleSet: DisplayRuleSet?,
         params: HashMap<String, String>?,
+        isRealTime: Boolean
     ): Boolean {
         if (displayRuleSet != null) {
             when (displayRuleSet.logicOperator) {
                 LogicOperator.AND.name -> {
                     return displayRuleSet.displayRules.all {
-                        operateDisplayRule(it, params)
+                        operateDisplayRule(it, params, isRealTime)
                     }
                 }
                 LogicOperator.OR.name -> {
                     return !displayRuleSet.displayRules.all {
-                        !operateDisplayRule(it, params)
+                        !operateDisplayRule(it, params, isRealTime)
                     }
                 }
             }
@@ -114,16 +115,17 @@ object InAppMessageUtils {
     private fun operateDisplayRule(
         displayRule: DisplayRule,
         params: HashMap<String, String>?,
+        isRealTime: Boolean,
     ): Boolean {
         when (displayRule.logicOperator) {
             LogicOperator.AND.name -> {
                 return displayRule.criterionList.all {
-                    operateCriterion(it, params)
+                    operateCriterion(it, params, isRealTime)
                 }
             }
             LogicOperator.OR.name -> {
                 return !displayRule.criterionList.all {
-                    !operateCriterion(it, params)
+                    !operateCriterion(it, params, isRealTime)
                 }
             }
         }
@@ -134,6 +136,7 @@ object InAppMessageUtils {
     private fun operateCriterion(
         criterion: Criterion,
         params: HashMap<String, String>?,
+        isRealTime: Boolean,
     ): Boolean {
         val subscription = Prefs.subscription
         val visitorInfo = Prefs.visitorInfo
@@ -144,7 +147,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.categoryPath ?: ""
+                    userParam = RealTimeInAppParamHolder.categoryPath ?: "",
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.CART_ITEM_COUNT.key -> {
@@ -152,7 +156,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.cartItemCount ?: "0"
+                    userParam = RealTimeInAppParamHolder.cartItemCount ?: "0",
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.CART_AMOUNT.key -> {
@@ -160,7 +165,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.cartAmount ?: "0"
+                    userParam = RealTimeInAppParamHolder.cartAmount ?: "0",
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.STATE.key -> {
@@ -168,7 +174,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.state ?: ""
+                    userParam = RealTimeInAppParamHolder.state ?: "",
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.CITY.key -> {
@@ -176,7 +183,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.city ?: ""
+                    userParam = RealTimeInAppParamHolder.city ?: "",
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.TIMEZONE.key -> {
@@ -184,7 +192,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.timezone
+                    userParam = subscription?.timezone,
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.LANGUAGE.key -> {
@@ -192,7 +201,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.language
+                    userParam = subscription?.language,
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.SCREEN_WIDTH.key -> {
@@ -200,7 +210,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Resources.getSystem().displayMetrics.widthPixels.toString()
+                    userParam = Resources.getSystem().displayMetrics.widthPixels.toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.SCREEN_HEIGHT.key -> {
@@ -208,7 +219,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Resources.getSystem().displayMetrics.heightPixels.toString()
+                    userParam = Resources.getSystem().displayMetrics.heightPixels.toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.OS_VERSION.key -> {
@@ -216,7 +228,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.VERSION.SDK_INT.toString()
+                    userParam = Build.VERSION.SDK_INT.toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.OS.key -> {
@@ -224,7 +237,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = "android"
+                    userParam = "android",
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.DEVICE_NAME.key -> {
@@ -232,7 +246,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.DEVICE
+                    userParam = Build.DEVICE,
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.COUNTRY.key -> {
@@ -240,7 +255,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.country
+                    userParam = subscription?.country,
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.MONTH.key -> {
@@ -249,7 +265,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = dateFormat.format(Date())
+                    userParam = dateFormat.format(Date()),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.WEEK_DAY.key -> {
@@ -257,7 +274,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString()
+                    userParam = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.HOUR.key -> {
@@ -266,7 +284,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = dateFormat.format(Date())
+                    userParam = dateFormat.format(Date()),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key -> {
@@ -274,7 +293,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.pageViewVisitCount.toString()
+                    userParam = RealTimeInAppParamHolder.pageViewVisitCount.toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.ANONYMOUS.key -> {
@@ -282,7 +302,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.contactKey.isNullOrEmpty().toString()
+                    userParam = subscription?.contactKey.isNullOrEmpty().toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.VISIT_DURATION.key -> {
@@ -290,7 +311,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = (TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - Prefs.lastSessionStartTime).toString()
+                    userParam = (TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - Prefs.lastSessionStartTime).toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.FIRST_VISIT.key -> {
@@ -298,7 +320,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Prefs.firstLaunchTime.toString()
+                    userParam = Prefs.firstLaunchTime.toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.LAST_VISIT.key -> {
@@ -306,7 +329,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Prefs.lastSessionVisitTime.toString()
+                    userParam = Prefs.lastSessionVisitTime.toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.BRAND_NAME.key -> {
@@ -314,7 +338,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.BRAND
+                    userParam = Build.BRAND,
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.MODEL_NAME.key -> {
@@ -322,7 +347,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.MODEL
+                    userParam = Build.MODEL,
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.PUSH_PERMISSION.key -> {
@@ -330,7 +356,8 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = (subscription?.permission ?: true).toString()
+                    userParam = (subscription?.permission ?: true).toString(),
+                    isRealTime = isRealTime
                 )
             }
             SpecialRuleParameter.VISIT_COUNT.key -> {
@@ -347,7 +374,8 @@ object InAppMessageUtils {
                                 dataType = DataType.INT.name,
                                 ruleParam = listOf(visitCount.count.toString()),
                                 userParam = VisitCountManager.findVisitCountSinceDays(visitCount.timeAmount)
-                                    .toString()
+                                    .toString(),
+                                isRealTime = isRealTime
                             )
                         }
                     } else {
@@ -398,7 +426,8 @@ object InAppMessageUtils {
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = changeDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS","yyyy-MM-dd HH:mm:ss",DateTime.now().toLocalDateTime().toString())
+                        userParam = changeDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS","yyyy-MM-dd HH:mm:ss",DateTime.now().toLocalDateTime().toString()),
+                        isRealTime = isRealTime
                     )
 
                 }
@@ -407,7 +436,8 @@ object InAppMessageUtils {
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = getVisitorInfoAttrValue(criterion).toString()
+                        userParam = getVisitorInfoAttrValue(criterion).toString(),
+                        isRealTime = isRealTime
                     )
                 }
             }
@@ -418,7 +448,8 @@ object InAppMessageUtils {
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = params?.get(criterion.parameter)
+                        userParam = params?.get(criterion.parameter),
+                        isRealTime = isRealTime
                     )
                 } else {
                     return false
@@ -533,8 +564,9 @@ object InAppMessageUtils {
         dataType: String,
         ruleParam: List<String>?,
         userParam: String?,
+        isRealTime: Boolean,
     ): Boolean {
-        if (ruleParam.isNullOrEmpty() || userParam == null) return true
+        if (ruleParam.isNullOrEmpty() || userParam == null) return !isRealTime
         when (operator) {
             Operator.EQUALS.operator -> {
                 return ruleParam.firstOrNull { it.lowercase() == userParam.lowercase() } != null
