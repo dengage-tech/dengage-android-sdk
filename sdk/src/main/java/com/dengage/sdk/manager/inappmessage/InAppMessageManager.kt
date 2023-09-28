@@ -27,7 +27,7 @@ class InAppMessageManager :
         activity: Activity,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        resultCode: Int = -1
+        resultCode: Int = -1 ,isRealTime: Boolean = false
     ) {
         cancelTimer()
 
@@ -40,7 +40,7 @@ class InAppMessageManager :
         Prefs.inAppMessages = inAppMessages
         if (!inAppMessages.isNullOrEmpty()) {
             val priorInAppMessage =
-                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params)
+                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime)
             if (priorInAppMessage != null) {
                 showInAppMessage(activity, priorInAppMessage, resultCode)
             }

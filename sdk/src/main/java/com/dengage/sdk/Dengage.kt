@@ -386,7 +386,8 @@ object Dengage {
         inAppMessageManager.setNavigation(
             activity = activity,
             screenName = screenName,
-            params = params, resultCode
+            params = params, resultCode,
+            isRealTime = true
         )
     }
 
