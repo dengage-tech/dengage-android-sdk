@@ -17,12 +17,10 @@ class App : Application() {
         Dengage.init(
             context = applicationContext,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
-            huaweiIntegrationKey = "jki",
-            geofenceEnabled = true,
-            contactKey = "jj",
-            partnerDeviceId = "k,"
+            geofenceEnabled = false
         )
         Dengage.setLogStatus(true)
+        Dengage.setDevelopmentStatus(true)
 
         /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
         registerReceiver(

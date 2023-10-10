@@ -40,10 +40,11 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_in_app_message)
-
         inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as InAppMessage
         val contentParams = inAppMessage.data.content.params
+        setThemeAccordingToContentParams(contentParams)
+        setContentView(R.layout.activity_in_app_message)
+
 
         setContentPosition(contentParams)
         setHtmlContent(contentParams)
@@ -237,9 +238,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         }
 
         @JavascriptInterface
-        fun androidUrlN(targetUrl: String,inAppBrowser : Boolean , retrieveOnSameLink : Boolean) {
+        fun androidUrlN(targetUrl: String, inAppBrowser: Boolean, retrieveOnSameLink: Boolean) {
             DengageLogger.verbose("In app message: android target url n event $targetUrl")
-            if (targetUrl.equals("DN.SHOWRATING()",ignoreCase = true)) {
+            if (targetUrl.equals("DN.SHOWRATING()", ignoreCase = true)) {
                 showRating()
             } else if (targetUrl == "Dn.promptPushPermission()") {
                 if (!this@InAppMessageActivity.areNotificationsEnabled()) {
@@ -256,7 +257,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     if (retrieveOnSameLink) {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                         intent.putExtra("targetUrl", targetUrl)
-                        DengageUtils.sendBroadCast(intent.apply { this.action=Constants.DEEPLINK_RETRIEVE_EVENT },this@InAppMessageActivity.applicationContext)
+                        DengageUtils.sendBroadCast(intent.apply {
+                            this.action = Constants.DEEPLINK_RETRIEVE_EVENT
+                        }, this@InAppMessageActivity.applicationContext)
                         intent.extras?.let {
                             setResult(it.getInt(RESULT_CODE), intent)
                         }
@@ -270,7 +273,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             } else if (retrieveOnSameLink && !inAppBrowser) {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
                 intent.putExtra("targetUrl", targetUrl)
-                DengageUtils.sendBroadCast(intent.apply { this.action=Constants.DEEPLINK_RETRIEVE_EVENT },this@InAppMessageActivity.applicationContext)
+                DengageUtils.sendBroadCast(intent.apply {
+                    this.action = Constants.DEEPLINK_RETRIEVE_EVENT
+                }, this@InAppMessageActivity.applicationContext)
                 intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
             } else if (inAppBrowser) {
                 val intent = InAppBrowserActivity.Builder.getBuilder()
@@ -299,7 +304,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun close() {
             if (isAndroidUrlNPresent == false) {
-                if(isRatingDialog==false) {
+                if (isRatingDialog == false) {
                     DengageLogger.verbose("In app message: close event")
                     this@InAppMessageActivity.finish()
                 }
@@ -309,7 +314,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun closeN() {
             DengageLogger.verbose("In app message: close event n")
-            if(isRatingDialog==false) {
+            if (isRatingDialog == false) {
                 this@InAppMessageActivity.finish()
             }
         }
@@ -355,6 +360,17 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
             })
         finish()
+    }
+
+    private fun setThemeAccordingToContentParams(contentParams: ContentParams)
+    {
+        if (contentParams.position == ContentPosition.FULL.position) {
+            setTheme(R.style.Theme_AppCompat_Transparent_NoActionBar_noFloating)
+        }
+        else {
+            setTheme(R.style.Theme_AppCompat_Transparent_NoActionBar)
+
+        }
     }
 
 }
