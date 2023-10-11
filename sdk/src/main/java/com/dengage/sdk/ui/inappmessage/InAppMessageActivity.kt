@@ -40,17 +40,20 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as InAppMessage
-        val contentParams = inAppMessage.data.content.params
-        setThemeAccordingToContentParams(contentParams)
-        setContentView(R.layout.activity_in_app_message)
+        try {
+            inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as InAppMessage
+            val contentParams = inAppMessage.data.content.params
+            setThemeAccordingToContentParams(contentParams)
+            setContentView(R.layout.activity_in_app_message)
 
 
-        setContentPosition(contentParams)
-        setHtmlContent(contentParams)
+            setContentPosition(contentParams)
+            setHtmlContent(contentParams)
 
-        findViewById<View>(R.id.vInAppMessageContainer).setOnClickListener(this)
-        findViewById<View>(R.id.cardInAppMessage).setOnClickListener(this)
+            findViewById<View>(R.id.vInAppMessageContainer).setOnClickListener(this)
+            findViewById<View>(R.id.cardInAppMessage).setOnClickListener(this)
+        }
+        catch (e:Exception){}
     }
 
     private fun setContentPosition(

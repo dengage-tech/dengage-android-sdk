@@ -17,10 +17,12 @@ class App : Application() {
         Dengage.init(
             context = applicationContext,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
-            geofenceEnabled = false
+            geofenceEnabled = false,
+            partnerDeviceId = "iko",
+            contactKey = "ck88890"
         )
         Dengage.setLogStatus(true)
-        Dengage.setDevelopmentStatus(true)
+       // Dengage.setDevelopmentStatus(true)
 
         /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
         registerReceiver(
