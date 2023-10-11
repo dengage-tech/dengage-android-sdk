@@ -18,10 +18,11 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
 
     private val sendSubscription by lazy { SendSubscription() }
     private var sendSubscriptionTryCount = 0
+    private var subscriptionInProgress =false
 
     override fun sendSubscription(subscription: Subscription) {
         Handler(Looper.getMainLooper()).postDelayed({
-            if (DengageUtils.isAppInForeground()) {
+            if (DengageUtils.isAppInForeground()&&!subscriptionInProgress) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
@@ -33,11 +34,13 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
 
 
     private fun callSubscriptionApi(subscription: Subscription) {
+        subscriptionInProgress=true
         DengageLogger.verbose("sub method is called")
         sendSubscriptionTryCount++
         sendSubscription(this) {
             onResponse = {
                 view {
+                    subscriptionInProgress=false
                     Prefs.previouSubscription = Prefs.subscription
                     Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
 
@@ -45,6 +48,7 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
             }
             onError = {
                 // try to send it for 5 times
+                subscriptionInProgress=false
                 if (sendSubscriptionTryCount < 5) {
                     sendSubscription(
                         subscription = subscription
