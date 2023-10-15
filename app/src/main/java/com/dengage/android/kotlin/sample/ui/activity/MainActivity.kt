@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
        // Log.d("oops", intent.toString())
+        Dengage.requestNotificationPermission(this)
         PushDataParser.parseIntent(intent, pushMessageCallback = object : PushMessageCallback {
             override fun dataFetched(message: Message) {
                 Log.d("logs",GsonHolder.toJson(message))
