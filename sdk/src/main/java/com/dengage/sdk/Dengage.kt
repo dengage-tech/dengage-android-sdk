@@ -1,11 +1,16 @@
 package com.dengage.sdk
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
 import android.text.TextUtils
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.data.cache.Prefs
@@ -847,6 +852,15 @@ object Dengage {
                 reviewDialogCallback.onError()
                 // There was an error obtaining the ReviewInfo object
                 // You can handle the error case here
+            }
+        }
+    }
+
+    fun requestNotificationPermission(activity: Activity)
+    {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
             }
         }
     }
