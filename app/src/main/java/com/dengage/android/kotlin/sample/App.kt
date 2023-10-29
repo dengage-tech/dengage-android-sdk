@@ -35,6 +35,7 @@ class App : Application() {
             deviceConfigurationPreference = DeviceConfigurationPreference.Huawei
         )
         Dengage.setLogStatus(true)
+        Dengage.setDevelopmentStatus(true)
 
 
         Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")

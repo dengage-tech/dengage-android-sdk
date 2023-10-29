@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -45,7 +46,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             val contentParams = inAppMessage.data.content.params
             setThemeAccordingToContentParams(contentParams)
             setContentView(R.layout.activity_in_app_message)
-
+            if (Build.VERSION.SDK_INT >= 21) {
+                getWindow().setBackgroundDrawableResource(R.color.dengage_color_black);
+            }
 
             setContentPosition(contentParams)
             setHtmlContent(contentParams)

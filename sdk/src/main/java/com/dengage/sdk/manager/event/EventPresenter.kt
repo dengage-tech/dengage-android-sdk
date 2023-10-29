@@ -11,6 +11,8 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
     private val sendEvent by lazy { SendEvent() }
     private val sendTransactionalOpenEvent by lazy { SendTransactionalOpenEvent() }
     private val sendOpenEvent by lazy { SendOpenEvent() }
+    private var isOpenEventBeingSent :Boolean = false
+    private var isTransactionalOpenEventBeingSent :Boolean = false
 
     override fun sendEvent(
         accountId: Int?,
@@ -41,9 +43,15 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         transactionId: String?,
         integrationKey: String?
     ) {
+
+        if(isTransactionalOpenEventBeingSent) return
+        isTransactionalOpenEventBeingSent=true
         sendTransactionalOpenEvent(this) {
             onResponse = {
-                view { transactionalOpenEventSent() }
+                view { isTransactionalOpenEventBeingSent=false
+                    transactionalOpenEventSent() }
+            }
+            onError={ isTransactionalOpenEventBeingSent=false
             }
             params = SendTransactionalOpenEvent.Params(
                 buttonId = buttonId,
@@ -63,9 +71,18 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         messageDetails: String?,
         integrationKey: String?
     ) {
+        if(isOpenEventBeingSent) return
+        isOpenEventBeingSent=true
+
         sendOpenEvent(this) {
             onResponse = {
-                view { openEventSent() }
+                view {
+                    isOpenEventBeingSent=false
+                    openEventSent() }
+            }
+            onError ={
+                isOpenEventBeingSent=false
+
             }
             params = SendOpenEvent.Params(
                 buttonId = buttonId,
