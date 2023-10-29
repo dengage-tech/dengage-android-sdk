@@ -47,7 +47,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             setThemeAccordingToContentParams(contentParams)
             setContentView(R.layout.activity_in_app_message)
             if (Build.VERSION.SDK_INT >= 21) {
-                getWindow().setBackgroundDrawableResource(R.color.dengage_color_black);
+            //    getWindow().setBackgroundDrawableResource(R.color.dengage_color_black);
             }
 
             setContentPosition(contentParams)
