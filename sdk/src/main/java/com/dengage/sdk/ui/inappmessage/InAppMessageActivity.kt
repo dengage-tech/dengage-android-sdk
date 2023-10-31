@@ -46,17 +46,16 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             val contentParams = inAppMessage.data.content.params
             setThemeAccordingToContentParams(contentParams)
             setContentView(R.layout.activity_in_app_message)
-            if (Build.VERSION.SDK_INT >= 21) {
-            //    getWindow().setBackgroundDrawableResource(R.color.dengage_color_black);
-            }
 
+            if (Build.VERSION.SDK_INT >= 21) {
+                window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor));
+            }
             setContentPosition(contentParams)
             setHtmlContent(contentParams)
-
             findViewById<View>(R.id.vInAppMessageContainer).setOnClickListener(this)
             findViewById<View>(R.id.cardInAppMessage).setOnClickListener(this)
+        } catch (e: Exception) {
         }
-        catch (e:Exception){}
     }
 
     private fun setContentPosition(
