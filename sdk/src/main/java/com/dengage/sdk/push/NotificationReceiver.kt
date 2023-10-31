@@ -40,9 +40,9 @@ open class NotificationReceiver : BroadcastReceiver() {
                 Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
                 Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
             }
-        } catch (_: Exception) {
-        } catch (_: Throwable) {
         }
+        catch (_:Exception){}
+        catch (_:Throwable){}
     }
 
     open fun onPushReceive(context: Context, intent: Intent) {
@@ -64,7 +64,6 @@ open class NotificationReceiver : BroadcastReceiver() {
                 message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
             }
             uri = intent.extras!!.getString("targetUrl")
-
             Dengage.sendOpenEvent("", "", message)
 
             clearNotification(context, message)
@@ -185,7 +184,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         intent: Intent,
         message: Message,
         bitmap: Bitmap,
-        notificationBuilder: NotificationCompat.Builder,
+        notificationBuilder: NotificationCompat.Builder
     ) {
         val style = NotificationCompat.BigPictureStyle().bigPicture(bitmap)
         notificationBuilder.setLargeIcon(bitmap)
@@ -200,7 +199,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         context: Context,
         intent: Intent,
         message: Message,
-        notificationBuilder: NotificationCompat.Builder,
+        notificationBuilder: NotificationCompat.Builder
     ) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
@@ -213,7 +212,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         message: Message,
         leftCarouselItem: CarouselItem,
         currentCarouselItem: CarouselItem,
-        rightCarouselItem: CarouselItem,
+        rightCarouselItem: CarouselItem
     ) = Unit
 
     protected open fun getContentIntent(extras: Bundle?, packageName: String?): Intent {
@@ -268,7 +267,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         carouselView: RemoteViews,
         imageViewId: Int,
         carouselItem: CarouselItem,
-        onComplete: (() -> Unit)? = null,
+        onComplete: (() -> Unit)? = null
     ) {
         val cachedFileBitmap = carouselItem.loadFileFromStorage()
         if (cachedFileBitmap == null) {
@@ -305,7 +304,8 @@ open class NotificationReceiver : BroadcastReceiver() {
             context,
             requestCode,
             intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT      )
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
     }
 
@@ -313,7 +313,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     open fun getCarouselDirectionIntent(
         context: Context,
         requestCode: Int,
-        intent: Intent,
+        intent: Intent
     ): PendingIntent? {
 
         return PendingIntent.getBroadcast(
@@ -328,7 +328,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     fun getDeletePendingIntent(
         context: Context,
         requestCode: Int,
-        intentParam: Intent,
+        intentParam: Intent
     ): PendingIntent {
 
         return PendingIntent.getBroadcast(
@@ -423,7 +423,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     private fun getNotificationBuilder(
         context: Context,
         intent: Intent,
-        message: Message,
+        message: Message
     ): NotificationCompat.Builder {
         val extras = intent.extras
         val random = Random()
@@ -490,8 +490,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     open fun createNotificationChannel(context: Context, message: Message): String {
         val soundUri = message.sound.getSoundUri(context)
 
-        val channelId = Constants.NOTIFICATION_CHANNEL_ID
-
+        val channelId = if(message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID else message.sound
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

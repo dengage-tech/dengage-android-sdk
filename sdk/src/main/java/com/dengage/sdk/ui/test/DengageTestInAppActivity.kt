@@ -63,7 +63,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             inAppMessages.add(0, it)
             Prefs.inAppMessages = inAppMessages
 
-            Dengage.setNavigation(this,1232)
+            Dengage.setNavigation(this)
         }
     }
 
@@ -78,7 +78,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             marginBottom = 0,
             marginLeft = 0,
             marginRight = 0,
-            dismissOnTouchOutside = true
+            dismissOnTouchOutside = true,""
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -120,7 +120,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             marginBottom = 0,
             marginLeft = 0,
             marginRight = 0,
-            dismissOnTouchOutside = true
+            dismissOnTouchOutside = true,""
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -162,7 +162,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             marginBottom = 5,
             marginLeft = 5,
             marginRight = 5,
-            dismissOnTouchOutside = true
+            dismissOnTouchOutside = true,""
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -204,7 +204,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             marginBottom = 0,
             marginLeft = 0,
             marginRight = 0,
-            dismissOnTouchOutside = true
+            dismissOnTouchOutside = true,""
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -246,7 +246,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             marginBottom = 0,
             marginLeft = 5,
             marginRight = 5,
-            dismissOnTouchOutside = true
+            dismissOnTouchOutside = true,""
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -288,7 +288,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             marginBottom = 0,
             marginLeft = 5,
             marginRight = 5,
-            dismissOnTouchOutside = true
+            dismissOnTouchOutside = true,""
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -330,7 +330,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             marginBottom = 0,
             marginLeft = 5,
             marginRight = 5,
-            dismissOnTouchOutside = true
+            dismissOnTouchOutside = true,""
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -372,7 +372,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             marginBottom = 0,
             marginLeft = 5,
             marginRight = 5,
-            dismissOnTouchOutside = true
+            dismissOnTouchOutside = true,""
         )
         val content = Content(
             type = ContentType.HTML.type,
