@@ -20,6 +20,8 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
         binding.btnDeviceInfo.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToDeviceInfo())
+            Dengage.setDevelopmentStatus(true)
+
             // Dengage.setDevelopmentStatus(false)
             /*     activity?.let { it1 ->
                      Dengage.showRatingDialog(activity = it1,
@@ -70,8 +72,8 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         }
 
         binding.btnDengageTestPage.setOnClickListener {
-            //  Dengage.showTestPage(requireActivity())
-            showRating()
+              Dengage.showTestPage(requireActivity())
+           // showRating()
         }
     }
     fun showRating() {

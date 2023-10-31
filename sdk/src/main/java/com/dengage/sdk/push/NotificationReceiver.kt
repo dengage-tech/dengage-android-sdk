@@ -490,8 +490,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     open fun createNotificationChannel(context: Context, message: Message): String {
         val soundUri = message.sound.getSoundUri(context)
 
-        val channelId = Constants.NOTIFICATION_CHANNEL_ID
-
+        val channelId = if(message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID else message.sound
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
