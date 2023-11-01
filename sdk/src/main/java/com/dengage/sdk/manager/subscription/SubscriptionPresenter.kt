@@ -22,7 +22,7 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
 
     override fun sendSubscription(subscription: Subscription) {
         Handler(Looper.getMainLooper()).postDelayed({
-            if (DengageUtils.isAppInForeground()&&!subscriptionInProgress) {
+            if (DengageUtils.isAppInForeground()/*&&!subscriptionInProgress*/) {
                 if (Prefs.subscription != Prefs.previouSubscription) {
                     Prefs.subscription?.let { callSubscriptionApi(it) }
                 } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
