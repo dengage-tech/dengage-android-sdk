@@ -48,7 +48,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             setContentView(R.layout.activity_in_app_message)
 
             if (Build.VERSION.SDK_INT >= 21) {
-                window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor));
+                //window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor));
             }
             setContentPosition(contentParams)
             setHtmlContent(contentParams)
