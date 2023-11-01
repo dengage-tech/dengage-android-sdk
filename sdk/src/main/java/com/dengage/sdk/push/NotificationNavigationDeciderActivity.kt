@@ -101,7 +101,7 @@ class NotificationNavigationDeciderActivity : Activity() {
                 if (DengageUtils.isAppInForeground()) {
                     launchActivity(null, null)
                     if(Prefs.restartApplicationAfterPushClick == false)
-                        finish()
+                    finish()
                     else
                         finishAffinity()
                 }
