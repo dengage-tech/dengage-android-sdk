@@ -38,6 +38,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     private lateinit var inAppMessage: InAppMessage
     private var isAndroidUrlNPresent: Boolean? = false
     private var isRatingDialog: Boolean? = false
+    private var isClicked:Boolean =false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +49,8 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             setContentView(R.layout.activity_in_app_message)
 
             if (Build.VERSION.SDK_INT >= 21) {
-               // window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor));
+                if(!inAppMessage.data.content.params.backgroundColor.isNullOrEmpty()){
+                window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor))}
             }
             setContentPosition(contentParams)
             setHtmlContent(contentParams)
@@ -146,7 +148,6 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         when (v?.id) {
             R.id.vInAppMessageContainer -> {
                 if (inAppMessage.data.content.params.dismissOnTouchOutside != false) {
-                    inAppMessageDismissed()
                     finish()
                 }
             }
@@ -161,6 +162,8 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     }
 
     override fun onDestroy() {
+
+        if(!isClicked) inAppMessageDismissed()
         inAppMessageCallback = null
         super.onDestroy()
     }
@@ -212,7 +215,6 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun dismiss() {
             DengageLogger.verbose("In app message: dismiss event")
-            inAppMessageDismissed()
             this@InAppMessageActivity.finish()
         }
 
@@ -296,12 +298,14 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         @JavascriptInterface
         fun sendClick(buttonId: String?) {
+            isClicked=true
             DengageLogger.verbose("In app message: clicked button $buttonId")
             inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId)
         }
 
         @JavascriptInterface
         fun sendClick() {
+            isClicked=true
             DengageLogger.verbose("In app message: clicked body/button with no Id")
             inAppMessageCallback?.inAppMessageClicked(inAppMessage, null)
         }
@@ -367,10 +371,12 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         finish()
     }
 
-    private fun setThemeAccordingToContentParams(contentParams: ContentParams) {
+    private fun setThemeAccordingToContentParams(contentParams: ContentParams)
+    {
         if (contentParams.position == ContentPosition.FULL.position) {
             setTheme(R.style.Theme_AppCompat_Transparent_NoActionBar_noFloating)
-        } else {
+        }
+        else {
             setTheme(R.style.Theme_AppCompat_Transparent_NoActionBar)
 
         }

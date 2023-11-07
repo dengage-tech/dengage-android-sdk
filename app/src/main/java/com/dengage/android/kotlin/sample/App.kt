@@ -21,7 +21,7 @@ class App : Application() {
         )
         Dengage.setLogStatus(true)
         Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
-
+Dengage.setDevelopmentStatus(true)
         /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
       registerReceiver(
           PushNotificationReceiver(),
