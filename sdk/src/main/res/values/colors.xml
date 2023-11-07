@@ -6,4 +6,5 @@
     <color name="colorPrimary">#FFFFFFFF</color>
     <color name="colorPrimaryDark">#FFFFFFFF</color>
     <color name="white">#FFFFFF</color>
+    <color name="dff">#52CFF1C0</color>
 </resources>
