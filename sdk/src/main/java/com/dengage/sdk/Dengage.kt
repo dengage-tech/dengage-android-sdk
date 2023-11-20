@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.text.TextUtils
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -134,14 +136,17 @@ object Dengage {
         }
         configurationManager.configurationCallback = configurationCallback
 
-        configurationManager.init(
-            firebaseApp = firebaseApp,
-            geofenceEnabled = geofenceEnabled,
-            firebaseIntegrationKey = firebaseIntegrationKey,
-            huaweiIntegrationKey = huaweiIntegrationKey,
-            deviceConfigurationPreference = deviceConfigurationPreference
 
-        )
+        Handler(Looper.getMainLooper()).postDelayed({
+            configurationManager.init(
+                firebaseApp = firebaseApp,
+                geofenceEnabled = geofenceEnabled,
+                firebaseIntegrationKey = firebaseIntegrationKey,
+                huaweiIntegrationKey = huaweiIntegrationKey,
+                deviceConfigurationPreference = deviceConfigurationPreference
+
+            )
+        }, 1000)
 
         configurationManager.getSdkParameters()
 
@@ -192,8 +197,11 @@ object Dengage {
      */
     fun setDeviceId(deviceId: String) {
         DengageLogger.verbose("setDeviceId method is called")
-        subscriptionManager.setDeviceId(deviceId = deviceId)
-        inAppMessageManager.fetchVisitorInfo()
+        Handler(Looper.getMainLooper()).postDelayed({
+            subscriptionManager.setDeviceId(deviceId = deviceId)
+            inAppMessageManager.fetchVisitorInfo()
+        }, 2000)
+
     }
 
     /**
@@ -213,11 +221,12 @@ object Dengage {
      */
     fun setContactKey(contactKey: String?) {
         DengageLogger.verbose("setContactKey method is called")
-
+        Handler(Looper.getMainLooper()).postDelayed({
         // clear inbox manager cache if contact key has been changed
         if (subscriptionManager.setContactKey(contactKey = contactKey)) {
             inboxMessageManager.clearInboxMessageCache()
         }
+        }, 2000)
     }
 
     /**
@@ -794,7 +803,10 @@ object Dengage {
 
     fun setPartnerDeviceId(adid: String) {
         DengageLogger.verbose("setPartnerDeviceId method is called")
-        subscriptionManager.setPartnerDeviceId(adid = adid)
+        Handler(Looper.getMainLooper()).postDelayed({
+            subscriptionManager.setPartnerDeviceId(adid = adid)
+        }, 2000)
+
     }
 
     fun inAppLinkConfiguration(
@@ -863,5 +875,10 @@ object Dengage {
                 ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
             }
         }
+    }
+
+    fun setClassName(className:String)
+    {
+        Prefs.className=className
     }
 }

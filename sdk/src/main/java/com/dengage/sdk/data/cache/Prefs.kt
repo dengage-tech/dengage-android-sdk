@@ -164,6 +164,9 @@ object Prefs {
         get() = preferences.get(PreferenceKey.VISITOR_INFO_FETCH_TIME, 0) ?: 0
         set(value) = preferences.set(PreferenceKey.VISITOR_INFO_FETCH_TIME, value)
 
+    internal var className: String
+        get() = preferences.get(PreferenceKey.CLASS_NAME, "") ?: ""
+        set(value) = preferences.set(PreferenceKey.CLASS_NAME, value)
 
     fun clear() {
         preferences.edit().clear().apply()
