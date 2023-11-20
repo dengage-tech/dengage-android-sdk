@@ -1,8 +1,10 @@
 package com.dengage.sdk.manager.inappmessage.session
 
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.inappmessage.usecase.SendAppForegroundEvent
 import com.dengage.sdk.domain.inappmessage.usecase.SendFirstLaunchEvent
+import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
 import com.dengage.sdk.manager.session.SessionManager
 import java.util.concurrent.TimeUnit
@@ -20,7 +22,8 @@ class InAppSessionPresenter : BaseAbstractPresenter<InAppSessionContract.View>()
     override fun setLastSessionDuration() {
         val lastSessionStartTime = Prefs.lastSessionStartTime
         if (lastSessionStartTime != 0L) {
-            Prefs.lastSessionDuration = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - lastSessionStartTime
+            Prefs.lastSessionDuration =
+                TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - lastSessionStartTime
         }
     }
 
@@ -29,43 +32,67 @@ class InAppSessionPresenter : BaseAbstractPresenter<InAppSessionContract.View>()
     }
 
     override fun sendAppForegroundEvent() {
-        val sdkParameters = Prefs.sdkParameters
-        val subscription = Prefs.subscription
-        val lastSessionDuration = Prefs.lastSessionDuration
-        if (subscription != null && sdkParameters != null && lastSessionDuration != 0L) {
-            sendAppForegroundEvent(this) {
-                onResponse = {
-                    Prefs.lastSessionDuration = 0
+        try {
+            val sdkParameters = Prefs.sdkParameters
+            val subscription = Prefs.subscription
+            val lastSessionDuration = Prefs.lastSessionDuration
+            if (subscription != null && sdkParameters != null && isRealTimeInAppMessageEnabled(
+                    subscription,
+                    sdkParameters) && lastSessionDuration != 0L
+            ) {
+                sendAppForegroundEvent(this) {
+                    onResponse = {
+                        Prefs.lastSessionDuration = 0
+                    }
+                    params = SendAppForegroundEvent.Params(
+                        accountName = sdkParameters.accountName,
+                        subscription = subscription,
+                        appId = sdkParameters.appId,
+                        sessionId = SessionManager.getSessionId(),
+                        duration = Prefs.lastSessionDuration
+                    )
                 }
-                params = SendAppForegroundEvent.Params(
-                    accountName = sdkParameters.accountName,
-                    subscription = subscription,
-                    appId = sdkParameters.appId,
-                    sessionId = SessionManager.getSessionId(),
-                    duration = Prefs.lastSessionDuration
-                )
             }
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
     }
 
     override fun sendFirstLaunchEvent() {
-        if (Prefs.firstLaunchTime != 0L) return
+        try {
+            if (Prefs.firstLaunchTime != 0L) return
 
-        val sdkParameters = Prefs.sdkParameters
-        val subscription = Prefs.subscription
-        if (subscription != null && sdkParameters != null) {
-            sendFirstLaunchEvent(this) {
-                onResponse = {
-                    Prefs.firstLaunchTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+            val sdkParameters = Prefs.sdkParameters
+            val subscription = Prefs.subscription
+            if (subscription != null && sdkParameters != null && isRealTimeInAppMessageEnabled(
+                    subscription,
+                    sdkParameters)
+            ) {
+                sendFirstLaunchEvent(this) {
+                    onResponse = {
+                        Prefs.firstLaunchTime =
+                            TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+                    }
+                    params = SendFirstLaunchEvent.Params(
+                        accountName = sdkParameters.accountName,
+                        subscription = subscription,
+                        appId = sdkParameters.appId,
+                        sessionId = SessionManager.getSessionId()
+                    )
                 }
-                params = SendFirstLaunchEvent.Params(
-                    accountName = sdkParameters.accountName,
-                    subscription = subscription,
-                    appId = sdkParameters.appId,
-                    sessionId = SessionManager.getSessionId()
-                )
             }
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
     }
 
+    private fun isRealTimeInAppMessageEnabled(
+        subscription: Subscription?,
+        sdkParameters: SdkParameters?,
+    ): Boolean {
+        return subscription != null && sdkParameters?.accountName != null &&
+                sdkParameters.appId != null &&
+                sdkParameters.realTimeInAppEnabled != null &&
+                sdkParameters.realTimeInAppEnabled
+    }
 }
