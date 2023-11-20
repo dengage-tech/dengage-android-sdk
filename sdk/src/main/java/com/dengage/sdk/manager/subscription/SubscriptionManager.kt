@@ -101,7 +101,7 @@ class SubscriptionManager :
         val subscription = Prefs.subscription
 
         // control the last device id equals to new device id then send subscription
-        if (subscription != null && subscription.deviceId != deviceId) {
+        if (subscription != null && (subscription.deviceId.isNullOrEmpty() || subscription.deviceId != deviceId)) {
             subscription.deviceId = deviceId
             DengageLogger.debug("deviceId: $deviceId")
 
@@ -209,7 +209,7 @@ class SubscriptionManager :
     internal fun setFirebaseIntegrationKey(integrationKey: String) {
         val subscription = Prefs.subscription
 
-        if (subscription != null) {
+        if (subscription != null  && (subscription.integrationKey.isNullOrEmpty() || subscription.integrationKey != integrationKey)) {
             subscription.integrationKey = integrationKey
 
             saveSubscription(subscription = subscription)
@@ -222,7 +222,7 @@ class SubscriptionManager :
     internal fun setHuaweiIntegrationKey(integrationKey: String) {
         val subscription = Prefs.subscription
 
-        if (subscription != null) {
+        if (subscription != null  && (subscription.integrationKey.isNullOrEmpty() || subscription.integrationKey != integrationKey)) {
             subscription.integrationKey = integrationKey
 
             saveSubscription(subscription = subscription)
@@ -235,7 +235,7 @@ class SubscriptionManager :
     internal fun setPartnerDeviceId(adid: String?) {
         val subscription = Prefs.subscription
 
-        if (subscription != null) {
+        if (subscription != null && (subscription.partnerDeviceId.isNullOrEmpty() || subscription.partnerDeviceId != adid)) {
             if (adid != null) {
                 subscription.partnerDeviceId = adid
             }

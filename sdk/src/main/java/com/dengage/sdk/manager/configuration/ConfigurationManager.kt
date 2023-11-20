@@ -21,7 +21,7 @@ import com.dengage.sdk.util.*
 import java.util.concurrent.TimeUnit
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
-    ConfigurationContract.Presenter>(), ConfigurationContract.View {
+        ConfigurationContract.Presenter>(), ConfigurationContract.View {
 
     internal var configurationCallback: ConfigurationCallback? = null
 
@@ -32,9 +32,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         firebaseApp: FirebaseApp?,
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
-        deviceConfigurationPreference : DeviceConfigurationPreference?= DeviceConfigurationPreference.Google
+        deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
 
-    ) {
+        ) {
         DengageUtils.getMetaData(name = "den_push_api_url").apply {
             if (this == null) {
                 DengageLogger.error("Push api url not found on application manifest metadata")
@@ -63,29 +63,29 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
         if (ConfigurationUtils.isGooglePlayServicesAvailable() && ConfigurationUtils.isHuaweiMobileServicesAvailable()) {
             DengageLogger.verbose("Google Play Services and Huawei Mobile Service are available. Firebase services will be used")
-           if(deviceConfigurationPreference == DeviceConfigurationPreference.Google) {
-               initWithGoogle(
-                   subscription = subscription,
-                   firebaseApp = firebaseApp,
-                   firebaseIntegrationKey = firebaseIntegrationKey)
-           } else{
-               initWithHuawei(
-                   subscription = subscription,
-                   huaweiIntegrationKey= huaweiIntegrationKey
-               )
-           }
+            if (deviceConfigurationPreference == DeviceConfigurationPreference.Google) {
+                initWithGoogle(
+                    subscription = subscription,
+                    firebaseApp = firebaseApp,
+                    firebaseIntegrationKey = firebaseIntegrationKey)
+            } else {
+                initWithHuawei(
+                    subscription = subscription,
+                    huaweiIntegrationKey = huaweiIntegrationKey
+                )
+            }
         } else if (ConfigurationUtils.isHuaweiMobileServicesAvailable()) {
             DengageLogger.verbose("Huawei Mobile Services is available")
             initWithHuawei(
                 subscription = subscription,
-               huaweiIntegrationKey= huaweiIntegrationKey
+                huaweiIntegrationKey = huaweiIntegrationKey
             )
         } else if (ConfigurationUtils.isGooglePlayServicesAvailable()) {
             DengageLogger.verbose("Google Play Services is available")
             initWithGoogle(
                 subscription = subscription,
                 firebaseApp = firebaseApp,
-               firebaseIntegrationKey= firebaseIntegrationKey
+                firebaseIntegrationKey = firebaseIntegrationKey
             )
         }
     }
@@ -93,47 +93,45 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
     @SuppressLint("QueryPermissionsNeeded")
     internal fun getAppTrackingTags(appTrackings: List<AppTracking>?): MutableList<TagItem> {
         val tagItems = mutableListOf<TagItem>()
-try{
-        // tracking time will be 0 for first tracking
-        if (Prefs.appTrackingTime != 0L) {
-            // time diff between now and last tracking time
-            val timeDiff: Long = Calendar.getInstance().timeInMillis - Prefs.appTrackingTime
-            val lastTrackingTime = TimeUnit.MILLISECONDS.toDays(timeDiff)
-            // return if tracking was already done in last 6 days
-            if (lastTrackingTime < 6) return tagItems
-        }
-        val packageManager = ContextHolder.context.packageManager
-        // get a list of installed apps.
-        val packages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-
-        for (app in appTrackings ?: listOf()) {
-            var isInstalled = false
-            for (packageInfo in packages) {
-                if (packageInfo.packageName == app.packageName) {
-                    isInstalled = true
-                    break
-                }
+        try {
+            // tracking time will be 0 for first tracking
+            if (Prefs.appTrackingTime != 0L) {
+                // time diff between now and last tracking time
+                val timeDiff: Long = Calendar.getInstance().timeInMillis - Prefs.appTrackingTime
+                val lastTrackingTime = TimeUnit.MILLISECONDS.toDays(timeDiff)
+                // return if tracking was already done in last 6 days
+                if (lastTrackingTime < 6) return tagItems
             }
-            tagItems.add(TagItem("app-${app.alias}", if (isInstalled) "true" else "false"))
+            val packageManager = ContextHolder.context.packageManager
+            // get a list of installed apps.
+            val packages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+
+            for (app in appTrackings ?: listOf()) {
+                var isInstalled = false
+                for (packageInfo in packages) {
+                    if (packageInfo.packageName == app.packageName) {
+                        isInstalled = true
+                        break
+                    }
+                }
+                tagItems.add(TagItem("app-${app.alias}", if (isInstalled) "true" else "false"))
+            }
+            Prefs.appTrackingTime = Calendar.getInstance().timeInMillis
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
+        } catch (e: DeadObjectException) {
+            e.printStackTrace()
+
         }
-        Prefs.appTrackingTime = Calendar.getInstance().timeInMillis
-}
-catch (ex: Throwable)
-{ ex.printStackTrace()
-
-}
-catch (e: DeadObjectException)
-{
-    e.printStackTrace()
-
-}
         return tagItems
     }
 
-     fun getSdkParameters() {
+    fun getSdkParameters() {
+        try{
         val subscription = Prefs.subscription
         if (subscription?.integrationKey.isNullOrEmpty()) return
-        if(!DengageUtils.isAppInForeground()) return
+        if (!DengageUtils.isAppInForeground()) return
         // if 24 hours passed after getting sdk params, you should get again
         val sdkParameters = Prefs.sdkParameters
         if (sdkParameters != null &&
@@ -146,6 +144,9 @@ catch (e: DeadObjectException)
         presenter.getSdkParameters(
             integrationKey = subscription!!.integrationKey
         )
+        }
+        catch (e:Exception){}
+        catch (e:Throwable){}
     }
 
     override fun sdkParametersFetched(sdkParameters: SdkParameters) {
@@ -155,25 +156,31 @@ catch (e: DeadObjectException)
         }
     }
 
-    private fun initWithGoogle(subscription: Subscription, firebaseApp: FirebaseApp?,  firebaseIntegrationKey: String? = null) {
+    private fun initWithGoogle(
+        subscription: Subscription,
+        firebaseApp: FirebaseApp?,
+        firebaseIntegrationKey: String? = null,
+    ) {
         ConfigurationUtils.getFirebaseToken(
             firebaseApp = firebaseApp,
             onTokenResult = {
                 subscription.tokenType = TokenType.FIREBASE.type
                 subscription.token = it
                 if (firebaseIntegrationKey != null) {
-                    subscription.integrationKey=firebaseIntegrationKey
+                    subscription.integrationKey = firebaseIntegrationKey
                 }
                 configurationCallback?.sendSubscription(subscription)
             }
         )
 
         ConfigurationUtils.getGmsAdvertisingId {
-            subscription.advertisingId = it
-            if (firebaseIntegrationKey != null) {
-                subscription.integrationKey=firebaseIntegrationKey
+            if (subscription != null && (subscription.advertisingId != it || subscription.advertisingId.isNullOrEmpty())) {
+                subscription.advertisingId = it
+                if (firebaseIntegrationKey != null) {
+                    subscription.integrationKey = firebaseIntegrationKey
+                }
+                configurationCallback?.sendSubscription(subscription)
             }
-            configurationCallback?.sendSubscription(subscription)
         }
     }
 
@@ -191,11 +198,13 @@ catch (e: DeadObjectException)
         )
 
         ConfigurationUtils.getHmsAdvertisingId {
-            subscription.advertisingId = it
-            if (huaweiIntegrationKey != null) {
-                subscription.integrationKey=huaweiIntegrationKey
+            if (subscription != null && (subscription.advertisingId != it || subscription.advertisingId.isNullOrEmpty())) {
+                subscription.advertisingId = it
+                if (huaweiIntegrationKey != null) {
+                    subscription.integrationKey = huaweiIntegrationKey
+                }
+                configurationCallback?.sendSubscription(subscription)
             }
-            configurationCallback?.sendSubscription(subscription)
         }
     }
 }

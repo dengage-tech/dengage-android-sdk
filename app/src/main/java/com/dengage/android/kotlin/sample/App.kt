@@ -32,8 +32,16 @@ class App : Application() {
         Dengage.init(
             context = context,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
-            deviceConfigurationPreference = DeviceConfigurationPreference.Huawei
+            deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
+            contactKey = "dasdasd",
+            partnerDeviceId = "hi",
+            deviceId = "22"
         )
+
+      /*  Dengage.setContactKey("dasdasd")
+        Dengage.setPartnerDeviceId("hi")
+        Dengage.setDeviceId("22")*/
+        //Dengage.setClassName("com.dengage.android.kotlin.sample.ui.activity.MainActivity2")
         Dengage.setLogStatus(true)
         Dengage.setDevelopmentStatus(true)
 

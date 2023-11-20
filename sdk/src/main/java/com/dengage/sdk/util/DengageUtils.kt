@@ -55,7 +55,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.46.1"
+        return "6.0.47.1"
     }
 
     fun getUserAgent(context: Context): String {
@@ -191,7 +191,7 @@ object DengageUtils {
         } catch (e: Exception) {
 //e.printStackTrace()
         } catch (ex: Throwable) {
-          //  ex.printStackTrace()
+            //  ex.printStackTrace()
 
         }
     }
@@ -199,16 +199,16 @@ object DengageUtils {
     fun registerInAppBroadcast() {
         try {
             val intentFilter = IntentFilter(Constants.DEEPLINK_RETRIEVE_EVENT)
-                ContextHolder.context.applicationContext.registerReceiver(
-                    InAppBroadcastReceiver(),
-                    intentFilter
-                )
+            ContextHolder.context.applicationContext.registerReceiver(
+                InAppBroadcastReceiver(),
+                intentFilter
+            )
 
 
         } catch (e: Exception) {
-           //  e.printStackTrace()
+            //  e.printStackTrace()
         } catch (ex: Throwable) {
-          //  ex.printStackTrace()
+            //  ex.printStackTrace()
 
         }
     }
@@ -219,9 +219,9 @@ object DengageUtils {
             ContextHolder.context.applicationContext.unregisterReceiver(InAppBroadcastReceiver())
 
         } catch (e: Exception) {
-         //   e.printStackTrace()
+            //   e.printStackTrace()
         } catch (ex: Throwable) {
-          //  ex.printStackTrace()
+            //  ex.printStackTrace()
 
         }
     }
@@ -234,7 +234,7 @@ object DengageUtils {
         } catch (e: Exception) {
 
         } catch (ex: Throwable) {
-           // ex.printStackTrace()
+            // ex.printStackTrace()
 
         }
     }
@@ -290,5 +290,19 @@ object DengageUtils {
         }
 
         return restartApplication
+    }
+
+    fun getClassName(className: String?): String? {
+        try {
+            if (Prefs.className.isEmpty()) {
+                return className
+            }
+            return Prefs.className
+        } catch (e: Exception) {
+        }
+        catch (t:Throwable)
+        {
+        }
+        return className
     }
 }

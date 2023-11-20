@@ -10,6 +10,7 @@ import android.os.DeadObjectException
 import android.provider.Settings
 import android.text.TextUtils
 import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
 
 fun Context.launchActivity(intent: Intent?, uri: String?) {
     val clazz = this.getActivityClass() ?: return
@@ -39,7 +40,7 @@ fun Context.getActivityClass(): Class<out Activity>? {
     val className = launchIntent.component?.className
     var clazz: Class<out Activity>? = null
     try {
-        clazz = Class.forName(className!!) as Class<out Activity>
+        clazz = DengageUtils.getClassName(className)?.let { Class.forName(it) } as Class<out Activity>
     } catch (e: Exception) {
         DengageLogger.error(e.message)
     }
