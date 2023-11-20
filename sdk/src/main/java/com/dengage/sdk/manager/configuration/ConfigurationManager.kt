@@ -11,7 +11,6 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.configuration.util.ConfigurationUtils
-import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
@@ -70,59 +69,60 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
     @SuppressLint("QueryPermissionsNeeded")
     internal fun getAppTrackingTags(appTrackings: List<AppTracking>?): MutableList<TagItem> {
         val tagItems = mutableListOf<TagItem>()
-try{
-        // tracking time will be 0 for first tracking
-        if (Prefs.appTrackingTime != 0L) {
-            // time diff between now and last tracking time
-            val timeDiff: Long = Calendar.getInstance().timeInMillis - Prefs.appTrackingTime
-            val lastTrackingTime = TimeUnit.MILLISECONDS.toDays(timeDiff)
-            // return if tracking was already done in last 6 days
-            if (lastTrackingTime < 6) return tagItems
-        }
-        val packageManager = ContextHolder.context.packageManager
-        // get a list of installed apps.
-        val packages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-
-        for (app in appTrackings ?: listOf()) {
-            var isInstalled = false
-            for (packageInfo in packages) {
-                if (packageInfo.packageName == app.packageName) {
-                    isInstalled = true
-                    break
-                }
+        try {
+            // tracking time will be 0 for first tracking
+            if (Prefs.appTrackingTime != 0L) {
+                // time diff between now and last tracking time
+                val timeDiff: Long = Calendar.getInstance().timeInMillis - Prefs.appTrackingTime
+                val lastTrackingTime = TimeUnit.MILLISECONDS.toDays(timeDiff)
+                // return if tracking was already done in last 6 days
+                if (lastTrackingTime < 6) return tagItems
             }
-            tagItems.add(TagItem("app-${app.alias}", if (isInstalled) "true" else "false"))
+            val packageManager = ContextHolder.context.packageManager
+            // get a list of installed apps.
+            val packages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+
+            for (app in appTrackings ?: listOf()) {
+                var isInstalled = false
+                for (packageInfo in packages) {
+                    if (packageInfo.packageName == app.packageName) {
+                        isInstalled = true
+                        break
+                    }
+                }
+                tagItems.add(TagItem("app-${app.alias}", if (isInstalled) "true" else "false"))
+            }
+            Prefs.appTrackingTime = Calendar.getInstance().timeInMillis
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
+        } catch (e: DeadObjectException) {
+            e.printStackTrace()
+
         }
-        Prefs.appTrackingTime = Calendar.getInstance().timeInMillis
-}
-catch (ex: Throwable)
-{ ex.printStackTrace()
-
-}
-catch (e: DeadObjectException)
-{
-    e.printStackTrace()
-
-}
         return tagItems
     }
 
-     fun getSdkParameters() {
-        val subscription = Prefs.subscription
-        if (subscription?.integrationKey.isNullOrEmpty()) return
-         if(!DengageUtils.isAppInForeground()) return
-        // if 24 hours passed after getting sdk params, you should get again
-        val sdkParameters = Prefs.sdkParameters
-        if (sdkParameters != null &&
-            System.currentTimeMillis() < sdkParameters.lastFetchTimeInMillis + (24 * 60 * 60 * 1000)
-        ) {
-            // fetch in app messages
-            configurationCallback?.fetchInAppMessages()
-            return
+    fun getSdkParameters() {
+        try{
+            val subscription = Prefs.subscription
+            if (subscription?.integrationKey.isNullOrEmpty()) return
+            if (!DengageUtils.isAppInForeground()) return
+            // if 24 hours passed after getting sdk params, you should get again
+            val sdkParameters = Prefs.sdkParameters
+            if (sdkParameters != null &&
+                System.currentTimeMillis() < sdkParameters.lastFetchTimeInMillis + (24 * 60 * 60 * 1000)
+            ) {
+                // fetch in app messages
+                configurationCallback?.fetchInAppMessages()
+                return
+            }
+            presenter.getSdkParameters(
+                integrationKey = subscription!!.integrationKey
+            )
         }
-        presenter.getSdkParameters(
-            integrationKey = subscription!!.integrationKey
-        )
+        catch (e:Exception){}
+        catch (e:Throwable){}
     }
 
     override fun sdkParametersFetched(sdkParameters: SdkParameters) {
@@ -132,7 +132,11 @@ catch (e: DeadObjectException)
         }
     }
 
-    private fun initWithGoogle(subscription: Subscription, firebaseApp: FirebaseApp?,  firebaseIntegrationKey: String? = null) {
+    private fun initWithGoogle(
+        subscription: Subscription,
+        firebaseApp: FirebaseApp?,
+        firebaseIntegrationKey: String? = null,
+    ) {
         ConfigurationUtils.getFirebaseToken(
             firebaseApp = firebaseApp,
             onTokenResult = {
@@ -146,13 +150,14 @@ catch (e: DeadObjectException)
         )
 
         ConfigurationUtils.getGmsAdvertisingId {
-            subscription.advertisingId = it
-            if (firebaseIntegrationKey != null) {
-                subscription.integrationKey=firebaseIntegrationKey
+            if (subscription != null && (subscription.advertisingId != it || subscription.advertisingId.isNullOrEmpty())) {
+                subscription.advertisingId = it
+                if (firebaseIntegrationKey != null) {
+                    subscription.integrationKey = firebaseIntegrationKey
+                }
+                configurationCallback?.sendSubscription(subscription)
             }
-            configurationCallback?.sendSubscription(subscription)
         }
     }
-
 
 }

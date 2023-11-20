@@ -17,8 +17,16 @@ class App : Application() {
 
         Dengage.init(
             context = applicationContext,
-            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY
+            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
+            contactKey = "se",
+            partnerDeviceId = "ss",
+            deviceId = "32"
         )
+
+      /*  Dengage.setContactKey("dasdasd")
+        Dengage.setPartnerDeviceId("hi")
+        Dengage.setDeviceId("22")*/
+        //Dengage.setClassName("com.dengage.android.kotlin.sample.ui.activity.MainActivity2")
         Dengage.setLogStatus(true)
         Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
 Dengage.setDevelopmentStatus(true)

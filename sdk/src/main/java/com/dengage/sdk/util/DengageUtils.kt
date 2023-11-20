@@ -58,7 +58,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.46.2"
+        return "6.0.47.2"
     }
 
     fun getUserAgent(context: Context): String {
@@ -307,5 +307,19 @@ object DengageUtils {
             //  ex.printStackTrace()
 
         }
+    }
+
+    fun getClassName(className: String?): String? {
+        try {
+            if (Prefs.className.isEmpty()) {
+                return className
+            }
+            return Prefs.className
+        } catch (e: Exception) {
+        }
+        catch (t:Throwable)
+        {
+        }
+        return className
     }
 }

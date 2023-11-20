@@ -26,6 +26,7 @@ import com.dengage.sdk.util.DengageUtils
 import java.io.File
 import java.io.FileInputStream
 
+
 fun String?.getSoundUri(context: Context): Uri {
     try {
         val id = if (TextUtils.isEmpty(this)) {
@@ -190,9 +191,9 @@ fun Context.getActivity(): Class<out Activity>? {
         }
         val packageName = packageName
         val launchIntent = packageManager.getLaunchIntentForPackage(packageName) ?: return null
-        val className = launchIntent.component!!.className
+        val className = launchIntent.component?.className
 
-        clazz = Class.forName(className) as Class<out Activity>?
+        clazz = DengageUtils.getClassName(className)?.let { Class.forName(it) } as Class<out Activity>?
     } catch (e: ClassNotFoundException) {
         // do nothing
     } catch (ex: Throwable) {
