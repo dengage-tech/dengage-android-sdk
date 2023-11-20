@@ -184,31 +184,35 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     }
 
     override fun getVisitorInfo() {
-        val sdkParameters = Prefs.sdkParameters
-        val subscription = Prefs.subscription
-        if (isRealTimeInAppMessageEnabled(subscription,
-                sdkParameters) && shouldFetchVisitorInfo()
-        ) {
+        try {
+            val sdkParameters = Prefs.sdkParameters
+            val subscription = Prefs.subscription
+            if (isRealTimeInAppMessageEnabled(subscription,
+                    sdkParameters) && shouldFetchVisitorInfo()
+            ) {
 
 
-            getVisitorInfo(this) {
-                onResponse = {
-                    /*  it.attr?.put("dn.master_contact.subscription_date","2023-06-04T15:08:59.429Z")
+                getVisitorInfo(this) {
+                    onResponse = {
+                        /*  it.attr?.put("dn.master_contact.subscription_date","2023-06-04T15:08:59.429Z")
                       it.attr?.put("dn.master_contact.name","hasnain1234")
                       it.attr?.put("dn.master_contact.birth_date","2023-06-01")
                      // it.attr?.put("dn.master_contact.subscription_date","2023-06-04T15:08:59.429Z")
   */
-                    Prefs.visitorInfo = it
-                }
-                params = subscription?.getSafeDeviceId()?.let {
-                    GetVisitorInfo.Params(
-                        accountName = sdkParameters?.accountName,
-                        contactKey = subscription.getContactKeyForVisitorInfoParameter(),
-                        deviceId = it,
-                    )
+                        Prefs.visitorInfo = it
+                    }
+                    params = subscription?.getSafeDeviceId()?.let {
+                        GetVisitorInfo.Params(
+                            accountName = sdkParameters?.accountName,
+                            contactKey = subscription.getContactKeyForVisitorInfoParameter(),
+                            deviceId = it,
+                        )
+                    }
                 }
             }
         }
+        catch (e:Exception){}
+        catch (e:Throwable){}
     }
 
     override fun setInAppMessageAsDismissed(inAppMessage: InAppMessage) {
