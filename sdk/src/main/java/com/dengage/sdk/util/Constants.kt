@@ -11,6 +11,7 @@ object Constants {
     const val PUSH_ITEM_CLICK_EVENT = "com.dengage.push.intent.ITEM_CLICK"
     const val PUSH_RECEIVE_EVENT = "com.dengage.push.intent.RECEIVE"
     const val PUSH_OPEN_EVENT = "com.dengage.push.intent.OPEN"
+    const val GET_REAL_INAPP_MESSAGES_API_URI = "https://tr-inapp.lib.dengage.com"
     const val PUSH_DELETE_EVENT = "com.dengage.push.intent.DELETE"
     const val PUSH_ACTION_CLICK_EVENT = "com.dengage.push.intent.ACTION_CLICK"
     const val NOTIFICATION_CHANNEL_ID = "3374143"

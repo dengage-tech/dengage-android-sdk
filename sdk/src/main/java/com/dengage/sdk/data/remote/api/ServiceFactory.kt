@@ -33,6 +33,9 @@ object ServiceFactory {
             ApiType.IN_APP -> {
                 InAppApiProvider.INSTANCE.create(serviceClass)
             }
+            ApiType.REAL_TIME_INAPP -> {
+                GetRealTimeInAppProvider.INSTANCE.create(serviceClass)
+            }
 
         }
     }

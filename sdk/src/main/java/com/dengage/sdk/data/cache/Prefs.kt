@@ -153,7 +153,9 @@ object Prefs {
         get() = preferences.get(PreferenceKey.CLASS_NAME, "") ?: ""
         set(value) = preferences.set(PreferenceKey.CLASS_NAME, value)
 
-
+    internal var getRealTimeMessagesBaseUrl: String
+        get() = preferences.get(PreferenceKey.REAL_TIME_IN_APP_API_BASE_URL) ?: Constants.GET_REAL_INAPP_MESSAGES_API_URI
+        set(value) = preferences.set(PreferenceKey.REAL_TIME_IN_APP_API_BASE_URL, value)
     fun clear() {
         preferences.edit().clear().apply()
     }
