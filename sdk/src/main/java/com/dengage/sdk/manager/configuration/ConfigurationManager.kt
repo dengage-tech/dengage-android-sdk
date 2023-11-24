@@ -54,6 +54,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         DengageUtils.getMetaData(name = "den_in_app_api_url")?.let {
             Prefs.inAppApiBaseUrl = it
         }
+        DengageUtils.getMetaData(name = "fetch_real_time_in_app_api_url")?.let {
+            Prefs.getRealTimeMessagesBaseUrl = it
+        }
 
         var subscription = Prefs.subscription
         if (subscription == null) {

@@ -37,6 +37,7 @@ enum class PreferenceKey {
     DEVELOPMENT_STATUS,
     VISITOR_INFO_FETCH_TIME,
     CLASS_NAME,
+    REAL_TIME_IN_APP_API_BASE_URL
     ;
 
     override fun toString(): String = name

@@ -10,16 +10,6 @@ class RealTimeInAppMessageRepository {
 
     private val service: InAppMessageService by service(IN_APP)
 
-    suspend fun getRealTimeInAppMessages(
-        accountId: String,
-        appId: String?,
-    ): MutableList<InAppMessageData>? {
-        return service.getRealTimeInAppMessages(
-            accountId = accountId,
-            appId = appId
-        )
-    }
-
     suspend fun setRealTimeInAppMessageAsDisplayed(
         accountName: String?,
         subscription: Subscription,
