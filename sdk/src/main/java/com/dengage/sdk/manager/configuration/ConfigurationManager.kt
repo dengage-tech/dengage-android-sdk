@@ -59,6 +59,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             }
         }
 
+        DengageUtils.getMetaData(name = "fetch_real_time_in_app_api_url")?.let {
+            Prefs.getRealTimeMessagesBaseUrl = it
+        }
         Prefs.geofenceEnabled = geofenceEnabled
 
         var subscription = Prefs.subscription

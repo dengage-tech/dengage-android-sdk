@@ -4,5 +4,6 @@ enum class ApiType {
     PUSH,
     EVENT,
     IN_APP,
-    GEOFENCE
+    GEOFENCE,
+    REAL_TIME_INAPP
 }
