@@ -7,6 +7,7 @@ object Constants {
     const val PUSH_API_URI = "https://dev-push.dengage.com"
     const val EVENT_API_URI = "https://dev-event.dengage.com"
     const val MESSAGE_SOURCE = "DENGAGE"
+    const val GET_REAL_INAPP_MESSAGES_API_URI = "https://tr-inapp.lib.dengage.com"
 
     const val PUSH_ITEM_CLICK_EVENT = "com.dengage.push.intent.ITEM_CLICK"
     const val PUSH_RECEIVE_EVENT = "com.dengage.push.intent.RECEIVE"

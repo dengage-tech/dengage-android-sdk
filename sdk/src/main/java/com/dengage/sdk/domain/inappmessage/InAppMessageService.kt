@@ -64,12 +64,6 @@ interface InAppMessageService {
         @Query("appid") appId:String
     ): MutableList<InAppRemovalId>?
 
-    @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
-    @GET("/api/realtime-inapp/{accountId}/{appId}/campaign.json")
-    suspend fun getRealTimeInAppMessages(
-        @Path("accountId") accountId: String,
-        @Path("appId") appId: String?,
-    ): MutableList<InAppMessageData>?
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
     @GET("/realtime-inapp/event")
