@@ -566,7 +566,7 @@ object InAppMessageUtils {
         userParam: String?,
         isRealTime: Boolean,
     ): Boolean {
-        if (ruleParam.isNullOrEmpty() || userParam == null) return !isRealTime
+        if (ruleParam.isNullOrEmpty() || userParam == null) return false
         when (operator) {
             Operator.EQUALS.operator -> {
                 return ruleParam.firstOrNull { it.lowercase() == userParam.lowercase() } != null

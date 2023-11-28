@@ -15,35 +15,35 @@
     <application>
         <activity
             android:name=".ui.test.DengageTestActivity"
-            android:exported="true"
+             android:exported="false"
             android:theme="@style/Theme.DengageAndroid" />
         <activity
             android:name=".ui.test.DengageTestInAppActivity"
-            android:exported="true"
+             android:exported="false"
             android:theme="@style/Theme.DengageAndroid" />
         <activity
             android:name=".ui.test.DengageTestPushActivity"
-            android:exported="true"
+             android:exported="false"
             android:theme="@style/Theme.DengageAndroid" />
         <activity
             android:name=".ui.test.DengageTestDeviceInfoActivity"
-            android:exported="true"
+             android:exported="false"
             android:theme="@style/Theme.DengageAndroid" />
         <activity
             android:name=".ui.test.DengageTestDeviceCacheActivity"
-            android:exported="true"
+             android:exported="false"
             android:theme="@style/Theme.DengageAndroid" />
         <activity
             android:name=".ui.test.DengageFetchTimeResetTestActivity"
-            android:exported="true"
+             android:exported="false"
             android:theme="@style/Theme.DengageAndroid" />
         <activity
             android:name=".ui.test.DengageTestShowLogsActivity"
-            android:exported="true"
+             android:exported="false"
             android:theme="@style/Theme.DengageAndroid" />
         <activity
             android:name=".ui.inappmessage.InAppMessageActivity"
-            android:exported="true"
+             android:exported="false"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar"  />
 
         <!-- Geofence -->
@@ -69,7 +69,7 @@
             android:name=".push.NotificationNavigationDeciderActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
             android:launchMode="singleTask"
-            android:exported="true" />
+             android:exported="false" />
 
         <activity android:name=".ui.inappmessage.InAppBrowserActivity"
             android:theme="@style/BrowserTheme.NoActionBar"/>
