@@ -74,18 +74,18 @@ object InAppMessageUtils {
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
         } else {
-            return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
-                inAppMessage.data.isDisplayTimeAvailable() &&
-                        inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
-                            operateScreenValues(
-                                screenNameFilter.value,
-                                screenName,
-                                screenNameFilter.operator
-                            )
-                        } != null &&
-                        operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                            params,isRealTime)
-            }
+          return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
+                    inAppMessage.data.isDisplayTimeAvailable() &&
+                            inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
+                                operateScreenValues(
+                                    screenNameFilter.value,
+                                    screenName,
+                                    screenNameFilter.operator
+                                )
+                            } != null &&
+                            operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
+                                params,isRealTime)
+                }
 
         }
     }
@@ -566,7 +566,7 @@ object InAppMessageUtils {
         userParam: String?,
         isRealTime: Boolean,
     ): Boolean {
-        if (ruleParam.isNullOrEmpty() || userParam == null) return !isRealTime
+        if (ruleParam.isNullOrEmpty() || userParam == null) return false
         when (operator) {
             Operator.EQUALS.operator -> {
                 return ruleParam.firstOrNull { it.lowercase() == userParam.lowercase() } != null
