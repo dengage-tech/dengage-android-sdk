@@ -33,9 +33,7 @@ class App : Application() {
             context = context,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
             deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
-            contactKey = "dasdasd",
-            partnerDeviceId = "hi",
-            deviceId = "22"
+
         )
 
       /*  Dengage.setContactKey("dasdasd")
