@@ -26,10 +26,8 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
     override fun providePresenter() = ConfigurationPresenter()
 
-    internal fun init(
-        firebaseApp: FirebaseApp?,
-        firebaseIntegrationKey: String? = null
-    ) {
+    internal fun setDomain()
+    {
         DengageUtils.getMetaData(name = "den_push_api_url").apply {
             if (this == null) {
                 DengageLogger.error("Push api url not found on application manifest metadata")
@@ -53,6 +51,12 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         DengageUtils.getMetaData(name = "fetch_real_time_in_app_api_url")?.let {
             Prefs.getRealTimeMessagesBaseUrl = it
         }
+
+    }
+    internal fun init(
+        firebaseApp: FirebaseApp?,
+        firebaseIntegrationKey: String? = null
+    ) {
 
         var subscription = Prefs.subscription
         if (subscription == null) {
