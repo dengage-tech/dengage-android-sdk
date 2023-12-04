@@ -144,7 +144,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         if (inAppMessage.data.isRealTime()) {
             if (isRealTimeInAppMessageEnabled(subscription, sdkParameters)) {
                 // remove in app message from cache if clicked
-                removeInAppMessageFromCache(inAppMessage.id)
+                //removeInAppMessageFromCache(inAppMessage.id)
 
                 setRealTimeInAppMessageAsClicked(this) {
                     onResponse = {
