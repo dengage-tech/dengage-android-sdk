@@ -1,10 +1,16 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.R.attr.label
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Build
+import android.widget.Toast
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentDeviceInfoBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
 import com.dengage.sdk.Dengage
+
 
 class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() {
 
@@ -17,6 +23,32 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
         Dengage.sendLoginEvent()
         Dengage.sendLogoutEvent()
         Dengage.sendRegisterEvent()
+
+       binding.tvToken.setOnClickListener {
+            val clipboard: ClipboardManager =
+                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("ik", binding.tvToken.text)
+            clipboard.setPrimaryClip(clip)
+           Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
+        }
+
+        binding.tvDeviceId.setOnClickListener {
+            val clipboard: ClipboardManager =
+                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("di", binding.tvDeviceId.text)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
+        }
+
+        binding.tvContactKey.setOnClickListener {
+            val clipboard: ClipboardManager =
+                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("ck", binding.tvContactKey.text)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
+        }
+
+
         binding.tvIntegrationKey.text = getString(
             R.string.dengage_integration_key,
             Dengage.getSubscription()?.integrationKey
