@@ -127,7 +127,7 @@ object Dengage {
         }
         configurationManager.configurationCallback = configurationCallback
 
-
+       configurationManager.setDomain()
         Handler(Looper.getMainLooper()).postDelayed({
             configurationManager.init(
                 firebaseApp = firebaseApp,
