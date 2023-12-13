@@ -74,22 +74,57 @@ object InAppMessageUtils {
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
         } else {
-          return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
-                    inAppMessage.data.isDisplayTimeAvailable() &&
-                            inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
-                                operateScreenValues(
-                                    screenNameFilter.value,
-                                    screenName,
-                                    screenNameFilter.operator
-                                )
-                            } != null &&
-                            operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                                params,isRealTime)
-                }
-
+            return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
+                inAppMessage.data.isDisplayTimeAvailable() &&
+                        isScreenNameFound(inAppMessage, screenName) &&
+                        operateRealTimeValues(
+                            inAppMessage.data.displayCondition.displayRuleSet,
+                            params, isRealTime
+                        )
+            }
         }
     }
+    private fun isScreenNameFound(inAppMessage: InAppMessage, screenName: String): Boolean {
+        val screenNameCheckArrayList = mutableListOf<Boolean>()
+        val operatorFilter = inAppMessage.data.displayCondition.screenNameFilterLogicOperator
 
+        inAppMessage.data.displayCondition.screenNameFilters?.forEach { screenNameFilter ->
+            screenNameCheckArrayList.add(
+                operateScreenValues(
+                    screenNameFilter.value,
+                    screenName,
+                    screenNameFilter.operator
+                )
+            )
+
+        }
+
+        return when {
+            operatorFilter.equals("AND") -> screenNameCheckArrayList.none { !it }
+            operatorFilter.equals("OR") -> screenNameCheckArrayList.any { it }
+            else -> useOldScreenNameFilter(inAppMessage,screenName)
+        }
+        /*     return inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
+                  operateScreenValues(
+                      screenNameFilter.value,
+                      screenName,
+                      screenNameFilter.operator
+                  )
+              } != null*/
+
+
+    }
+
+    private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String) :Boolean
+    {
+        return  inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
+            operateScreenValues(
+                screenNameFilter.value,
+                screenName,
+                screenNameFilter.operator
+            )
+        } != null
+    }
     private fun operateRealTimeValues(
         displayRuleSet: DisplayRuleSet?,
         params: HashMap<String, String>?,
