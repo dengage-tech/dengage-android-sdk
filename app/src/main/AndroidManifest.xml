@@ -55,17 +55,17 @@
         <!-- Event api url of Dengage -->
         <meta-data
             android:name="den_event_api_url"
-            android:value="https://event.dengage.com" />
+            android:value="https://dev-event.dengage.com" />
 
         <!-- Push api url of Dengage -->
         <meta-data
             android:name="den_push_api_url"
-            android:value="https://push.dengage.com" />
+            android:value="https://dev-push.dengage.com" />
 
         <!-- Real time inapp api url of Dengage -->
         <meta-data
             android:name="den_in_app_api_url"
-            android:value="https://push.dengage.com" />
+            android:value="https://dev-push.dengage.com" />
 
         <!-- Geofence api url of Dengage -->
         <meta-data
@@ -75,11 +75,6 @@
         <meta-data
             android:name="den_device_id_api_url"
             android:value="https://magento.232.dengage.shobii.com/rest/" />
-
-
-        <meta-data
-            android:name="den_in_app_api_url"
-            android:value="https://dev-push.dengage.com" />
 
         <meta-data
             android:name="fetch_real_time_in_app_api_url"
