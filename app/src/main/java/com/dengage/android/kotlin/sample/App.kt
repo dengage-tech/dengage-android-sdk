@@ -17,10 +17,7 @@ class App : Application() {
 
         Dengage.init(
             context = applicationContext,
-            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
-            contactKey = "se",
-            partnerDeviceId = "ss",
-            deviceId = "32"
+            firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY
         )
 
       /*  Dengage.setContactKey("dasdasd")
