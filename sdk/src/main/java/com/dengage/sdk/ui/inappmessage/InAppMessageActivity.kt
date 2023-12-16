@@ -50,9 +50,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
             if (Build.VERSION.SDK_INT >= 21) {
 
-                 if(!inAppMessage.data.content.params.backgroundColor.isNullOrEmpty()){
-                     window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor?.dropLast(2)))
-                    window.decorView.background.alpha=hexToPercentageOpacity(inAppMessage.data.content.params.backgroundColor?.takeLast(2)).toInt()}
+                if(!inAppMessage.data.content.params.backgroundColor.isNullOrEmpty()){
+                    window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor?.dropLast(2)))
+                    window.decorView.background.alpha=InAppMessageUtils.hexToPercentageOpacity(inAppMessage.data.content.params.backgroundColor?.takeLast(2)).toInt()}
             }
             setContentPosition(contentParams)
             setHtmlContent(contentParams)
@@ -62,18 +62,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             e.printStackTrace()
         }
     }
-    fun hexToPercentageOpacity(hex: String?): Double {
-        // Ensure the hex string has correct length
-        if (hex?.length != 2) {
-            throw IllegalArgumentException("Hex string must be 2 characters long")
-        }
 
-        // Convert hex to decimal
-        val decimal = hex.toInt(16)
-
-        // Convert decimal to percentage and return
-        return (decimal / 255.0) * 100
-    }
     private fun setContentPosition(
         contentParams: ContentParams,
     ) {
