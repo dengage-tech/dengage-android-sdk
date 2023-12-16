@@ -877,4 +877,17 @@ object InAppMessageUtils {
         return result
     }
 
+    fun hexToPercentageOpacity(hex: String?): Double {
+        // Ensure the hex string has correct length
+        if (hex?.length != 2) {
+            throw IllegalArgumentException("Hex string must be 2 characters long")
+        }
+
+        // Convert hex to decimal
+        val decimal = hex.toInt(16)
+
+        // Convert decimal to percentage and return
+        return (decimal / 255.0) * 100
+    }
+
 }

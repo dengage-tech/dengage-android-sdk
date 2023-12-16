@@ -49,8 +49,10 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             setContentView(R.layout.activity_in_app_message)
 
             if (Build.VERSION.SDK_INT >= 21) {
-                if(!inAppMessage.data.content.params.backgroundColor.isNullOrEmpty()){
-                window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor))}
+
+                 if(!inAppMessage.data.content.params.backgroundColor.isNullOrEmpty()){
+                     window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor?.dropLast(2)))
+                    window.decorView.background.alpha=InAppMessageUtils.hexToPercentageOpacity(inAppMessage.data.content.params.backgroundColor?.takeLast(2)).toInt()}
             }
             setContentPosition(contentParams)
             setHtmlContent(contentParams)
