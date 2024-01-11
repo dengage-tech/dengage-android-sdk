@@ -40,7 +40,7 @@ object InAppMessageUtils {
                 if (untilDate.before(expireDate)) {
                     notExpiredMessages.add(inAppMessage)
                 }
-            } catch (e: ParseException) {
+            } catch (e: Exception) {
                 DengageLogger.error("expireDateFormatError: " + e.message)
                 e.printStackTrace()
             }
