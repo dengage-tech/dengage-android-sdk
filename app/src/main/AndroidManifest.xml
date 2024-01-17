@@ -65,7 +65,7 @@
 
         <meta-data
             android:name="fetch_real_time_in_app_api_url"
-            android:value="https://tr-inapp.lib.dengage.com" />
+            android:value="https://tr-inapp.lib.dengage.com/" />
 
 
         <!-- <meta-data
