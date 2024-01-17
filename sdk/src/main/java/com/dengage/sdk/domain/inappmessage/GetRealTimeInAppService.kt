@@ -8,7 +8,7 @@ import retrofit2.http.Path
 interface GetRealTimeInAppService {
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
-    @GET("/{accountId}/{appId}/campaign.json")
+    @GET("{accountId}/{appId}/campaign.json")
     suspend fun getRealTimeInAppMessages(
         @Path("accountId") accountId: String,
         @Path("appId") appId: String?,
