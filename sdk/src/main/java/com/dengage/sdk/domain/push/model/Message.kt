@@ -22,6 +22,7 @@ data class Message(
     @SerializedName("badgeCount") val badgeCount: Int? = 0,
     @SerializedName("sound") val sound: String? = "",
     @SerializedName("dengageCampId") val campaignId: Int? = 0,
+    @SerializedName("current") val current: Int? = -1,
     @SerializedName("dengageCampName") val campaignName: String? = "",
     @SerializedName("dengageSendId") val sendId: Int? = 0,
     @SerializedName("notificationType") val notificationType: NotificationType = NotificationType.RICH,
@@ -186,6 +187,19 @@ data class Message(
             if (media != null && media.isNotEmpty() && media[0].url != null) {
                 mediaUrl = media[0].url!!
             }
+            var current=-1
+            if(carouselContent!=null)
+            {
+                if(bundleMap.contains("current")) {
+                    current = if (bundleMap["current"].isNullOrEmpty()
+                            .not() && bundleMap["current"]!!.isDigitsOnly()
+                    ) {
+                        bundleMap["current"]!!.toInt()
+                    } else {
+                        -1
+                    }
+                }
+            }
 
             return Message(
                 messageId = messageId,
@@ -209,7 +223,7 @@ data class Message(
                 carouselContent = carouselContent,
                 actionButtons = actionButtons,
                 addToInbox = addToInbox,
-                expireDate = expireDate
+                expireDate = expireDate, current = current
             )
         }
     }

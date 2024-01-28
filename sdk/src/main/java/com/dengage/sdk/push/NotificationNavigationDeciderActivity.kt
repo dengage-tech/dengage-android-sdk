@@ -36,8 +36,18 @@ class NotificationNavigationDeciderActivity : Activity() {
                     val uri: String?
 
                     if (extras != null) {
-
-                        uri = extras.getString("targetUrl")
+                        val message: Message? = Message.createFromIntent(extras)
+                        var targetUrl: String? = ""
+                        if (message?.carouselContent.isNullOrEmpty()) {
+                            targetUrl= message?.targetUrl
+                        } else {
+                            targetUrl = message?.current?.let { message.carouselContent?.get(it)?.targetUrl }
+                            if(targetUrl.isNullOrEmpty())
+                            {
+                                targetUrl=message?.targetUrl
+                            }
+                        }
+                        uri = targetUrl
 
 
                         if (uri != null && !TextUtils.isEmpty(uri)) {
@@ -58,7 +68,6 @@ class NotificationNavigationDeciderActivity : Activity() {
                         }
 
 
-                        var message: Message? = Message.createFromIntent(extras)
                         message?.storeToPref()
                         val rawJson = extras.getString("RAW_DATA")
 
@@ -100,39 +109,30 @@ class NotificationNavigationDeciderActivity : Activity() {
             } else {
                 if (DengageUtils.isAppInForeground()) {
                     launchActivity(null, null)
-                    if(Prefs.restartApplicationAfterPushClick == false)
-                    finish()
+                    if (Prefs.restartApplicationAfterPushClick == false)
+                        finish()
                     else
                         finishAffinity()
                 }
             }
-        }
-        catch (ex:Exception)
-        { ex.printStackTrace()
-
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
-
-        }
-        catch (ex :IncompatibleClassChangeError)
-        { ex.printStackTrace()
-
-        }
-        catch (ex :NoSuchFieldError)
-        { ex.printStackTrace()
-
-        }
-        catch (ex :NoSuchMethodError)
-        { ex.printStackTrace()
-
-        }
-        catch (ex:java.lang.AssertionError)
-        {
+        } catch (ex: Exception) {
             ex.printStackTrace()
-        }
-        catch (ex:AssertionError)
-        {
+
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
+
+        } catch (ex: IncompatibleClassChangeError) {
+            ex.printStackTrace()
+
+        } catch (ex: NoSuchFieldError) {
+            ex.printStackTrace()
+
+        } catch (ex: NoSuchMethodError) {
+            ex.printStackTrace()
+
+        } catch (ex: java.lang.AssertionError) {
+            ex.printStackTrace()
+        } catch (ex: AssertionError) {
             ex.printStackTrace()
         }
     }
@@ -141,16 +141,15 @@ class NotificationNavigationDeciderActivity : Activity() {
         Constants.isActivityPerformed = true
         Handler(Looper.getMainLooper()).postDelayed({
             DengageUtils.unregisterBroadcast()
-            if(Prefs.restartApplicationAfterPushClick == false)
+            if (Prefs.restartApplicationAfterPushClick == false)
                 finish()
             else
                 finishAffinity()
         }, 1200)
     }
 
-    private fun startActivityLocal(intent :Intent)
-    {
-        if(Prefs.restartApplicationAfterPushClick == false) {
+    private fun startActivityLocal(intent: Intent) {
+        if (Prefs.restartApplicationAfterPushClick == false) {
             intent.flags = FLAG_ACTIVITY_CLEAR_TOP or FLAG_ACTIVITY_SINGLE_TOP
         }
         startActivity(intent)
