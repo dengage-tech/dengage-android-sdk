@@ -40,9 +40,9 @@ open class NotificationReceiver : BroadcastReceiver() {
                 Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
                 Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
             }
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
         }
-        catch (_:Exception){}
-        catch (_:Throwable){}
     }
 
     open fun onPushReceive(context: Context, intent: Intent) {
@@ -64,6 +64,7 @@ open class NotificationReceiver : BroadcastReceiver() {
                 message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
             }
             uri = intent.extras!!.getString("targetUrl")
+
             Dengage.sendOpenEvent("", "", message)
 
             clearNotification(context, message)
@@ -295,6 +296,9 @@ open class NotificationReceiver : BroadcastReceiver() {
         intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
         intent.putExtras(extras!!)
         intent.setPackage(packageName)
+        if (requestCode == 5) {
+            intent.putExtra("source", "carouselContent")
+        }
         intent.action = action
         if (intent.extras != null) {
             intent.putExtras(intent.extras!!)
@@ -433,7 +437,11 @@ open class NotificationReceiver : BroadcastReceiver() {
         val packageName = context.packageName
         val contentIntent = getContentIntent(extras, packageName)
         val deleteIntent = getDeleteIntent(extras, packageName)
-        val pContentIntent = getPendingIntent(context, contentIntentRequestCode, contentIntent)
+        val pContentIntent = getPendingIntent(
+            context,
+            if (contentIntentRequestCode == 5) random.nextInt() else contentIntentRequestCode,
+            contentIntent
+        )
         val pDeleteIntent = getDeletePendingIntent(context, deleteIntentRequestCode, deleteIntent)
 
         val channelId = createNotificationChannel(context, message)
@@ -490,7 +498,9 @@ open class NotificationReceiver : BroadcastReceiver() {
     open fun createNotificationChannel(context: Context, message: Message): String {
         val soundUri = message.sound.getSoundUri(context)
 
-        val channelId = if(message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID else message.sound
+        val channelId =
+            if (message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID else message.sound
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
