@@ -23,6 +23,7 @@ data class Message(
     @SerializedName("sound") val sound: String? = "",
     @SerializedName("dengageCampId") val campaignId: Int? = 0,
     @SerializedName("current") val current: Int? = -1,
+    @SerializedName("source") val source: String? = "",
     @SerializedName("dengageCampName") val campaignName: String? = "",
     @SerializedName("dengageSendId") val sendId: Int? = 0,
     @SerializedName("notificationType") val notificationType: NotificationType = NotificationType.RICH,
@@ -184,6 +185,11 @@ data class Message(
                 ""
             }
 
+            val source = if (bundleMap["source"].isNullOrEmpty().not()) {
+                bundleMap["source"]!!
+            } else {
+                ""
+            }
             if (media != null && media.isNotEmpty() && media[0].url != null) {
                 mediaUrl = media[0].url!!
             }
@@ -209,6 +215,7 @@ data class Message(
                 mediaUrl = mediaUrl,
                 media = media,
                 targetUrl = targetUrl,
+                source=source,
                 title = title,
                 subTitle = subTitle,
                 message = message,

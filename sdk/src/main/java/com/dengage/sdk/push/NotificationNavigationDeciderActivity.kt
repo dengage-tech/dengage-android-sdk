@@ -38,7 +38,7 @@ class NotificationNavigationDeciderActivity : Activity() {
                     if (extras != null) {
                         val message: Message? = Message.createFromIntent(extras)
                         var targetUrl: String? = ""
-                        if (message?.carouselContent.isNullOrEmpty()) {
+                        if (message?.carouselContent.isNullOrEmpty()||!message?.source.isNullOrBlank()) {
                             targetUrl= message?.targetUrl
                         } else {
                             targetUrl = message?.current?.let { message.carouselContent?.get(it)?.targetUrl }
