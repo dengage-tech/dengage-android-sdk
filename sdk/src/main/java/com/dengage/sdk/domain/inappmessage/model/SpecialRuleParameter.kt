@@ -28,5 +28,6 @@ enum class SpecialRuleParameter(val key: String) {
     VISIT_COUNT("dn.visit_count"),
     SEGMENT("dn.segment"),
     TAG("dn.tag"),
-    BIRTH_DATE("dn.master_contact.birth_date")
+    BIRTH_DATE("dn.master_contact.birth_date"),
+    PROPERTY_ID("dn.property_id")
 }

@@ -5,6 +5,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
+import com.dengage.sdk.ui.InAppInlineElement
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
 import java.util.*
 
@@ -27,9 +28,13 @@ class InAppMessageManager :
         activity: Activity,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        resultCode: Int = -1 ,isRealTime: Boolean = false
+        resultCode: Int = -1, isRealTime: Boolean = false,
+        property_id: String = "",
+        inAppInlineElement: InAppInlineElement?=null,
     ) {
-        cancelTimer()
+        if(inAppInlineElement==null) {
+            cancelTimer()
+        }
 
         // control next in app message show time
         if(Prefs.isDevelopmentStatusDebug==false){
@@ -40,9 +45,14 @@ class InAppMessageManager :
         Prefs.inAppMessages = inAppMessages
         if (!inAppMessages.isNullOrEmpty()) {
             val priorInAppMessage =
-                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime)
+                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime,property_id)
             if (priorInAppMessage != null) {
-                showInAppMessage(activity, priorInAppMessage, resultCode)
+                if(inAppInlineElement==null) {
+                    showInAppMessage(activity, priorInAppMessage, resultCode)
+                }
+                else {
+                    inAppInlineElement.populateInLineInApp(priorInAppMessage)
+                }
             }
         }
     }

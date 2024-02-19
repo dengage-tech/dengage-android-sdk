@@ -55,7 +55,8 @@ object InAppMessageUtils {
         inAppMessages: List<InAppMessage>,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        isRealTime: Boolean = false
+        isRealTime: Boolean = false,
+        property_id: String = "",
     ): InAppMessage? {
         // sort list with comparator
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
@@ -69,7 +70,7 @@ object InAppMessageUtils {
                 inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
                         inAppMessage.data.isDisplayTimeAvailable() &&
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                            params,isRealTime)
+                            params,isRealTime,property_id)
             }
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
@@ -79,7 +80,7 @@ object InAppMessageUtils {
                         isScreenNameFound(inAppMessage, screenName) &&
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
-                            params, isRealTime
+                            params, isRealTime,property_id
                         )
             }
         }
@@ -128,18 +129,19 @@ object InAppMessageUtils {
     private fun operateRealTimeValues(
         displayRuleSet: DisplayRuleSet?,
         params: HashMap<String, String>?,
-        isRealTime: Boolean
+        isRealTime: Boolean,
+        property_id: String = "",
     ): Boolean {
         if (displayRuleSet != null) {
             when (displayRuleSet.logicOperator) {
                 LogicOperator.AND.name -> {
                     return displayRuleSet.displayRules.all {
-                        operateDisplayRule(it, params, isRealTime)
+                        operateDisplayRule(it, params, isRealTime,property_id)
                     }
                 }
                 LogicOperator.OR.name -> {
                     return !displayRuleSet.displayRules.all {
-                        !operateDisplayRule(it, params, isRealTime)
+                        !operateDisplayRule(it, params, isRealTime,property_id)
                     }
                 }
             }
@@ -151,16 +153,17 @@ object InAppMessageUtils {
         displayRule: DisplayRule,
         params: HashMap<String, String>?,
         isRealTime: Boolean,
+        property_id: String = "",
     ): Boolean {
         when (displayRule.logicOperator) {
             LogicOperator.AND.name -> {
                 return displayRule.criterionList.all {
-                    operateCriterion(it, params, isRealTime)
+                    operateCriterion(it, params, isRealTime,property_id)
                 }
             }
             LogicOperator.OR.name -> {
                 return !displayRule.criterionList.all {
-                    !operateCriterion(it, params, isRealTime)
+                    !operateCriterion(it, params, isRealTime,property_id)
                 }
             }
         }
@@ -172,6 +175,7 @@ object InAppMessageUtils {
         criterion: Criterion,
         params: HashMap<String, String>?,
         isRealTime: Boolean,
+        property_id: String = "",
     ): Boolean {
         val subscription = Prefs.subscription
         val visitorInfo = Prefs.visitorInfo
@@ -451,6 +455,15 @@ object InAppMessageUtils {
                 }
             }
 
+            SpecialRuleParameter.PROPERTY_ID.key -> {
+                operateRuleParameter(
+                    operator = criterion.operator,
+                    dataType = criterion.dataType,
+                    ruleParam = criterion.values,
+                    userParam = property_id,
+                    isRealTime = isRealTime
+                )
+            }
             checkVisitorInfoAttr(criterion.parameter) -> {
                 if (criterion.parameter == SpecialRuleParameter.BIRTH_DATE.key) {
                     return birthCriteriaValid(criterion.values, getVisitorInfoAttrValue(criterion))
