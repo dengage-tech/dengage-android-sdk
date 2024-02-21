@@ -193,7 +193,7 @@ open class NotificationReceiver : BroadcastReceiver() {
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        manager?.notify(message.messageSource, message.messageId, notification)
+        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification)}
     }
 
     open fun onTextNotificationRender(
@@ -204,7 +204,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     ) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        manager?.notify(message.messageSource, message.messageId, notification)
+        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification)}
     }
 
     protected open fun onCarouselRender(
