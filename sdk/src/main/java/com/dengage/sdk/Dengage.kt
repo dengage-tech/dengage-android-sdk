@@ -482,6 +482,7 @@ object Dengage {
         try {
             val intent = Intent(Constants.PUSH_RECEIVE_EVENT)
             intent.putExtra("RAW_DATA", json)
+            intent.putExtra("requestCode", DengageUtils.generateRandomInt())
             DengageLogger.verbose("RAW_DATA: $json")
             for ((key, value) in data) {
                 intent.putExtra(key, value)
@@ -678,12 +679,12 @@ object Dengage {
         itemId: String,
         message: Message?,
     ) {
-        subscriptionManager.sendSubscription()
         DengageLogger.verbose("sendOpenEvent method is called")
         DengageLogger.verbose(buttonId)
         DengageLogger.verbose(itemId)
         DengageLogger.verbose(message?.toJson())
         try {
+            subscriptionManager.sendSubscription()
             getSubscription()
             if (message == null) {
                 DengageLogger.error("Argument null: message")

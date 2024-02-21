@@ -58,7 +58,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.54.3"
+        return "6.0.55.3"
     }
 
     fun getUserAgent(context: Context): String {
@@ -187,25 +187,24 @@ object DengageUtils {
             filter.addAction(Constants.PUSH_ACTION_CLICK_EVENT)
             filter.addAction(Constants.PUSH_ITEM_CLICK_EVENT)
             filter.addAction("com.dengage.push.intent.CAROUSEL_ITEM_CLICK")
-            if (!isAppInForeground() &&!isBCRegistered) {
-                ContextHolder.context.applicationContext.registerReceiver(
-                    NRTrampoline(),
-                    filter
-                )
 
-            }
+            ContextHolder.context.applicationContext.registerReceiver(
+                NRTrampoline(),
+                filter
+            )
+
+
         } catch (e: Exception) {
-          //  e.printStackTrace()
-        }
-        catch (ex: Throwable)
-        { ex.printStackTrace()
+            //  e.printStackTrace()
+        } catch (ex: Throwable) {
+            ex.printStackTrace()
 
         }
     }
 
     fun unregisterBroadcast() {
         try {
-            ContextHolder.context.applicationContext.unregisterReceiver(NRTrampoline())    } catch (e: Exception) {
+            //ContextHolder.context.applicationContext.unregisterReceiver(NRTrampoline())    } catch (e: Exception) {
 
         }
         catch (ex: Throwable)
@@ -320,5 +319,14 @@ object DengageUtils {
         {
         }
         return className
+    }
+
+    fun generateRandomInt(): Int {
+        var randomInteger: Int = Random().nextInt()
+        while (Constants.listOfNotificationIds.contains(randomInteger)) {
+            randomInteger = Random().nextInt()
+        }
+        return randomInteger
+
     }
 }
