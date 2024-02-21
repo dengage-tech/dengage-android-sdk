@@ -32,7 +32,7 @@ open class NRTrampoline : BroadcastReceiver() {
             ContextHolder.resetContext(context)
 
             DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
-            if (!Constants.isBCRegistered) {
+
 
                 when (intent?.action) {
                     Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
@@ -41,7 +41,7 @@ open class NRTrampoline : BroadcastReceiver() {
                     Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
                     Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
                 }
-            }
+
         }
         catch (_:Exception){}
         catch (_:Throwable){}
@@ -196,7 +196,7 @@ open class NRTrampoline : BroadcastReceiver() {
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        manager?.notify(message.messageSource, message.messageId, notification)
+        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification)}
     }
 
     open fun onTextNotificationRender(
@@ -207,7 +207,7 @@ open class NRTrampoline : BroadcastReceiver() {
     ) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        manager?.notify(message.messageSource, message.messageId, notification)
+        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification)}
     }
 
     protected open fun onCarouselRender(
@@ -299,6 +299,9 @@ open class NRTrampoline : BroadcastReceiver() {
         intent = Intent(context, NotificationNavigationDeciderActivity::class.java)
         intent.putExtras(extras!!)
         intent.setPackage(packageName)
+        if (requestCode == 5) {
+            intent.putExtra("source", "carouselContent")
+        }
         intent.action = action
         if (intent.extras != null) {
             intent.putExtras(intent.extras!!)

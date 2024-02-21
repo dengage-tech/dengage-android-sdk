@@ -24,5 +24,7 @@ object Constants {
    var isActivityPerformed =false
 
     var isBCRegistered =false
+
+    var listOfNotificationIds = mutableListOf<Int?>()
 }
 

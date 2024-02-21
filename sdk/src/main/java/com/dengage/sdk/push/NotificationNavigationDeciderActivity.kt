@@ -26,10 +26,11 @@ class NotificationNavigationDeciderActivity : Activity() {
     override fun onResume() {
         super.onResume()
         try {
-            if (!Constants.isActivityPerformed) {
+            DengageUtils.registerBroadcast()
+            if (!Constants.listOfNotificationIds.contains(intent.extras?.getInt("requestCode"))) {
                 var sendingIntentObject: Intent
-
                 if (intent != null) {
+                    Constants.listOfNotificationIds.add(intent?.extras?.getInt("requestCode"))
 
                     val extras = intent.extras
 
