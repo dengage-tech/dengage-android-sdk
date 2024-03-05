@@ -44,6 +44,9 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         binding.btnUserPermission.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToUserPermission())
         }
+        binding.btnInAppinline.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToinappInline())
+        }
 
         binding.btnContactKey.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToContactKey())
