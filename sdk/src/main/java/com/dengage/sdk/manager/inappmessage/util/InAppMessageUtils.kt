@@ -55,7 +55,8 @@ object InAppMessageUtils {
         inAppMessages: List<InAppMessage>,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        isRealTime: Boolean = false
+        isRealTime: Boolean = false ,
+        propertyId: String? =""
     ): InAppMessage? {
         // sort list with comparator
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
@@ -67,6 +68,7 @@ object InAppMessageUtils {
         val inAppMessageWithoutScreenName =
             sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
+                        isInlineInApp(inAppMessage,propertyId)&&
                         inAppMessage.data.isDisplayTimeAvailable() &&
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
                             params,isRealTime)
@@ -77,6 +79,7 @@ object InAppMessageUtils {
             return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.isDisplayTimeAvailable() &&
                         isScreenNameFound(inAppMessage, screenName) &&
+                        isInlineInApp(inAppMessage,propertyId)&&
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
                             params, isRealTime
@@ -114,6 +117,9 @@ object InAppMessageUtils {
 
 
     }
+
+    private fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?): Boolean {
+        return (inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty()==true )&& propertyId?.isNotEmpty() == true }
 
     private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String) :Boolean
     {

@@ -16,10 +16,6 @@ class InAppInLineFragment : BaseDataBindingFragment<FragmentInappInlineBinding>(
 
         binding.btnShowInlineInapp.setOnClickListener {
             var propertyId = binding.etPropertyId.text.toString().trim()
-            var propertyIdInInt = 0
-            if (!propertyId.isNullOrEmpty()) {
-                propertyIdInInt = propertyId.toInt()
-            }
             val screenName = binding.etScreenName.text.toString().trim()
             val customKey1 = binding.etCustomKey1.text.toString().trim()
             val customValue1 = binding.etCustomValue1.text.toString().trim()
@@ -35,7 +31,7 @@ class InAppInLineFragment : BaseDataBindingFragment<FragmentInappInlineBinding>(
             }
             Dengage.showInlineInApp(screenName = screenName.ifEmpty { null },
                 inAppInlineElement = binding.webview,
-                propertyId = propertyIdInInt,
+                propertyId = propertyId,
                 activity = requireActivity(),
                 customParams = customParams.ifEmpty { null }
             )

@@ -32,9 +32,9 @@ class InAppMessageManager :
         resultCode: Int = -1,
         isRealTime: Boolean = false,
         inAppInlineElement: InAppInlineElement?=null,
-        propertyId: Int? =0
+        propertyId: String? =""
     ) {
-        if(propertyId==0) {
+        if(propertyId.isNullOrEmpty()) {
             cancelTimer()
         }
         // control next in app message show time
@@ -46,7 +46,7 @@ class InAppMessageManager :
         Prefs.inAppMessages = inAppMessages
         if (!inAppMessages.isNullOrEmpty()) {
             val priorInAppMessage =
-                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime)
+                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime,propertyId)
             if (priorInAppMessage != null) {
                 showInAppMessage(activity, priorInAppMessage, resultCode, inAppInlineElement = inAppInlineElement , propertyId = propertyId)
             }
@@ -107,7 +107,7 @@ class InAppMessageManager :
      * Show in app message dialog on activity screen
      */
     private fun showInAppMessage(
-        activity: Activity, inAppMessage: InAppMessage, resultCode: Int = -1,propertyId: Int? =0,inAppInlineElement: InAppInlineElement?
+        activity: Activity, inAppMessage: InAppMessage, resultCode: Int = -1,propertyId: String? ="",inAppInlineElement: InAppInlineElement?
     ) {
         try {
             // set delay for showing in app message

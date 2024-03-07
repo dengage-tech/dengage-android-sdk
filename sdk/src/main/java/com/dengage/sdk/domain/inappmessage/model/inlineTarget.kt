@@ -5,5 +5,5 @@ import java.io.Serializable
 
 class InlineTarget(
 
-    @SerializedName("androidSelector") val androidSelector: Int?
+    @SerializedName("androidSelector") val androidSelector: String?
 ) : Serializable
