@@ -55,8 +55,8 @@ object InAppMessageUtils {
         inAppMessages: List<InAppMessage>,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        isRealTime: Boolean = false ,
-        propertyId: String? =""
+        isRealTime: Boolean = false,
+        propertyId: String? = "",
     ): InAppMessage? {
         // sort list with comparator
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
@@ -68,10 +68,10 @@ object InAppMessageUtils {
         val inAppMessageWithoutScreenName =
             sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
-                        isInlineInApp(inAppMessage,propertyId)&&
+                        isInlineInApp(inAppMessage, propertyId) &&
                         inAppMessage.data.isDisplayTimeAvailable() &&
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                            params,isRealTime)
+                            params, isRealTime)
             }
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
@@ -79,7 +79,7 @@ object InAppMessageUtils {
             return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.isDisplayTimeAvailable() &&
                         isScreenNameFound(inAppMessage, screenName) &&
-                        isInlineInApp(inAppMessage,propertyId)&&
+                        isInlineInApp(inAppMessage, propertyId) &&
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
                             params, isRealTime
@@ -87,6 +87,7 @@ object InAppMessageUtils {
             }
         }
     }
+
     private fun isScreenNameFound(inAppMessage: InAppMessage, screenName: String): Boolean {
         val screenNameCheckArrayList = mutableListOf<Boolean>()
         val operatorFilter = inAppMessage.data.displayCondition.screenNameFilterLogicOperator
@@ -105,7 +106,7 @@ object InAppMessageUtils {
         return when {
             operatorFilter.equals("AND") -> screenNameCheckArrayList.none { !it }
             operatorFilter.equals("OR") -> screenNameCheckArrayList.any { it }
-            else -> useOldScreenNameFilter(inAppMessage,screenName)
+            else -> useOldScreenNameFilter(inAppMessage, screenName)
         }
         /*     return inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
                   operateScreenValues(
@@ -118,12 +119,24 @@ object InAppMessageUtils {
 
     }
 
-    private fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?): Boolean {
-        return (inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty()==true )&& propertyId?.isNotEmpty() == true }
+    fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?): Boolean {
+        if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
+            return false
+        } else if (inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == true && propertyId.isNullOrEmpty()) {
+            return true
+        } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isEmpty() == true) {
+            return false
+        } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
+            return inAppMessage.data.inlineTarget?.androidSelector?.equals(propertyId) == true
+        }
+        else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == null) {
+            return false
+        }
+        else return true
+    }
 
-    private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String) :Boolean
-    {
-        return  inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
+    private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String): Boolean {
+        return inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
             operateScreenValues(
                 screenNameFilter.value,
                 screenName,
@@ -131,10 +144,11 @@ object InAppMessageUtils {
             )
         } != null
     }
+
     private fun operateRealTimeValues(
         displayRuleSet: DisplayRuleSet?,
         params: HashMap<String, String>?,
-        isRealTime: Boolean
+        isRealTime: Boolean,
     ): Boolean {
         if (displayRuleSet != null) {
             when (displayRuleSet.logicOperator) {
@@ -460,19 +474,18 @@ object InAppMessageUtils {
             checkVisitorInfoAttr(criterion.parameter) -> {
                 if (criterion.parameter == SpecialRuleParameter.BIRTH_DATE.key) {
                     return birthCriteriaValid(criterion.values, getVisitorInfoAttrValue(criterion))
-                }
-                else if (criterion.dataType== DataType.DATETIME.name)
-                {
+                } else if (criterion.dataType == DataType.DATETIME.name) {
                     operateRuleParameter(
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = changeDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS","yyyy-MM-dd HH:mm:ss",DateTime.now().toLocalDateTime().toString()),
+                        userParam = changeDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS",
+                            "yyyy-MM-dd HH:mm:ss",
+                            DateTime.now().toLocalDateTime().toString()),
                         isRealTime = isRealTime
                     )
 
-                }
-                else {
+                } else {
                     operateRuleParameter(
                         operator = criterion.operator,
                         dataType = criterion.dataType,
@@ -506,9 +519,8 @@ object InAppMessageUtils {
             if (values.isNullOrEmpty()) return false
             val birthComparisonValue = values[0]
             if (birthComparisonValue.contains("-")) {
-                val days =birthComparisonValue.replace("-", "").toInt()
-                for (i in 0..days)
-                {
+                val days = birthComparisonValue.replace("-", "").toInt()
+                for (i in 0..days) {
                     if (DateTime.now().minusDays(days).plusDays(i).toString()
                             .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
                     ) {
@@ -524,9 +536,8 @@ object InAppMessageUtils {
                     return true
                 }
             } else {
-                val days =birthComparisonValue.replace("-", "").toInt()
-                for (i in 0..days)
-                {
+                val days = birthComparisonValue.replace("-", "").toInt()
+                for (i in 0..days) {
                     if (DateTime.now().plusDays(days).minusDays(i).toString()
                             .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
                     ) {

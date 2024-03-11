@@ -13,7 +13,7 @@ class InAppInLineFragment : BaseDataBindingFragment<FragmentInappInlineBinding>(
 
     override fun init() {
         sendPageView("in-app-message")
-
+Dengage.setCategoryPath("23")
         binding.btnShowInlineInapp.setOnClickListener {
             var propertyId = binding.etPropertyId.text.toString().trim()
             val screenName = binding.etScreenName.text.toString().trim()
