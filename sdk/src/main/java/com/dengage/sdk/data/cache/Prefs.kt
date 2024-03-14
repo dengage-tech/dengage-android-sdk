@@ -2,6 +2,7 @@ package com.dengage.sdk.data.cache
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.VisitorInfo
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
@@ -156,6 +157,14 @@ object Prefs {
     internal var getRealTimeMessagesBaseUrl: String
         get() = preferences.get(PreferenceKey.REAL_TIME_IN_APP_API_BASE_URL) ?: Constants.GET_REAL_INAPP_MESSAGES_API_URI
         set(value) = preferences.set(PreferenceKey.REAL_TIME_IN_APP_API_BASE_URL, value)
+
+    internal var disableOpenWebUrl: Boolean?
+        get() = preferences.get(PreferenceKey.DISABLE_WEB_OPEN_URL) ?: false
+        set (value) = preferences.set(PreferenceKey.DISABLE_WEB_OPEN_URL, value)
+
+    internal var notificationDisplayPriorityConfiguration: Int?
+        get() = preferences.get(PreferenceKey.NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION) ?: NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY.ordinal
+        set (value) = preferences.set(PreferenceKey.NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION, value)
     fun clear() {
         preferences.edit().clear().apply()
     }

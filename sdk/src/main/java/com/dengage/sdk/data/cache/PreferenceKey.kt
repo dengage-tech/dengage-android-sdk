@@ -33,6 +33,8 @@ enum class PreferenceKey {
     VISITOR_INFO_FETCH_TIME,
     CLASS_NAME,
     REAL_TIME_IN_APP_API_BASE_URL,
+    DISABLE_WEB_OPEN_URL,
+    NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION,
     VISITOR_INFO;
 
     override fun toString(): String = name

@@ -68,7 +68,7 @@ object InAppMessageUtils {
         val inAppMessageWithoutScreenName =
             sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
-                        isInlineInApp(inAppMessage, propertyId) &&
+                       /* isInlineInApp(inAppMessage, propertyId) &&*/
                         inAppMessage.data.isDisplayTimeAvailable() &&
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
                             params, isRealTime)
@@ -79,7 +79,7 @@ object InAppMessageUtils {
             return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.isDisplayTimeAvailable() &&
                         isScreenNameFound(inAppMessage, screenName) &&
-                        isInlineInApp(inAppMessage, propertyId) &&
+                       /* isInlineInApp(inAppMessage, propertyId) &&*/
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
                             params, isRealTime
@@ -120,7 +120,7 @@ object InAppMessageUtils {
     }
 
     fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?): Boolean {
-        if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
+   /*     if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
             return false
         } else if (inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == true && propertyId.isNullOrEmpty()) {
             return true
@@ -132,7 +132,8 @@ object InAppMessageUtils {
         else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == null) {
             return false
         }
-        else return true
+        else return true*/
+        return true
     }
 
     private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String): Boolean {

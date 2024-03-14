@@ -34,9 +34,9 @@ class InAppMessageManager :
         inAppInlineElement: InAppInlineElement?=null,
         propertyId: String? =""
     ) {
-        if(propertyId.isNullOrEmpty()) {
+      //  if(propertyId.isNullOrEmpty()) {
             cancelTimer()
-        }
+       // }
         // control next in app message show time
         if (Prefs.isDevelopmentStatusDebug == false) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
@@ -137,7 +137,7 @@ class InAppMessageManager :
                         Prefs.inAppMessageShowTime =
                             System.currentTimeMillis() + ((Prefs.sdkParameters?.inAppMinSecBetweenMessages
                                 ?: 0) * 1000)
-                        if (inAppMessage.data.inlineTarget?.androidSelector == propertyId) {
+                        if (/*inAppMessage.data.inlineTarget?.androidSelector == propertyId*/false ) {
 
                             inAppInlineElement?.populateInLineInApp(inAppMessage,activity)
                             InAppInlineElement.inAppMessageCallback = this@InAppMessageManager

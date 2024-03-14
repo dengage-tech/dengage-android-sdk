@@ -10,7 +10,7 @@ class InAppMessageData(
     @SerializedName("content") val content: Content,
     @SerializedName("displayCondition") val displayCondition: DisplayCondition,
     @SerializedName("displayTiming") val displayTiming: DisplayTiming,
-    @SerializedName("inlineTarget") val inlineTarget: InlineTarget?,
+   /* @SerializedName("inlineTarget") val inlineTarget: InlineTarget?,*/
     @SerializedName("publicId") val publicId: String?,
     @SerializedName("nextDisplayTime") var nextDisplayTime: Long = 0,
     @SerializedName("showCount") var showCount: Long = 0
@@ -19,6 +19,11 @@ class InAppMessageData(
     fun isRealTime(): Boolean = !publicId.isNullOrEmpty()
 
     fun isDisplayTimeAvailable(): Boolean {
-        return true
+        return (displayTiming.showEveryXMinutes == null ||
+            displayTiming.showEveryXMinutes == 0 ||
+            nextDisplayTime <= System.currentTimeMillis()) &&
+            (displayTiming.maxShowCount == null ||
+                displayTiming.maxShowCount == 0 ||
+                showCount < displayTiming.maxShowCount)
     }
 }

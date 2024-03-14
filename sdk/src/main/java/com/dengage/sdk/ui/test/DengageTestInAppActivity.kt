@@ -101,7 +101,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             displayCondition = displayCondition,
             displayTiming = displayTiming,
             publicId = null,
-            inlineTarget = null
+        /*inlineTarget = null*/
         )
 
         return InAppMessage(
@@ -144,7 +144,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             displayCondition = displayCondition,
             displayTiming = displayTiming,
             publicId = null,
-            inlineTarget = null
+        /*inlineTarget = null*/
         )
 
         return InAppMessage(
@@ -187,7 +187,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             displayCondition = displayCondition,
             displayTiming = displayTiming,
             publicId = null,
-            inlineTarget = null
+        /*inlineTarget = null*/
         )
 
         return InAppMessage(
@@ -230,7 +230,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             displayCondition = displayCondition,
             displayTiming = displayTiming,
             publicId = null,
-            inlineTarget = null
+        /*inlineTarget = null*/
         )
 
         return InAppMessage(
@@ -273,7 +273,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             displayCondition = displayCondition,
             displayTiming = displayTiming,
             publicId = null,
-            inlineTarget = null
+        /*inlineTarget = null*/
         )
 
         return InAppMessage(
@@ -316,7 +316,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             displayCondition = displayCondition,
             displayTiming = displayTiming,
             publicId = null,
-            inlineTarget = null
+        /*inlineTarget = null*/
         )
 
         return InAppMessage(
@@ -359,7 +359,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             displayCondition = displayCondition,
             displayTiming = displayTiming,
             publicId = null,
-            inlineTarget = null
+        /*inlineTarget = null*/
         )
 
         return InAppMessage(
@@ -402,7 +402,7 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
             displayCondition = displayCondition,
             displayTiming = displayTiming,
             publicId = null,
-            inlineTarget = null
+        /*inlineTarget = null*/
         )
 
         return InAppMessage(

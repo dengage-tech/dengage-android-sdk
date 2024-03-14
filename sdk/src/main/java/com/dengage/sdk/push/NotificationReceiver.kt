@@ -498,8 +498,7 @@ open class NotificationReceiver : BroadcastReceiver() {
     open fun createNotificationChannel(context: Context, message: Message): String {
         val soundUri = message.sound.getSoundUri(context)
 
-        val channelId =
-            if (message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID else message.sound
+        val channelId =DengageUtils.getChannelId(message)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager =
@@ -508,7 +507,7 @@ open class NotificationReceiver : BroadcastReceiver() {
             val notificationChannel = NotificationChannel(
                 channelId,
                 Prefs.notificationChannelName,
-                NotificationManager.IMPORTANCE_DEFAULT
+                DengageUtils.getNotificationPreference()
             )
             val audioAttributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)

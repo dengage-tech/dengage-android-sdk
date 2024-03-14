@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dengage.sdk.callback.DengageCallback;
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration;
 import com.dengage.sdk.domain.configuration.model.AppTracking;
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage;
 import com.dengage.sdk.domain.push.model.Message;
@@ -83,7 +84,7 @@ public class DengageManager {
      */
     public DengageManager init() {
         try {
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, null,"","","");
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, null,"","","",false, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
@@ -101,7 +102,7 @@ public class DengageManager {
     public DengageManager initWithFirebaseInstance(@NonNull FirebaseApp firebaseApp) {
         try {
             // create in app message manager and start new session
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  firebaseApp,"","","");
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  firebaseApp,"","","",false, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
