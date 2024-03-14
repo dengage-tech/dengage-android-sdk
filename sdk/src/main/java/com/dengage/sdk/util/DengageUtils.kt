@@ -1,6 +1,7 @@
 package com.dengage.sdk.util
 
 import android.app.ActivityManager
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -11,6 +12,7 @@ import android.os.DeadObjectException
 import android.telephony.TelephonyManager
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.subscription.model.Subscription
@@ -58,7 +60,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.55.3"
+        return "6.0.56.3"
     }
 
     fun getUserAgent(context: Context): String {
@@ -329,4 +331,16 @@ object DengageUtils {
         return randomInteger
 
     }
+
+    fun getNotificationPreference(): Int {
+        try {
+            return if (Prefs.notificationDisplayPriorityConfiguration == NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY.ordinal) NotificationManager.IMPORTANCE_DEFAULT else NotificationManager.IMPORTANCE_HIGH
+        } catch (e: java.lang.Exception) {
+        } catch (t: Throwable) {
+        }
+        return NotificationManager.IMPORTANCE_DEFAULT
+    }
+
+    fun getChannelId(message: Message):String{
+        return  if (message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID+"_"+getNotificationPreference() else message.sound+"_"+getNotificationPreference()}
 }
