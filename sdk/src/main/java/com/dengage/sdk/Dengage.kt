@@ -16,6 +16,7 @@ import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
@@ -81,7 +82,9 @@ object Dengage {
         deviceId: String? = null,
         deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
         contactKey: String? = null,
-        partnerDeviceId: String? = null
+        partnerDeviceId: String? = null,
+        disableOpenWebUrl:Boolean? =false,
+        notificationDisplayPriorityConfiguration: NotificationDisplayPriorityConfiguration =NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY
 
         ) {
         initialized = true
@@ -136,7 +139,8 @@ object Dengage {
             )
         }, 1000)
 
-
+        configurationManager.saveOpenWebUrlConfigurations(disableOpenWebUrl)
+        configurationManager.saveNotificationPriority(notificationDisplayPriorityConfiguration)
         configurationManager.getSdkParameters()
         DengageUtils.registerInAppBroadcast()
     }

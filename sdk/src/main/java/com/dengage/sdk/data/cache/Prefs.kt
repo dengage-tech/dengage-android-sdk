@@ -2,6 +2,7 @@ package com.dengage.sdk.data.cache
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.VisitorInfo
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
@@ -44,7 +45,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.APP_TRACKING_TIME, value)
 
     internal var inAppMessages: MutableList<InAppMessage>?
-        get() = preferences.get(PreferenceKey.IN_APP_MESSAGES)?:mutableListOf()
+        get() = preferences.get(PreferenceKey.IN_APP_MESSAGES) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGES, value)
 
     internal var inAppMessageFetchTime: Long
@@ -65,7 +66,8 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGE_SHOW_TIME, value)
 
     internal var notificationChannelName: String
-        get() = preferences.get(PreferenceKey.NOTIFICATION_CHANNEL_NAME, Constants.NOTIFICATION_CHANNEL_NAME)
+        get() = preferences.get(PreferenceKey.NOTIFICATION_CHANNEL_NAME,
+            Constants.NOTIFICATION_CHANNEL_NAME)
             ?: Constants.NOTIFICATION_CHANNEL_NAME
         set(value) = preferences.set(PreferenceKey.NOTIFICATION_CHANNEL_NAME, value)
 
@@ -90,7 +92,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.LOG_VISIBILITY, value)
 
     internal var rfmScores: MutableList<RFMScore>?
-        get() = preferences.get(PreferenceKey.RFM_SCORES)?: mutableListOf()
+        get() = preferences.get(PreferenceKey.RFM_SCORES) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.RFM_SCORES, value)
 
     internal var subscriptionCallTime: Long
@@ -123,7 +125,7 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.VISIT_COUNTS, value)
 
     internal var visitorInfo: VisitorInfo?
-        get() = preferences.get(PreferenceKey.VISITOR_INFO)?:VisitorInfo()
+        get() = preferences.get(PreferenceKey.VISITOR_INFO) ?: VisitorInfo()
         set(value) = preferences.set(PreferenceKey.VISITOR_INFO, value)
 
     internal var inAppDeeplink: String
@@ -151,8 +153,18 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.CLASS_NAME, value)
 
     internal var getRealTimeMessagesBaseUrl: String
-        get() = preferences.get(PreferenceKey.REAL_TIME_IN_APP_API_BASE_URL) ?: Constants.GET_REAL_INAPP_MESSAGES_API_URI
+        get() = preferences.get(PreferenceKey.REAL_TIME_IN_APP_API_BASE_URL)
+            ?: Constants.GET_REAL_INAPP_MESSAGES_API_URI
         set(value) = preferences.set(PreferenceKey.REAL_TIME_IN_APP_API_BASE_URL, value)
+
+    internal var disableOpenWebUrl: Boolean?
+        get() = preferences.get(PreferenceKey.DISABLE_WEB_OPEN_URL) ?: false
+        set (value) = preferences.set(PreferenceKey.DISABLE_WEB_OPEN_URL, value)
+
+    internal var notificationDisplayPriorityConfiguration: Int?
+        get() = preferences.get(PreferenceKey.NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION) ?: NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY.ordinal
+        set (value) = preferences.set(PreferenceKey.NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION, value)
+
     fun clear() {
         preferences.edit().clear().apply()
     }

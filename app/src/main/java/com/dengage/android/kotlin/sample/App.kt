@@ -8,6 +8,7 @@ import com.dengage.android.kotlin.sample.utils.Constants
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.DengageManager
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.util.DengageLifecycleTracker
 import com.dengage.sdk.util.DengageUtils
 import java.util.logging.Handler
@@ -33,6 +34,8 @@ class App : Application() {
             context = context,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
             deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
+            disableOpenWebUrl = false,
+            notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY
 
         )
 

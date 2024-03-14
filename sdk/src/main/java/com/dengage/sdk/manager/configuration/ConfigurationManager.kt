@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.DeadObjectException
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.TokenType
@@ -28,9 +29,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
     override fun providePresenter() = ConfigurationPresenter()
 
 
-
-    internal fun setDomain()
-    {
+    internal fun setDomain() {
         DengageUtils.getMetaData(name = "den_push_api_url").apply {
             if (this == null) {
                 DengageLogger.error("Push api url not found on application manifest metadata")
@@ -137,25 +136,25 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
     }
 
     fun getSdkParameters() {
-        try{
-        val subscription = Prefs.subscription
-        if (subscription?.integrationKey.isNullOrEmpty()) return
-        if (!DengageUtils.isAppInForeground()) return
-        // if 24 hours passed after getting sdk params, you should get again
-        val sdkParameters = Prefs.sdkParameters
-        if (sdkParameters != null &&
-            System.currentTimeMillis() < sdkParameters.lastFetchTimeInMillis + (24 * 60 * 60 * 1000)
-        ) {
-            // fetch in app messages
-            configurationCallback?.fetchInAppMessages()
-            return
+        try {
+            val subscription = Prefs.subscription
+            if (subscription?.integrationKey.isNullOrEmpty()) return
+            if (!DengageUtils.isAppInForeground()) return
+            // if 24 hours passed after getting sdk params, you should get again
+            val sdkParameters = Prefs.sdkParameters
+            if (sdkParameters != null &&
+                System.currentTimeMillis() < sdkParameters.lastFetchTimeInMillis + (24 * 60 * 60 * 1000)
+            ) {
+                // fetch in app messages
+                configurationCallback?.fetchInAppMessages()
+                return
+            }
+            presenter.getSdkParameters(
+                integrationKey = subscription!!.integrationKey
+            )
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
-        presenter.getSdkParameters(
-            integrationKey = subscription!!.integrationKey
-        )
-        }
-        catch (e:Exception){}
-        catch (e:Throwable){}
     }
 
     override fun sdkParametersFetched(sdkParameters: SdkParameters) {
@@ -193,14 +192,16 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         }
     }
 
-    private fun initWithHuawei(subscription: Subscription,
-                               huaweiIntegrationKey: String? = null) {
+    private fun initWithHuawei(
+        subscription: Subscription,
+        huaweiIntegrationKey: String? = null,
+    ) {
         ConfigurationUtils.getHuaweiToken(
             onTokenResult = {
                 subscription.tokenType = TokenType.HUAWEI.type
                 subscription.token = it
                 if (huaweiIntegrationKey != null) {
-                    subscription.integrationKey=huaweiIntegrationKey
+                    subscription.integrationKey = huaweiIntegrationKey
                 }
                 configurationCallback?.sendSubscription(subscription)
             }
@@ -214,6 +215,22 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
                 }
                 configurationCallback?.sendSubscription(subscription)
             }
+        }
+    }
+
+    fun saveOpenWebUrlConfigurations(disableOpenWebUrl: Boolean?) {
+        try {
+            Prefs.disableOpenWebUrl = disableOpenWebUrl
+        } catch (e: java.lang.Exception) {
+        } catch (e: Throwable) {
+        }
+    }
+
+    fun saveNotificationPriority(notificationDisplayConfiguration: NotificationDisplayPriorityConfiguration?) {
+        try {
+            Prefs.notificationDisplayPriorityConfiguration = notificationDisplayConfiguration?.ordinal
+        } catch (e: java.lang.Exception) {
+        } catch (e: Throwable) {
         }
     }
 }

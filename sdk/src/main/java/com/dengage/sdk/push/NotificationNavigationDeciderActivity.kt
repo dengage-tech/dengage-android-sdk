@@ -51,7 +51,7 @@ class NotificationNavigationDeciderActivity : Activity() {
                         uri = targetUrl
 
 
-                        if (uri != null && !TextUtils.isEmpty(uri)) {
+                        if (uri != null && !TextUtils.isEmpty(uri) && Prefs.disableOpenWebUrl ==false) {
 
                             sendingIntentObject = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
 
