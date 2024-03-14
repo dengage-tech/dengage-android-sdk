@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.DeadObjectException
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.TokenType
@@ -176,6 +177,22 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
                 }
                 configurationCallback?.sendSubscription(subscription)
             }
+        }
+    }
+
+    fun saveOpenWebUrlConfigurations(disableOpenWebUrl: Boolean?) {
+        try {
+            Prefs.disableOpenWebUrl = disableOpenWebUrl
+        } catch (e: java.lang.Exception) {
+        } catch (e: Throwable) {
+        }
+    }
+
+    fun saveNotificationPriority(notificationDisplayConfiguration: NotificationDisplayPriorityConfiguration?) {
+        try {
+            Prefs.notificationDisplayPriorityConfiguration = notificationDisplayConfiguration?.ordinal
+        } catch (e: java.lang.Exception) {
+        } catch (e: Throwable) {
         }
     }
 

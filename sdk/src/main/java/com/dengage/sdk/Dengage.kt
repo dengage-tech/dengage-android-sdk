@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.geofence.model.GeofenceLocationSource
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
@@ -90,6 +91,8 @@ object Dengage {
         deviceId: String? = null,
         contactKey: String? = null,
         partnerDeviceId: String? = null,
+        disableOpenWebUrl:Boolean? =false,
+        notificationDisplayPriorityConfiguration: NotificationDisplayPriorityConfiguration =NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY
     ) {
         initialized = true
         ContextHolder.resetContext(context = context)
@@ -135,6 +138,8 @@ object Dengage {
                 firebaseIntegrationKey = firebaseIntegrationKey
             )
         }, 1000)
+        configurationManager.saveOpenWebUrlConfigurations(disableOpenWebUrl)
+        configurationManager.saveNotificationPriority(notificationDisplayPriorityConfiguration)
         configurationManager.getSdkParameters()
 
         if (geofenceEnabled) {
