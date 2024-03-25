@@ -40,6 +40,9 @@
         <action
             android:id="@+id/actionHomeToRealTimeInAppMessage"
             app:destination="@id/realTimeInAppMessageFragment" />
+        <action
+            android:id="@+id/actionHomeToinappInline"
+            app:destination="@id/inappInLineFragment" />
     </fragment>
     <fragment
         android:id="@+id/deviceInfoFragment"
@@ -91,4 +94,10 @@
         android:name="com.dengage.android.kotlin.sample.ui.fragment.RealTimeInAppMessageFragment"
         android:label="fragment_real_time_in_app_message"
         tools:layout="@layout/fragment_real_time_in_app_message" />
+
+    <fragment
+        android:id="@+id/inappInLineFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.InAppInLineFragment"
+        android:label="fragment_inline_inapp"
+        tools:layout="@layout/fragment_inapp_inline" />
 </navigation>

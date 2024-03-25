@@ -5,12 +5,14 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
+import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
 import java.util.*
 
 class InAppMessageManager :
     BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
-    InAppMessageContract.View, InAppMessageActivity.InAppMessageCallback {
+    InAppMessageContract.View, InAppMessageActivity.InAppMessageCallback,
+    InAppInlineElement.InAppMessageCallback {
 
     override fun providePresenter() = InAppMessagePresenter()
 
@@ -27,12 +29,16 @@ class InAppMessageManager :
         activity: Activity,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        resultCode: Int = -1 ,isRealTime: Boolean = false
+        resultCode: Int = -1,
+        isRealTime: Boolean = false,
+        inAppInlineElement: InAppInlineElement?=null,
+        propertyId: String? =""
     ) {
+          if(propertyId.isNullOrEmpty()) {
         cancelTimer()
-
+         }
         // control next in app message show time
-        if(Prefs.isDevelopmentStatusDebug==false){
+        if (Prefs.isDevelopmentStatusDebug == false) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
         }
         val inAppMessages =
@@ -40,9 +46,9 @@ class InAppMessageManager :
         Prefs.inAppMessages = inAppMessages
         if (!inAppMessages.isNullOrEmpty()) {
             val priorInAppMessage =
-                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime)
+                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime,propertyId)
             if (priorInAppMessage != null) {
-                showInAppMessage(activity, priorInAppMessage, resultCode)
+                showInAppMessage(activity, priorInAppMessage, resultCode, inAppInlineElement = inAppInlineElement , propertyId = propertyId)
             }
         }
     }
@@ -56,8 +62,7 @@ class InAppMessageManager :
         presenter.getInAppMessages()
     }
 
-    internal fun fetchVisitorInfo()
-    {
+    internal fun fetchVisitorInfo() {
         presenter.getVisitorInfo()
     }
 
@@ -102,7 +107,7 @@ class InAppMessageManager :
      * Show in app message dialog on activity screen
      */
     private fun showInAppMessage(
-        activity: Activity, inAppMessage: InAppMessage, resultCode: Int = -1
+        activity: Activity, inAppMessage: InAppMessage, resultCode: Int = -1,propertyId: String? ="",inAppInlineElement: InAppInlineElement?
     ) {
         try {
             // set delay for showing in app message
@@ -132,18 +137,25 @@ class InAppMessageManager :
                         Prefs.inAppMessageShowTime =
                             System.currentTimeMillis() + ((Prefs.sdkParameters?.inAppMinSecBetweenMessages
                                 ?: 0) * 1000)
+                        if (inAppMessage.data.inlineTarget?.androidSelector == propertyId ) {
 
-                        activity.startActivityForResult(
-                            InAppMessageActivity.newIntent(
-                                activity, inAppMessage, resultCode
-                            ), resultCode
-                        )
+                            inAppInlineElement?.populateInLineInApp(inAppMessage,activity)
+                            InAppInlineElement.inAppMessageCallback = this@InAppMessageManager
+
+                        }else {
+                            activity.startActivityForResult(
+                                InAppMessageActivity.newIntent(
+                                    activity, inAppMessage, resultCode
+                                ), resultCode
+                            )
 
 
-                        if (!inAppMessage.data.content.params.shouldAnimate) {
-                            activity.overridePendingTransition(0, 0)
+                            if (!inAppMessage.data.content.params.shouldAnimate) {
+                                activity.overridePendingTransition(0, 0)
+                            }
+                            InAppMessageActivity.inAppMessageCallback = this@InAppMessageManager
                         }
-                        InAppMessageActivity.inAppMessageCallback = this@InAppMessageManager
+
                     }
                 }
             }, delay)

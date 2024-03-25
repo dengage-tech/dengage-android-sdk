@@ -55,7 +55,8 @@ object InAppMessageUtils {
         inAppMessages: List<InAppMessage>,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        isRealTime: Boolean = false
+        isRealTime: Boolean = false,
+        propertyId: String? = "",
     ): InAppMessage? {
         // sort list with comparator
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
@@ -67,9 +68,10 @@ object InAppMessageUtils {
         val inAppMessageWithoutScreenName =
             sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
+                        isInlineInApp(inAppMessage, propertyId) &&
                         inAppMessage.data.isDisplayTimeAvailable() &&
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                            params,isRealTime)
+                            params, isRealTime)
             }
         return if (screenName.isNullOrEmpty()) {
             inAppMessageWithoutScreenName
@@ -77,6 +79,7 @@ object InAppMessageUtils {
             return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.isDisplayTimeAvailable() &&
                         isScreenNameFound(inAppMessage, screenName) &&
+                        isInlineInApp(inAppMessage, propertyId) &&
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
                             params, isRealTime
@@ -113,6 +116,22 @@ object InAppMessageUtils {
               } != null*/
 
 
+    }
+
+
+    fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?): Boolean {
+        return if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
+            false
+        } else if (inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == true && propertyId.isNullOrEmpty()) {
+            true
+        } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isEmpty() == true) {
+            false
+        } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
+            inAppMessage.data.inlineTarget?.androidSelector?.equals(propertyId) == true
+        } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == null) {
+            false
+        } else true
+      //  return true
     }
 
     private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String) :Boolean

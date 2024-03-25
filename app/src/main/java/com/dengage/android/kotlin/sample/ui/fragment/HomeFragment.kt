@@ -67,7 +67,9 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
             Dengage.showTestPage(requireActivity())
         }
 
-
+        binding.btnInAppinline.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToinappInline())
+        }
     }
 
 }

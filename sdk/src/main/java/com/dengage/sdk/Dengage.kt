@@ -39,6 +39,7 @@ import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.push.clearNotification
+import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
@@ -820,5 +821,11 @@ object Dengage {
     fun setClassName(className:String)
     {
         Prefs.className=className
+    }
+
+   private fun showInlineInApp(propertyId:String, inAppInlineElement: InAppInlineElement, activity: Activity, customParams: HashMap<String, String>? = null, screenName: String?)
+    {
+        inAppMessageManager.setNavigation(propertyId= propertyId,inAppInlineElement=inAppInlineElement, activity = activity, params = customParams, screenName = screenName)
+
     }
 }
