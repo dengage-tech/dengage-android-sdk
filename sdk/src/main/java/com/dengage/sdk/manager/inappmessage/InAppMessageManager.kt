@@ -34,9 +34,9 @@ class InAppMessageManager :
         inAppInlineElement: InAppInlineElement?=null,
         propertyId: String? =""
     ) {
-      //  if(propertyId.isNullOrEmpty()) {
+        if(propertyId.isNullOrEmpty()) {
             cancelTimer()
-       // }
+        }
         // control next in app message show time
         if (Prefs.isDevelopmentStatusDebug == false) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
