@@ -119,7 +119,7 @@ object InAppMessageUtils {
 
     }
 
-    fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?): Boolean {
+    private fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?): Boolean {
         if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
             return false
         } else if (inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == true && propertyId.isNullOrEmpty()) {

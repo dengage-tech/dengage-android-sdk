@@ -29,12 +29,12 @@ Dengage.setCategoryPath("23")
             if (customKey2.isNotEmpty() && customValue2.isNotEmpty()) {
                 customParams[customKey2] = customValue2
             }
-          /*  Dengage.showInlineInApp(screenName = screenName.ifEmpty { null },
+            Dengage.showInlineInApp(screenName = screenName.ifEmpty { null },
                 inAppInlineElement = binding.webview,
                 propertyId = propertyId,
                 activity = requireActivity(),
                 customParams = customParams.ifEmpty { null }
-            )*/
+            )
         }
     }
 

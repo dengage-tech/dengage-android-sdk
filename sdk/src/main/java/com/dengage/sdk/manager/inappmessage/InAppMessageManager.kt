@@ -137,7 +137,7 @@ class InAppMessageManager :
                         Prefs.inAppMessageShowTime =
                             System.currentTimeMillis() + ((Prefs.sdkParameters?.inAppMinSecBetweenMessages
                                 ?: 0) * 1000)
-                        if (/*inAppMessage.data.inlineTarget?.androidSelector == propertyId*/false ) {
+                        if (inAppMessage.data.inlineTarget?.androidSelector == propertyId ) {
 
                             inAppInlineElement?.populateInLineInApp(inAppMessage,activity)
                             InAppInlineElement.inAppMessageCallback = this@InAppMessageManager

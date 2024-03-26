@@ -42,14 +42,8 @@ class InAppInlineElement : WebView {
     }
 
     companion object {
-        /**
-        Set Inapp inlinee callback for handling Inapp inlinee actions
-         */
         var inAppMessageCallback: InAppMessageCallback? = null
 
-
-        const val EXTRA_IN_APP_MESSAGE = "EXTRA_IN_APP_MESSAGE"
-        const val RESULT_CODE = "RESULT_CODE"
 
 
     }
