@@ -50,6 +50,7 @@ import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.toJson
 import com.google.firebase.FirebaseApp
 import com.dengage.sdk.push.clearNotification
+import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManager
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -885,5 +886,11 @@ object Dengage {
     fun setClassName(className:String)
     {
         Prefs.className=className
+    }
+
+    fun showInlineInApp(propertyId:String, inAppInlineElement: InAppInlineElement, activity: Activity, customParams: HashMap<String, String>? = null, screenName: String?, hideIfNotFound:Boolean? = false)
+    {
+        inAppMessageManager.setNavigation(propertyId= propertyId,inAppInlineElement=inAppInlineElement, activity = activity, params = customParams, screenName = screenName, hideIfNotFound = hideIfNotFound)
+
     }
 }
