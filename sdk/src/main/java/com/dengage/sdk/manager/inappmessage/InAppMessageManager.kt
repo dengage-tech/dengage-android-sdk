@@ -1,6 +1,7 @@
 package com.dengage.sdk.manager.inappmessage
 
 import android.app.Activity
+import android.view.View
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.manager.base.BaseMvpManager
@@ -32,7 +33,8 @@ class InAppMessageManager :
         resultCode: Int = -1,
         isRealTime: Boolean = false,
         inAppInlineElement: InAppInlineElement?=null,
-        propertyId: String? =""
+        propertyId: String? ="",
+        hideIfNotFound:Boolean? = false
     ) {
         if(propertyId.isNullOrEmpty()) {
             cancelTimer()
@@ -49,6 +51,10 @@ class InAppMessageManager :
                 InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime,propertyId)
             if (priorInAppMessage != null) {
                 showInAppMessage(activity, priorInAppMessage, resultCode, inAppInlineElement = inAppInlineElement , propertyId = propertyId)
+            }
+            else if(!propertyId.isNullOrEmpty()&& hideIfNotFound==true)
+            {
+                inAppInlineElement?.visibility= View.GONE
             }
         }
     }

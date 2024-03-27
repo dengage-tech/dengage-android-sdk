@@ -33,7 +33,8 @@ Dengage.setCategoryPath("23")
                 inAppInlineElement = binding.webview,
                 propertyId = propertyId,
                 activity = requireActivity(),
-                customParams = customParams.ifEmpty { null }
+                customParams = customParams.ifEmpty { null },
+                hideIfNotFound = true
             )
         }
     }

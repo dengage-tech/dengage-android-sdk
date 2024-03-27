@@ -802,9 +802,9 @@ object Dengage {
         Prefs.className=className
     }
 
-    fun showInlineInApp(propertyId:String, inAppInlineElement: InAppInlineElement, activity: Activity, customParams: HashMap<String, String>? = null, screenName: String?)
+    fun showInlineInApp(propertyId:String, inAppInlineElement: InAppInlineElement, activity: Activity, customParams: HashMap<String, String>? = null, screenName: String?,  hideIfNotFound:Boolean? = false)
     {
-        inAppMessageManager.setNavigation(propertyId= propertyId,inAppInlineElement=inAppInlineElement, activity = activity, params = customParams, screenName = screenName)
+        inAppMessageManager.setNavigation(propertyId= propertyId,inAppInlineElement=inAppInlineElement, activity = activity, params = customParams, screenName = screenName, hideIfNotFound = hideIfNotFound)
 
     }
 }
