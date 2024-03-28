@@ -1,42 +1,33 @@
 {
   "project_info": {
-    "project_number": "722038687787",
-    "firebase_url": "https://batuhan-dengage-sample.firebaseio.com",
-    "project_id": "batuhan-dengage-sample",
-    "storage_bucket": "batuhan-dengage-sample.appspot.com"
+    "project_number": "450490384663",
+    "project_id": "andriodnewsdk",
+    "storage_bucket": "andriodnewsdk.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:722038687787:android:23320f4e11e8d86320426e",
+        "mobilesdk_app_id": "1:450490384663:android:2ee2841ac9c28c257cb752",
         "android_client_info": {
           "package_name": "com.dengage.android.kotlin.sample"
         }
       },
       "oauth_client": [
         {
-          "client_id": "722038687787-2narprd5i2eedpm8j6cmsb6j42uv0c99.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.dengage.android.kotlin.sample",
-            "certificate_hash": "6c4b81c1d086ff0f06ba1054965aaf3c1baec6e1"
-          }
-        },
-        {
-          "client_id": "722038687787-kbe3ku8c1c3tflgjga1o6lkldc3m0r1d.apps.googleusercontent.com",
+          "client_id": "450490384663-kmn7jbnis4efmn02rgecp3iv8fo6lou5.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA35CwWAXEtcx6OA0A8SzFqh9r6bIdoANE"
+          "current_key": "AIzaSyCQF6D_I3DItd4r7LQWDkt2vEOUpKYOPwE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "722038687787-kbe3ku8c1c3tflgjga1o6lkldc3m0r1d.apps.googleusercontent.com",
+              "client_id": "450490384663-kmn7jbnis4efmn02rgecp3iv8fo6lou5.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

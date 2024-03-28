@@ -150,8 +150,8 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
         if (location == null) {
             return
         }
-        this.removeBubbleGeofences()
-        if (stopped) {
+     //   this.removeBubbleGeofences()
+     /*   if (stopped) {
             val identifier = BUBBLE_STOPPED_GEOFENCE_REQUEST_ID
             val radius = STOPPED_GEOFENCE_RADIUS.toFloat()
             val geofence = Geofence.Builder()
@@ -202,7 +202,7 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                         DL.debug("Error adding moving bubble geofence | message = ${it.message}")
                     }
                 }
-        }
+        }*/
     }
 
     private fun replaceSyncedGeofences(geofenceClusters: Array<Cluster>?) {
