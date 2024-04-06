@@ -145,7 +145,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             }
             copyData[EventKey.EVENT_TYPE.key] = EventType.CANCEL.type
             if (copyData.containsKey(EventKey.TOTAL_AMOUNT.key)) {
-                copyData[EventKey.TOTAL_AMOUNT.key] = 0
+                if(copyData[EventKey.TOTAL_AMOUNT.key].toString().toIntOrNull()!=null) {
+                    val totalAmount: Int = copyData[EventKey.TOTAL_AMOUNT.key] as Int
+                    copyData[EventKey.TOTAL_AMOUNT.key] = totalAmount.unaryMinus()
+                }
             }
             sendDeviceEvent(EventTable.ORDER_EVENTS.tableName, copyData)
 
