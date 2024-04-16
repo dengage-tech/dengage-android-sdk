@@ -30,9 +30,22 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
             for (eventParameter in eventParameters) {
                 customEventData[eventParameter.key!!] = eventParameter.value!!
             }
-            Dengage.sendCustomEvent(
-                binding.etTableName.text.toString().trim(),
-                Dengage.getSubscription()?.contactKey!!,
+            val cartItems= arrayOf (HashMap<String, Any>())
+
+
+            val item1: HashMap<String, Any> = HashMap()
+            item1["product_id"] = "1234"
+            item1["product_variant_id"] = "12224"
+            item1["quantity"] = 1
+            item1["unit_price"] = 9.99
+            item1["discounted_price"] = 9.99
+// ... extra columns in shopping_cart_events_detail table, can be added here
+// ... extra columns in shopping_cart_events_detail table, can be added here
+            cartItems[0]=item1
+
+
+            customEventData.put("cartItems",cartItems)
+            Dengage.order(
                 customEventData
             )
         }
