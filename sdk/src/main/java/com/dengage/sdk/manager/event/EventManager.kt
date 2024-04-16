@@ -98,6 +98,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                     if (obj is HashMap<*, *>) {
                         val product = obj as HashMap<String, Any>
                         product[EventKey.EVENT_ID.key] = eventId
+                        product[EventKey.EVENT_TYPE.key] = eventType
                         sendDeviceEvent(EventTable.SHOPPING_CART_EVENTS_DETAIL.tableName, product)
                     }
                 }
@@ -158,8 +159,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                     if (obj is HashMap<*, *>) {
                         val product = obj as HashMap<String, Any>
                         if (copyData.containsKey(EventKey.ORDER_ID.key)) {
+                            val toString = copyData[EventKey.ORDER_ID.key].toString()
                             product[EventKey.ORDER_ID.key] =
-                                copyData[EventKey.ORDER_ID.key].toString()
+                                toString
+                            product[EventKey.EVENT_TYPE.key] =  EventType.CANCEL.type
                         }
                         sendDeviceEvent(EventTable.ORDER_EVENTS_DETAIL.tableName, product)
                     }
@@ -195,6 +198,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                         if (copyData.containsKey(EventKey.ORDER_ID.key)) {
                             product[EventKey.ORDER_ID.key] =
                                 copyData[EventKey.ORDER_ID.key].toString()
+                            product[EventKey.EVENT_TYPE.key] =  EventType.ORDER.type
                         }
                         sendDeviceEvent(EventTable.ORDER_EVENTS_DETAIL.tableName, product)
                     }
@@ -289,12 +293,12 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         eventDetails: HashMap<String, Any>
     ) {
         try{
-        DengageLogger.verbose("sendDeviceEvent method is called")
-        sendCustomEvent(
-            tableName = tableName,
-            key = Prefs.subscription?.getSafeDeviceId()!!,
-            eventDetails = eventDetails
-        )
+            DengageLogger.verbose("sendDeviceEvent method is called")
+            sendCustomEvent(
+                tableName = tableName,
+                key = Prefs.subscription?.getSafeDeviceId()!!,
+                eventDetails = eventDetails
+            )
         } catch (e: Exception) {
             DengageLogger.error(e.message)
         }
