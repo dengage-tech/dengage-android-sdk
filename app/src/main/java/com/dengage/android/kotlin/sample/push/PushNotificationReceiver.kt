@@ -13,6 +13,7 @@ import com.dengage.android.kotlin.sample.R
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.push.NotificationReceiver
+import com.dengage.sdk.push.getSoundUri
 
 class PushNotificationReceiver : NotificationReceiver() {
 
@@ -110,6 +111,7 @@ class PushNotificationReceiver : NotificationReceiver() {
             .setCustomBigContentView(carouselView)
             .setContentIntent(contentPendingIntent)
             .setDeleteIntent(deletePendingIntent)
+            .setSound(message.sound.getSoundUri(context))
             .build()
 
         // show message again silently with next, previous and current item.
@@ -117,10 +119,6 @@ class PushNotificationReceiver : NotificationReceiver() {
 
         // show message
         val notificationManager = NotificationManagerCompat.from(context)
-        notificationManager.notify(
-            message.messageSource,
-            message.messageId,
-            notification
-        )
+        intent.extras?.getInt("requestCode")?.let { notificationManager.notify(it, notification) }
     }
 }
