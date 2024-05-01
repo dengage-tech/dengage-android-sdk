@@ -21,6 +21,7 @@ import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
+import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import java.io.File
@@ -222,6 +223,8 @@ fun Context.clearNotification(message: Message?) {
         }
         val manager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         manager?.cancel(message?.messageSource, message?.messageId!!)
+        for (nid in Constants.listOfNotificationIds) { manager?.cancel(Integer.parseInt(nid.toString())) }
+
     } catch (ex: Exception) {
 
     } catch (ex: Throwable) {

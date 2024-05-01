@@ -479,8 +479,7 @@ open class NotificationReceiver : BroadcastReceiver() {
                 val requestCode = random.nextInt()
                 val buttonIntent = Intent(Constants.PUSH_ACTION_CLICK_EVENT)
                 buttonIntent.putExtra("id", actionButton.id)
-                buttonIntent.putExtra("targetUrl", actionButton.targetUrl)
-                buttonIntent.putExtra("RAW_DATA", message.toJson())
+                buttonIntent.putExtras(intent.extras!!)
                 buttonIntent.setPackage(packageName)
                 val btnPendingIntent: PendingIntent? =
                     getPendingIntent(context, requestCode, buttonIntent)
