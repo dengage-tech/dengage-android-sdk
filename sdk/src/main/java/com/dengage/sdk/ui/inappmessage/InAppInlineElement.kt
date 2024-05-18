@@ -24,7 +24,7 @@ import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchSettingsActivity
 
-class InAppInlineElement : WebView {
+open class InAppInlineElement : WebView {
     private lateinit var inAppMessage: InAppMessage
     private var contextWebView: Context? = null
     private var isAndroidUrlNPresent: Boolean? = false
