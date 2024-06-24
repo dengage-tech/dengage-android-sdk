@@ -60,7 +60,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.61.3"
+        return "6.0.62.3"
     }
 
     fun getUserAgent(context: Context): String {
@@ -190,10 +190,18 @@ object DengageUtils {
             filter.addAction(Constants.PUSH_ITEM_CLICK_EVENT)
             filter.addAction("com.dengage.push.intent.CAROUSEL_ITEM_CLICK")
 
-            ContextHolder.context.applicationContext.registerReceiver(
-                NRTrampoline(),
-                filter
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextHolder.context.applicationContext.registerReceiver(
+                    NRTrampoline(),
+                    filter,Context.RECEIVER_EXPORTED
+                )
+            }
+            else {
+                ContextHolder.context.applicationContext.registerReceiver(
+                    NRTrampoline(),
+                    filter
+                )
+            }
 
 
         } catch (e: Exception) {
@@ -219,7 +227,7 @@ object DengageUtils {
         try {
             val broadCastIntent = Intent(intent.action)
             broadCastIntent.putExtras(intent.extras!!)
-            context.sendBroadcast(broadCastIntent)
+            ContextHolder.context.applicationContext.sendBroadcast(broadCastIntent)
         } catch (e: Exception) {
 
         }
@@ -282,10 +290,18 @@ object DengageUtils {
     fun registerInAppBroadcast() {
         try {
             val intentFilter = IntentFilter(Constants.DEEPLINK_RETRIEVE_EVENT)
-            ContextHolder.context.applicationContext.registerReceiver(
-                InAppBroadcastReceiver(),
-                intentFilter
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextHolder.context.applicationContext.registerReceiver(
+                    InAppBroadcastReceiver(),
+                    intentFilter, Context.RECEIVER_EXPORTED
+                )
+            }
+            else {
+                ContextHolder.context.applicationContext.registerReceiver(
+                    InAppBroadcastReceiver(),
+                    intentFilter
+                )
+            }
 
 
         } catch (e: Exception) {
