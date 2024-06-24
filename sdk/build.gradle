@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         minSdk 19
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -72,8 +72,8 @@ dependencies {
     api 'com.google.code.gson:gson:2.10.1'
 
     api 'joda-time:joda-time:2.12.5'
-
-    implementation 'com.google.android.play:core:1.10.3'
+    implementation 'com.google.android.play:review:2.0.1'
+    implementation 'com.google.android.play:review-ktx:2.0.1'
 
 
 }
