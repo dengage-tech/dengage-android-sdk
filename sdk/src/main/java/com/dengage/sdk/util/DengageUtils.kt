@@ -244,10 +244,10 @@ object DengageUtils {
             broadCastIntent.putExtras(intent.extras!!)
             ContextHolder.context.applicationContext.sendBroadcast(broadCastIntent)
         } catch (e: Exception) {
-   e.printStackTrace()
+   //e.printStackTrace()
         } catch (ex: Throwable) {
             // ex.printStackTrace()
-ex.printStackTrace()
+
         }
     }
 
