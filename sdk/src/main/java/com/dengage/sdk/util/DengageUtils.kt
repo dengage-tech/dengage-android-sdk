@@ -60,7 +60,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.62.2"
+        return "6.0.63.2"
     }
 
     fun getUserAgent(context: Context): String {
@@ -360,4 +360,8 @@ object DengageUtils {
 
     fun getChannelId(message: Message):String{
         return  if (message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID+"_"+getNotificationPreference() else message.sound+"_"+getNotificationPreference()}
+
+    fun getLanguage(): String {
+        return Prefs.language.toString()
+    }
 }
