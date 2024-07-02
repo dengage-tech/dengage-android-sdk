@@ -252,7 +252,7 @@ class SubscriptionManager :
         try {
             val subscription = Prefs.subscription
 
-            // control the last country equals to new country then send subscription
+            // control the last language equals to new language then send subscription
             if (subscription != null && (subscription.language == null || subscription.language != language)) {
                 subscription.language = language
                 Prefs.language = language
