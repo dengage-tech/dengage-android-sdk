@@ -39,7 +39,7 @@ class SubscriptionManager :
         deviceId: String?,
         deviceConfigurationPreference: DeviceConfigurationPreference?,
         contactKey: String?,
-        partnerDeviceId: String?
+        partnerDeviceId: String?,
     ) {
 
         this.deviceConfigurationPreference = deviceConfigurationPreference
@@ -194,7 +194,7 @@ class SubscriptionManager :
             subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
             subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
             subscription.sdkVersion = DengageUtils.getSdkVersion()
-            subscription.language = Locale.getDefault().language
+            subscription.language = DengageUtils.getLanguage()
 
             subscription.timezone = DengageUtils.getIANAFormatTimeZone()
             DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
@@ -209,7 +209,7 @@ class SubscriptionManager :
     internal fun setFirebaseIntegrationKey(integrationKey: String) {
         val subscription = Prefs.subscription
 
-        if (subscription != null  && (subscription.integrationKey.isNullOrEmpty() || subscription.integrationKey != integrationKey)) {
+        if (subscription != null && (subscription.integrationKey.isNullOrEmpty() || subscription.integrationKey != integrationKey)) {
             subscription.integrationKey = integrationKey
 
             saveSubscription(subscription = subscription)
@@ -222,7 +222,7 @@ class SubscriptionManager :
     internal fun setHuaweiIntegrationKey(integrationKey: String) {
         val subscription = Prefs.subscription
 
-        if (subscription != null  && (subscription.integrationKey.isNullOrEmpty() || subscription.integrationKey != integrationKey)) {
+        if (subscription != null && (subscription.integrationKey.isNullOrEmpty() || subscription.integrationKey != integrationKey)) {
             subscription.integrationKey = integrationKey
 
             saveSubscription(subscription = subscription)
@@ -244,6 +244,28 @@ class SubscriptionManager :
 
             // send to api
             presenter.sendSubscription(subscription = subscription)
+        }
+    }
+
+    internal fun setLanguage(language: String) {
+
+        try {
+            val subscription = Prefs.subscription
+
+            // control the last country equals to new country then send subscription
+            if (subscription != null && (subscription.language == null || subscription.language != language)) {
+                subscription.language = language
+                Prefs.language = language
+                DengageLogger.debug("language: $language")
+
+                saveSubscription(subscription = subscription)
+
+                // send to api
+                presenter.sendSubscription(subscription = subscription)
+            }
+
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
     }
 
