@@ -14,6 +14,7 @@ import com.dengage.sdk.domain.visitcount.model.VisitCountItem
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageUtils
+import java.util.Locale
 
 object Prefs {
 
@@ -179,6 +180,10 @@ object Prefs {
     internal var notificationDisplayPriorityConfiguration: Int?
         get() = preferences.get(PreferenceKey.NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION) ?: NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY.ordinal
         set (value) = preferences.set(PreferenceKey.NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION, value)
+
+    internal var language: String?
+        get() = preferences.get(PreferenceKey.LANGUAGE) ?: Locale.getDefault().language
+        set (value) = preferences.set(PreferenceKey.LANGUAGE, value)
 
     fun clear() {
         preferences.edit().clear().apply()

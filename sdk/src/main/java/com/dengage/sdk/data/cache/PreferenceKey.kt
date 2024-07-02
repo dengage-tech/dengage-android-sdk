@@ -39,6 +39,7 @@ enum class PreferenceKey {
     REAL_TIME_IN_APP_API_BASE_URL,
     DISABLE_WEB_OPEN_URL,
     NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION,
+    LANGUAGE,
     VISITOR_INFO;
 
     override fun toString(): String = name

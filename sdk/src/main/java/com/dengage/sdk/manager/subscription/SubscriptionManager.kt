@@ -195,7 +195,7 @@ class SubscriptionManager :
             subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
             subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
             subscription.sdkVersion = DengageUtils.getSdkVersion()
-            subscription.language = Locale.getDefault().language
+            subscription.language = DengageUtils.getLanguage()
 
             subscription.timezone = DengageUtils.getIANAFormatTimeZone()
             DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
@@ -245,6 +245,28 @@ class SubscriptionManager :
 
             // send to api
             presenter.sendSubscription(subscription = subscription)
+        }
+    }
+
+    internal fun setLanguage(language: String) {
+
+        try {
+            val subscription = Prefs.subscription
+
+            // control the last language equals to new language then send subscription
+            if (subscription != null && (subscription.language == null || subscription.language != language)) {
+                subscription.language = language
+                Prefs.language = language
+                DengageLogger.debug("language: $language")
+
+                saveSubscription(subscription = subscription)
+
+                // send to api
+                presenter.sendSubscription(subscription = subscription)
+            }
+
+        } catch (e: Exception) {
+        } catch (e: Throwable) {
         }
     }
 

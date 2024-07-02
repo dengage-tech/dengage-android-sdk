@@ -892,4 +892,14 @@ object Dengage {
         inAppMessageManager.setNavigation(propertyId= propertyId,inAppInlineElement=inAppInlineElement, activity = activity, params = customParams, screenName = screenName, hideIfNotFound = hideIfNotFound)
 
     }
+
+    /**
+     * Set language
+     * Use to set language of current subscription
+     * @param language language string
+     */
+    fun setLanguage(language: String) {
+        DengageLogger.verbose("setLanguage method is called")
+        subscriptionManager.setLanguage(language = language)
+    }
 }
