@@ -43,9 +43,6 @@ import com.google.firebase.FirebaseApp
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.push.clearNotification
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
-import com.google.android.play.core.review.ReviewInfo
-import com.google.android.play.core.review.ReviewManager
-import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.android.gms.tasks.Task
 
 @SuppressLint("StaticFieldLeak")
@@ -772,20 +769,6 @@ object Dengage {
     }
 
     fun showRatingDialog(activity: Activity, reviewDialogCallback: ReviewDialogCallback) {
-        val reviewManager: ReviewManager = ReviewManagerFactory.create(activity)
-        val request: Task<ReviewInfo> = reviewManager.requestReviewFlow()
-        request.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val reviewInfo: ReviewInfo = task.result
-                val flow: Task<Void> = reviewManager.launchReviewFlow(activity, reviewInfo)
-                flow.addOnCompleteListener {
-
-                    reviewDialogCallback.onCompletion()
-                }
-            } else {
-                reviewDialogCallback.onError()
-            }
-        }
     }
 
     fun requestNotificationPermission(activity: Activity)
