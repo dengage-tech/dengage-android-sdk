@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.VisitorInfo
+import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.rfm.model.RFMScore
@@ -72,9 +73,9 @@ object Prefs {
             ?: Constants.NOTIFICATION_CHANNEL_NAME
         set(value) = preferences.set(PreferenceKey.NOTIFICATION_CHANNEL_NAME, value)
 
-    internal var subscription: Subscription?
+    var subscription: Subscription?
         get() = preferences.get(PreferenceKey.SUBSCRIPTION)
-        set(value) = preferences.set(PreferenceKey.SUBSCRIPTION, value)
+        internal set(value) = preferences.set(PreferenceKey.SUBSCRIPTION, value)
 
     internal var inboxMessageFetchTime: Long
         get() = preferences.get(PreferenceKey.INBOX_MESSAGE_FETCH_TIME, 0) ?: 0
@@ -95,6 +96,19 @@ object Prefs {
     internal var rfmScores: MutableList<RFMScore>?
         get() = preferences.get(PreferenceKey.RFM_SCORES) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.RFM_SCORES, value)
+
+    internal var geofenceApiBaseUrl: String
+        get() = preferences.get(PreferenceKey.GEOFENCE_API_BASE_URL) ?: Constants.GEOFENCE_API_URI
+        set(value) = preferences.set(PreferenceKey.GEOFENCE_API_BASE_URL, value)
+
+    var geofenceEnabled: Boolean
+        get() = preferences.get(PreferenceKey.GEOFENCE_ENABLED, defaultValue = false) ?: false
+        set(value) = preferences.set(PreferenceKey.GEOFENCE_ENABLED, value)
+
+    var geofenceHistory: GeofenceHistory
+        get() = preferences.get(PreferenceKey.GEOFENCE_HISTORY, defaultValue = GeofenceHistory())
+            ?: GeofenceHistory()
+        set(value) = preferences.set(PreferenceKey.GEOFENCE_HISTORY, value)
 
     internal var subscriptionCallTime: Long
         get() = preferences.get(PreferenceKey.SUBSCRIPTION_CALL_TIME, 0) ?: 0

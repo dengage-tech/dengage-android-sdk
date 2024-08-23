@@ -18,6 +18,22 @@ object Constants {
     const val NOTIFICATION_CHANNEL_NAME = "General"
     const val DEEPLINK_RETRIEVE_EVENT = "com.dengage.inapp.LINK_RETRIEVAL"
 
+
+    internal const val GEOFENCE_API_URI = "https://dev-push.dengage.com/geoapi/"
+
+
+    const val SYNCED_GEOFENCES_REQUEST_ID_PREFIX = "dengage_sync"
+    const val DESIRED_MOVING_UPDATE_INTERVAL = 150
+    const val FASTEST_MOVING_UPDATE_INTERVAL = 30
+    const val DESIRED_SYNC_INTERVAL = 20
+    const val STOP_DURATION = 140
+    const val STOP_DISTANCE = 70
+    const val GEOFENCE_MAX_MONITOR_COUNT = 50
+    const val GEOFENCE_MAX_FETCH_INTERVAL_MILISECONDS = (15 * 60 * 1000).toLong()
+    const val GEOFENCE_MAX_EVENT_SIGNAL_INTERVAL_MILISECONDS = (5 * 60 * 1000).toLong()
+    const val GEOFENCE_FETCH_HISTORY_MAX_COUNT = 100
+    const val GEOFENCE_EVENT_HISTORY_MAX_COUNT = 100
+
     internal var deviceId=""
     var deviceToken=""
 

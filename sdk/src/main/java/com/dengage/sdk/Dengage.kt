@@ -62,7 +62,8 @@ object Dengage {
     private val deviceIdSenderManager by lazy { DeviceIdSenderManager() }
     private val inAppSessionManager by lazy { InAppSessionManager() }
 
-    internal var initialized = false
+    var initialized = false
+        internal set
     private var isInAppFetched: Boolean = false
     private var currentActivity: Activity? = null
 
@@ -80,6 +81,7 @@ object Dengage {
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
+        geofenceEnabled: Boolean = false,
         deviceId: String? = null,
         deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
         contactKey: String? = null,
@@ -135,6 +137,7 @@ object Dengage {
             configurationManager.init(
                 firebaseApp = firebaseApp,
                 firebaseIntegrationKey = firebaseIntegrationKey,
+                geofenceEnabled = geofenceEnabled,
                 huaweiIntegrationKey = huaweiIntegrationKey,
                 deviceConfigurationPreference = deviceConfigurationPreference
             )

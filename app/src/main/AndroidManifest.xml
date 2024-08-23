@@ -34,7 +34,6 @@
         <!-- below is the same filter as above just the scheme is changed to http -->
         <!-- so we can open our app with the url starting with https and http as well -->
         <intent-filter>
-            <action android:name="android.intent.action.VIEW" />
 
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
