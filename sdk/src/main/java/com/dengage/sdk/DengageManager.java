@@ -40,7 +40,7 @@ public class DengageManager {
     private static DengageManager _instance = null;
     private final Context _context;
     private static String firebaseIntegrationKey = null;
-
+    private static boolean disableWebUrl = false;
     private DengageManager(Context context) {
         _context = context;
         ContextHolder.INSTANCE.setContext(context);
@@ -84,7 +84,7 @@ public class DengageManager {
      */
     public DengageManager init() {
         try {
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, null,"","","",false, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, null,"","","",disableWebUrl, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
@@ -102,7 +102,7 @@ public class DengageManager {
     public DengageManager initWithFirebaseInstance(@NonNull FirebaseApp firebaseApp) {
         try {
             // create in app message manager and start new session
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  firebaseApp,"","","",false, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey,  firebaseApp,"","","",disableWebUrl, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
@@ -479,6 +479,11 @@ public class DengageManager {
                 postData,
                 null);
         networkRequest.executeTask();*/
+    }
+
+    public DengageManager setDisableWebUrl(Boolean disableWebUrlParam) {
+        disableWebUrl = disableWebUrlParam;
+        return _instance;
     }
 
 }
