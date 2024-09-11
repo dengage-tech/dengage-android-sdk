@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Looper
 import com.dengage.android.kotlin.sample.push.PushNotificationReceiver
 import com.dengage.android.kotlin.sample.utils.Constants
+import com.dengage.geofence.DengageGeofence
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.DengageManager
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
@@ -38,6 +39,8 @@ class App : Application() {
             notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY
 
         )
+
+        DengageGeofence.startGeofence()
 
       /*  Dengage.setContactKey("dasdasd")
         Dengage.setPartnerDeviceId("hi")

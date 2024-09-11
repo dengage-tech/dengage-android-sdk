@@ -43,6 +43,7 @@
         <action
             android:id="@+id/actionHomeToinappInline"
             app:destination="@id/inappInLineFragment" />
+
     </fragment>
     <fragment
         android:id="@+id/deviceInfoFragment"

@@ -67,12 +67,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         firebaseApp: FirebaseApp?,
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
-        geofenceEnabled: Boolean,
         deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
 
         ) {
-
-        Prefs.geofenceEnabled = geofenceEnabled
 
         var subscription = Prefs.subscription
         if (subscription == null) {

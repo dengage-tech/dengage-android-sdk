@@ -74,14 +74,12 @@ object Dengage {
      * @param firebaseIntegrationKey for fcm operations, get firebase integration from dengage panel
      * @param huaweiIntegrationKey for hms operations,  get huawei integration from dengage panel
      * @param firebaseApp for fcm operations, it is optional parameter
-     * @param geoFenceEnabled for geofence tracking, it is optional parameter
      */
     fun init(
         context: Context,
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
-        geofenceEnabled: Boolean = false,
         deviceId: String? = null,
         deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
         contactKey: String? = null,
@@ -137,7 +135,6 @@ object Dengage {
             configurationManager.init(
                 firebaseApp = firebaseApp,
                 firebaseIntegrationKey = firebaseIntegrationKey,
-                geofenceEnabled = geofenceEnabled,
                 huaweiIntegrationKey = huaweiIntegrationKey,
                 deviceConfigurationPreference = deviceConfigurationPreference
             )

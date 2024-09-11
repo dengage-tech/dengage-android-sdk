@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentGeofenceBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
+import com.dengage.geofence.DengageGeofence
 import com.dengage.sdk.Dengage
 
 class GeofenceFragment : BaseDataBindingFragment<FragmentGeofenceBinding>() {
@@ -16,9 +17,14 @@ class GeofenceFragment : BaseDataBindingFragment<FragmentGeofenceBinding>() {
     override fun init() {
         sendPageView("geofence")
 
+        binding.btnRequestLocationPermission.setOnClickListener {
+            val activity = this.activity as AppCompatActivity
+            DengageGeofence.requestLocationPermissions(activity)
+        }
 
-
-
+        binding.btnStopGeofencing.setOnClickListener {
+            DengageGeofence.stopGeofence()
+        }
 
     }
 }

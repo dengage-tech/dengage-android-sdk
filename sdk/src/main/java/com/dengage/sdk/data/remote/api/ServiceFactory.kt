@@ -36,7 +36,9 @@ object ServiceFactory {
             ApiType.REAL_TIME_INAPP -> {
                 GetRealTimeInAppProvider.INSTANCE.create(serviceClass)
             }
-
+            ApiType.GEOFENCE -> {
+                GeofenceApiProvider.INSTANCE.create(serviceClass)
+            }
         }
     }
 }

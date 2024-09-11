@@ -70,6 +70,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         binding.btnInAppinline.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToinappInline())
         }
+
+        binding.btnGeofencePage.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToGeofence())
+        }
     }
 
 }
