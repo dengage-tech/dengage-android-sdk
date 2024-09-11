@@ -38,6 +38,7 @@ import com.dengage.sdk.manager.rfm.RFMManager
 import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
+import com.dengage.sdk.push.IDengageHmsManager
 import com.dengage.sdk.push.clearNotification
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.story.StoriesListView
@@ -81,6 +82,7 @@ object Dengage {
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
         firebaseApp: FirebaseApp? = null,
+        dengageHmsManager: IDengageHmsManager? = null,
         deviceId: String? = null,
         deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
         contactKey: String? = null,
@@ -134,6 +136,7 @@ object Dengage {
 
         Handler(Looper.getMainLooper()).postDelayed({
             configurationManager.init(
+                dengageHmsManager = dengageHmsManager,
                 firebaseApp = firebaseApp,
                 firebaseIntegrationKey = firebaseIntegrationKey,
                 huaweiIntegrationKey = huaweiIntegrationKey,

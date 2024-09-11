@@ -1,10 +1,9 @@
-
 /*
-package com.dengage.geofence
+
+package com.dengage.hms
 
 import androidx.test.platform.app.InstrumentationRegistry
-//import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,7 +21,7 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.dengage.geofence.test", appContext.packageName)
+        assertEquals("com.dengage.hms.test", appContext.packageName)
     }
 }
 */

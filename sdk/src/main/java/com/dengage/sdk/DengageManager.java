@@ -79,7 +79,7 @@ public class DengageManager {
      */
     public DengageManager init() {
         try {
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, huaweiIntegrationKey, null,"",null,"","",disableWebUrl, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, huaweiIntegrationKey, null, null,"",null,"","",disableWebUrl, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }
@@ -97,7 +97,7 @@ public class DengageManager {
     public DengageManager initWithFirebaseInstance(@NonNull FirebaseApp firebaseApp) {
         try {
             // create in app message manager and start new session
-            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, huaweiIntegrationKey, firebaseApp,"",null,"","",disableWebUrl, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
+            Dengage.INSTANCE.init(_context, firebaseIntegrationKey, huaweiIntegrationKey, firebaseApp, null,"",null,"","",disableWebUrl, NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY);
         } catch (Exception e) {
             DengageLogger.INSTANCE.error(e.getMessage());
         }

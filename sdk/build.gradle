@@ -70,9 +70,6 @@ dependencies {
     api 'com.google.firebase:firebase-core:21.1.1'
     api 'com.google.firebase:firebase-messaging:23.3.1'
 
-    // huawei
-    api 'com.huawei.hms:push:6.3.0.304'
-    api 'com.huawei.hms:ads-identifier:3.4.39.302'
     api 'com.google.code.gson:gson:2.10.1'
 
     api 'joda-time:joda-time:2.12.5'

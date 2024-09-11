@@ -13,12 +13,12 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.configuration.util.ConfigurationUtils
+import com.dengage.sdk.push.IDengageHmsManager
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.google.firebase.FirebaseApp
 import java.util.*
-import com.dengage.sdk.util.*
 import java.util.concurrent.TimeUnit
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
@@ -65,6 +65,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
     internal fun init(
         firebaseApp: FirebaseApp?,
+        dengageHmsManager: IDengageHmsManager? = null,
         firebaseIntegrationKey: String? = null,
         huaweiIntegrationKey: String? = null,
         deviceConfigurationPreference: DeviceConfigurationPreference? = DeviceConfigurationPreference.Google,
@@ -76,6 +77,8 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             subscription = Subscription()
             Prefs.subscription = subscription
         }
+
+        ConfigurationUtils.dengageHmsManager = dengageHmsManager
 
         if (ConfigurationUtils.isGooglePlayServicesAvailable() && ConfigurationUtils.isHuaweiMobileServicesAvailable()) {
             DengageLogger.verbose("Google Play Services and Huawei Mobile Service are available. Firebase services will be used")

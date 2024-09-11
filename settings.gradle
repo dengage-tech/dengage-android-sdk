@@ -11,3 +11,4 @@ rootProject.name = "DengageAndroid"
 include ':app'
 include ':sdk'
 include ':sdk-geofence'
+include ':sdk-hms'

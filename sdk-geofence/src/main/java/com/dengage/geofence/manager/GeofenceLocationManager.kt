@@ -3,7 +3,6 @@ package com.dengage.geofence.manager
 import java.util.*
 import android.annotation.SuppressLint as SL
 import android.location.Location
-import com.dengage.geofence.manager.GeofenceLocationReceiver
 import com.google.android.gms.location.GeofencingClient as GC
 import com.google.android.gms.location.FusedLocationProviderClient as FLPC
 import com.google.android.gms.location.LocationRequest

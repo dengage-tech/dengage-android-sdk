@@ -2,17 +2,14 @@ package com.dengage.android.kotlin.sample
 
 import android.app.Application
 import android.content.Context
-import android.os.Looper
-import com.dengage.android.kotlin.sample.push.PushNotificationReceiver
 import com.dengage.android.kotlin.sample.utils.Constants
-import com.dengage.geofence.DengageGeofence
 import com.dengage.sdk.Dengage
-import com.dengage.sdk.DengageManager
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.util.DengageLifecycleTracker
-import com.dengage.sdk.util.DengageUtils
-import java.util.logging.Handler
+import com.dengage.sdk.push.IDengageHmsManager
+import com.dengage.hms.DengageHmsManager
+import com.dengage.geofence.DengageGeofence
 
 class App : Application() {
     /*lateinit var dengageManager: DengageManager
@@ -31,9 +28,14 @@ class App : Application() {
             .setFirebaseIntegrationKey(Constants.FIREBASE_APP_INTEGRATION_KEY)
             .init()*/
              val context :Context  = this
+
+        val dengageHmsManager = DengageHmsManager()
+
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
+            dengageHmsManager = dengageHmsManager,
             deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
             disableOpenWebUrl = false,
             notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY

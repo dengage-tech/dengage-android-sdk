@@ -1,4 +1,4 @@
-package com.dengage.sdk.push
+package com.dengage.hms
 
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.util.ContextHolder
