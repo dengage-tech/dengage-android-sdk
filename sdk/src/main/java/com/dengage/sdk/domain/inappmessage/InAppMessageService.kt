@@ -136,4 +136,22 @@ interface InAppMessageService {
         @Query("session_id") sessionId: String,
         @Query("eventval") duration: Long
     ): Response<Unit>
+
+    @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
+    @GET("/realtime-inapp/event")
+    suspend fun sendStoryEvent(
+        @Query("accid") accountName: String?,
+        @Query("eventtype") eventType: String,
+        @Query("ckey") contactKey: String?,
+        @Query("did") deviceId: String,
+        @Query("appid") appId: String?,
+        @Query("session_id") sessionId: String,
+        @Query("campid") campaignId: String,
+        @Query("campparams") messageDetails: String?,
+        @Query("content_id") contentId: String?,
+        @Query("stPrId") storyProfileId: String?,
+        @Query("stPrName") storyProfileName: String?,
+        @Query("stId") storyId: String?,
+        @Query("stName") storyName: String?
+    ): Response<Unit>
 }

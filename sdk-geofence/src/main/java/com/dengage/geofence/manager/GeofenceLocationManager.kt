@@ -142,7 +142,7 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
     }
 
 
-    private fun replaceBubbleGeofence(location: Location?, stopped: Boolean) {
+    private fun replaceBubbleGeofence(location: Location?, stopped: Boolean = false) {
         if (location == null) {
             return
         }
@@ -292,7 +292,7 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
             this.updateTracking(location)
             return
         }
-        val duration: Long
+        //val duration: Long
         if (STOP_DISTANCE > 0 && STOP_DURATION > 0) {
             var lastMovedLocation = GState.getLastMovedLocation()
             if (lastMovedLocation == null) {

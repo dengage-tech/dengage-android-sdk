@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ll_story"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/fl_circle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_circle_shadow"
+        android:padding="0dp">
+
+        <com.dengage.sdk.ui.story.CircularImageView
+            android:id="@+id/civ_story"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            app:civ_border="true"
+            app:civ_border_color="#3f51b5"
+            app:civ_border_width="10dp"
+            app:civ_shadow="false"
+            app:civ_shadow_color="#3f51b5"
+            app:civ_shadow_radius="6dp" />
+    </FrameLayout>
+
+
+
+    <TextView
+        android:id="@+id/tv_story_name"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textColor="#000000"
+        android:textSize="12sp" />
+</LinearLayout>

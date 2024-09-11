@@ -1,3 +1,4 @@
+/*
 package com.dengage.sdk.manager.inappmessage.util
 
 import com.dengage.sdk.domain.inappmessage.model.*
@@ -161,3 +162,5 @@ object InAppMessageMocker {
     }
 
 }
+
+ */

@@ -42,5 +42,11 @@ object Constants {
     var isBCRegistered =false
 
     var listOfNotificationIds = mutableListOf<Int?>()
+
+    const val STORY_COVER_POSITION = "story_cover_position"
+    const val STORY_POSITION = "story_position"
+    const val INAPP_MESSAGE = "inapp_message"
+    const val CONTENT_ID = "content_id"
+    const val PUBLIC_ID = "public_id"
 }
 

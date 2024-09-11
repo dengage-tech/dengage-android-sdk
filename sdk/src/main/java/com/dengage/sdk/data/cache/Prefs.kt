@@ -184,6 +184,10 @@ object Prefs {
         get() = preferences.get(PreferenceKey.LANGUAGE) ?: Locale.getDefault().language
         set (value) = preferences.set(PreferenceKey.LANGUAGE, value)
 
+    internal var shownStoryCoverDic: MutableMap<String, MutableList<String>> ?
+        get() = preferences.get(PreferenceKey.SHOWN_STORY_COVER_DIC) ?: mutableMapOf()
+        set(value) = preferences.set(PreferenceKey.SHOWN_STORY_COVER_DIC, value)
+
 
     fun clear() {
         preferences.edit().clear().apply()

@@ -4,6 +4,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.usecase.GetVisitorInfo
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.*
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
@@ -22,6 +23,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val setInAppMessageAsDisplayed by lazy { SetInAppMessageAsDisplayed() }
     private val getInAppExpiredMessageIds by lazy { GetInAppExpiredMessageIds() }
     private val setRealTimeInAppMessageAsDisplayed by lazy { SetRealTimeInAppMessageAsDisplayed() }
+    private val sendStoryEvent by lazy { SendStoryEvent() }
     private val getVisitorInfo by lazy { GetVisitorInfo() }
 
     override fun getInAppMessages() {
@@ -251,6 +253,43 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 }
             }
         }
+    }
+
+    override fun sendStoryEvent(
+        storyEventType: StoryEventType,
+        inAppMessage: InAppMessage,
+        storyProfileId: String?,
+        storyProfileName: String?,
+        storyId: String?,
+        storyName: String?) {
+        val sdkParameters = Prefs.sdkParameters
+        sendStoryEvent(this) {
+            onResponse = {
+                view { inAppMessageSetAsClicked() }
+            }
+            params = SendStoryEvent.Params(
+                accountName = sdkParameters?.accountName!!,
+                subscription = Prefs.subscription!!,
+                appId = sdkParameters.appId,
+                sessionId = SessionManager.getSessionId(),
+                campaignId = inAppMessage.data.publicId!!,
+                messageDetails = inAppMessage.data.messageDetails,
+                contentId = inAppMessage.data.content.contentId,
+                storyProfileId = storyProfileId,
+                storyProfileName = storyProfileName,
+                storyId = storyId,
+                storyName = storyName,
+                storyEventType = storyEventType
+            )
+        }
+    }
+
+    override fun setStoryCoverShown(storyCoverId: String, storySetId: String) {
+        //TODO:EG implement this
+    }
+    override fun sortStoryCovers(storyCovers: List<StoryCover>, storySetId: String): List<StoryCover> {
+        //TODO:EG implement this
+        return storyCovers
     }
 
     override fun fetchInAppExpiredMessageIds() {

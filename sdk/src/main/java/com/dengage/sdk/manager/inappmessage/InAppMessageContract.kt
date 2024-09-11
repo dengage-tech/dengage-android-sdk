@@ -1,8 +1,8 @@
 package com.dengage.sdk.manager.inappmessage
 
-import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
-import com.dengage.sdk.domain.subscription.model.Subscription
+import com.dengage.sdk.domain.inappmessage.model.StoryCover
+import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
 import com.dengage.sdk.manager.base.BasePresenter
 import com.dengage.sdk.manager.base.BaseView
 
@@ -22,6 +22,19 @@ interface InAppMessageContract {
             inAppMessage: InAppMessage,
             buttonId: String?
         )
+
+        fun sendStoryEvent(
+            storyEventType: StoryEventType,
+            inAppMessage: InAppMessage,
+            storyProfileId: String? = null,
+            storyProfileName: String? = null,
+            storyId: String? = null,
+            storyName: String? = null
+        )
+
+        fun setStoryCoverShown(storyCoverId: String, storySetId: String)
+        fun sortStoryCovers(storyCovers: List<StoryCover>, storySetId: String): List<StoryCover>
+
         fun getVisitorInfo()
 
 

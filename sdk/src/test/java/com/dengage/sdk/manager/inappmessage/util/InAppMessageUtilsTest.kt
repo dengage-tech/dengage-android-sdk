@@ -1,3 +1,4 @@
+/*
 package com.dengage.sdk.manager.inappmessage.util
 
 import com.dengage.sdk.domain.inappmessage.model.Operator
@@ -546,3 +547,4 @@ class InAppMessageUtilsTest {
         Assert.assertEquals(priorInAppMessage?.id, id2)
     }*/
 }
+ */

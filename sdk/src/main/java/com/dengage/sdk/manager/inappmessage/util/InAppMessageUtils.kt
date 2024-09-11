@@ -57,6 +57,7 @@ object InAppMessageUtils {
         params: HashMap<String, String>? = null,
         isRealTime: Boolean = false,
         propertyId: String? = "",
+        storyPropertyId: String? = null,
     ): InAppMessage? {
         // sort list with comparator
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
@@ -68,7 +69,7 @@ object InAppMessageUtils {
         val inAppMessageWithoutScreenName =
             sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
-                        isInlineInApp(inAppMessage, propertyId) &&
+                        isInlineInApp(inAppMessage, propertyId, storyPropertyId) &&
                         inAppMessage.data.isDisplayTimeAvailable() &&
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
                             params, isRealTime)
@@ -79,7 +80,7 @@ object InAppMessageUtils {
             return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.isDisplayTimeAvailable() &&
                         isScreenNameFound(inAppMessage, screenName) &&
-                        isInlineInApp(inAppMessage, propertyId) &&
+                        isInlineInApp(inAppMessage, propertyId, storyPropertyId) &&
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
                             params, isRealTime
@@ -119,19 +120,30 @@ object InAppMessageUtils {
     }
 
 
-    fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?): Boolean {
-        return if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
-            false
-        } else if (inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == true && propertyId.isNullOrEmpty()) {
-            true
-        } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isEmpty() == true) {
-            false
-        } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
-            inAppMessage.data.inlineTarget?.androidSelector?.equals(propertyId) == true
-        } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == null) {
-            false
-        } else true
-      //  return true
+    fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?, storyPropertyId: String?): Boolean {
+        if ("story".equals(inAppMessage.data.content.type, ignoreCase = true)) {
+            val isPropertyEmpty = storyPropertyId.isNullOrEmpty()
+            val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
+            return if (isPropertyEmpty || isSelectorEmpty) {
+                false
+            } else {
+                inAppMessage.data.inlineTarget?.androidSelector == storyPropertyId
+            }
+        } else if (storyPropertyId.isNullOrEmpty()) {
+            return if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
+                false
+            } else if (inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == true && propertyId.isNullOrEmpty()) {
+                true
+            } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isEmpty() == true) {
+                false
+            } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
+                inAppMessage.data.inlineTarget?.androidSelector?.equals(propertyId) == true
+            } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == null) {
+                false
+            } else true
+        }
+        return false
+        //return true
     }
 
     private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String) :Boolean

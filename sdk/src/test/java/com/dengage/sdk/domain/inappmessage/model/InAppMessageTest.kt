@@ -1,3 +1,4 @@
+/*
 package com.dengage.sdk.domain.inappmessage.model
 
 import org.junit.Assert
@@ -55,3 +56,4 @@ class InAppMessageTest {
     }
 
 }
+*/

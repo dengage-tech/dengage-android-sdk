@@ -75,4 +75,35 @@ class RealTimeInAppMessageRepository {
         )
     }
 
+    suspend fun sendStoryEvent(
+        accountName: String?,
+        subscription: Subscription,
+        appId: String?,
+        sessionId: String,
+        campaignId: String,
+        messageDetails: String?,
+        contentId: String?,
+        storyProfileId: String?,
+        storyProfileName: String?,
+        storyId: String?,
+        storyName: String?,
+        storyEventType: String
+    ): Response<Unit> {
+        return service.sendStoryEvent(
+            accountName = accountName,
+            contactKey = subscription.contactKey,
+            deviceId = subscription.getSafeDeviceId(),
+            appId = appId,
+            sessionId = sessionId,
+            campaignId = campaignId,
+            messageDetails = messageDetails,
+            contentId = contentId,
+            storyProfileId = storyProfileId,
+            storyProfileName = storyProfileName,
+            storyId = storyId,
+            storyName = storyName,
+            eventType = storyEventType
+        )
+    }
+
 }

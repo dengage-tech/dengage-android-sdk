@@ -40,6 +40,7 @@ import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.push.clearNotification
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
+import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
@@ -826,6 +827,23 @@ object Dengage {
     fun showInlineInApp(propertyId:String, inAppInlineElement: InAppInlineElement, activity: Activity, customParams: HashMap<String, String>? = null, screenName: String?,  hideIfNotFound:Boolean? = false)
     {
         inAppMessageManager.setNavigation(propertyId= propertyId,inAppInlineElement=inAppInlineElement, activity = activity, params = customParams, screenName = screenName, hideIfNotFound = hideIfNotFound)
+
+    }
+
+    fun showStoriesList(
+        storyPropertyId: String,
+        storiesListView: StoriesListView,
+        activity: Activity,
+        customParams: HashMap<String, String>? = null,
+        screenName: String?
+    ) {
+        inAppMessageManager.setNavigation(
+            storyPropertyId = storyPropertyId,
+            storiesListView = storiesListView,
+            activity = activity,
+            params = customParams,
+            screenName = screenName
+        )
 
     }
 

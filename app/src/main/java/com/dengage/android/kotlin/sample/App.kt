@@ -40,7 +40,7 @@ class App : Application() {
 
         )
 
-        DengageGeofence.startGeofence()
+
 
       /*  Dengage.setContactKey("dasdasd")
         Dengage.setPartnerDeviceId("hi")
@@ -51,6 +51,10 @@ class App : Application() {
 
 
         Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
+
+        DengageGeofence.startGeofence()
+
+
       /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)
         registerReceiver(
             PushNotificationReceiver(),

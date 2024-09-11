@@ -15,5 +15,6 @@ class ContentParams(
     @SerializedName("marginRight") val marginRight: Int?,
     @SerializedName("dismissOnTouchOutside") val dismissOnTouchOutside: Boolean?,
     @SerializedName("backgroundColor") val backgroundColor: String?,
+    @SerializedName("storySet") val storySet: StorySet?,
 
 ) : Serializable

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/dengage_page_margin_medium"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etPropertyId"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:hint="property id"
+            android:textSize="@dimen/dengage_text_size_medium" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etScreenName"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:hint="screen name"
+            android:textSize="@dimen/dengage_text_size_medium" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etBackgroundColor"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:hint="Story Background Color"
+            android:value="#000000"
+            android:textSize="@dimen/dengage_text_size_medium" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnBackgroundColor"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:layout_marginTop="12dp"
+            android:text="Change Story Background Color" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnRefreshStory"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:layout_marginTop="12dp"
+            android:text="Refresh Story" />
+
+        <com.dengage.sdk.ui.story.StoriesListView
+            android:id="@+id/storiesListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
+
+    </LinearLayout>
+
+</layout>

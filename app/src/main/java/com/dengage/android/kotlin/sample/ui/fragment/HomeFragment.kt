@@ -74,6 +74,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         binding.btnGeofencePage.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToGeofence())
         }
+
+        binding.btnAppStory.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToAppStory())
+        }
     }
 
 }

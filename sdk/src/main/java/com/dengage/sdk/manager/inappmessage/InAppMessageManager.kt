@@ -1,19 +1,29 @@
 package com.dengage.sdk.manager.inappmessage
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.view.View
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.inappmessage.model.StoryCover
+import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
+import com.dengage.sdk.ui.story.StoriesListView
+import com.dengage.sdk.util.Constants
+import com.dengage.sdk.util.ContextHolder
+import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
+import com.dengage.sdk.util.extension.launchActivity
 import java.util.*
 
 class InAppMessageManager :
     BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
     InAppMessageContract.View, InAppMessageActivity.InAppMessageCallback,
-    InAppInlineElement.InAppMessageCallback {
+    InAppInlineElement.InAppMessageCallback, StoriesListView.InAppMessageCallback {
 
     override fun providePresenter() = InAppMessagePresenter()
 
@@ -32,13 +42,15 @@ class InAppMessageManager :
         params: HashMap<String, String>? = null,
         resultCode: Int = -1,
         isRealTime: Boolean = false,
-        inAppInlineElement: InAppInlineElement?=null,
-        propertyId: String? ="",
-        hideIfNotFound:Boolean? = false
+        inAppInlineElement: InAppInlineElement? = null,
+        propertyId: String? = "",
+        hideIfNotFound: Boolean? = false,
+        storyPropertyId: String? = null,
+        storiesListView: StoriesListView? = null,
     ) {
-          if(propertyId.isNullOrEmpty()) {
-        cancelTimer()
-         }
+        if (propertyId.isNullOrEmpty()) {
+            cancelTimer()
+        }
         // control next in app message show time
         if (Prefs.isDevelopmentStatusDebug == false) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
@@ -48,13 +60,37 @@ class InAppMessageManager :
         Prefs.inAppMessages = inAppMessages
         if (!inAppMessages.isNullOrEmpty()) {
             val priorInAppMessage =
-                InAppMessageUtils.findPriorInAppMessage(inAppMessages, screenName, params,isRealTime,propertyId)
+                InAppMessageUtils.findPriorInAppMessage(
+                    inAppMessages,
+                    screenName,
+                    params,
+                    isRealTime,
+                    propertyId,
+                    storyPropertyId
+                )
+
             if (priorInAppMessage != null) {
-                showInAppMessage(activity, priorInAppMessage, resultCode, inAppInlineElement = inAppInlineElement , propertyId = propertyId)
-            }
-            else if(!propertyId.isNullOrEmpty()&& hideIfNotFound==true)
-            {
-                inAppInlineElement?.visibility= View.GONE
+                if (!storyPropertyId.isNullOrEmpty() && storiesListView != null) {
+                    val androidSelector = priorInAppMessage.data.inlineTarget?.androidSelector
+                    if (androidSelector == storyPropertyId && "story".equals(
+                            priorInAppMessage.data.content.type,
+                            ignoreCase = true
+                        )
+                    ) {
+                        showAppStory(activity, priorInAppMessage, storiesListView)
+                    }
+                } else {
+                    showInAppMessage(
+                        activity,
+                        priorInAppMessage,
+                        resultCode,
+                        inAppInlineElement = inAppInlineElement,
+                        propertyId = propertyId
+                    )
+                }
+
+            } else if (!propertyId.isNullOrEmpty() && hideIfNotFound == true) {
+                inAppInlineElement?.visibility = View.GONE
             }
         }
     }
@@ -113,7 +149,11 @@ class InAppMessageManager :
      * Show in app message dialog on activity screen
      */
     private fun showInAppMessage(
-        activity: Activity, inAppMessage: InAppMessage, resultCode: Int = -1,propertyId: String? ="",inAppInlineElement: InAppInlineElement?
+        activity: Activity,
+        inAppMessage: InAppMessage,
+        resultCode: Int = -1,
+        propertyId: String? = "",
+        inAppInlineElement: InAppInlineElement?
     ) {
         try {
             // set delay for showing in app message
@@ -143,12 +183,12 @@ class InAppMessageManager :
                         Prefs.inAppMessageShowTime =
                             System.currentTimeMillis() + ((Prefs.sdkParameters?.inAppMinSecBetweenMessages
                                 ?: 0) * 1000)
-                        if (inAppMessage.data.inlineTarget?.androidSelector == propertyId ) {
+                        if (inAppMessage.data.inlineTarget?.androidSelector == propertyId) {
 
-                            inAppInlineElement?.populateInLineInApp(inAppMessage,activity)
+                            inAppInlineElement?.populateInLineInApp(inAppMessage, activity)
                             InAppInlineElement.inAppMessageCallback = this@InAppMessageManager
 
-                        }else {
+                        } else {
                             activity.startActivityForResult(
                                 InAppMessageActivity.newIntent(
                                     activity, inAppMessage, resultCode
@@ -281,6 +321,96 @@ class InAppMessageManager :
         } catch (e: Throwable) {
             e.printStackTrace()
         }
+    }
+
+    private fun showAppStory(activity: Activity, inAppMessage: InAppMessage, storiesListView: StoriesListView) {
+        val data = inAppMessage.data
+        if(!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
+            StoriesListView.inAppMessageCallback = this@InAppMessageManager
+            storiesListView.loadInAppMessage(inAppMessage, data.publicId, data.content.contentId)
+            presenter.sendStoryEvent(
+                StoryEventType.DISPLAY,
+                inAppMessage
+            )
+        }
+    }
+
+    override fun storyEvent(
+        eventType: StoryEventType,
+        inAppMessage: InAppMessage,
+        storyProfileId: String,
+        storyProfileName: String,
+        storyId: String,
+        storyName: String,
+        buttonUrl: String
+    ) {
+        val data = inAppMessage.data
+        if (!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
+            presenter.sendStoryEvent(
+                eventType,
+                inAppMessage,
+                storyProfileId,
+                storyProfileName,
+                storyId,
+                storyName
+            )
+
+            if(eventType == StoryEventType.STORY_CLICK) {
+                if (DengageUtils.isDeeplink(buttonUrl)) {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(buttonUrl))
+                        intent.putExtra("targetUrl", buttonUrl)
+                        DengageUtils.sendBroadCast(intent.apply {
+                            this.action = Constants.DEEPLINK_RETRIEVE_EVENT
+                        }, ContextHolder.context)
+                    } catch (e: Exception) {
+                        DengageLogger.error(e.message)
+                    }
+                } else{
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(buttonUrl))
+                    intent.putExtra("targetUrl", buttonUrl)
+                    ContextHolder.context.launchActivity(intent, buttonUrl)
+                }
+            }
+        }
+
+    }
+
+    override fun setStoryCoverShown(storyCoverId: String, storySetId: String) {
+        val shownStoryCoverDic: MutableMap<String, MutableList<String>> =
+            Prefs.shownStoryCoverDic ?: mutableMapOf()
+
+        if (!shownStoryCoverDic.containsKey(storySetId)) {
+            shownStoryCoverDic[storySetId] = ArrayList()
+        }
+        if (!shownStoryCoverDic[storySetId]!!.contains(storyCoverId)) {
+            shownStoryCoverDic[storySetId]!!.add(storyCoverId)
+        }
+        Prefs.shownStoryCoverDic = shownStoryCoverDic
+    }
+
+    override fun sortStoryCovers(storyCovers: List<StoryCover>, storySetId: String): List<StoryCover>{
+        val shownStoryCoverDic: MutableMap<String, MutableList<String>> =
+            Prefs.shownStoryCoverDic ?: mutableMapOf()
+
+        if (shownStoryCoverDic.containsKey(storySetId)) {
+            val shownStoryCoverIds = shownStoryCoverDic[storySetId]
+            val notShownStoryCovers: MutableList<StoryCover> = ArrayList<StoryCover>()
+            val shownStoryCovers: MutableList<StoryCover> = ArrayList<StoryCover>()
+            if (!shownStoryCoverIds.isNullOrEmpty()) {
+                for (cover in storyCovers) {
+                    if (shownStoryCoverIds.contains(cover.id)) {
+                        cover.shown = true
+                        shownStoryCovers.add(cover)
+                    } else {
+                        notShownStoryCovers.add(cover)
+                    }
+                }
+                notShownStoryCovers.addAll(shownStoryCovers)
+                return notShownStoryCovers
+            }
+        }
+        return storyCovers
     }
 
 }

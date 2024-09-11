@@ -40,7 +40,11 @@
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar" />
         <activity android:name=".ui.inappmessage.InAppBrowserActivity"
-        android:theme="@style/BrowserTheme.NoActionBar"/>
+            android:theme="@style/BrowserTheme.NoActionBar"/>
+        <activity
+            android:name=".ui.story.StoryActivity"
+            android:noHistory="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <activity
             android:name=".push.NotificationNavigationDeciderActivity"
