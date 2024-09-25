@@ -70,7 +70,7 @@ dependencies {
     api 'com.huawei.hms:ads-identifier:3.4.39.302'
 
     // geofence
-    api "com.google.android.gms:play-services-location:19.0.1"
+    api "com.google.android.gms:play-services-location:21.3.0"
 
     api 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 

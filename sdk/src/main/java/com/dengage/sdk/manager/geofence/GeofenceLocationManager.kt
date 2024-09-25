@@ -3,8 +3,6 @@ package com.dengage.sdk.manager.geofence
 import java.util.*
 import android.annotation.SuppressLint as SL
 import android.location.Location
-import com.google.android.gms.location.GeofencingClient as GC
-import com.google.android.gms.location.FusedLocationProviderClient as FLPC
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest as GR
@@ -32,8 +30,7 @@ import com.dengage.sdk.util.Constants.FASTEST_MOVING_UPDATE_INTERVAL as FMUI
 import com.dengage.sdk.util.Constants.DESIRED_SYNC_INTERVAL as DSI
 import com.dengage.sdk.util.Constants.STOP_DURATION
 import com.dengage.sdk.util.Constants.STOP_DISTANCE
-import com.dengage.sdk.util.Constants.STOPPED_GEOFENCE_RADIUS
-import com.dengage.sdk.util.Constants.MOVING_GEOFENCE_RADIUS
+import com.google.android.gms.location.LocationServices
 import kotlin.math.*
 
 
@@ -43,10 +40,10 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
     override fun providePresenter() = GeofenceLocationPresenter()
 
     @SL("VisibleForTests")
-    internal var lClient = FLPC(CH.context)
+    internal var lClient = LocationServices.getFusedLocationProviderClient(CH.context);
 
     @SL("VisibleForTests")
-    internal var gClient = GC(CH.context)
+    internal var gClient = LocationServices.getGeofencingClient(CH.context)
 
     private val R = 6372.8 // In kilometers
     private var started = false
