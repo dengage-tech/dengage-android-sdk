@@ -3,8 +3,7 @@ package com.dengage.geofence.manager
 import java.util.*
 import android.annotation.SuppressLint as SL
 import android.location.Location
-import com.google.android.gms.location.GeofencingClient as GC
-import com.google.android.gms.location.FusedLocationProviderClient as FLPC
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest as GR
@@ -38,10 +37,10 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
     override fun providePresenter() = GeofenceLocationPresenter()
 
     @SL("VisibleForTests")
-    internal var lClient = FLPC(CH.context)
+    internal var lClient = LocationServices.getFusedLocationProviderClient(CH.context)
 
     @SL("VisibleForTests")
-    internal var gClient = GC(CH.context)
+    internal var gClient = LocationServices.getGeofencingClient(CH.context)
 
     private val R = 6372.8 // In kilometers
     private var started = false
