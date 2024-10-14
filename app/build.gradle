@@ -6,7 +6,6 @@ plugins {
     id 'com.google.gms.google-services'
     id 'com.huawei.agconnect'
     id 'com.google.firebase.crashlytics'
-    id 'maven-publish'
 }
 
 android {
@@ -41,15 +40,7 @@ android {
 
 
 }
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                   from components.findByName('release')
-            }
-        }
-    }
-}
+
 dependencies {
     implementation project(':sdk')
     implementation project(':sdk-geofence')
