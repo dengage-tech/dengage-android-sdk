@@ -3,8 +3,6 @@ package com.dengage.sdk.manager.geofence
 import java.util.*
 import android.annotation.SuppressLint as SL
 import android.location.Location
-import com.google.android.gms.location.GeofencingClient as GC
-import com.google.android.gms.location.FusedLocationProviderClient as FLPC
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingRequest as GR
@@ -32,8 +30,7 @@ import com.dengage.sdk.util.Constants.FASTEST_MOVING_UPDATE_INTERVAL as FMUI
 import com.dengage.sdk.util.Constants.DESIRED_SYNC_INTERVAL as DSI
 import com.dengage.sdk.util.Constants.STOP_DURATION
 import com.dengage.sdk.util.Constants.STOP_DISTANCE
-import com.dengage.sdk.util.Constants.STOPPED_GEOFENCE_RADIUS
-import com.dengage.sdk.util.Constants.MOVING_GEOFENCE_RADIUS
+import com.google.android.gms.location.LocationServices
 import kotlin.math.*
 
 
@@ -43,10 +40,10 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
     override fun providePresenter() = GeofenceLocationPresenter()
 
     @SL("VisibleForTests")
-    internal var lClient = FLPC(CH.context)
+    internal var lClient = LocationServices.getFusedLocationProviderClient(CH.context);
 
     @SL("VisibleForTests")
-    internal var gClient = GC(CH.context)
+    internal var gClient = LocationServices.getGeofencingClient(CH.context)
 
     private val R = 6372.8 // In kilometers
     private var started = false
@@ -150,59 +147,59 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
         if (location == null) {
             return
         }
-     //   this.removeBubbleGeofences()
-     /*   if (stopped) {
-            val identifier = BUBBLE_STOPPED_GEOFENCE_REQUEST_ID
-            val radius = STOPPED_GEOFENCE_RADIUS.toFloat()
-            val geofence = Geofence.Builder()
-                .setRequestId(identifier)
-                .setCircularRegion(location.latitude, location.longitude, radius)
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build()
+        //   this.removeBubbleGeofences()
+        /*   if (stopped) {
+               val identifier = BUBBLE_STOPPED_GEOFENCE_REQUEST_ID
+               val radius = STOPPED_GEOFENCE_RADIUS.toFloat()
+               val geofence = Geofence.Builder()
+                   .setRequestId(identifier)
+                   .setCircularRegion(location.latitude, location.longitude, radius)
+                   .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                   .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+                   .build()
 
-            val request = GR.Builder().addGeofence(geofence)
-                .setInitialTrigger(Geofence.GEOFENCE_TRANSITION_EXIT).build()
+               val request = GR.Builder().addGeofence(geofence)
+                   .setInitialTrigger(Geofence.GEOFENCE_TRANSITION_EXIT).build()
 
-            DL.debug("Adding stopped bubble geofence | latitude = ${location.latitude}; longitude = ${location.longitude}; radius = $radius; identifier = $identifier")
+               DL.debug("Adding stopped bubble geofence | latitude = ${location.latitude}; longitude = ${location.longitude}; radius = $radius; identifier = $identifier")
 
-            gClient.addGeofences(request, GLR.getBubbleGeofencePendingIntent(CH.context))
-                .run {
-                    addOnSuccessListener {
-                        DL.debug("Successfully added stopped bubble geofence")
-                    }
-                    addOnFailureListener {
-                        DL.debug("Error adding stopped bubble geofence | message = ${it.message}")
-                    }
-                }
-        } else if (!stopped) {
-            val identifier = BUBBLE_MOVING_GEOFENCE_REQUEST_ID
-            val radius = MOVING_GEOFENCE_RADIUS.toFloat()
+               gClient.addGeofences(request, GLR.getBubbleGeofencePendingIntent(CH.context))
+                   .run {
+                       addOnSuccessListener {
+                           DL.debug("Successfully added stopped bubble geofence")
+                       }
+                       addOnFailureListener {
+                           DL.debug("Error adding stopped bubble geofence | message = ${it.message}")
+                       }
+                   }
+           } else if (!stopped) {
+               val identifier = BUBBLE_MOVING_GEOFENCE_REQUEST_ID
+               val radius = MOVING_GEOFENCE_RADIUS.toFloat()
 
-            val geofence = Geofence.Builder()
-                .setRequestId(identifier)
-                .setCircularRegion(location.latitude, location.longitude, radius)
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setLoiteringDelay(STOP_DURATION * 1000 + 10000)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL or Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build()
+               val geofence = Geofence.Builder()
+                   .setRequestId(identifier)
+                   .setCircularRegion(location.latitude, location.longitude, radius)
+                   .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                   .setLoiteringDelay(STOP_DURATION * 1000 + 10000)
+                   .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL or Geofence.GEOFENCE_TRANSITION_EXIT)
+                   .build()
 
-            val request = GR.Builder()
-                .addGeofence(geofence)
-                .setInitialTrigger(Geofence.GEOFENCE_TRANSITION_DWELL or Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build()
+               val request = GR.Builder()
+                   .addGeofence(geofence)
+                   .setInitialTrigger(Geofence.GEOFENCE_TRANSITION_DWELL or Geofence.GEOFENCE_TRANSITION_EXIT)
+                   .build()
 
-            DL.debug("Adding moving bubble geofence | latitude = ${location.latitude}; longitude = ${location.longitude}; radius = $radius; identifier = $identifier")
-            gClient.addGeofences(request, GLR.getBubbleGeofencePendingIntent(CH.context))
-                .run {
-                    addOnSuccessListener {
-                        DL.debug("Successfully added moving bubble geofence")
-                    }
-                    addOnFailureListener {
-                        DL.debug("Error adding moving bubble geofence | message = ${it.message}")
-                    }
-                }
-        }*/
+               DL.debug("Adding moving bubble geofence | latitude = ${location.latitude}; longitude = ${location.longitude}; radius = $radius; identifier = $identifier")
+               gClient.addGeofences(request, GLR.getBubbleGeofencePendingIntent(CH.context))
+                   .run {
+                       addOnSuccessListener {
+                           DL.debug("Successfully added moving bubble geofence")
+                       }
+                       addOnFailureListener {
+                           DL.debug("Error adding moving bubble geofence | message = ${it.message}")
+                       }
+                   }
+           }*/
     }
 
     private fun replaceSyncedGeofences(geofenceClusters: Array<Cluster>?) {
@@ -309,8 +306,8 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
             //    GState.lastMovedAt = lastMovedAt
             //}
             //if (!force && lastMovedAt > location.time) {
-                //DL.debug("Skipping location: old | lastMovedAt = $lastMovedAt; location.time = ${location.time}")
-                //return
+            //DL.debug("Skipping location: old | lastMovedAt = $lastMovedAt; location.time = ${location.time}")
+            //return
             //}
             val distance = location.distanceTo(lastMovedLocation)
             //duration = (location.time - lastMovedAt) / 1000

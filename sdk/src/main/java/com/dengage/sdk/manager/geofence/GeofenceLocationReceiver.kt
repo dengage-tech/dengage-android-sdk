@@ -91,24 +91,29 @@ class GeofenceLocationReceiver: BroadcastReceiver() {
         when (intent.action) {
             ACTION_BUBBLE_GEOFENCE, ACTION_SYNCED_GEOFENCES -> {
                 val event = GeofencingEvent.fromIntent(intent)
-                val triggeredGeofences = event.triggeringGeofences
-                for(triggeredGeofence in triggeredGeofences) {
-                    val source = when (event.geofenceTransition) {
-                        Geofence.GEOFENCE_TRANSITION_ENTER -> GeofenceLocationSource.GEOFENCE_ENTER
-                        Geofence.GEOFENCE_TRANSITION_DWELL -> GeofenceLocationSource.GEOFENCE_DWELL
-                        else -> GeofenceLocationSource.GEOFENCE_EXIT
+                val triggeredGeofences = event?.triggeringGeofences
+                if (triggeredGeofences != null) {
+                    for(triggeredGeofence in triggeredGeofences) {
+                        val source = when (event.geofenceTransition) {
+                            Geofence.GEOFENCE_TRANSITION_ENTER -> GeofenceLocationSource.GEOFENCE_ENTER
+                            Geofence.GEOFENCE_TRANSITION_DWELL -> GeofenceLocationSource.GEOFENCE_DWELL
+                            else -> GeofenceLocationSource.GEOFENCE_EXIT
+                        }
+
+                        event.triggeringLocation?.let {
+                            Dengage.handleLocation(context,
+                                it, source, triggeredGeofence.requestId)
+                        }
+
+                        /*
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    GeofenceJobScheduler.scheduleJob(context, event.triggeringLocation, source, triggeredGeofence.requestId)
+                                } else {
+
+                                }
+                                 */
+
                     }
-
-                    Dengage.handleLocation(context, event.triggeringLocation, source, triggeredGeofence.requestId)
-
-                    /*
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        GeofenceJobScheduler.scheduleJob(context, event.triggeringLocation, source, triggeredGeofence.requestId)
-                    } else {
-
-                    }
-                     */
-
                 }
             }
             ACTION_LOCATION -> {
@@ -116,10 +121,12 @@ class GeofenceLocationReceiver: BroadcastReceiver() {
                     return
                 }
                 val result = LocationResult.extractResult(intent)
-                result.lastLocation.also {
+                result?.lastLocation.also {
                     val source = GeofenceLocationSource.BACKGROUND_LOCATION
 
-                    Dengage.handleLocation(context, it, source, null)
+                    if (it != null) {
+                        Dengage.handleLocation(context, it, source, null)
+                    }
 
                     /*
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
