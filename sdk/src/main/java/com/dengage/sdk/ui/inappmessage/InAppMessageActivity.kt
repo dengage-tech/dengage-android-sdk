@@ -30,7 +30,8 @@ import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
-import com.dengage.sdk.util.extension.launchSettingsActivity
+import com.dengage.sdk.util.extension.launchApplicationSettingsActivity
+import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
 import kotlin.math.roundToInt
 
 
@@ -233,7 +234,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                             "You need to enable push permission",
                             Toast.LENGTH_LONG
                         ).show()
-                        this@InAppMessageActivity.launchSettingsActivity()
+                        this@InAppMessageActivity.launchNotificationSettingsActivity()
                     }
                 } else {
                     try {
@@ -259,7 +260,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                         "You need to enable push permission",
                         Toast.LENGTH_LONG
                     ).show()
-                    this@InAppMessageActivity.launchSettingsActivity()
+                    this@InAppMessageActivity.launchNotificationSettingsActivity()
                 }
             } else if (DengageUtils.isDeeplink(targetUrl)) {
 
@@ -336,7 +337,6 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             DengageLogger.verbose("In app message: set tags event")
         }
 
-
         @JavascriptInterface
         fun setTags(tagsString: String?) {
             DengageLogger.verbose("In app message: set tags event")
@@ -362,9 +362,16 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     "You need to enable push permission",
                     Toast.LENGTH_LONG
                 ).show()
-                this@InAppMessageActivity.launchSettingsActivity()
+                this@InAppMessageActivity.launchNotificationSettingsActivity()
             }
         }
+
+        @JavascriptInterface
+        fun openSettings() {
+            DengageLogger.verbose("In app message: open settings event")
+            this@InAppMessageActivity.launchApplicationSettingsActivity()
+        }
+
     }
 
     fun showRating() {

@@ -63,7 +63,7 @@ fun Context.startActivityFromClass(clazz: Class<out Activity>?, activityIntent: 
     stackBuilder.startActivities()
 }
 
-fun Context.launchSettingsActivity() {
+fun Context.launchNotificationSettingsActivity() {
     try {
         val intent = Intent()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -95,3 +95,19 @@ fun Context.launchSettingsActivity() {
 
     }
 }
+
+fun Context.launchApplicationSettingsActivity() {
+    try {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.parse("package:$packageName")
+        }
+        this.startActivity(intent)
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+    } catch (ex: Throwable) {
+        ex.printStackTrace()
+    } catch (e: DeadObjectException) {
+        e.printStackTrace()
+    }
+}
+

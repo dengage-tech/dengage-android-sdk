@@ -19,7 +19,7 @@ import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.extension.launchActivity
-import com.dengage.sdk.util.extension.launchSettingsActivity
+import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
 
 open class InAppInlineElement : WebView {
     private lateinit var inAppMessage: InAppMessage
@@ -133,7 +133,7 @@ open class InAppInlineElement : WebView {
             if (targetUrl == "Dn.promptPushPermission()") {
                 if (!context.areNotificationsEnabled()) {
                     Toast.makeText(context, "You need to enable push permission", Toast.LENGTH_LONG).show()
-                    context.launchSettingsActivity ()
+                    context.launchNotificationSettingsActivity ()
                 }
             } else {
                 try {
@@ -177,7 +177,7 @@ open class InAppInlineElement : WebView {
             DengageLogger.verbose("Inapp inlinee: prompt push permission event")
             if (!context.areNotificationsEnabled()) {
                 Toast.makeText(context, "You need to enable push permission", Toast.LENGTH_LONG).show()
-                context.launchSettingsActivity ()
+                context.launchNotificationSettingsActivity ()
             }
         }
     }
