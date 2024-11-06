@@ -23,6 +23,7 @@ import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.Constants
@@ -191,7 +192,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         /**
         Send tags method for using from webview javascript interface
          */
-        fun sendTags(tags: String?)
+        fun sendTags(tags: List<TagItem>?)
     }
 
     companion object {
@@ -333,6 +334,13 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun setTags() {
             DengageLogger.verbose("In app message: set tags event")
+        }
+
+
+        @JavascriptInterface
+        fun setTags(tagsString: String?) {
+            DengageLogger.verbose("In app message: set tags event")
+            //tagsString is not a valid json // TODO: setTags(tagsString: String?)
         }
 
         @JavascriptInterface

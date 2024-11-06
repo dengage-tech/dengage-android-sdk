@@ -3,9 +3,7 @@ package com.dengage.sdk.ui.inappmessage
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
@@ -17,10 +15,9 @@ import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.push.areNotificationsEnabled
-import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchSettingsActivity
 
@@ -68,7 +65,7 @@ open class InAppInlineElement : WebView {
         /**
         Send tags method for using from webview javascript interface
          */
-        fun sendTags(tags: String?)
+        fun sendTags(tags: List<TagItem>?)
     }
 
     fun populateInLineInApp(inAppMessageParam: InAppMessage, activityParam: Activity) {

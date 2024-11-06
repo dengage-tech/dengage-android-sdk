@@ -4,10 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.view.View
+import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
+import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
@@ -306,8 +308,10 @@ class InAppMessageManager :
         )
     }
 
-    override fun sendTags(tags: String?) {
-        // todo send tags
+    override fun sendTags(tags: List<TagItem>?) {
+        if (!tags.isNullOrEmpty()) {
+            Dengage.setTags(tags)
+        }
     }
 
     fun cancelTimer() {
