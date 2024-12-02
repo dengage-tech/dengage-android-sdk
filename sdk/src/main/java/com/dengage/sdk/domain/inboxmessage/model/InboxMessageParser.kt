@@ -62,7 +62,7 @@ object InboxMessageParser {
                     ?: messageJsonObject?.getString("targetUrl")
                 val androidTargetUrl = messageJsonObject?.getString("androidTargetUrl")
                 val receiveDate = messageJsonObject?.getString("receiveDate")
-                val inboxMessageObject = InboxMessage(id = id, isClicked = isClicked,
+                val inboxMessageObject = InboxMessage(id = id, isClicked = isClicked, isDeleted = false,
                     InboxMessageData(title = title,
                         message = message,
                         mediaUrl = mediaUrl,

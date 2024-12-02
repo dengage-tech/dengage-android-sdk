@@ -7,6 +7,7 @@ import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.VisitorInfo
 import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.rfm.model.RFMScore
 import com.dengage.sdk.domain.subscription.model.Subscription
@@ -187,6 +188,10 @@ object Prefs {
     internal var shownStoryCoverDic: MutableMap<String, MutableList<String>> ?
         get() = preferences.get(PreferenceKey.SHOWN_STORY_COVER_DIC) ?: mutableMapOf()
         set(value) = preferences.set(PreferenceKey.SHOWN_STORY_COVER_DIC, value)
+
+    internal var inboxMessages: MutableList<InboxMessage>?
+        get() = preferences.get(PreferenceKey.INBOX_MESSAGES) ?: mutableListOf()
+        set(value) = preferences.set(PreferenceKey.INBOX_MESSAGES, value)
 
 
     fun clear() {

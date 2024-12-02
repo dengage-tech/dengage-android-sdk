@@ -10,7 +10,11 @@ import com.dengage.sdk.domain.inboxmessage.usecase.SetInboxMessageAsClicked
 import com.dengage.sdk.domain.inboxmessage.usecase.SetInboxMessageAsDeleted
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
+import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageUtils
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>(),
     InboxMessageContract.Presenter {
@@ -28,7 +32,11 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
     ) {
         val subscription = Prefs.subscription
         val sdkParameters = Prefs.sdkParameters
-        if (isInboxMessageEnabled(subscription, sdkParameters)&& DengageUtils.isAppInForeground()) {
+        if (isInboxMessageEnabled(
+                subscription,
+                sdkParameters
+            ) && DengageUtils.isAppInForeground()
+        ) {
             if (!inboxMessages.isNullOrEmpty() && offset == 0 &&
                 System.currentTimeMillis() < Prefs.inboxMessageFetchTime + 600000
             ) {
@@ -41,8 +49,9 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
 
                         if (offset == 0) {
                             inboxMessages = it
+                            updateInboxMessages(it)
                         }
-                        dengageCallback.onResult(it ?: mutableListOf())
+                        dengageCallback.onResult(inboxMessages ?: mutableListOf())
                     }
                     onError = {
                         dengageCallback.onError(DengageError(it.message))
@@ -65,9 +74,13 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
         val subscription = Prefs.subscription
         val sdkParameters = Prefs.sdkParameters
         if (isInboxMessageEnabled(subscription, sdkParameters)) {
-            inboxMessages?.firstOrNull { inboxMessage ->
-                inboxMessage.id == messageId
-            }?.isClicked = true
+            val message = inboxMessages?.firstOrNull { message ->
+                message.id == messageId
+            }
+            if (message != null) {
+                message.isClicked = true
+                updateInboxMessagesPrefs(message)
+            }
 
             setInboxMessageAsClicked(this) {
                 onResponse = {
@@ -86,6 +99,15 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
         val subscription = Prefs.subscription
         val sdkParameters = Prefs.sdkParameters
         if (isInboxMessageEnabled(subscription, sdkParameters)) {
+
+            val message = inboxMessages?.firstOrNull { message ->
+                message.id == messageId
+            }
+            if (message != null) {
+                message.isDeleted = true
+                updateInboxMessagesPrefs(message)
+            }
+
             inboxMessages?.removeAll { inboxMessage ->
                 inboxMessage.id == messageId
             }
@@ -105,6 +127,7 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
 
     override fun clearInboxMessageCache() {
         inboxMessages?.clear()
+        Prefs.inboxMessages = null
     }
 
     private fun isInboxMessageEnabled(
@@ -112,7 +135,57 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
         sdkParameters: SdkParameters?
     ): Boolean {
         return subscription != null && sdkParameters?.accountName != null &&
-            sdkParameters.inboxEnabled != null && sdkParameters.inboxEnabled
+                sdkParameters.inboxEnabled != null && sdkParameters.inboxEnabled
     }
+
+
+    private fun updateInboxMessages(remoteInboxMessages: MutableList<InboxMessage>?) {
+
+        if (remoteInboxMessages.isNullOrEmpty()) return
+
+        val prefsInboxMessages = Prefs.inboxMessages
+        if (prefsInboxMessages.isNullOrEmpty()) return
+
+        remoteInboxMessages.forEach { remoteInboxMessage ->
+            val matchingPrefsMessage = prefsInboxMessages.find { it.id == remoteInboxMessage.id }
+            matchingPrefsMessage?.let {
+                remoteInboxMessage.isClicked = it.isClicked
+                remoteInboxMessage.isDeleted = it.isDeleted
+            }
+        }
+
+        inboxMessages = remoteInboxMessages.filter { !it.isDeleted }.toMutableList()
+    }
+
+
+    private fun updateInboxMessagesPrefs(inboxMessage: InboxMessage) {
+        val prefsInboxMessages = Prefs.inboxMessages?.toMutableList() ?: mutableListOf()
+
+        val oneWeekAgo = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000
+        val filteredPrefsInboxMessages = prefsInboxMessages.filterNot {
+            it.data.receiveDate?.let { receiveDate ->
+                try {
+                    val messageDate = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).apply {
+                        timeZone = TimeZone.getTimeZone("UTC")
+                    }.parse(receiveDate)?.time
+                    messageDate != null && messageDate < oneWeekAgo
+                } catch (e: Exception) {
+                    true // If parsing fails, remove
+                }
+            } ?: false
+        }.toMutableList()
+
+        val existingMessageIndex = filteredPrefsInboxMessages.indexOfFirst { it.id == inboxMessage.id }
+
+        if (existingMessageIndex != -1) {
+            filteredPrefsInboxMessages[existingMessageIndex] = inboxMessage
+        } else {
+            filteredPrefsInboxMessages.add(inboxMessage)
+        }
+
+        Prefs.inboxMessages = filteredPrefsInboxMessages
+    }
+
+
 
 }

@@ -42,6 +42,7 @@ enum class PreferenceKey {
     NOTIFICATION_DISPLAY_PRIORITY_CONFIGURATION,
     LANGUAGE,
     SHOWN_STORY_COVER_DIC,
+    INBOX_MESSAGES,
     ;
 
     override fun toString(): String = name
