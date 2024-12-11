@@ -145,6 +145,43 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             settings.javaScriptEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
             addJavascriptInterface(JavaScriptInterface(), "Dn")
+
+            contentParams.html?.let {
+                loadDataWithBaseURL(null, it, "text/html", "UTF-8", null)
+            }
+
+            webViewClient = object : android.webkit.WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+
+                    evaluateJavascript(Constants.mustacheJs.trimIndent()) { _ ->
+
+                        val dataMap = mapOf(
+                            "dnInAppDeviceInfo" to mapOf<String, String>(
+                                //"test1" to "Başlık Burada",
+                                //"test2" to "https://dengage-cdn.azureedge.net",
+                                "test4" to "Mesaj içeriği."
+                            )
+                        )
+                        val dataJson = org.json.JSONObject(dataMap).toString()
+
+                        val mustacheRenderJs = """
+                        (function() {
+                            var data = $dataJson;
+                            var template = document.documentElement.innerHTML;
+                            var rendered = Mustache.render(template, data);
+                            document.documentElement.innerHTML = rendered;
+                        })();
+                    """.trimIndent()
+
+                        evaluateJavascript(mustacheRenderJs) {
+
+                        }
+                    }
+                }
+            }
+
+
         }
     }
 
