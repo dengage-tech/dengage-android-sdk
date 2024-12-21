@@ -66,7 +66,7 @@ object InAppMessageUtils {
         // if screen name is not empty, find in app message that screen name filter has screen name value
         // if screen name is not empty and could not found in app message with screen name filter, use in app message without screen name filter
         // Also control nextDisplayTime for showEveryXMinutes type in app messages
-        val inAppMessageWithoutScreenName =
+        val matchedWithoutScreenFilters =
             sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
                 inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
                         isInlineInApp(inAppMessage, propertyId, storyPropertyId) &&
@@ -74,20 +74,33 @@ object InAppMessageUtils {
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
                             params, isRealTime)
             }
+
         return if (screenName.isNullOrEmpty()) {
-            inAppMessageWithoutScreenName
+            matchedWithoutScreenFilters
         } else {
-            return sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
-                inAppMessage.data.isDisplayTimeAvailable() &&
+
+            val matchedWithScreenFilters = sortedInAppMessages.firstOrNull { inAppMessage ->
+                !inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
+                        inAppMessage.data.isDisplayTimeAvailable() &&
                         isScreenNameFound(inAppMessage, screenName) &&
                         isInlineInApp(inAppMessage, propertyId, storyPropertyId) &&
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
-                            params, isRealTime
+                            params,
+                            isRealTime
                         )
             }
+
+            if (matchedWithScreenFilters != null) {
+                return matchedWithScreenFilters
+            } else {
+                return matchedWithoutScreenFilters
+            }
+
         }
+
     }
+
     private fun isScreenNameFound(inAppMessage: InAppMessage, screenName: String): Boolean {
         val screenNameCheckArrayList = mutableListOf<Boolean>()
         val operatorFilter = inAppMessage.data.displayCondition.screenNameFilterLogicOperator
@@ -100,7 +113,6 @@ object InAppMessageUtils {
                     screenNameFilter.operator
                 )
             )
-
         }
 
         return when {
@@ -121,13 +133,21 @@ object InAppMessageUtils {
 
 
     fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?, storyPropertyId: String?): Boolean {
-        if ("story".equals(inAppMessage.data.content.type, ignoreCase = true)) {
+        if ("STORY".equals(inAppMessage.data.content.type, ignoreCase = true)) {
             val isPropertyEmpty = storyPropertyId.isNullOrEmpty()
             val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
             return if (isPropertyEmpty || isSelectorEmpty) {
                 false
             } else {
                 inAppMessage.data.inlineTarget?.androidSelector == storyPropertyId
+            }
+        } else if ("INLINE".equals(inAppMessage.data.content.type, ignoreCase = true)) {
+            val isPropertyEmpty = propertyId.isNullOrEmpty()
+            val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
+            return if (isPropertyEmpty || isSelectorEmpty) {
+                false
+            } else {
+                inAppMessage.data.inlineTarget?.androidSelector == propertyId
             }
         } else if (storyPropertyId.isNullOrEmpty()) {
             return if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {

@@ -74,7 +74,7 @@ class InAppMessageManager :
             if (priorInAppMessage != null) {
                 if (!storyPropertyId.isNullOrEmpty() && storiesListView != null) {
                     val androidSelector = priorInAppMessage.data.inlineTarget?.androidSelector
-                    if (androidSelector == storyPropertyId && "story".equals(
+                    if (androidSelector == storyPropertyId && "STORY".equals(
                             priorInAppMessage.data.content.type,
                             ignoreCase = true
                         )
@@ -82,13 +82,19 @@ class InAppMessageManager :
                         showAppStory(activity, priorInAppMessage, storiesListView)
                     }
                 } else {
-                    showInAppMessage(
-                        activity,
-                        priorInAppMessage,
-                        resultCode,
-                        inAppInlineElement = inAppInlineElement,
-                        propertyId = propertyId
-                    )
+                    if(storiesListView == null) {
+                        if (!"INLINE".equals(priorInAppMessage.data.content.type, ignoreCase = true) && inAppInlineElement != null) {
+                           return
+                        } else {
+                            showInAppMessage(
+                                activity,
+                                priorInAppMessage,
+                                resultCode,
+                                inAppInlineElement = inAppInlineElement,
+                                propertyId = propertyId
+                            )
+                        }
+                    }
                 }
 
             } else if (!propertyId.isNullOrEmpty() && hideIfNotFound == true) {
