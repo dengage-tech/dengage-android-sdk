@@ -193,6 +193,9 @@ object Prefs {
         get() = preferences.get(PreferenceKey.INBOX_MESSAGES) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.INBOX_MESSAGES, value)
 
+    internal var inAppDeviceInfo: MutableMap<String, String> ?
+        get() = preferences.get(PreferenceKey.IN_APP_DEVICE_INFO) ?: mutableMapOf()
+        set(value) = preferences.set(PreferenceKey.IN_APP_DEVICE_INFO, value)
 
     fun clear() {
         preferences.edit().clear().apply()

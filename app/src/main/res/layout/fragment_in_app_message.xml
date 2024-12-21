@@ -1,26 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/dengage_page_margin_medium"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/etScreenName"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/dengage_page_margin_medium"
-        android:orientation="vertical">
+        android:layout_height="@dimen/base_component_height"
+        android:hint="@string/screen_name"
+        android:textSize="@dimen/dengage_text_size_medium" />
 
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/etScreenName"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/base_component_height"
-            android:hint="@string/screen_name"
-            android:textSize="@dimen/dengage_text_size_medium" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnSetNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/base_component_height"
+        android:layout_marginTop="12dp"
+        android:text="@string/button_set_navigation" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnSetNavigation"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/base_component_height"
-            android:layout_marginTop="12dp"
-            android:text="@string/button_set_navigation" />
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnClearDeviceInfo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/base_component_height"
+        android:layout_marginTop="12dp"
+        android:text="@string/clear_device_info" />
 
-    </LinearLayout>
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnAddDeviceInfo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/base_component_height"
+        android:layout_marginTop="12dp"
+        android:text="@string/add_new_device_info" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDeviceInfo"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="8dp" />
+
+</LinearLayout>
 </layout>

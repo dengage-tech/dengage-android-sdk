@@ -78,9 +78,11 @@
                 <action android:name="com.dengage.push.intent.CAROUSEL_ITEM_CLICK" />
             </intent-filter>
         </receiver> <!-- Event api url of Dengage -->
-        <meta-data
-            android:name="den_event_api_url"
-            android:value="https://event.dengage.com" /> <!-- Push api url of Dengage -->
+
+        <!--
+                <meta-data
+                    android:name="den_event_api_url"
+                    android:value="https://event.dengage.com" />
         <meta-data
             android:name="den_push_api_url"
             android:value="https://push.dengage.com" />
@@ -88,12 +90,10 @@
             android:name="den_device_id_api_url"
             android:value="https://magento.232.dengage.shobii.com/rest/" />
 
-        <!-- Real time inapp api url of Dengage -->
         <meta-data
             android:name="den_in_app_api_url"
             android:value="https://push.dengage.com" />
 
-        <!-- Geofence api url of Dengage -->
         <meta-data
             android:name="den_geofence_api_url"
             android:value="https://push.dengage.com/geoapi/" />
@@ -101,8 +101,8 @@
         <meta-data
             android:name="fetch_real_time_in_app_api_url"
             android:value="https://tr-inapp.lib.dengage.com/" />
+        -->
 
-        <!--
         <meta-data
             android:name="den_event_api_url"
             android:value="https://dev-push.dengage.com" />
@@ -124,7 +124,6 @@
         <meta-data
             android:name="fetch_real_time_in_app_api_url"
             android:value="https://dev-inapp.lib.dengage.com/" />
-        -->
 
 
        <!-- <meta-data

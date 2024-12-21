@@ -13,7 +13,7 @@ class InAppInLineFragment : BaseDataBindingFragment<FragmentInappInlineBinding>(
 
     override fun init() {
         sendPageView("in-app-message")
-Dengage.setCategoryPath("23")
+        Dengage.setCategoryPath("23")
         binding.btnShowInlineInapp.setOnClickListener {
             var propertyId = binding.etPropertyId.text.toString().trim()
             val screenName = binding.etScreenName.text.toString().trim()
@@ -29,12 +29,12 @@ Dengage.setCategoryPath("23")
             if (customKey2.isNotEmpty() && customValue2.isNotEmpty()) {
                 customParams[customKey2] = customValue2
             }
-          /*  Dengage.showInlineInApp(screenName = screenName.ifEmpty { null },
+            Dengage.showInlineInApp(screenName = screenName.ifEmpty { null },
                 inAppInlineElement = binding.webview,
                 propertyId = propertyId,
                 activity = requireActivity(),
                 customParams = customParams.ifEmpty { null }
-            )*/
+            )
         }
     }
 

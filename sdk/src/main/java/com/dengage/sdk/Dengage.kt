@@ -860,4 +860,19 @@ object Dengage {
         DengageLogger.verbose("setLanguage method is called")
         subscriptionManager.setLanguage(language = language)
     }
+
+    fun setInAppDeviceInfo(key: String, value: String) {
+        val inAppDeviceInfoDic: MutableMap<String, String> =
+            Prefs.inAppDeviceInfo ?: mutableMapOf()
+        inAppDeviceInfoDic[key] = value
+        Prefs.inAppDeviceInfo = inAppDeviceInfoDic
+    }
+
+    fun clearInAppDeviceInfo() {
+        Prefs.inAppDeviceInfo = mutableMapOf()
+    }
+
+    fun getInAppDeviceInfo(): Map<String, String> {
+       return Prefs.inAppDeviceInfo ?: mutableMapOf()
+    }
 }

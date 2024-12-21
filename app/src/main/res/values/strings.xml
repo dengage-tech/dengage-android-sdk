@@ -50,4 +50,6 @@
     <string name="button_request_location_permission">Request Location Permission</string>
     <string name="button_stop_geofencing">Stop Geofencing</string>
     <string name="button_geofence">Geofence</string>
+    <string name="clear_device_info">Clear Device Info</string>
+    <string name="add_new_device_info">Add New Device Info</string>
 </resources>

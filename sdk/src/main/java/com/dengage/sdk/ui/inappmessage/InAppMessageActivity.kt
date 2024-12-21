@@ -157,11 +157,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     evaluateJavascript(Constants.mustacheJs.trimIndent()) { _ ->
 
                         val dataMap = mapOf(
-                            "dnInAppDeviceInfo" to mapOf<String, String>(
-                                //"test1" to "Başlık Burada",
-                                //"test2" to "https://dengage-cdn.azureedge.net",
-                                "test4" to "Mesaj içeriği."
-                            )
+                            "dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo()
                         )
                         val dataJson = org.json.JSONObject(dataMap).toString()
 
@@ -376,8 +372,19 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         @JavascriptInterface
         fun setTags(tagsString: String?) {
+            val tagItemString = tagsString?.trim()?.takeIf { it.isNotEmpty() } ?: return
+            val components = tagItemString.trim('{', '}').split(",").mapNotNull { component ->
+                val pair = component.split(":").map { it.trim() }
+                if (pair.size == 2) pair[0] to pair[1] else null
+            }.toMap()
+
+            val tagItem = TagItem(
+                tag = components["tag"] ?: return,
+                value = components["value"] ?: return
+            )
+
+            inAppMessageCallback?.sendTags(listOf(tagItem))
             DengageLogger.verbose("In app message: set tags event")
-            //tagsString is not a valid json // TODO: setTags(tagsString: String?)
         }
 
         @JavascriptInterface
