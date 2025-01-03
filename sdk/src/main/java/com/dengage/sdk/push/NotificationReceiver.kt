@@ -119,11 +119,13 @@ open class NotificationReceiver : BroadcastReceiver() {
         var navigation: String? = ""
         var uri: String? = null
         var id = ""
+        var carouselId = ""
         var current: Int? = null
         var message: Message? = null
         val extras = intent.extras
         if (extras != null) {
             id = extras.getString("id", "")
+            carouselId = extras.getString("carouselId", "")
             navigation = extras.getString("navigation")
             uri = extras.getString("targetUrl")
             current = extras.getInt("current")
@@ -148,7 +150,7 @@ open class NotificationReceiver : BroadcastReceiver() {
         message?.let {
             when (navigation) {
                 "" -> {
-                    Dengage.sendOpenEvent("", id, message)
+                    Dengage.sendOpenEvent(carouselId, id, message)
                     clearNotification(context, message)
                     // context.launchActivity(intent, uri)
                 }

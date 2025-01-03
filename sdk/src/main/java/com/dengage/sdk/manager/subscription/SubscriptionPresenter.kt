@@ -38,12 +38,10 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
         subscriptionInProgress = true
         sendSubscriptionTryCount++
 
-        // Artık “gerçek” network isteğini burada yapıyoruz
         sendSubscription(this) {
             onResponse = {
                 view {
                     subscriptionInProgress = false
-                    // localstorage güncelleme
                     Prefs.previouSubscription = Prefs.subscription
                     Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
                     subscriptionSent()
