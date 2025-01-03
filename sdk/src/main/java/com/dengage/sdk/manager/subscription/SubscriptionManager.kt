@@ -11,8 +11,6 @@ import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.GsonHolder
-import java.util.*
-import com.dengage.sdk.util.*
 
 class SubscriptionManager :
     BaseMvpManager<SubscriptionContract.View, SubscriptionContract.Presenter>(),

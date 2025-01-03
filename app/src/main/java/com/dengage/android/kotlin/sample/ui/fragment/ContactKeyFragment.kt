@@ -15,11 +15,15 @@ class ContactKeyFragment : BaseDataBindingFragment<FragmentContactKeyBinding>() 
         sendPageView("contact-key")
 
         binding.etContactKey.setText(Dengage.getSubscription()?.contactKey)
+        binding.switchPermission.isChecked = Dengage.getUserPermission() ?: false
 
         binding.btnSave.setOnClickListener {
             val contactKey = binding.etContactKey.text.toString().trim()
             Dengage.setContactKey(contactKey)
         }
-    }
 
+        binding.switchPermission.setOnCheckedChangeListener { _, isChecked ->
+            Dengage.setUserPermission(permission = isChecked)
+        }
+    }
 }

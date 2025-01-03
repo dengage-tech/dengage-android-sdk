@@ -19,6 +19,7 @@
     <string name="cart_amount">Cart Amount</string>
     <string name="state">State</string>
     <string name="city">City</string>
+    <string name="permission_label">Permission</string>
 
     <string name="button_save">Save</string>
     <string name="button_inbox_messages">Inbox Messages</string>
@@ -52,4 +53,5 @@
     <string name="button_geofence">Geofence</string>
     <string name="clear_device_info">Clear Device Info</string>
     <string name="add_new_device_info">Add New Device Info</string>
+    <string name="subscribe">Subscribe</string>
 </resources>

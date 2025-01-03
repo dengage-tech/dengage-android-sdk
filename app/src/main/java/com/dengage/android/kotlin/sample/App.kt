@@ -54,7 +54,7 @@ class App : Application() {
 
         Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
 
-        DengageGeofence.startGeofence()
+        //DengageGeofence.startGeofence()
 
 
       /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)

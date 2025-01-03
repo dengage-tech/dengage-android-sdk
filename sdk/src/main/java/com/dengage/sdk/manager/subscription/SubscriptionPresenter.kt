@@ -1,17 +1,9 @@
 package com.dengage.sdk.manager.subscription
 
-import android.os.Handler
-import android.os.Looper
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.subscription.usecase.SendSubscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
-import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.DengageUtils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>(),
     SubscriptionContract.Presenter {
@@ -20,6 +12,15 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
     private var sendSubscriptionTryCount = 0
     private var subscriptionInProgress =false
 
+    private val subscriptionQueue: SubscriptionQueue by lazy {
+        SubscriptionQueue(this)
+    }
+
+    override fun sendSubscription(subscription: Subscription) {
+        subscriptionQueue.enqueueSubscription(subscription)
+    }
+
+    /*
     override fun sendSubscription(subscription: Subscription) {
         Handler(Looper.getMainLooper()).postDelayed({
             if (DengageUtils.isAppInForeground()/*&&!subscriptionInProgress*/) {
@@ -31,35 +32,32 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
             }
         }, 4000)
     }
+    */
 
-
-    private fun callSubscriptionApi(subscription: Subscription) {
-        subscriptionInProgress=true
-        DengageLogger.verbose("sub method is called")
+    override fun callSubscriptionApi(subscription: Subscription) {
+        subscriptionInProgress = true
         sendSubscriptionTryCount++
+
+        // Artık “gerçek” network isteğini burada yapıyoruz
         sendSubscription(this) {
             onResponse = {
                 view {
-                    subscriptionInProgress=false
+                    subscriptionInProgress = false
+                    // localstorage güncelleme
                     Prefs.previouSubscription = Prefs.subscription
                     Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
-
-                    subscriptionSent() }
+                    subscriptionSent()
+                }
             }
             onError = {
-                // try to send it for 5 times
-                subscriptionInProgress=false
+                subscriptionInProgress = false
                 if (sendSubscriptionTryCount < 5) {
-                    sendSubscription(
-                        subscription = subscription
-                    )
+                    callSubscriptionApi(subscription)
                 } else {
                     sendSubscriptionTryCount = 0
                 }
             }
-            params = SendSubscription.Params(
-                subscription = subscription
-            )
+            params = SendSubscription.Params(subscription)
         }
     }
 }

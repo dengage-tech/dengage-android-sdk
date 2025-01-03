@@ -80,9 +80,9 @@
         </receiver> <!-- Event api url of Dengage -->
 
         <!--
-                <meta-data
-                    android:name="den_event_api_url"
-                    android:value="https://event.dengage.com" />
+        <meta-data
+            android:name="den_event_api_url"
+            android:value="https://event.dengage.com" />
         <meta-data
             android:name="den_push_api_url"
             android:value="https://push.dengage.com" />
@@ -101,7 +101,8 @@
         <meta-data
             android:name="fetch_real_time_in_app_api_url"
             android:value="https://tr-inapp.lib.dengage.com/" />
-        -->
+-->
+
 
         <meta-data
             android:name="den_event_api_url"
@@ -124,7 +125,6 @@
         <meta-data
             android:name="fetch_real_time_in_app_api_url"
             android:value="https://dev-inapp.lib.dengage.com/" />
-
 
        <!-- <meta-data
             android:name="den_push_small_icon"

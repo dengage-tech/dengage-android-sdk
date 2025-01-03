@@ -14,5 +14,6 @@ interface SubscriptionContract {
         fun sendSubscription(
             subscription: Subscription
         )
+        fun callSubscriptionApi(subscription: Subscription)
     }
 }
