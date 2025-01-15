@@ -42,8 +42,17 @@
     - [Removing an Inbox Message](#removing-an-inbox-message)
     - [Marking an Inbox Message as Read](#marking-an-inbox-message-as-read)
 - [In-App Messaging](#in-app-messaging)
+  - [Methods](#methods)
+  - [Real Time In-App Messaging](#real-time-in-app-messaging)
+  - [In-App Inline](#in-app-inline)
+  - [App Stories](#app-stories)
 - [Geofence](#geofence)
+  - [Geofence Installation](#geofence-installation)
+  - [Geofence Initialization](#geofence-initialization)
+  - [Request Location Permission](#request-location-permission)
 - [Huawei Messaging Service](#huawei-messaging-service)
+  - [HMS setup](#hms-setup)
+  - [Initialization for Huawei](#initialization-for-huawei)
 
 
 ## Android SDK Setup
@@ -671,7 +680,7 @@ The SDK utilizes custom layouts for carousel functionality. You need to set up t
 </RelativeLayout>
 ```
 
-```den_carousel_portrait.xml```
+`den_carousel_portrait.xml`:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -1130,21 +1139,225 @@ Dengage.setState(name = "state-name")
 Dengage.setCity(name = "city-name")
 ```
 
-### In App Inline
+### In-App Inline
+
+The **In-App Inline** feature allows you to seamlessly integrate inline in-app messages into your app's content, dynamically populating specific parts of your app for a better user experience.
+
+Define the layout in your XML file to include the `InAppInlineElement` view, which will display the inline content.
+
+`InAppInlineElement`: The placeholder view where the inline content will be displayed.
+
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp"
+        android:orientation="vertical">
+
+        <com.dengage.sdk.ui.inappmessage.InAppInlineElement
+            android:id="@+id/inapp_inline_element"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="12dp" />
+    </LinearLayout>
+
+</layout>
+```
+
+In your fragment or activity, set up the inline in-app messaging using the `Dengage.showInlineInApp` method.
+
+```kotlin
+class InAppInLineFragment : BaseDataBindingFragment<FragmentInappInlineBinding>() {
+
+    override fun getLayoutRes(): Int {
+        return R.layout.fragment_inapp_inline
+    }
+
+    override fun init() {
+        val customParams = hashMapOf<String, String>()
+        Dengage.showInlineInApp(screenName = "screen-name",
+            inAppInlineElement = binding.inappInlineElement,
+            propertyId = "property-id",
+            activity = requireActivity(),
+            customParams = customParams,
+            hideIfNotFound = true
+        )
+    }
+
+}
+```
+
+Parameters:
+
+* **`inAppInlineElement`** The `InAppInlineElement` view defined in the XML layout where the inline content will appear.
+* **`propertyId`** The Android selector linked to the in-app inline campaign created in the Dengage panel.
+* **`customParams`** _(optional)_ A `HashMap` of custom parameters used for filtering inline messages.
+* **`screenName`** _(optional)_ Specifies the screen where the inline in-app message will be displayed.
+* **`hideIfNotFound`** _(optional, default: `false`)_ If set to `true`, the `InAppInlineElement` will be hidden if no inline message is found.
+
 
 
 ### App Stories
 
+The **App Stories** feature allows you to display story-like content within your app.
+
+Define the layout in your XML file to include the `StoriesListView` view, which will display the story content.
+
+`StoriesListView`: The placeholder view where the app stories will be displayed.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="20dp"
+        android:orientation="vertical">
 
 
+        <com.dengage.sdk.ui.story.StoriesListView
+            android:id="@+id/stories_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
+
+    </LinearLayout>
+
+</layout>
+```
+
+In your fragment or activity, set up the app stories using the `Dengage.showStoriesList` method.
 
 
+```kotlin
+class AppStoryFragment : BaseDataBindingFragment<FragmentAppStoryBinding>() {
 
+    override fun getLayoutRes(): Int {
+        return R.layout.fragment_app_story
+    }
 
+    override fun init() {
+        val customParams = hashMapOf<String, String>()
+        Dengage.showStoriesList(screenName = "screen-name",
+            storiesListView = binding.storiesListView,
+            storyPropertyId = "property-id",
+            activity = requireActivity(),
+            customParams = customParams
+        )
+    }
 
+}
+```
+
+Parameters:
+
+* **`screenName`** _(optional)_ Specifies the screen where the app stories should be displayed.
+* **`storiesListView`** The `StoriesListView` defined in the XML layout where the stories will appear.
+* **`storyPropertyId`** The story property ID associated with the app stories campaign created in the Dengage panel.
+* **`customParams`** _(optional)_ A `HashMap` of custom parameters used for filtering stories.
 
 ## Geofence
+
+The **Dengage Android Geofence SDK** enhances the **Dengage Android SDK** by integrating geofence capabilities through the **Play Services Location** library.
+
+### Geofence Installation
+
+The **Dengage Android Geofence SDK** is available via **JitPack**. To install the SDK, include the following dependencies in your `build.gradle` file. Ensure the `sdk-geofence` version matches the core SDK version.
+
+```groovy
+dependencies {
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.76'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.76'
+}
+```
+
+### Geofence Initialization
+
+After initializing the core SDK with `Dengage.init`, you can enable geofence by calling the `DengageGeofence.startGeofence` method in your application class.
+
+```kotlin
+DengageGeofence.startGeofence()
+```
+
+### Request Location Permission
+
+To request location permissions at runtime, use the `DengageGeofence.requestLocationPermissions` method.
+
+```kotlin
+DengageGeofence.requestLocationPermissions(activity)
+```
+
 
 
 ## Huawei Messaging Service
 
+
+### HMS setup
+
+1. Complete the [HMS Android Setup](https://developer.huawei.com/consumer/en/codelab/HMSPushKit/index.html#3) to configure your Android application for Huawei integration.
+2. Download the `agconnect-services.json` configuration file and place it in your app's directory.
+3. In your root-level (project-level) Gradle file `<project>/build.gradle`, add the following dependency::
+
+    ```groovy
+    buildscript {
+      repositories {
+          maven {url 'http://developer.huawei.com/repo/'}
+      }
+      dependencies {        
+          classpath "com.huawei.agconnect:agcp:1.6.2.300"
+      }
+    }
+    ```
+
+4. In your module (app-level) Gradle file `<project>/app/build.gradle`, apply the Huawei Agconnect plugin as follows:
+
+   ```groovy
+   plugins {
+       id("com.huawei.agconnect")
+   }
+   ```
+
+5. The **Dengage Android HMS SDK** is available via **JitPack**. To install the SDK, include the following dependencies in your `build.gradle` file. Ensure the `sdk-hms` version matches the core SDK version.
+
+```groovy
+dependencies {
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.76'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.76'
+}
+```
+
+6. To handle push messages, you need to include the **HmsMessagingService** in your `AndroidManifest.xml` file. Place the following block inside the `<application>` tag of your `AndroidManifest.xml` file to ensure proper integration:
+
+   ```xml
+   <!-- Add the Hms Messaging Service to handle push notifications from HMS -->
+   <service
+      android:name="com.dengage.hms.HmsMessagingService"
+      android:exported="false" >
+      <intent-filter>
+          <action android:name="com.huawei.push.action.MESSAGING_EVENT" />
+      </intent-filter>
+   </service>
+   ```
+
+### Initialization for Huawei
+
+`init` method should be called once during the application's lifecycle to initialize the Dengage SDK. It is recommended to place it inside the `onCreate` method of your `Application` class.
+
+```kotlin
+val dengageHmsManager = DengageHmsManager()
+
+Dengage.init(
+    context = applicationContext,
+    huaweiIntegrationKey = "your-huawei-integration-key",
+    dengageHmsManager = dengageHmsManager,
+    deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
+    disableOpenWebUrl = false
+)
+```
+
+Just as like in [Carousel Push](#carousel-push) section, you need to define a custom receiver in your `AndroidManifest.xml` file and to prepare custom layouts for carousel functionality.
