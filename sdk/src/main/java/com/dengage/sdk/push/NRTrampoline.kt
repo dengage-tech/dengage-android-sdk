@@ -189,7 +189,7 @@ open class NRTrampoline : BroadcastReceiver() {
         context: Context,
         intent: Intent,
         message: Message,
-        bitmap: Bitmap,
+        bitmap: Bitmap?,
         notificationBuilder: NotificationCompat.Builder
     ) {
         val style = NotificationCompat.BigPictureStyle().bigPicture(bitmap)
@@ -406,9 +406,17 @@ open class NRTrampoline : BroadcastReceiver() {
                 ImageDownloadUtils.downloadImage(
                     imageUrl = message.mediaUrl,
                     onComplete = { bitmap ->
-                        bitmap?.let {
-                            val notificationBuilder: NotificationCompat.Builder =
-                                getNotificationBuilder(context, intent, message)
+                        val notificationBuilder: NotificationCompat.Builder =
+                            getNotificationBuilder(context, intent, message)
+                        if (bitmap == null) {
+                            onRichNotificationRender(
+                                context,
+                                intent,
+                                message,
+                                null,
+                                notificationBuilder
+                            )
+                        } else {
                             onRichNotificationRender(
                                 context,
                                 intent,
