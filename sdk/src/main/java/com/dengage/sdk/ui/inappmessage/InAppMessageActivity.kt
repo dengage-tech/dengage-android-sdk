@@ -17,6 +17,7 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import kotlin.math.roundToInt
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.R
 import com.dengage.sdk.callback.ReviewDialogCallback
@@ -32,48 +33,57 @@ import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchApplicationSettingsActivity
 import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
-import kotlin.math.roundToInt
-
 
 class InAppMessageActivity : Activity(), View.OnClickListener {
 
     private lateinit var inAppMessage: InAppMessage
     private var isAndroidUrlNPresent: Boolean? = false
     private var isRatingDialog: Boolean? = false
-    private var isClicked:Boolean =false
+    private var isClicked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as InAppMessage
-            val contentParams = inAppMessage.data.content.params
-            setThemeAccordingToContentParams(contentParams)
-            setContentView(R.layout.activity_in_app_message)
-
-            if (Build.VERSION.SDK_INT >= 21) {
-
-                 if(!inAppMessage.data.content.params.backgroundColor.isNullOrEmpty()){
-                     window.decorView.setBackgroundColor(Color.parseColor(inAppMessage.data.content.params.backgroundColor?.dropLast(2)))
-                    window.decorView.background.alpha=InAppMessageUtils.hexToPercentageOpacity(inAppMessage.data.content.params.backgroundColor?.takeLast(2)).toInt()}
-            }
-            setContentPosition(contentParams)
-            setHtmlContent(contentParams)
-            findViewById<View>(R.id.vInAppMessageContainer).setOnClickListener(this)
-            findViewById<View>(R.id.cardInAppMessage).setOnClickListener(this)
-        } catch (e: Exception) {
+        inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as? InAppMessage ?: run {
+            finish()
+            return
         }
+
+        val contentParams = inAppMessage.data.content.params
+        setThemeAccordingToContentParams(contentParams)
+        setContentView(R.layout.activity_in_app_message)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            contentParams.backgroundColor?.let { color ->
+                window.decorView.setBackgroundColor(Color.parseColor(color.dropLast(2)))
+                window.decorView.background.alpha =
+                    InAppMessageUtils.hexToPercentageOpacity(color.takeLast(2)).toInt()
+            }
+        }
+
+        setContentPosition(contentParams)
+        setHtmlContent(contentParams)
+
+        findViewById<View>(R.id.vInAppMessageContainer).setOnClickListener(this)
+        findViewById<View>(R.id.cardInAppMessage).setOnClickListener(this)
     }
 
-    private fun setContentPosition(
-        contentParams: ContentParams,
-    ) {
-        val cardInAppMessage = findViewById<CardView>(R.id.cardInAppMessage)
-        val params = RelativeLayout.LayoutParams(
-            WRAP_CONTENT,
-            WRAP_CONTENT
+    private fun setThemeAccordingToContentParams(contentParams: ContentParams) {
+        val isFull = contentParams.position == ContentPosition.FULL.position
+        setTheme(
+            if (isFull)
+                R.style.Theme_AppCompat_Transparent_NoActionBar_noFloating
+            else
+                R.style.Theme_AppCompat_Transparent_NoActionBar
         )
+    }
+
+    private fun setContentPosition(contentParams: ContentParams) {
+        val cardInAppMessage = findViewById<CardView>(R.id.cardInAppMessage)
+        val params = RelativeLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+
         val screenWidth = Resources.getSystem().displayMetrics.widthPixels
         val screenHeight = Resources.getSystem().displayMetrics.heightPixels
+
         params.setMargins(
             InAppMessageUtils.getPixelsByPercentage(screenWidth, contentParams.marginLeft),
             InAppMessageUtils.getPixelsByPercentage(screenHeight, contentParams.marginTop),
@@ -81,103 +91,76 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             InAppMessageUtils.getPixelsByPercentage(screenHeight, contentParams.marginBottom)
         )
         params.addRule(RelativeLayout.CENTER_HORIZONTAL)
+
         when (contentParams.position) {
-            ContentPosition.BOTTOM.position -> {
-                params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-            }
-            ContentPosition.MIDDLE.position -> {
-                params.addRule(RelativeLayout.CENTER_VERTICAL)
-            }
-            ContentPosition.TOP.position -> {
-                params.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-            }
+            ContentPosition.BOTTOM.position -> params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+            ContentPosition.MIDDLE.position -> params.addRule(RelativeLayout.CENTER_VERTICAL)
+            ContentPosition.TOP.position    -> params.addRule(RelativeLayout.ALIGN_PARENT_TOP)
         }
+
         cardInAppMessage.layoutParams = params
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setHtmlContent(contentParams: ContentParams) {
-        val vHtmlContent = findViewById<View>(R.id.vHtmlContent)
         val webView = findViewById<WebView>(R.id.webView)
         val vHtmlWidthContainer = findViewById<RelativeLayout>(R.id.vHtmlWidthContainer)
         val cardInAppMessage = findViewById<CardView>(R.id.cardInAppMessage)
 
-        // set height for content type full
         if (contentParams.position == ContentPosition.FULL.position) {
-            val params = RelativeLayout.LayoutParams(
-                MATCH_PARENT,
-                MATCH_PARENT
-            )
-            webView.layoutParams = params
+            webView.layoutParams = RelativeLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         }
 
-        // set radius of card view
         cardInAppMessage.radius = InAppMessageUtils.pxToDp(contentParams.radius, this)
 
-        // set max width for container
         contentParams.maxWidth?.let {
             val params = vHtmlWidthContainer.layoutParams as ConstraintLayout.LayoutParams
             params.matchConstraintMaxWidth = InAppMessageUtils.pxToDp(it, this).roundToInt()
             vHtmlWidthContainer.layoutParams = params
         }
 
-        vHtmlContent.visibility = View.VISIBLE
-
+        findViewById<View>(R.id.vHtmlContent).visibility = View.VISIBLE
         isAndroidUrlNPresent = contentParams.html?.contains("Dn.androidUrlN")
+        isRatingDialog = contentParams.html?.contains("Dn.showRating")
 
-        isRatingDialog = contentParams.html?.contains("Dn.showRating") //false
+        with(webView.settings) {
+            loadWithOverviewMode = true
+            useWideViewPort = true
+            displayZoomControls = false
+            builtInZoomControls = true
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            javaScriptCanOpenWindowsAutomatically = true
+        }
 
-        webView.apply {
+        webView.setBackgroundColor(Color.TRANSPARENT)
+        webView.addJavascriptInterface(JavaScriptInterface(), "Dn")
 
-            contentParams.html?.let {
-                loadDataWithBaseURL(
-                    null,
-                    it, "text/html", "UTF-8", null
-                )
-            }
-            settings.loadWithOverviewMode = true
-            settings.useWideViewPort = true
-            settings.displayZoomControls = false
-            settings.builtInZoomControls = true
-            settings.setSupportZoom(true)
-            setBackgroundColor(Color.TRANSPARENT)
-            settings.domStorageEnabled = true
-            settings.javaScriptEnabled = true
-            settings.javaScriptCanOpenWindowsAutomatically = true
-            addJavascriptInterface(JavaScriptInterface(), "Dn")
+        contentParams.html?.let { html ->
+            webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+        }
 
-            contentParams.html?.let {
-                loadDataWithBaseURL(null, it, "text/html", "UTF-8", null)
-            }
-
-            webViewClient = object : android.webkit.WebViewClient() {
+        if (!"VIDEO_MODAL".equals(inAppMessage.data.content.type, ignoreCase = true)) {
+            webView.webViewClient = object : android.webkit.WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
 
-                    evaluateJavascript(Constants.mustacheJs.trimIndent()) { _ ->
+                    val dataMap = mapOf("dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo())
+                    val dataJson = org.json.JSONObject(dataMap).toString()
 
-                        val dataMap = mapOf(
-                            "dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo()
-                        )
-                        val dataJson = org.json.JSONObject(dataMap).toString()
-
-                        val mustacheRenderJs = """
-                        (function() {
-                            var data = $dataJson;
-                            var template = document.documentElement.innerHTML;
-                            var rendered = Mustache.render(template, data);
-                            document.documentElement.innerHTML = rendered;
-                        })();
+                    val mustacheRenderJs = """
+                    (function() {
+                        ${Constants.mustacheJs}
+                        var data = $dataJson;                       
+                        var template = document.documentElement.innerHTML;
+                        var rendered = Mustache.render(template, data);
+                        document.documentElement.innerHTML = rendered;
+                    })();
                     """.trimIndent()
 
-                        evaluateJavascript(mustacheRenderJs) {
-
-                        }
-                    }
+                    webView.evaluateJavascript(mustacheRenderJs, null)
                 }
             }
-
-
         }
     }
 
@@ -189,7 +172,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                 }
             }
             R.id.cardInAppMessage -> {
-                // ignore
+                // Do nothing (ignore clicks on the card itself)
             }
         }
     }
@@ -199,8 +182,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     }
 
     override fun onDestroy() {
-
-        if(!isClicked) inAppMessageDismissed()
+        if (!isClicked) inAppMessageDismissed()
         inAppMessageCallback = null
         super.onDestroy()
     }
@@ -213,46 +195,35 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     }
 
     interface InAppMessageCallback {
-        /**
-        Clicked in app message
-         */
+        /** Clicked in app message */
         fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?)
 
-        /**
-        Dismissed in app message
-         */
+        /** Dismissed in app message */
         fun inAppMessageDismissed(inAppMessage: InAppMessage)
 
-        /**
-        Send tags method for using from webview javascript interface
-         */
+        /** Send tags method for using from webview javascript interface */
         fun sendTags(tags: List<TagItem>?)
     }
 
     companion object {
-        /**
-        Set in app message callback for handling in app message actions
-         */
         var inAppMessageCallback: InAppMessageCallback? = null
 
         const val EXTRA_IN_APP_MESSAGE = "EXTRA_IN_APP_MESSAGE"
         const val RESULT_CODE = "RESULT_CODE"
 
         fun newIntent(activity: Activity, inAppMessage: InAppMessage, resultCode: Int): Intent {
-            val intent = Intent(activity, InAppMessageActivity::class.java).apply {
+            return Intent(activity, InAppMessageActivity::class.java).apply {
                 putExtra(EXTRA_IN_APP_MESSAGE, inAppMessage)
                 putExtra(RESULT_CODE, resultCode)
             }
-            return intent
         }
     }
-
 
     private inner class JavaScriptInterface {
         @JavascriptInterface
         fun dismiss() {
             DengageLogger.verbose("In app message: dismiss event")
-            this@InAppMessageActivity.finish()
+            finish()
         }
 
         @JavascriptInterface
@@ -261,99 +232,93 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                 DengageLogger.verbose("In app message: android target url event $targetUrl")
 
                 if (targetUrl == "Dn.promptPushPermission()") {
-                    if (!this@InAppMessageActivity.areNotificationsEnabled()) {
+                    if (!areNotificationsEnabled()) {
                         Toast.makeText(
                             this@InAppMessageActivity,
                             "You need to enable push permission",
                             Toast.LENGTH_LONG
                         ).show()
-                        this@InAppMessageActivity.launchNotificationSettingsActivity()
+                        launchNotificationSettingsActivity()
                     }
                 } else {
                     try {
-                        this@InAppMessageActivity.launchActivity(null, targetUrl)
+                        launchActivity(null, targetUrl)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
             }
-
-
         }
 
         @JavascriptInterface
         fun androidUrlN(targetUrl: String, inAppBrowser: Boolean, retrieveOnSameLink: Boolean) {
             DengageLogger.verbose("In app message: android target url n event $targetUrl")
-            if (targetUrl.equals("DN.SHOWRATING()", ignoreCase = true)) {
-                showRating()
-            } else if (targetUrl == "Dn.promptPushPermission()") {
-                if (!this@InAppMessageActivity.areNotificationsEnabled()) {
-                    Toast.makeText(
-                        this@InAppMessageActivity,
-                        "You need to enable push permission",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    this@InAppMessageActivity.launchNotificationSettingsActivity()
-                }
-            } else if (DengageUtils.isDeeplink(targetUrl)) {
-
-                try {
-                    if (retrieveOnSameLink) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
-                        intent.putExtra("targetUrl", targetUrl)
-                        DengageUtils.sendBroadCast(intent.apply {
-                            this.action = Constants.DEEPLINK_RETRIEVE_EVENT
-                        }, this@InAppMessageActivity.applicationContext)
-                        intent.extras?.let {
-                            setResult(it.getInt(RESULT_CODE), intent)
-                        }
-
-                    } else {
-                        this@InAppMessageActivity.launchActivity(null, targetUrl)
+            when {
+                targetUrl.equals("DN.SHOWRATING()", ignoreCase = true) -> showRating()
+                targetUrl == "Dn.promptPushPermission()" -> {
+                    if (!areNotificationsEnabled()) {
+                        Toast.makeText(
+                            this@InAppMessageActivity,
+                            "You need to enable push permission",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        launchNotificationSettingsActivity()
                     }
-                } catch (e: Exception) {
-                    DengageLogger.error(e.message)
                 }
-            } else if (retrieveOnSameLink && !inAppBrowser) {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
-                intent.putExtra("targetUrl", targetUrl)
-                DengageUtils.sendBroadCast(intent.apply {
-                    this.action = Constants.DEEPLINK_RETRIEVE_EVENT
-                }, this@InAppMessageActivity.applicationContext)
-                intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
-            } else if (inAppBrowser) {
-                val intent = InAppBrowserActivity.Builder.getBuilder()
-                    .withUrl(targetUrl)
-                    .build(this@InAppMessageActivity)
-
-                startActivity(intent)
-            } else {
-                this@InAppMessageActivity.launchActivity(null, targetUrl)
+                DengageUtils.isDeeplink(targetUrl) -> {
+                    try {
+                        if (retrieveOnSameLink) {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                            intent.putExtra("targetUrl", targetUrl)
+                            DengageUtils.sendBroadCast(intent.apply {
+                                action = Constants.DEEPLINK_RETRIEVE_EVENT
+                            }, applicationContext)
+                            intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
+                        } else {
+                            launchActivity(null, targetUrl)
+                        }
+                    } catch (e: Exception) {
+                        DengageLogger.error(e.message)
+                    }
+                }
+                retrieveOnSameLink && !inAppBrowser -> {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                    intent.putExtra("targetUrl", targetUrl)
+                    DengageUtils.sendBroadCast(intent.apply {
+                        action = Constants.DEEPLINK_RETRIEVE_EVENT
+                    }, applicationContext)
+                    intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
+                }
+                inAppBrowser -> {
+                    val intent = InAppBrowserActivity.Builder
+                        .getBuilder()
+                        .withUrl(targetUrl)
+                        .build(this@InAppMessageActivity)
+                    startActivity(intent)
+                }
+                else -> launchActivity(null, targetUrl)
             }
-
         }
 
         @JavascriptInterface
         fun sendClick(buttonId: String?) {
-            isClicked=true
+            isClicked = true
             DengageLogger.verbose("In app message: clicked button $buttonId")
             inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId)
         }
 
         @JavascriptInterface
         fun sendClick() {
-            isClicked=true
+            isClicked = true
             DengageLogger.verbose("In app message: clicked body/button with no Id")
             inAppMessageCallback?.inAppMessageClicked(inAppMessage, null)
         }
 
         @JavascriptInterface
         fun close() {
-            if (isAndroidUrlNPresent == false) {
-                if (isRatingDialog == false) {
-                    DengageLogger.verbose("In app message: close event")
-                    this@InAppMessageActivity.finish()
-                }
+            if (isAndroidUrlNPresent == false && isRatingDialog == false) {
+                DengageLogger.verbose("In app message: close event")
+                finish()
             }
         }
 
@@ -361,30 +326,31 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         fun closeN() {
             DengageLogger.verbose("In app message: close event n")
             if (isRatingDialog == false) {
-                this@InAppMessageActivity.finish()
+                finish()
             }
         }
 
         @JavascriptInterface
         fun setTags() {
-            DengageLogger.verbose("In app message: set tags event")
+            DengageLogger.verbose("In app message: set tags event (no data)")
         }
 
         @JavascriptInterface
         fun setTags(tagsString: String?) {
             val tagItemString = tagsString?.trim()?.takeIf { it.isNotEmpty() } ?: return
-            val components = tagItemString.trim('{', '}').split(",").mapNotNull { component ->
-                val pair = component.split(":").map { it.trim() }
-                if (pair.size == 2) pair[0] to pair[1] else null
-            }.toMap()
+            val components = tagItemString.trim('{', '}')
+                .split(",")
+                .mapNotNull { component ->
+                    val pair = component.split(":").map { it.trim() }
+                    if (pair.size == 2) pair[0] to pair[1] else null
+                }.toMap()
 
             val tagItem = TagItem(
                 tag = components["tag"] ?: return,
                 value = components["value"] ?: return
             )
-
             inAppMessageCallback?.sendTags(listOf(tagItem))
-            DengageLogger.verbose("In app message: set tags event")
+            DengageLogger.verbose("In app message: set tags event with $tagItem")
         }
 
         @JavascriptInterface
@@ -400,47 +366,31 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun promptPushPermission() {
             DengageLogger.verbose("In app message: prompt push permission event")
-            if (!this@InAppMessageActivity.areNotificationsEnabled()) {
+            if (!areNotificationsEnabled()) {
                 Toast.makeText(
                     this@InAppMessageActivity,
                     "You need to enable push permission",
                     Toast.LENGTH_LONG
                 ).show()
-                this@InAppMessageActivity.launchNotificationSettingsActivity()
+                launchNotificationSettingsActivity()
             }
         }
 
         @JavascriptInterface
         fun openSettings() {
             DengageLogger.verbose("In app message: open settings event")
-            this@InAppMessageActivity.launchApplicationSettingsActivity()
+            launchApplicationSettingsActivity()
         }
-
     }
 
-    fun showRating() {
-        Dengage.showRatingDialog(activity = this@InAppMessageActivity,
+    private fun showRating() {
+        Dengage.showRatingDialog(
+            activity = this@InAppMessageActivity,
             reviewDialogCallback = object : ReviewDialogCallback {
-                override fun onCompletion() {
-                }
-
-                override fun onError() {
-
-                }
-
-            })
+                override fun onCompletion() {}
+                override fun onError() {}
+            }
+        )
         finish()
     }
-
-    private fun setThemeAccordingToContentParams(contentParams: ContentParams)
-    {
-        if (contentParams.position == ContentPosition.FULL.position) {
-            setTheme(R.style.Theme_AppCompat_Transparent_NoActionBar_noFloating)
-        }
-        else {
-            setTheme(R.style.Theme_AppCompat_Transparent_NoActionBar)
-
-        }
-    }
-
 }
