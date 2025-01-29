@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.DeadObjectException
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.remote.api.ApiUrlConfiguration
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.AppTracking
@@ -28,39 +29,32 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
     override fun providePresenter() = ConfigurationPresenter()
 
+    internal fun setDomain(apiUrlConfiguration: ApiUrlConfiguration? = null, initForGeofence: Boolean = false) {
 
-    internal fun setDomain() {
-        DengageUtils.getMetaData(name = "den_push_api_url").apply {
-            if (this == null) {
-                DengageLogger.error("Push api url not found on application manifest metadata")
-                throw RuntimeException("Push api url not found on application manifest metadata")
-            } else {
-                Prefs.pushApiBaseUrl = this
+        if (apiUrlConfiguration == null) {
+            mapOf(
+                "den_push_api_url" to { url: String -> Prefs.pushApiBaseUrl = url },
+                "den_event_api_url" to { url: String -> Prefs.eventApiBaseUrl = url },
+                "den_in_app_api_url" to { url: String -> Prefs.inAppApiBaseUrl = url },
+                "den_geofence_api_url" to { url: String -> Prefs.geofenceApiBaseUrl = url },
+                "fetch_real_time_in_app_api_url" to { url: String -> Prefs.getRealTimeMessagesBaseUrl = url }
+            ).forEach { (name, setter) ->
+                DengageUtils.getMetaData(name = name)?.let(setter) ?: run {
+                    DengageLogger.error("$name not found on application manifest metadata")
+                    if(initForGeofence) {
+                        throw RuntimeException("$name not found on application manifest metadata")
+                    }
+                }
+            }
+        } else {
+            with(apiUrlConfiguration) {
+                Prefs.pushApiBaseUrl = denPushApiUrl
+                Prefs.eventApiBaseUrl = denEventApiUrl
+                Prefs.inAppApiBaseUrl = denInAppApiUrl
+                Prefs.geofenceApiBaseUrl = denGeofenceApiUrl
+                Prefs.getRealTimeMessagesBaseUrl = fetchRealTimeInAppApiUrl
             }
         }
-        DengageUtils.getMetaData(name = "den_event_api_url").apply {
-            if (this == null) {
-                DengageLogger.error("Event api url not found on application manifest metadata")
-                throw RuntimeException("Event api url not found on application manifest metadata")
-            } else {
-                Prefs.eventApiBaseUrl = this
-            }
-        }
-        DengageUtils.getMetaData(name = "den_in_app_api_url")?.let {
-            Prefs.inAppApiBaseUrl = it
-        }
-        DengageUtils.getMetaData(name = "den_geofence_api_url").apply {
-            if (this == null) {
-                DengageLogger.error("Geofence api url not found on application manifest metadata")
-                throw RuntimeException("Geofence api url not found on application manifest metadata")
-            } else {
-                Prefs.geofenceApiBaseUrl = this
-            }
-        }
-        DengageUtils.getMetaData(name = "fetch_real_time_in_app_api_url")?.let {
-            Prefs.getRealTimeMessagesBaseUrl = it
-        }
-
     }
 
     internal fun init(

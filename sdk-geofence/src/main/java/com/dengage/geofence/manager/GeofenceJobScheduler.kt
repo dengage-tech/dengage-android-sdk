@@ -36,7 +36,7 @@ class GeofenceJobScheduler : JobService() {
         private val counter = AtomicInteger()
 
         internal fun scheduleJob(context: Context, location: Location, source: GLC, geofenceRequestId: String?) {
-            if (!Dengage.initialized) Dengage.init(context)
+            if (!Dengage.initialized) Dengage.init(context, initForGeofence = true)
             val componentName = ComponentName(context, GeofenceJobScheduler::class.java)
             val extras = PersistableBundle().apply {
                 putDouble(EXTRA_LATITUDE, location.latitude)
@@ -69,7 +69,7 @@ class GeofenceJobScheduler : JobService() {
 
     override fun onStartJob(params: JobParameters): Boolean {
         if (!Dengage.initialized) {
-            Dengage.init(this.applicationContext)
+            Dengage.init(context = this.applicationContext, initForGeofence = true)
         }
 
         val extras = params.extras
@@ -103,7 +103,7 @@ class GeofenceJobScheduler : JobService() {
 
     override fun onStopJob(params: JobParameters): Boolean {
         if (!Dengage.initialized) {
-            Dengage.init(this.applicationContext)
+            Dengage.init(context = this.applicationContext, initForGeofence = true)
         }
         return false
     }

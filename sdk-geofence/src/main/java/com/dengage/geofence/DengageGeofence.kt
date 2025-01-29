@@ -19,15 +19,14 @@ object DengageGeofence {
         geofenceRequestId: String?,
     ) {
         if (!Dengage.initialized) {
-            Dengage.init(context)
-            Dengage.init(context = context)
+            Dengage.init(context = context, initForGeofence = true)
         }
         geofenceManager.handleLocation(location, source, geofenceRequestId)
     }
 
     fun handleBootCompleted(context: Context) {
         if (!Dengage.initialized) {
-            Dengage.init(context = context)
+            Dengage.init(context = context, initForGeofence = true)
         }
         geofenceManager.handleBootCompleted()
     }

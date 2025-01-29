@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.data.remote.api.ApiUrlConfiguration
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.AppTracking
@@ -88,8 +89,9 @@ object Dengage {
         contactKey: String? = null,
         partnerDeviceId: String? = null,
         disableOpenWebUrl:Boolean? =false,
-        notificationDisplayPriorityConfiguration: NotificationDisplayPriorityConfiguration =NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY
-
+        notificationDisplayPriorityConfiguration: NotificationDisplayPriorityConfiguration =NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY,
+        apiUrlConfiguration: ApiUrlConfiguration? = null,
+        initForGeofence: Boolean = false,
         ) {
         initialized = true
         ContextHolder.resetContext(context = context)
@@ -132,7 +134,7 @@ object Dengage {
         }
         configurationManager.configurationCallback = configurationCallback
 
-        configurationManager.setDomain()
+        configurationManager.setDomain(apiUrlConfiguration, initForGeofence)
 
         Handler(Looper.getMainLooper()).postDelayed({
             configurationManager.init(

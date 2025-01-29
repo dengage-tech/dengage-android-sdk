@@ -7,9 +7,9 @@ import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.util.DengageLifecycleTracker
-import com.dengage.sdk.push.IDengageHmsManager
 import com.dengage.hms.DengageHmsManager
 import com.dengage.geofence.DengageGeofence
+import com.dengage.sdk.data.remote.api.ApiUrlConfiguration
 
 class App : Application() {
     /*lateinit var dengageManager: DengageManager
@@ -32,17 +32,22 @@ class App : Application() {
         val dengageHmsManager = DengageHmsManager()
 
 
+        val apiUrlConfiguration = ApiUrlConfiguration(
+            denEventApiUrl = "https://dev-push.dengage.com",
+            denPushApiUrl = "https://dev-push.dengage.com",
+            denInAppApiUrl = "https://dev-push.dengage.com",
+            denGeofenceApiUrl = "https://dev-push.dengage.com/geoapi/",
+            fetchRealTimeInAppApiUrl = "https://dev-inapp.lib.dengage.com/"
+        )
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
             dengageHmsManager = dengageHmsManager,
-            deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
+            deviceConfigurationPreference = DeviceConfigurationPreference.Google,
             disableOpenWebUrl = false,
             notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY
-
         )
-
-
 
       /*  Dengage.setContactKey("dasdasd")
         Dengage.setPartnerDeviceId("hi")

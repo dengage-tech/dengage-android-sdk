@@ -84,7 +84,7 @@ class GeofenceLocationReceiver: BroadcastReceiver() {
     @SuppressLint("MissingPermission")
     override fun onReceive(context: Context, intent: Intent) {
         if (!Dengage.initialized) {
-            Dengage.init(context)
+            Dengage.init(context = context, initForGeofence = true)
         }
 
         DengageLogger.debug("Received broadcast | action = ${intent.action}")
