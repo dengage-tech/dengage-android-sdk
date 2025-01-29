@@ -1,6 +1,8 @@
 package com.dengage.sdk.push
 
 import android.app.Activity
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
 import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -35,14 +37,17 @@ class NotificationNavigationDeciderActivity : Activity() {
                     val extras = intent.extras
 
                     val uri: String?
+                    val id: String?
 
                     if (extras != null) {
                         val message: Message? = Message.createFromIntent(extras)
                         var targetUrl: String? = ""
-                        var carouselId: String? = ""
+                        var carouselId: String?
                         if (message?.carouselContent.isNullOrEmpty()||!message?.source.isNullOrBlank()) {
                             targetUrl= message?.targetUrl
+
                         } else {
+
                             targetUrl = message?.current?.let { message.carouselContent?.get(it)?.targetUrl }
                             carouselId = message?.current?.let { message.carouselContent?.get(it)?.id }
                             if(!carouselId.isNullOrEmpty())
@@ -58,7 +63,6 @@ class NotificationNavigationDeciderActivity : Activity() {
 
 
                         if (uri != null && !TextUtils.isEmpty(uri) && Prefs.disableOpenWebUrl ==false) {
-
                             sendingIntentObject = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
 
                         } else {
@@ -80,20 +84,30 @@ class NotificationNavigationDeciderActivity : Activity() {
 
 
                         if (!TextUtils.isEmpty(rawJson)) {
-
                             //  message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
-
                         }
 
                         DengageUtils.sendBroadCast(intent, this)
+
+                        if (!message?.actionButtons.isNullOrEmpty()) {
+                            id = extras.getString("id", "")
+                            if ("NO".equals(id, ignoreCase = true)) {
+                                val requestCode = extras.getInt("requestCode")
+                                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                                notificationManager.cancel(requestCode)
+                                Constants.listOfNotificationIds.add(requestCode)
+                                killActivity()
+                                return
+                            }
+                        }
+
+
                         try {
                             startActivityLocal(sendingIntentObject)
                         } catch (e: Exception) {
                             val packageName: String = packageName
-
                             sendingIntentObject =
                                 Intent(this@NotificationNavigationDeciderActivity, getActivity())
-
                             sendingIntentObject.putExtras(extras)
                             sendingIntentObject.action = intent.action
                             sendingIntentObject.setPackage(packageName)
