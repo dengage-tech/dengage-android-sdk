@@ -11,9 +11,7 @@ interface SubscriptionContract {
     }
 
     interface Presenter : BasePresenter<View> {
-        fun sendSubscription(
-            subscription: Subscription
-        )
+        fun enqueueSubscription(subscription: Subscription)
         fun callSubscriptionApi(subscription: Subscription)
     }
 }

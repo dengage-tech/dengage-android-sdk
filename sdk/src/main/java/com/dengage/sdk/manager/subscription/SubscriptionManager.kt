@@ -19,162 +19,143 @@ class SubscriptionManager :
     override fun providePresenter() = SubscriptionPresenter()
 
     private var firebaseIntegrationKey: String? = null
-
     private var huaweiIntegrationKey: String? = null
-
     private var deviceId: String? = null
-
     private var contactKey: String? = null
-
     private var partnerDeviceId: String? = null
-
-    private var deviceConfigurationPreference: DeviceConfigurationPreference? = null
-
+    private var deviceConfigPref: DeviceConfigurationPreference? = null
 
     fun buildSubscription(
         firebaseIntegrationKey: String?,
         huaweiIntegrationKey: String?,
         deviceId: String?,
-        deviceConfigurationPreference: DeviceConfigurationPreference?,
+        deviceConfigPref: DeviceConfigurationPreference?,
         contactKey: String?,
         partnerDeviceId: String?,
     ) {
-
-        this.deviceConfigurationPreference = deviceConfigurationPreference
-
+        this.deviceConfigPref = deviceConfigPref
         this.firebaseIntegrationKey = firebaseIntegrationKey
-
         this.huaweiIntegrationKey = huaweiIntegrationKey
-
         this.deviceId = deviceId
-
         this.partnerDeviceId = partnerDeviceId
-
         this.contactKey = contactKey
-        // this is for migration from old sdk
-        if (PrefsOld.subscription != null) {
-            Prefs.subscription = PrefsOld.subscription
+        // Migration from old sdk
+        PrefsOld.subscription?.let {
+            Prefs.subscription = it
             PrefsOld.subscription = null
         }
-
-
-        var subscription = Prefs.subscription
-        if (subscription == null) {
-            subscription = Subscription()
-            subscription.integrationKey = firebaseIntegrationKey ?: huaweiIntegrationKey ?: ""
+        Prefs.subscription = Prefs.subscription ?: Subscription().apply {
+            integrationKey = firebaseIntegrationKey ?: huaweiIntegrationKey ?: ""
         }
-        Prefs.subscription = subscription
     }
 
     internal fun sendSubscription() {
-        var subscription = Prefs.subscription
-        if (subscription == null) {
-            subscription = Subscription()
-        }
-        presenter.sendSubscription(subscription = subscription)
+        presenter.enqueueSubscription(Prefs.subscription ?: Subscription())
     }
 
     internal fun setToken(token: String?) {
-        val subscription = Prefs.subscription
-
-        if (subscription != null && subscription.token.isNullOrEmpty()) {
-
-            if (deviceConfigurationPreference == DeviceConfigurationPreference.Google) subscription.tokenType =
-                TokenType.FIREBASE.type else subscription.tokenType = TokenType.HUAWEI.type
-
-            if (subscription.tokenType == TokenType.FIREBASE.type) subscription.integrationKey =
-                firebaseIntegrationKey.toString() else huaweiIntegrationKey
-
-
-            subscription.token = token
-
-            saveSubscription(subscription = subscription)
-
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
+        val sub = Prefs.subscription ?: return
+        if (!sub.token.isNullOrEmpty()) return
+        sub.tokenType = when (deviceConfigPref) {
+            DeviceConfigurationPreference.Google -> TokenType.FIREBASE.type
+            else -> TokenType.HUAWEI.type
         }
+        sub.integrationKey = if (sub.tokenType == TokenType.FIREBASE.type) {
+            firebaseIntegrationKey.toString()
+        } else {
+            huaweiIntegrationKey.toString()
+        }
+        sub.token = token
+        saveAndEnqueue(sub)
     }
 
     internal fun setDeviceId(deviceId: String) {
-        val subscription = Prefs.subscription
-
-        // control the last device id equals to new device id then send subscription
-        if (subscription != null && (subscription.deviceId.isNullOrEmpty() || subscription.deviceId != deviceId)) {
-            subscription.deviceId = deviceId
-            DengageLogger.debug("deviceId: $deviceId")
-
-            saveSubscription(subscription = subscription)
-
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
+        Prefs.subscription?.let { sub ->
+            if (sub.deviceId.isNullOrEmpty() || sub.deviceId != deviceId) {
+                sub.deviceId = deviceId
+                saveAndEnqueue(sub)
+                DengageLogger.debug("setDeviceId: $deviceId")
+            }
         }
     }
 
     internal fun setCountry(country: String) {
-        val subscription = Prefs.subscription
-
-        // control the last country equals to new country then send subscription
-        if (subscription != null && (subscription.country == null || subscription.country != country)) {
-            subscription.country = country
-            DengageLogger.debug("country: $country")
-
-            saveSubscription(subscription = subscription)
-
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
+        Prefs.subscription?.let { sub ->
+            if (sub.country.isNullOrEmpty() || sub.country != country) {
+                sub.country = country
+                saveAndEnqueue(sub)
+                DengageLogger.debug("setCountry: $country")
+            }
         }
     }
 
+    // Returns `true` if the contactKey changed (for use in inboxManager tasks).
     internal fun setContactKey(contactKey: String?): Boolean {
-        val subscription = Prefs.subscription
-
-        // control the last contact key equals to new contact key then send subscription
-        if (subscription != null && (subscription.contactKey == null || subscription.contactKey != contactKey)) {
-            // clear cache if contact key has been changed
-            Prefs.inAppMessageFetchTime = 0L
-            Prefs.inAppMessageShowTime = 0L
-            Prefs.inAppMessages = null
-            Prefs.inboxMessageFetchTime = 0L
-            Prefs.visitCountItems = mutableListOf()
-            Prefs.lastSessionStartTime = 0L
-            Prefs.lastSessionDuration = 0L
-            Prefs.lastSessionVisitTime = 0L
-            SessionManager.getSessionId(force = true)
-
-            subscription.contactKey = contactKey
-            DengageLogger.debug("contactKey: $contactKey")
-
-            saveSubscription(subscription = subscription)
-
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
-
-            // if contact key changed, return true for inboxManager jobs
-            return true
+        val sub = Prefs.subscription ?: return false
+        return if (sub.contactKey == null || sub.contactKey != contactKey) {
+            clearContactSpecificCaches()
+            sub.contactKey = contactKey
+            saveAndEnqueue(sub)
+            DengageLogger.debug("setContactKey: $contactKey")
+            true
+        } else {
+            false
         }
-
-        return false
     }
 
     internal fun setUserPermission(userPermission: Boolean) {
-        val subscription = Prefs.subscription
+        Prefs.subscription?.let { sub ->
+            if (sub.permission == null || sub.permission != userPermission) {
+                sub.permission = userPermission
+                saveAndEnqueue(sub)
+                DengageLogger.debug("setUserPermission: $userPermission")
+            }
+        }
+    }
 
-        // control the last permission flag equals to new permission flag then send subscription
-        if (subscription != null && (subscription.permission == null || subscription.permission != userPermission)) {
-            subscription.permission = userPermission
-            DengageLogger.debug("permission: $userPermission")
+    internal fun setFirebaseIntegrationKey(integrationKey: String) {
+        Prefs.subscription?.let { sub ->
+            if (sub.integrationKey.isEmpty() || sub.integrationKey != integrationKey) {
+                sub.integrationKey = integrationKey
+                saveAndEnqueue(sub)
+            }
+        }
+    }
 
-            saveSubscription(subscription = subscription)
+    internal fun setHuaweiIntegrationKey(integrationKey: String) {
+        Prefs.subscription?.let { sub ->
+            if (sub.integrationKey.isEmpty() || sub.integrationKey != integrationKey) {
+                sub.integrationKey = integrationKey
+                saveAndEnqueue(sub)
+            }
+        }
+    }
 
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
+    internal fun setPartnerDeviceId(adid: String?) {
+        Prefs.subscription?.let { sub ->
+            if ((sub.partnerDeviceId.isNullOrEmpty() || sub.partnerDeviceId != adid) && adid != null) {
+                sub.partnerDeviceId = adid
+                saveAndEnqueue(sub)
+            }
+        }
+    }
+
+    internal fun setLanguage(language: String) {
+        try {
+            Prefs.subscription?.let { sub ->
+                if (sub.language != language) {
+                    sub.language = language
+                    Prefs.language = language
+                    saveAndEnqueue(sub)
+                    DengageLogger.debug("setLanguage: $language")
+                }
+            }
+        } catch (_: Throwable) {
         }
     }
 
     fun saveSubscription(subscription: Subscription) {
         try {
-            DengageLogger.verbose("saveSubscription method is called")
-
             if (subscription.deviceId.isNullOrEmpty()) {
                 if (deviceId.isNullOrEmpty()) {
                     subscription.deviceId = DengageUtils.getDeviceId()
@@ -184,89 +165,37 @@ class SubscriptionManager :
             } else if (!subscription.deviceId.equals(deviceId) && !deviceId.isNullOrEmpty()) {
                 subscription.deviceId = deviceId
             }
-
-            if (!contactKey.isNullOrEmpty()) subscription.contactKey = this.contactKey
-            if (!partnerDeviceId.isNullOrEmpty()) subscription.partnerDeviceId =
-                this.partnerDeviceId
-
-            subscription.carrierId = DengageUtils.getCarrier(ContextHolder.context)
-            subscription.appVersion = DengageUtils.getAppVersion(ContextHolder.context)
-            subscription.sdkVersion = DengageUtils.getSdkVersion()
-            subscription.language = DengageUtils.getLanguage()
-
-            subscription.timezone = DengageUtils.getIANAFormatTimeZone()
-            DengageLogger.debug("subscriptionJson: ${GsonHolder.gson.toJson(subscription)}")
-
-            // save to cache
+            contactKey?.let { subscription.contactKey = it }
+            partnerDeviceId?.let { subscription.partnerDeviceId = it }
+            subscription.apply {
+                carrierId = DengageUtils.getCarrier(ContextHolder.context)
+                appVersion = DengageUtils.getAppVersion(ContextHolder.context)
+                sdkVersion = DengageUtils.getSdkVersion()
+                language = DengageUtils.getLanguage()
+                timezone = DengageUtils.getIANAFormatTimeZone()
+            }
             Prefs.subscription = subscription
-        } catch (e: Exception) {
-        } catch (e: Throwable) {
+            DengageLogger.verbose("saveSubscription: ${GsonHolder.gson.toJson(subscription)}")
+        } catch (_: Throwable) {
         }
     }
 
-    internal fun setFirebaseIntegrationKey(integrationKey: String) {
-        val subscription = Prefs.subscription
-
-        if (subscription != null && (subscription.integrationKey.isNullOrEmpty() || subscription.integrationKey != integrationKey)) {
-            subscription.integrationKey = integrationKey
-
-            saveSubscription(subscription = subscription)
-
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
-        }
+    private fun clearContactSpecificCaches() {
+        Prefs.inAppMessageFetchTime = 0L
+        Prefs.inAppMessageShowTime = 0L
+        Prefs.inAppMessages = null
+        Prefs.inboxMessageFetchTime = 0L
+        Prefs.visitCountItems = mutableListOf()
+        Prefs.lastSessionStartTime = 0L
+        Prefs.lastSessionDuration = 0L
+        Prefs.lastSessionVisitTime = 0L
+        SessionManager.getSessionId(force = true)
     }
 
-    internal fun setHuaweiIntegrationKey(integrationKey: String) {
-        val subscription = Prefs.subscription
-
-        if (subscription != null && (subscription.integrationKey.isNullOrEmpty() || subscription.integrationKey != integrationKey)) {
-            subscription.integrationKey = integrationKey
-
-            saveSubscription(subscription = subscription)
-
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
-        }
-    }
-
-    internal fun setPartnerDeviceId(adid: String?) {
-        val subscription = Prefs.subscription
-
-        if (subscription != null && (subscription.partnerDeviceId.isNullOrEmpty() || subscription.partnerDeviceId != adid)) {
-            if (adid != null) {
-                subscription.partnerDeviceId = adid
-            }
-
-            saveSubscription(subscription = subscription)
-
-            // send to api
-            presenter.sendSubscription(subscription = subscription)
-        }
-    }
-
-    internal fun setLanguage(language: String) {
-
-        try {
-            val subscription = Prefs.subscription
-
-            // control the last language equals to new language then send subscription
-            if (subscription != null && (subscription.language == null || subscription.language != language)) {
-                subscription.language = language
-                Prefs.language = language
-                DengageLogger.debug("language: $language")
-
-                saveSubscription(subscription = subscription)
-
-                // send to api
-                presenter.sendSubscription(subscription = subscription)
-            }
-
-        } catch (e: Exception) {
-        } catch (e: Throwable) {
-        }
+    private fun saveAndEnqueue(subscription: Subscription) {
+        saveSubscription(subscription)
+        presenter.enqueueSubscription(subscription)
     }
 
     override fun subscriptionSent() = Unit
-
 }

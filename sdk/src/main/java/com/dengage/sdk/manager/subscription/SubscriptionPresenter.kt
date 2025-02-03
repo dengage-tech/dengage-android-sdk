@@ -1,54 +1,49 @@
 package com.dengage.sdk.manager.subscription
 
+import android.os.Handler
+import android.os.Looper
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.subscription.usecase.SendSubscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
+import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
 
 class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>(),
     SubscriptionContract.Presenter {
 
-    private val sendSubscription by lazy { SendSubscription() }
+    private val sendSubscriptionUseCase by lazy { SendSubscription() }
     private var sendSubscriptionTryCount = 0
-    private var subscriptionInProgress =false
+    private val handler = Handler(Looper.getMainLooper())
+    private var currentWorkItem: Runnable? = null
 
-    private val subscriptionQueue: SubscriptionQueue by lazy {
-        SubscriptionQueue(this)
-    }
-
-    override fun sendSubscription(subscription: Subscription) {
-        subscriptionQueue.enqueueSubscription(subscription)
-    }
-
-    /*
-    override fun sendSubscription(subscription: Subscription) {
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (DengageUtils.isAppInForeground()/*&&!subscriptionInProgress*/) {
-                if (Prefs.subscription != Prefs.previouSubscription) {
-                    Prefs.subscription?.let { callSubscriptionApi(it) }
-                } else if (System.currentTimeMillis() > Prefs.subscriptionCallTime) {
-                    Prefs.subscription?.let { callSubscriptionApi(it) }
-                }
+    override fun enqueueSubscription(subscription: Subscription) {
+        currentWorkItem?.let {
+            handler.removeCallbacks(it)
+        }
+        currentWorkItem = Runnable {
+            DengageLogger.verbose("SubscriptionPresenter -> Checking if we should call subscription API now.")
+            if (shouldCallSubscriptionApi(subscription)) {
+                DengageLogger.verbose("SubscriptionPresenter -> Conditions met. Now calling callSubscriptionApi.")
+                callSubscriptionApi(subscription)
             }
-        }, 4000)
+        }.also { task ->
+            handler.postDelayed(task, QUEUE_DELAY)
+        }
     }
-    */
 
     override fun callSubscriptionApi(subscription: Subscription) {
-        subscriptionInProgress = true
         sendSubscriptionTryCount++
-
-        sendSubscription(this) {
+        sendSubscriptionUseCase(this) {
             onResponse = {
                 view {
-                    subscriptionInProgress = false
                     Prefs.previouSubscription = Prefs.subscription
-                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (20 * 60 * 1000)
+                    Prefs.subscriptionCallTime = System.currentTimeMillis() + (TWENTY_MINUTES)
                     subscriptionSent()
                 }
             }
             onError = {
-                subscriptionInProgress = false
+                // Retry up to 5 times
                 if (sendSubscriptionTryCount < 5) {
                     callSubscriptionApi(subscription)
                 } else {
@@ -57,5 +52,20 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
             }
             params = SendSubscription.Params(subscription)
         }
+    }
+
+    private fun shouldCallSubscriptionApi(subscription: Subscription): Boolean {
+        if(!DengageUtils.isAppInForeground()) return false
+        val now = System.currentTimeMillis()
+        val nextAllowedTime = Prefs.subscriptionCallTime
+        val prevSubscription = Prefs.previouSubscription
+        val subscriptionChanged = (subscription != prevSubscription)
+        val timePassed = now >= nextAllowedTime
+        return (subscriptionChanged || timePassed)
+    }
+
+    companion object {
+        private const val QUEUE_DELAY = 5000L // 5 seconds
+        private const val TWENTY_MINUTES = 20 * 60 * 1000
     }
 }
