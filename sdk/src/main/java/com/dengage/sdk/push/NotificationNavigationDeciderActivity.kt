@@ -91,14 +91,12 @@ class NotificationNavigationDeciderActivity : Activity() {
 
                         if (!message?.actionButtons.isNullOrEmpty()) {
                             id = extras.getString("id", "")
+                            clearNotification()
                             if ("NO".equals(id, ignoreCase = true)) {
-                                val requestCode = extras.getInt("requestCode")
-                                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                                notificationManager.cancel(requestCode)
-                                Constants.listOfNotificationIds.add(requestCode)
-                                killActivity()
+                                finish()
                                 return
                             }
+
                         }
 
 
@@ -135,7 +133,9 @@ class NotificationNavigationDeciderActivity : Activity() {
                     else
                         finishAffinity()
                 }
+
             }
+            clearNotification()
         } catch (ex: Exception) {
             ex.printStackTrace()
 
@@ -174,5 +174,16 @@ class NotificationNavigationDeciderActivity : Activity() {
             intent.flags = FLAG_ACTIVITY_CLEAR_TOP or FLAG_ACTIVITY_SINGLE_TOP
         }
         startActivity(intent)
+    }
+
+    private fun clearNotification()
+    {
+        if (intent != null) {
+            val extras = intent.extras
+            if (extras != null) {
+                val message: Message = Message.createFromIntent(extras)
+                this.clearNotification(message)
+            }
+        }
     }
 }

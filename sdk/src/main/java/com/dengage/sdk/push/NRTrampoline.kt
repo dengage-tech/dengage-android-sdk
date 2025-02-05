@@ -17,6 +17,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
+import com.dengage.sdk.push.NotificationReceiver.Companion
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
@@ -34,17 +35,17 @@ open class NRTrampoline : BroadcastReceiver() {
             DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
 
 
-                when (intent?.action) {
-                    Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
-                    Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
-                    Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
-                    Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
-                    Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
-                }
+            when (intent?.action) {
+                Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
+                Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)
+                Constants.PUSH_DELETE_EVENT -> onPushDismiss(context, intent)
+                Constants.PUSH_ACTION_CLICK_EVENT -> onActionClick(context, intent)
+                Constants.PUSH_ITEM_CLICK_EVENT -> onItemClick(context, intent)
+            }
 
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
         }
-        catch (_:Exception){}
-        catch (_:Throwable){}
     }
 
     open fun onPushReceive(context: Context, intent: Intent) {
@@ -56,7 +57,7 @@ open class NRTrampoline : BroadcastReceiver() {
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
-        Constants.isBCRegistered =true
+        Constants.isBCRegistered = true
         DengageLogger.verbose("$TAG onPushOpen method is called")
 
         var uri: String? = null
@@ -157,6 +158,7 @@ open class NRTrampoline : BroadcastReceiver() {
                     clearNotification(context, message)
                     // context.launchActivity(intent, uri)
                 }
+
                 "left", "right" -> {
                     if (message.carouselContent.isNullOrEmpty()) {
                         DengageLogger.error("$TAG carousel content is empty")
@@ -190,7 +192,7 @@ open class NRTrampoline : BroadcastReceiver() {
         intent: Intent,
         message: Message,
         bitmap: Bitmap?,
-        notificationBuilder: NotificationCompat.Builder
+        notificationBuilder: NotificationCompat.Builder,
     ) {
         val style = NotificationCompat.BigPictureStyle().bigPicture(bitmap)
         notificationBuilder.setLargeIcon(bitmap)
@@ -198,18 +200,18 @@ open class NRTrampoline : BroadcastReceiver() {
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification)}
+        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification) }
     }
 
     open fun onTextNotificationRender(
         context: Context,
         intent: Intent,
         message: Message,
-        notificationBuilder: NotificationCompat.Builder
+        notificationBuilder: NotificationCompat.Builder,
     ) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
         val notification = notificationBuilder.build()
-        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification)}
+        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification) }
     }
 
     protected open fun onCarouselRender(
@@ -218,7 +220,7 @@ open class NRTrampoline : BroadcastReceiver() {
         message: Message,
         leftCarouselItem: CarouselItem,
         currentCarouselItem: CarouselItem,
-        rightCarouselItem: CarouselItem
+        rightCarouselItem: CarouselItem,
     ) = Unit
 
     protected open fun getContentIntent(extras: Bundle?, packageName: String?): Intent {
@@ -273,7 +275,7 @@ open class NRTrampoline : BroadcastReceiver() {
         carouselView: RemoteViews,
         imageViewId: Int,
         carouselItem: CarouselItem,
-        onComplete: (() -> Unit)? = null
+        onComplete: (() -> Unit)? = null,
     ) {
         val cachedFileBitmap = carouselItem.loadFileFromStorage()
         if (cachedFileBitmap == null) {
@@ -322,7 +324,7 @@ open class NRTrampoline : BroadcastReceiver() {
     open fun getCarouselDirectionIntent(
         context: Context,
         requestCode: Int,
-        intent: Intent
+        intent: Intent,
     ): PendingIntent? {
 
         return PendingIntent.getBroadcast(
@@ -337,7 +339,7 @@ open class NRTrampoline : BroadcastReceiver() {
     fun getDeletePendingIntent(
         context: Context,
         requestCode: Int,
-        intentParam: Intent
+        intentParam: Intent,
     ): PendingIntent {
 
         return PendingIntent.getBroadcast(
@@ -400,34 +402,47 @@ open class NRTrampoline : BroadcastReceiver() {
                     )
                 }
             }
-            message.notificationType === NotificationType.RICH -> {
-                DengageLogger.verbose("$TAG this is a rich notification")
 
-                ImageDownloadUtils.downloadImage(
-                    imageUrl = message.mediaUrl,
-                    onComplete = { bitmap ->
-                        val notificationBuilder: NotificationCompat.Builder =
-                            getNotificationBuilder(context, intent, message)
-                        if (bitmap == null) {
-                            onRichNotificationRender(
-                                context,
-                                intent,
-                                message,
-                                null,
-                                notificationBuilder
-                            )
-                        } else {
-                            onRichNotificationRender(
-                                context,
-                                intent,
-                                message,
-                                bitmap,
-                                notificationBuilder
-                            )
+            message.notificationType === NotificationType.RICH -> {
+                DengageLogger.verbose("${TAG} this is a rich notification")
+                if (!message.mediaUrl.isNullOrEmpty()) {
+                    ImageDownloadUtils.downloadImage(
+                        imageUrl = message.mediaUrl,
+                        onComplete = { bitmap ->
+                            if (!Constants.listOfNotificationIds.contains(intent.extras?.getInt("requestCode"))) {
+                                val notificationBuilder: NotificationCompat.Builder =
+                                    getNotificationBuilder(context, intent, message)
+                                if (bitmap == null) {
+                                    onRichNotificationRender(
+                                        context,
+                                        intent,
+                                        message,
+                                        null,
+                                        notificationBuilder
+                                    )
+                                } else {
+                                    onRichNotificationRender(
+                                        context,
+                                        intent,
+                                        message,
+                                        bitmap,
+                                        notificationBuilder
+                                    )
+                                }
+                            }
+
                         }
-                    }
-                )
+                    )
+                }
+                else{
+                    DengageLogger.verbose("$TAG this is a text notification")
+                    val notificationBuilder: NotificationCompat.Builder =
+                        getNotificationBuilder(context, intent, message)
+                    onTextNotificationRender(context, intent, message, notificationBuilder)
+                }
+
             }
+
             else -> {
                 DengageLogger.verbose("$TAG this is a text notification")
                 val notificationBuilder: NotificationCompat.Builder =
@@ -440,7 +455,7 @@ open class NRTrampoline : BroadcastReceiver() {
     private fun getNotificationBuilder(
         context: Context,
         intent: Intent,
-        message: Message
+        message: Message,
     ): NotificationCompat.Builder {
         val extras = intent.extras
         val random = Random()
@@ -489,7 +504,7 @@ open class NRTrampoline : BroadcastReceiver() {
                 val buttonIntent = Intent(Constants.PUSH_ACTION_CLICK_EVENT)
                 buttonIntent.putExtras(intent.extras!!)
                 buttonIntent.putExtra("id", actionButton.id)
-                buttonIntent.putExtra("targetUrl", actionButton.targetUrl)
+                buttonIntent.putExtra("targetUrl", message.targetUrl)
                 buttonIntent.setPackage(packageName)
                 val btnPendingIntent: PendingIntent? =
                     getPendingIntent(context, requestCode, buttonIntent)
@@ -507,7 +522,7 @@ open class NRTrampoline : BroadcastReceiver() {
     open fun createNotificationChannel(context: Context, message: Message): String {
         val soundUri = message.sound.getSoundUri(context)
 
-        val channelId =DengageUtils.getChannelId(message)
+        val channelId = DengageUtils.getChannelId(message)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager =

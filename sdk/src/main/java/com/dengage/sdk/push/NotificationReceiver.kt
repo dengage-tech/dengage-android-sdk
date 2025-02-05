@@ -17,6 +17,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
+import com.dengage.sdk.push.NRTrampoline.Companion
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
@@ -398,32 +399,43 @@ open class NotificationReceiver : BroadcastReceiver() {
                 }
             }
             message.notificationType === NotificationType.RICH -> {
-                DengageLogger.verbose("$TAG this is a rich notification")
+                DengageLogger.verbose("${TAG} this is a rich notification")
+                if (!message.mediaUrl.isNullOrEmpty()) {
+                    ImageDownloadUtils.downloadImage(
+                        imageUrl = message.mediaUrl,
+                        onComplete = { bitmap ->
+                            if (!Constants.listOfNotificationIds.contains(intent.extras?.getInt("requestCode"))) {
+                                val notificationBuilder: NotificationCompat.Builder =
+                                    getNotificationBuilder(context, intent, message)
+                                if (bitmap == null) {
+                                    onRichNotificationRender(
+                                        context,
+                                        intent,
+                                        message,
+                                        null,
+                                        notificationBuilder
+                                    )
+                                } else {
+                                    onRichNotificationRender(
+                                        context,
+                                        intent,
+                                        message,
+                                        bitmap,
+                                        notificationBuilder
+                                    )
+                                }
+                            }
 
-                ImageDownloadUtils.downloadImage(
-                    imageUrl = message.mediaUrl,
-                    onComplete = { bitmap ->
-                        val notificationBuilder: NotificationCompat.Builder =
-                            getNotificationBuilder(context, intent, message)
-                        if (bitmap == null) {
-                            onRichNotificationRender(
-                                context,
-                                intent,
-                                message,
-                                null,
-                                notificationBuilder
-                            )
-                        } else {
-                            onRichNotificationRender(
-                                context,
-                                intent,
-                                message,
-                                bitmap,
-                                notificationBuilder
-                            )
                         }
-                    }
-                )
+                    )
+                }
+                else{
+                    DengageLogger.verbose("${TAG} this is a text notification")
+                    val notificationBuilder: NotificationCompat.Builder =
+                        getNotificationBuilder(context, intent, message)
+                    onTextNotificationRender(context, intent, message, notificationBuilder)
+                }
+
             }
             else -> {
                 DengageLogger.verbose("$TAG this is a text notification")
@@ -490,7 +502,7 @@ open class NotificationReceiver : BroadcastReceiver() {
                 val buttonIntent = Intent(Constants.PUSH_ACTION_CLICK_EVENT)
                 buttonIntent.putExtras(intent.extras!!)
                 buttonIntent.putExtra("id", actionButton.id)
-                buttonIntent.putExtra("targetUrl", actionButton.targetUrl)
+                buttonIntent.putExtra("targetUrl", message.targetUrl)
                 buttonIntent.setPackage(packageName)
                 val btnPendingIntent: PendingIntent? =
                     getPendingIntent(context, requestCode, buttonIntent)
