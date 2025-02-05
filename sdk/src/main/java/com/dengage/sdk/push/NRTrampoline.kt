@@ -435,19 +435,15 @@ open class NRTrampoline : BroadcastReceiver() {
                     )
                 }
                 else{
-                    DengageLogger.verbose("$TAG this is a text notification")
-                    val notificationBuilder: NotificationCompat.Builder =
-                        getNotificationBuilder(context, intent, message)
-                    onTextNotificationRender(context, intent, message, notificationBuilder)
+                    DengageLogger.verbose("$TAG this is a rich notification but show as a text notification")
+                    showTextNotification(context, intent, message)
                 }
 
             }
 
             else -> {
                 DengageLogger.verbose("$TAG this is a text notification")
-                val notificationBuilder: NotificationCompat.Builder =
-                    getNotificationBuilder(context, intent, message)
-                onTextNotificationRender(context, intent, message, notificationBuilder)
+                showTextNotification(context, intent, message)
             }
         }
     }
@@ -541,5 +537,10 @@ open class NRTrampoline : BroadcastReceiver() {
             notificationManager.createNotificationChannel(notificationChannel)
         }
         return channelId
+    }
+
+    private fun showTextNotification(context: Context, intent: Intent, message: Message) {
+        val notificationBuilder = getNotificationBuilder(context, intent, message)
+        onTextNotificationRender(context, intent, message, notificationBuilder)
     }
 }
