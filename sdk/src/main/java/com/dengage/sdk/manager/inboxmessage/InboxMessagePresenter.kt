@@ -47,10 +47,10 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
                         Prefs.inboxMessageFetchTime = System.currentTimeMillis()
                         view { fetchedInboxMessages(it) }
 
-                        if (offset == 0) {
+
                             inboxMessages = it
                             updateInboxMessages(it)
-                        }
+
                         dengageCallback.onResult(inboxMessages ?: mutableListOf())
                     }
                     onError = {

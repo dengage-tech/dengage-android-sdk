@@ -500,7 +500,7 @@ open class NRTrampoline : BroadcastReceiver() {
                 val buttonIntent = Intent(Constants.PUSH_ACTION_CLICK_EVENT)
                 buttonIntent.putExtras(intent.extras!!)
                 buttonIntent.putExtra("id", actionButton.id)
-                buttonIntent.putExtra("targetUrl", message.targetUrl)
+                buttonIntent.putExtra("targetUrl", actionButton.targetUrl)
                 buttonIntent.setPackage(packageName)
                 val btnPendingIntent: PendingIntent? =
                     getPendingIntent(context, requestCode, buttonIntent)
