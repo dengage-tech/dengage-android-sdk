@@ -5,7 +5,7 @@
 - [SDK Setup](#sdk-setup)
   - [Requirements](#requirements)
   - [SDK Installation](#sdk-installation)
-  - [End Point Configuration](#end-point-configuration)
+  - [Endpoint Configuration](#endpoint-configuration)
 - [Integration](#integration)
   - [Register Lifecycle Callbacks](#register-lifecycle-callbacks)
   - [Initialization](#initialization)
@@ -458,13 +458,13 @@ Dengage.sendDeviceEvent("events", data)
 1. Complete the [FCM Android Setup](https://firebase.google.com/docs/android/setup) to configure your Android application for Firebase integration.
 2. Download the `google-services.json` configuration file and place it in your app's directory.
 3. To ensure the values in your `google-services.json` configuration file are accessible to Firebase SDKs, you need to include the **Google Services Gradle Plugin (`google-services`)** in your project.
-   - In your root-level (project-level) Gradle file `<project>/build.gradle`, add the following dependency::
+- In your root-level (project-level) Gradle file `<project>/build.gradle`, add the following dependency:
    ```groovy
    dependencies {
        classpath("com.google.gms:google-services:4.4.2")
    }
    ```
-   - In your module (app-level) Gradle file `<project>/app/build.gradle`, apply the Google Services plugin as follows:
+- In your module (app-level) Gradle file `<project>/app/build.gradle`, apply the Google Services plugin as follows:
    ```groovy
    plugins {
        id("com.google.gms.google-services")
@@ -522,7 +522,7 @@ Dengage.setNotificationChannelName("your-custom-channel-name")
 
 ### getToken
 
-Retrieve the token for the current user's subscription using this method. 
+Retrieve the token for the current user's subscription using this method.
 
 ```kotlin
 val token = Dengage.getToken()
@@ -1037,7 +1037,7 @@ When a push message is received with the `addToInbox` parameter, the message is 
 
 #### Getting Inbox Messages
 
-Retrieve stored inbox messages with pagination: 
+Retrieve stored inbox messages with pagination:
 
 ```kotlin
 Dengage.getInboxMessages(
@@ -1059,7 +1059,7 @@ Dengage.getInboxMessages(
 ```
 #### Removing an Inbox Message
 
-Delete a specific inbox message: 
+Delete a specific inbox message:
 
 ```kotlin
 Dengage.deleteInboxMessage(
@@ -1073,7 +1073,7 @@ Mark a message as clicked to update its status:
 
 ```kotlin
 Dengage.setInboxMessageAsClicked(
-    messageId = "message-id" // ID of the message to mark as clicked
+  messageId = "message-id" // ID of the message to mark as clicked
 )
 ```
 
@@ -1101,13 +1101,13 @@ You should pass the current activity to setNavigation function.
 ```kotlin
 // Without screen filter
 Dengage.setNavigation(
-    activity = activity as AppCompatActivity // For showing ui of in app message
+  activity = activity as AppCompatActivity // For showing ui of in app message
 )
 
 // With screen filter
 Dengage.setNavigation(
-    activity = activity as AppCompatActivity, // For showing ui of in app message
-    screenName = "screen-name" // For filtering in app messages with respect to current screen in your app
+  activity = activity as AppCompatActivity, // For showing ui of in app message
+  screenName = "screen-name" // For filtering in app messages with respect to current screen in your app
 )
 ```
 
@@ -1118,9 +1118,9 @@ You can use the real time in-app functionality by using the function.
 ```kotlin
 val customParams = hashMapOf<String, String>()
 Dengage.showRealTimeInApp(
-    activity = activity as AppCompatActivity, // For showing ui of in app message
-    screenName = "screen-name", // For filtering in app messages with respect to current screen in your app(optional)
-    params = customParams // For filtering in app messages with respect to custom parameters(optional)
+  activity = activity as AppCompatActivity, // For showing ui of in app message
+  screenName = "screen-name", // For filtering in app messages with respect to current screen in your app(optional)
+  params = customParams // For filtering in app messages with respect to custom parameters(optional)
 )
 
 // Set category path for using in real time in app comparisons
@@ -1152,18 +1152,18 @@ Define the layout in your XML file to include the `InAppInlineElement` view, whi
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="20dp"
-        android:orientation="vertical">
+  <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_margin="20dp"
+          android:orientation="vertical">
 
-        <com.dengage.sdk.ui.inappmessage.InAppInlineElement
+    <com.dengage.sdk.ui.inappmessage.InAppInlineElement
             android:id="@+id/inapp_inline_element"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="12dp" />
-    </LinearLayout>
+  </LinearLayout>
 
 </layout>
 ```
@@ -1173,20 +1173,20 @@ In your fragment or activity, set up the inline in-app messaging using the `Deng
 ```kotlin
 class InAppInLineFragment : BaseDataBindingFragment<FragmentInappInlineBinding>() {
 
-    override fun getLayoutRes(): Int {
-        return R.layout.fragment_inapp_inline
-    }
+  override fun getLayoutRes(): Int {
+    return R.layout.fragment_inapp_inline
+  }
 
-    override fun init() {
-        val customParams = hashMapOf<String, String>()
-        Dengage.showInlineInApp(screenName = "screen-name",
-            inAppInlineElement = binding.inappInlineElement,
-            propertyId = "property-id",
-            activity = requireActivity(),
-            customParams = customParams,
-            hideIfNotFound = true
-        )
-    }
+  override fun init() {
+    val customParams = hashMapOf<String, String>()
+    Dengage.showInlineInApp(screenName = "screen-name",
+      inAppInlineElement = binding.inappInlineElement,
+      propertyId = "property-id",
+      activity = requireActivity(),
+      customParams = customParams,
+      hideIfNotFound = true
+    )
+  }
 
 }
 ```
@@ -1213,20 +1213,20 @@ Define the layout in your XML file to include the `StoriesListView` view, which 
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="20dp"
-        android:orientation="vertical">
+  <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_margin="20dp"
+          android:orientation="vertical">
 
 
-        <com.dengage.sdk.ui.story.StoriesListView
+    <com.dengage.sdk.ui.story.StoriesListView
             android:id="@+id/stories_list_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp" />
 
-    </LinearLayout>
+  </LinearLayout>
 
 </layout>
 ```
@@ -1237,19 +1237,19 @@ In your fragment or activity, set up the app stories using the `Dengage.showStor
 ```kotlin
 class AppStoryFragment : BaseDataBindingFragment<FragmentAppStoryBinding>() {
 
-    override fun getLayoutRes(): Int {
-        return R.layout.fragment_app_story
-    }
+  override fun getLayoutRes(): Int {
+    return R.layout.fragment_app_story
+  }
 
-    override fun init() {
-        val customParams = hashMapOf<String, String>()
-        Dengage.showStoriesList(screenName = "screen-name",
-            storiesListView = binding.storiesListView,
-            storyPropertyId = "property-id",
-            activity = requireActivity(),
-            customParams = customParams
-        )
-    }
+  override fun init() {
+    val customParams = hashMapOf<String, String>()
+    Dengage.showStoriesList(screenName = "screen-name",
+      storiesListView = binding.storiesListView,
+      storyPropertyId = "property-id",
+      activity = requireActivity(),
+      customParams = customParams
+    )
+  }
 
 }
 ```
@@ -1271,8 +1271,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.76'
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.76'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.76'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.76'
 }
 ```
 
@@ -1301,7 +1301,7 @@ DengageGeofence.requestLocationPermissions(activity)
 
 1. Complete the [HMS Android Setup](https://developer.huawei.com/consumer/en/codelab/HMSPushKit/index.html#3) to configure your Android application for Huawei integration.
 2. Download the `agconnect-services.json` configuration file and place it in your app's directory.
-3. In your root-level (project-level) Gradle file `<project>/build.gradle`, add the following dependency::
+3. In your root-level (project-level) Gradle file `<project>/build.gradle`, add the following dependency:
 
     ```groovy
     buildscript {
@@ -1326,8 +1326,8 @@ DengageGeofence.requestLocationPermissions(activity)
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.76'
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.76'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.76'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.76'
 }
 ```
 
@@ -1352,11 +1352,11 @@ dependencies {
 val dengageHmsManager = DengageHmsManager()
 
 Dengage.init(
-    context = applicationContext,
-    huaweiIntegrationKey = "your-huawei-integration-key",
-    dengageHmsManager = dengageHmsManager,
-    deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
-    disableOpenWebUrl = false
+  context = applicationContext,
+  huaweiIntegrationKey = "your-huawei-integration-key",
+  dengageHmsManager = dengageHmsManager,
+  deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
+  disableOpenWebUrl = false
 )
 ```
 
