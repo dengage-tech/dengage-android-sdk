@@ -137,31 +137,11 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         webView.addJavascriptInterface(JavaScriptInterface(), "Dn")
 
         contentParams.html?.let { html ->
-            webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+            val dataMap = mapOf("dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo())
+            val renderedHtml = Mustache.render(html, dataMap)
+            webView.loadDataWithBaseURL(null, renderedHtml, "text/html", "UTF-8", null)
         }
 
-        if (!"VIDEO_MODAL".equals(inAppMessage.data.content.type, ignoreCase = true)) {
-            webView.webViewClient = object : android.webkit.WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-
-                    val dataMap = mapOf("dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo())
-                    val dataJson = org.json.JSONObject(dataMap).toString()
-
-                    val mustacheRenderJs = """
-                    (function() {
-                        ${Constants.mustacheJs}
-                        var data = $dataJson;                       
-                        var template = document.documentElement.innerHTML;
-                        var rendered = Mustache.render(template, data);
-                        document.documentElement.innerHTML = rendered;
-                    })();
-                    """.trimIndent()
-
-                    webView.evaluateJavascript(mustacheRenderJs, null)
-                }
-            }
-        }
     }
 
     override fun onClick(v: View?) {
@@ -394,3 +374,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         finish()
     }
 }
+
+
+
+
+
+
