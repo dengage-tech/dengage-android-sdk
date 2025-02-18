@@ -232,7 +232,7 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                     .setCircularRegion(lat, lon, radius)
                     .setExpirationDuration(Geofence.NEVER_EXPIRE)
                     .setLoiteringDelay(STOP_DURATION * 1000 + 10000)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                     .build()
                 validGeofences.add(geofence)
                 DL.debug("Adding synced geofence | latitude = $lat; longitude = $lon; radius = $radius; identifier = $identifier")

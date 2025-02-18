@@ -55,6 +55,7 @@ class GeofenceJobScheduler : JobService() {
                 .setMinimumLatency(0)
                 .setOverrideDeadline(0)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
+                .setPersisted(true)
                 .build()
 
             val jobScheduler = context.getSystemService(JOB_SCHEDULER_SERVICE) as JobScheduler
