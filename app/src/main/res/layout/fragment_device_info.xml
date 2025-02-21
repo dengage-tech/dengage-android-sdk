@@ -27,6 +27,34 @@
                 android:textSize="@dimen/dengage_text_size_medium" />
 
             <TextView
+                android:id="@+id/tvContactKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/dengage_color_black"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+            <TextView
+                android:id="@+id/tvUserPermission"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/dengage_color_black"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+            <TextView
+                android:id="@+id/tvToken"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/dengage_color_black"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+
+
+
+
+            <TextView
                 android:id="@+id/tvDeviceBrand"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -50,21 +78,9 @@
                 android:textColor="@color/dengage_color_black"
                 android:textSize="@dimen/dengage_text_size_medium" />
 
-            <TextView
-                android:id="@+id/tvToken"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/dengage_color_black"
-                android:textSize="@dimen/dengage_text_size_medium" />
 
-            <TextView
-                android:id="@+id/tvContactKey"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/dengage_color_black"
-                android:textSize="@dimen/dengage_text_size_medium" />
+
+
 
             <TextView
                 android:id="@+id/tvTimeZone"
@@ -83,7 +99,24 @@
                 android:textSize="@dimen/dengage_text_size_medium" />
 
             <TextView
-                android:id="@+id/tvUserPermission"
+                android:id="@+id/tvSdkVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/dengage_color_black"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+
+            <TextView
+                android:id="@+id/tvScreenWidth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/dengage_color_black"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+            <TextView
+                android:id="@+id/tvScreenHeight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

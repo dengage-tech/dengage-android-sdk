@@ -10,6 +10,10 @@
     <string name="dengage_timezone">TimeZone = %s</string>
     <string name="dengage_language">Language = %s</string>
     <string name="dengage_user_permission">User Permission = %s</string>
+    <string name="dengage_sdk_version">Sdk Version = %s</string>
+    <string name="dengage_screen_width">Screen Width = %s</string>
+    <string name="dengage_screen_height">Screen Height = %s</string>
+
 
     <string name="contact_key">Contact Key</string>
     <string name="country">Country</string>

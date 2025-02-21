@@ -882,4 +882,8 @@ object Dengage {
         DengageLogger.verbose("setLocationPermission method is called")
         subscriptionManager.setLocationPermission(status = status)
     }
+
+    fun getSdkVersion(): String {
+        return DengageUtils.getSdkVersion()
+    }
 }
