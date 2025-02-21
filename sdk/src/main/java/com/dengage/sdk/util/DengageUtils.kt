@@ -341,4 +341,8 @@ object DengageUtils {
     fun getLanguage(): String {
         return Prefs.language.toString()
     }
+
+    fun getLocationPermission(): String {
+        return Prefs.locationPermission.toString()
+    }
 }

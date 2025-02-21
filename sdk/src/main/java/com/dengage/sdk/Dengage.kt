@@ -877,4 +877,9 @@ object Dengage {
     fun getInAppDeviceInfo(): Map<String, String> {
        return Prefs.inAppDeviceInfo ?: mutableMapOf()
     }
+
+    fun setLocationPermission(status: String) {
+        DengageLogger.verbose("setLocationPermission method is called")
+        subscriptionManager.setLocationPermission(status = status)
+    }
 }

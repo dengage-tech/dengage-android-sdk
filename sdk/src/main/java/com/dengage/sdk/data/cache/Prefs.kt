@@ -197,6 +197,10 @@ object Prefs {
         get() = preferences.get(PreferenceKey.IN_APP_DEVICE_INFO) ?: mutableMapOf()
         set(value) = preferences.set(PreferenceKey.IN_APP_DEVICE_INFO, value)
 
+    internal var locationPermission: String?
+        get() = preferences.get(PreferenceKey.LOCATION_PERMISSION) ?: ""
+        set (value) = preferences.set(PreferenceKey.LOCATION_PERMISSION, value)
+
     fun clear() {
         preferences.edit().clear().apply()
     }

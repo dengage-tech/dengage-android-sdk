@@ -154,6 +154,20 @@ class SubscriptionManager :
         }
     }
 
+    internal fun setLocationPermission(status: String) {
+        try {
+            Prefs.subscription?.let { sub ->
+                if (sub.locationPermission != status) {
+                    sub.locationPermission = status
+                    Prefs.locationPermission = status
+                    saveAndEnqueue(sub)
+                    DengageLogger.debug("setLocationPermission: $status")
+                }
+            }
+        } catch (_: Throwable) {
+        }
+    }
+
     fun saveSubscription(subscription: Subscription) {
         try {
             if (subscription.deviceId.isNullOrEmpty()) {
@@ -173,6 +187,7 @@ class SubscriptionManager :
                 sdkVersion = DengageUtils.getSdkVersion()
                 language = DengageUtils.getLanguage()
                 timezone = DengageUtils.getIANAFormatTimeZone()
+                locationPermission = DengageUtils.getLocationPermission()
             }
             Prefs.subscription = subscription
             DengageLogger.verbose("saveSubscription: ${GsonHolder.gson.toJson(subscription)}")

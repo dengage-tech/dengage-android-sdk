@@ -3,6 +3,7 @@ package com.dengage.geofence.manager
 import java.util.*
 import android.annotation.SuppressLint as SL
 import android.location.Location
+import com.dengage.sdk.Dengage
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Geofence
@@ -52,6 +53,11 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
     private var sending = false
 
     init {
+        try {
+            Dengage.setLocationPermission(status = GPH.getLocationPermissionStatusString(CH.context))
+        } catch (e: Exception) {
+            DL.error("Error setting location permission status | error = ${e.message}")
+        }
         if (Prefs.geofenceEnabled) {
             startTracking()
         }

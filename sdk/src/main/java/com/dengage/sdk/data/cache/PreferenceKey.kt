@@ -44,6 +44,7 @@ enum class PreferenceKey {
     SHOWN_STORY_COVER_DIC,
     INBOX_MESSAGES,
     IN_APP_DEVICE_INFO,
+    LOCATION_PERMISSION,
     ;
 
     override fun toString(): String = name

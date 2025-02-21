@@ -91,4 +91,35 @@ object GeofencePermissionsHelper {
         }
     }
 
+    internal fun getLocationPermissionStatusString(context: Context): String {
+
+        return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            if (hasFineOrCoarsePermission(context)) {
+                "always"
+            } else {
+                "none"
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                "always"
+            } else {
+                if (hasFineOrCoarsePermission(context)) {
+                    "appinuse"
+                } else {
+                    "none"
+                }
+            }
+        }
+    }
+
+    private fun hasFineOrCoarsePermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
+
 }
