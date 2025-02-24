@@ -346,7 +346,7 @@ object InAppMessageUtils {
                 )
             }
             SpecialRuleParameter.MONTH.key -> {
-                val dateFormat = SimpleDateFormat("MM")
+                val dateFormat = SimpleDateFormat("MMM")
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
