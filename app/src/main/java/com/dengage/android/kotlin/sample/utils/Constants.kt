@@ -12,6 +12,9 @@ object Constants {
     //const val FIREBASE_APP_INTEGRATION_KEY = "RWXFWEfyaUV3q1f3QL4rf6XynGX2pi2BzTxjJx_s_l_q4sQQtN6qXqY_s_l_p6I4t72v6FtI_p_l_d69e0ABHUj4bOvPdEchlsq_s_l_wA3bss7oFfRDawb7d11I0J940t9EJ13A6xViUGFp"
 
 
+    // eu-app.dengage.com: hasnain new test app
+    //const val FIREBASE_APP_INTEGRATION_KEY = "H15fmwU6yOnn2uJVcFIaxkFAvJziH3NNdE97ui5ZfVv1rM2v1TDkod6WG7LyA0GoymAN0Vz_p_l_eI4hV5KNJFGtD83Pb_p_l_nG3Lq7RmFCX8aUHkB3OAwPQHdXizJ_p_l_hvH4P6M3"
+
 
     // dev-app.dengage.com: hasnain new test app
     const val FIREBASE_APP_INTEGRATION_KEY = "o5r8xJa8eyBUGSmwXdskiIx0Um1oacEGoowX1_p_l_chY5_p_l_cVGTBC4m4jWgohN6vS3X3FG1cUbmToIAyVQfXAFDShKgqChrmLTMwnae_s_l_mqgXMNgkIG2gsAkOidM1znE1lIypsr_p_l_p9VrPR6OKSDdvF_s_l_3krw_e_q__e_q_"

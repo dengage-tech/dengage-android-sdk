@@ -21,9 +21,9 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
 
     override fun init() {
         sendPageView("device-info")
-        Dengage.sendLoginEvent()
-        Dengage.sendLogoutEvent()
-        Dengage.sendRegisterEvent()
+        //Dengage.sendLoginEvent()
+        //Dengage.sendLogoutEvent()
+        //Dengage.sendRegisterEvent()
 
         binding.tvIntegrationKey.text = getString(
             R.string.dengage_integration_key,
@@ -41,42 +41,10 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
             R.string.dengage_user_permission,
             Dengage.getUserPermission().toString()
         )
-        binding.tvToken.text = getString(
-            R.string.dengage_token,
+        binding.tvDeviceToken.text = getString(
+            R.string.dengage_device_token,
             Dengage.getToken()
         )
-
-
-
-        binding.tvDeviceId.setOnClickListener {
-            val clipboard: ClipboardManager =
-                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("di", binding.tvDeviceId.text)
-            clipboard.setPrimaryClip(clip)
-            Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
-        }
-
-       binding.tvToken.setOnClickListener {
-            val clipboard: ClipboardManager =
-                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("ik", binding.tvToken.text)
-            clipboard.setPrimaryClip(clip)
-           Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
-        }
-
-
-
-        binding.tvContactKey.setOnClickListener {
-            val clipboard: ClipboardManager =
-                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = ClipData.newPlainText("ck", binding.tvContactKey.text)
-            clipboard.setPrimaryClip(clip)
-            Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
-        }
-
-
-
-
         binding.tvDeviceBrand.text = getString(
             R.string.dengage_device_brand,
             Build.BRAND
@@ -89,8 +57,6 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
             R.string.dengage_advertising_id,
             Dengage.getSubscription()?.advertisingId
         )
-
-
         binding.tvTimeZone.text = getString(
             R.string.dengage_timezone,
             Dengage.getSubscription()?.timezone
@@ -99,12 +65,10 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
             R.string.dengage_language,
             Dengage.getSubscription()?.language
         )
-
         binding.tvSdkVersion.text = getString(
             R.string.dengage_sdk_version,
             Dengage.getSdkVersion()
         )
-
         binding.tvScreenWidth.text = getString(
             R.string.dengage_screen_width,
             Resources.getSystem().displayMetrics.widthPixels.toString()
@@ -117,6 +81,31 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
             R.string.dengage_os_version,
             Build.VERSION.RELEASE.toString()
         )
+
+        binding.tvDeviceId.setOnClickListener {
+            val clipboard: ClipboardManager =
+                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("di", binding.tvDeviceId.text)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
+        }
+
+       binding.tvDeviceToken.setOnClickListener {
+            val clipboard: ClipboardManager =
+                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("ik", binding.tvDeviceToken.text)
+            clipboard.setPrimaryClip(clip)
+           Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
+        }
+
+        binding.tvContactKey.setOnClickListener {
+            val clipboard: ClipboardManager =
+                activity?.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("ck", binding.tvContactKey.text)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(activity,"copied",Toast.LENGTH_SHORT).show()
+        }
+
     }
 
 }

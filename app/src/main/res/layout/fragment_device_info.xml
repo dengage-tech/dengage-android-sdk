@@ -43,16 +43,12 @@
                 android:textSize="@dimen/dengage_text_size_medium" />
 
             <TextView
-                android:id="@+id/tvToken"
+                android:id="@+id/tvDeviceToken"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:textColor="@color/dengage_color_black"
                 android:textSize="@dimen/dengage_text_size_medium" />
-
-
-
-
 
             <TextView
                 android:id="@+id/tvDeviceBrand"

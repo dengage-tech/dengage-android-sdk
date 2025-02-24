@@ -5,7 +5,7 @@
     <string name="dengage_device_brand">Device Brand = %s</string>
     <string name="dengage_device_model">Device Model = %s</string>
     <string name="dengage_advertising_id">Advertising Id = %s</string>
-    <string name="dengage_token">Token = %s</string>
+    <string name="dengage_device_token">Device Token = %s</string>
     <string name="dengage_contact_key">Contact Key = %s</string>
     <string name="dengage_timezone">TimeZone = %s</string>
     <string name="dengage_language">Language = %s</string>
