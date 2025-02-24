@@ -113,6 +113,10 @@ class DeviceInfoFragment : BaseDataBindingFragment<FragmentDeviceInfoBinding>() 
             R.string.dengage_screen_height,
             Resources.getSystem().displayMetrics.heightPixels.toString()
         )
+        binding.tvOsVersion.text = getString(
+            R.string.dengage_os_version,
+            Build.VERSION.RELEASE.toString()
+        )
     }
 
 }

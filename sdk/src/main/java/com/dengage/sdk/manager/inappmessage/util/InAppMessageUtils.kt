@@ -314,7 +314,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.VERSION.SDK_INT.toString(),
+                    userParam = Build.VERSION.RELEASE.toString(),
                     isRealTime = isRealTime
                 )
             }
