@@ -356,11 +356,12 @@ object InAppMessageUtils {
                 )
             }
             SpecialRuleParameter.WEEK_DAY.key -> {
+                val dateFormat = SimpleDateFormat("EEE")
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Calendar.getInstance().get(Calendar.DAY_OF_WEEK).toString(),
+                    userParam = dateFormat.format(Date()),
                     isRealTime = isRealTime
                 )
             }
@@ -402,11 +403,17 @@ object InAppMessageUtils {
                 )
             }
             SpecialRuleParameter.FIRST_VISIT.key -> {
+
+                var firstVisit = "false"
+                if (System.currentTimeMillis() / 1000 - Prefs.firstLaunchTime < 3600) {
+                    firstVisit = "true"
+                }
+
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Prefs.firstLaunchTime.toString(),
+                    userParam = firstVisit,
                     isRealTime = isRealTime
                 )
             }
