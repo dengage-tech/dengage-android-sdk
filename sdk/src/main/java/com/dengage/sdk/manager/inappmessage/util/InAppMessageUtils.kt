@@ -394,11 +394,12 @@ object InAppMessageUtils {
                 )
             }
             SpecialRuleParameter.VISIT_DURATION.key -> {
+                val visitDurationInMinutes = ((TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - Prefs.lastSessionStartTime) / 60).toInt()
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = (TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - Prefs.lastSessionStartTime).toString(),
+                    userParam = visitDurationInMinutes.toString(),
                     isRealTime = isRealTime
                 )
             }
