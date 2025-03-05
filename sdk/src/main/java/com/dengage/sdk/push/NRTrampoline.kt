@@ -505,7 +505,28 @@ open class NRTrampoline : BroadcastReceiver() {
                 val btnPendingIntent: PendingIntent? =
                     getPendingIntent(context, requestCode, buttonIntent)
                 val icon: Int = context.getResourceId(actionButton.icon)
-                notificationBuilder.addAction(icon, actionButton.text, btnPendingIntent)
+
+                if ("NO".equals(actionButton.id, ignoreCase = true)) {
+                    val noIntent = Intent(context, NotificationDismissReceiver::class.java).apply {
+                        action = Constants.PUSH_ACTION_CLICK_EVENT
+                        if (extras != null) {
+                            putExtras(extras)
+                        }
+                        putExtra("id", actionButton.id)
+                        putExtra("targetUrl", actionButton.targetUrl)
+                        setPackage(packageName)
+                    }
+                    val noPendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        requestCode,
+                        noIntent,
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                    notificationBuilder.addAction(icon, actionButton.text, noPendingIntent)
+
+                } else {
+                    notificationBuilder.addAction(icon, actionButton.text, btnPendingIntent)
+                }
             }
         }
         return notificationBuilder

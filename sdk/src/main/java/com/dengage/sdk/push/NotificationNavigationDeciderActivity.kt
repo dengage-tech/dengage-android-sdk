@@ -20,8 +20,20 @@ import com.dengage.sdk.util.extension.storeToPref
 class NotificationNavigationDeciderActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ContextHolder.resetContext(this.applicationContext)
 
+        val id = intent.extras?.getString("id", "")
+        if ("NO".equals(id, ignoreCase = true)) {
+            val requestCode = intent.extras?.getInt("requestCode")
+            if (!Constants.listOfNotificationIds.contains(requestCode)) {
+                Constants.listOfNotificationIds.add(requestCode)
+            }
+            val message = Message.createFromIntent(intent.extras!!)
+            clearNotification(message)
+            finish()
+            return
+        }
+
+        ContextHolder.resetContext(this.applicationContext)
     }
 
 
@@ -88,17 +100,6 @@ class NotificationNavigationDeciderActivity : Activity() {
                         }
 
                         DengageUtils.sendBroadCast(intent, this)
-
-                        if (!message?.actionButtons.isNullOrEmpty()) {
-                            id = extras.getString("id", "")
-                            clearNotification()
-                            if ("NO".equals(id, ignoreCase = true)) {
-                                finish()
-                                return
-                            }
-
-                        }
-
 
                         try {
                             startActivityLocal(sendingIntentObject)

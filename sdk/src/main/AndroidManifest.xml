@@ -51,6 +51,10 @@
             android:theme="@style/Theme.AppCompat.Translucent"
             android:launchMode="singleTask"
             android:exported="false" />
+
+        <receiver android:name=".push.NotificationDismissReceiver" />
+
+
     </application>
 
 </manifest>
