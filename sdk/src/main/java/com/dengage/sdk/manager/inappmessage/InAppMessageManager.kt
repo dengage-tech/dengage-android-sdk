@@ -282,13 +282,20 @@ class InAppMessageManager :
                     }
                     existingInAppMessages.addAll(newInAppMessages)
                 } else {
-                    // remove duplicated in app messages
-                    existingInAppMessages.removeAll { existingInAppMessage ->
-                        inAppMessages.firstOrNull { inAppMessage ->
-                            inAppMessage.id == existingInAppMessage.id
-                        } != null
+                    val updatedMessages = inAppMessages.map { newMsg ->
+                        val oldMsg = existingInAppMessages.firstOrNull { it.id == newMsg.id }
+                        if (oldMsg != null) {
+                            newMsg.data.nextDisplayTime = oldMsg.data.nextDisplayTime
+                            newMsg.data.showCount = oldMsg.data.showCount
+                        }
+                        newMsg
                     }
-                    existingInAppMessages.addAll(inAppMessages)
+
+                    existingInAppMessages.removeAll { existingMsg ->
+                        inAppMessages.any { newMsg -> newMsg.id == existingMsg.id }
+                    }
+
+                    existingInAppMessages.addAll(updatedMessages)
                 }
             }
 

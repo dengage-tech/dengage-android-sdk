@@ -166,12 +166,15 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             }
         } else {
             if (isInAppMessageEnabled(subscription, sdkParameters)) {
-                // remove in app message from cache if clicked
-                removeInAppMessageFromCache(inAppMessage.id)
-
                 setInAppMessageAsClicked(this) {
                     onResponse = {
-                        view { inAppMessageSetAsClicked() }
+                        view {
+                            val maxDismissCount = inAppMessage.data.displayTiming.maxDismissCount
+                            if (maxDismissCount == null || maxDismissCount <= 0 || inAppMessage.data.showCount >= maxDismissCount) {
+                                removeInAppMessageFromCache(inAppMessage.id)
+                            }
+                            inAppMessageSetAsClicked()
+                        }
                     }
                     params = SetInAppMessageAsClicked.Params(
                         account = sdkParameters?.accountName!!,
@@ -242,7 +245,13 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             if (isInAppMessageEnabled(subscription, sdkParameters)) {
                 setInAppMessageAsDismissed(this) {
                     onResponse = {
-                        view { inAppMessageSetAsDismissed() }
+                        view {
+                            val maxDismissCount = inAppMessage.data.displayTiming.maxDismissCount
+                            if (maxDismissCount == null || maxDismissCount <= 0 || inAppMessage.data.showCount >= maxDismissCount) {
+                                removeInAppMessageFromCache(inAppMessage.id)
+                            }
+                            inAppMessageSetAsDismissed()
+                        }
                     }
                     params = SetInAppMessageAsDismissed.Params(
                         account = sdkParameters?.accountName!!,

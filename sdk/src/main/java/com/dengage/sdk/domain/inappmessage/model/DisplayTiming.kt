@@ -6,5 +6,6 @@ import java.io.Serializable
 class DisplayTiming(
     @SerializedName("delay") val delay: Int?,
     @SerializedName("showEveryXMinutes") val showEveryXMinutes: Int?,
-    @SerializedName("maxShowCount") val maxShowCount: Int?
+    @SerializedName("maxShowCount") val maxShowCount: Int?,
+    @SerializedName("maxDismissCount") val maxDismissCount: Int?
 ) : Serializable
