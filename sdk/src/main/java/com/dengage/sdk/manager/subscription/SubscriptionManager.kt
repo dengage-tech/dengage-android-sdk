@@ -187,7 +187,7 @@ class SubscriptionManager :
                 sdkVersion = DengageUtils.getSdkVersion()
                 language = DengageUtils.getLanguage()
                 timezone = DengageUtils.getIANAFormatTimeZone()
-                locationPermission = DengageUtils.getLocationPermission()
+                locationPermission = DengageUtils.getLocationPermissionStatusString(ContextHolder.context)
             }
             Prefs.subscription = subscription
             DengageLogger.verbose("saveSubscription: ${GsonHolder.gson.toJson(subscription)}")

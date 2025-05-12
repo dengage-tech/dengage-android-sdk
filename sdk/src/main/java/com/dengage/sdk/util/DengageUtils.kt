@@ -1,5 +1,6 @@
 package com.dengage.sdk.util
 
+import android.Manifest
 import android.app.ActivityManager
 import android.app.NotificationManager
 import android.content.Context
@@ -10,6 +11,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.DeadObjectException
 import android.telephony.TelephonyManager
+import androidx.core.content.ContextCompat
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
@@ -168,10 +170,9 @@ object DengageUtils {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 ContextHolder.context.applicationContext.registerReceiver(
                     NRTrampoline(),
-                    filter,Context.RECEIVER_EXPORTED
+                    filter, Context.RECEIVER_EXPORTED
                 )
-            }
-            else {
+            } else {
                 ContextHolder.context.applicationContext.registerReceiver(
                     NRTrampoline(),
                     filter
@@ -208,8 +209,7 @@ object DengageUtils {
                     InAppBroadcastReceiver(),
                     intentFilter, Context.RECEIVER_EXPORTED
                 )
-            }
-            else {
+            } else {
                 ContextHolder.context.applicationContext.registerReceiver(
                     InAppBroadcastReceiver(),
                     intentFilter
@@ -244,7 +244,7 @@ object DengageUtils {
             broadCastIntent.putExtras(intent.extras!!)
             ContextHolder.context.applicationContext.sendBroadcast(broadCastIntent)
         } catch (e: Exception) {
-   //e.printStackTrace()
+            //e.printStackTrace()
         } catch (ex: Throwable) {
             // ex.printStackTrace()
 
@@ -334,15 +334,49 @@ object DengageUtils {
         return NotificationManager.IMPORTANCE_DEFAULT
     }
 
-    fun getChannelId(message: Message):String{
-      return  if (message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID+"_"+getNotificationPreference() else message.sound+"_"+getNotificationPreference()
+    fun getChannelId(message: Message): String {
+        return if (message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID + "_" + getNotificationPreference() else message.sound + "_" + getNotificationPreference()
     }
 
     fun getLanguage(): String {
         return Prefs.language.toString()
     }
 
-    fun getLocationPermission(): String {
-        return Prefs.locationPermission.toString()
+    private fun hasFineOrCoarsePermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
     }
+
+    internal fun getLocationPermissionStatusString(context: Context): String {
+
+        return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            if (hasFineOrCoarsePermission(context)) {
+                "always"
+            } else {
+                "none"
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                "always"
+            } else {
+                if (hasFineOrCoarsePermission(context)) {
+                    "appinuse"
+                } else {
+                    "none"
+                }
+            }
+        }
+    }
+
+
 }
