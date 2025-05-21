@@ -496,6 +496,19 @@ The SDK automatically sends subscription events in the following scenarios:
 3. Setting Token
 4. Setting User Permission (if permissions are manually managed)
 
+### Asking User Permission for Notification
+
+To request notification permission from the user (required for Android 13+), you can use the following method provided by the SDK:
+
+```kotlin
+Dengage.requestNotificationPermission(activity)
+```
+
+This function checks if the notification permission (`POST_NOTIFICATIONS`) is granted. If not, it will prompt the user to allow notifications. Make sure to call this method from your `Activity` (for example, during onboarding or before sending notifications).
+
+> **Note:** On Android 13 (API level 33) and above, notification permission is required at runtime. On earlier versions, this call will have no effect.
+
+
 ### User Permission Management (optional)
 
 If you manage your own user permission states on your application you may send user permission by using `setUserPermission` method.

@@ -12,10 +12,10 @@ class InAppInLineFragment : BaseDataBindingFragment<FragmentInappInlineBinding>(
     }
 
     override fun init() {
-        sendPageView("in-app-message")
-        Dengage.setCategoryPath("23")
+        binding.etPropertyId.setText("1")
+        binding.etScreenName.setText("inline")
         binding.btnShowInlineInapp.setOnClickListener {
-            var propertyId = binding.etPropertyId.text.toString().trim()
+            val propertyId = binding.etPropertyId.text.toString().trim()
             val screenName = binding.etScreenName.text.toString().trim()
             val customKey1 = binding.etCustomKey1.text.toString().trim()
             val customValue1 = binding.etCustomValue1.text.toString().trim()
