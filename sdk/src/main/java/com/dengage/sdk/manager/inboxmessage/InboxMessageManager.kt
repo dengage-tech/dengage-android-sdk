@@ -4,7 +4,8 @@ import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.manager.base.BaseMvpManager
 
-class InboxMessageManager : BaseMvpManager<InboxMessageContract.View, InboxMessageContract.Presenter>(),
+class InboxMessageManager :
+    BaseMvpManager<InboxMessageContract.View, InboxMessageContract.Presenter>(),
     InboxMessageContract.View {
 
     override fun providePresenter() = InboxMessagePresenter()
@@ -37,6 +38,14 @@ class InboxMessageManager : BaseMvpManager<InboxMessageContract.View, InboxMessa
         )
     }
 
+    internal fun deleteAllInboxMessages() {
+        presenter.setAllInboxMessagesAsDeleted()
+    }
+
+    internal fun setAllInboxMessagesAsClicked() {
+        presenter.setAllInboxMessagesAsClicked()
+    }
+
     internal fun clearInboxMessageCache() {
         presenter.clearInboxMessageCache()
     }
@@ -46,5 +55,10 @@ class InboxMessageManager : BaseMvpManager<InboxMessageContract.View, InboxMessa
     override fun inboxMessageClicked() = Unit
 
     override fun inboxMessageDeleted() = Unit
+
+    override fun allInboxMessagesClicked() = Unit
+
+    override fun allInboxMessagesDeleted() = Unit
+
 
 }

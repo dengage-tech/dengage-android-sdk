@@ -4,13 +4,22 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="@dimen/dengage_page_margin_medium">
+        android:layout_height="match_parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:title="Inbox"
+            app:titleTextColor="@android:color/white"
+            app:menu="@menu/menu_inbox_actions" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvInboxMessages"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@id/toolbar"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
     </RelativeLayout>

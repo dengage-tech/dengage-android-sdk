@@ -1,6 +1,5 @@
 package com.dengage.sdk.domain.inboxmessage
 
-import android.util.Log
 import com.dengage.sdk.data.remote.api.ApiType
 import com.dengage.sdk.data.remote.api.service
 import com.dengage.sdk.domain.subscription.model.Subscription
@@ -61,6 +60,34 @@ class InboxMessageRepository {
             deviceId = subscription.getSafeDeviceId(),
             type = subscription.getType(),
             messageId = messageId
+        )
+    }
+
+    suspend fun setAllInboxMessagesAsClicked(
+        appId : String,
+        account: String,
+        subscription: Subscription,
+    ): Response<Unit> {
+        return service.setAllInboxMessagesAsClicked(
+            appId = appId,
+            account = account,
+            cdKey = subscription.getCdKey(),
+            deviceId = subscription.getSafeDeviceId(),
+            type = subscription.getType(),
+        )
+    }
+
+    suspend fun setAllInboxMessagesAsDeleted(
+        appId : String,
+        account: String,
+        subscription: Subscription,
+    ): Response<Unit> {
+        return service.setAllInboxMessagesAsDeleted(
+            appId = appId,
+            account = account,
+            cdKey = subscription.getCdKey(),
+            deviceId = subscription.getSafeDeviceId(),
+            type = subscription.getType(),
         )
     }
 

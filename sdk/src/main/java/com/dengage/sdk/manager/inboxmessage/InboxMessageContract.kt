@@ -11,6 +11,8 @@ interface InboxMessageContract {
         fun fetchedInboxMessages(inAppMessages: MutableList<InboxMessage>?)
         fun inboxMessageClicked()
         fun inboxMessageDeleted()
+        fun allInboxMessagesClicked()
+        fun allInboxMessagesDeleted()
     }
 
     interface Presenter : BasePresenter<View> {
@@ -22,6 +24,8 @@ interface InboxMessageContract {
 
         fun setInboxMessageAsClicked(messageId: String)
         fun setInboxMessageAsDeleted(messageId: String)
+        fun setAllInboxMessagesAsClicked()
+        fun setAllInboxMessagesAsDeleted()
         fun clearInboxMessageCache()
     }
 }

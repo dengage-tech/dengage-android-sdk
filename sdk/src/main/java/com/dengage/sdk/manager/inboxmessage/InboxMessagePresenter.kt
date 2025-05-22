@@ -6,6 +6,8 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.inboxmessage.usecase.GetInboxMessages
+import com.dengage.sdk.domain.inboxmessage.usecase.SetAllInboxMessagesAsClicked
+import com.dengage.sdk.domain.inboxmessage.usecase.SetAllInboxMessagesAsDeleted
 import com.dengage.sdk.domain.inboxmessage.usecase.SetInboxMessageAsClicked
 import com.dengage.sdk.domain.inboxmessage.usecase.SetInboxMessageAsDeleted
 import com.dengage.sdk.domain.subscription.model.Subscription
@@ -22,6 +24,8 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
     private val getInboxMessages by lazy { GetInboxMessages() }
     private val setInboxMessageAsClicked by lazy { SetInboxMessageAsClicked() }
     private val setInboxMessageAsDeleted by lazy { SetInboxMessageAsDeleted() }
+    private val setAllInboxMessagesAsClicked by lazy { SetAllInboxMessagesAsClicked() }
+    private val setAllInboxMessagesAsDeleted by lazy { SetAllInboxMessagesAsDeleted() }
 
     private var inboxMessages: MutableList<InboxMessage>? = null
 
@@ -120,6 +124,49 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
                     account = sdkParameters?.accountName!!,
                     subscription = Prefs.subscription!!,
                     messageId = messageId
+                )
+            }
+        }
+    }
+
+    override fun setAllInboxMessagesAsClicked() {
+        val subscription = Prefs.subscription
+        val sdkParameters = Prefs.sdkParameters
+        if (isInboxMessageEnabled(subscription, sdkParameters)) {
+            setAllInboxMessagesAsClicked(this) {
+                onResponse = {
+                    inboxMessages?.forEach { message ->
+                        message.isClicked = true
+                    }
+                    Prefs.inboxMessages = inboxMessages
+                    view { allInboxMessagesClicked() }
+                }
+                params = SetAllInboxMessagesAsClicked.Params(
+                    appId = sdkParameters?.appId!!,
+                    account = sdkParameters.accountName!!,
+                    subscription = Prefs.subscription!!
+                )
+            }
+        }
+    }
+
+    override fun setAllInboxMessagesAsDeleted() {
+        val subscription = Prefs.subscription
+        val sdkParameters = Prefs.sdkParameters
+        if (isInboxMessageEnabled(subscription, sdkParameters)) {
+            setAllInboxMessagesAsDeleted(this) {
+                onResponse = {
+                    inboxMessages?.forEach { message ->
+                        message.isDeleted = true
+                    }
+                    Prefs.inboxMessages = inboxMessages
+                    inboxMessages?.clear()
+                    view { allInboxMessagesDeleted() }
+                }
+                params = SetAllInboxMessagesAsDeleted.Params(
+                    appId = sdkParameters?.appId!!,
+                    account = sdkParameters.accountName!!,
+                    subscription = Prefs.subscription!!
                 )
             }
         }

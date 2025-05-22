@@ -25,8 +25,6 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
     }
 
     override fun init() {
-        sendPageView("inbox-messages")
-
         fetchInboxMessages(0)
         binding.rvInboxMessages.adapter = adapter
 
@@ -41,6 +39,24 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
                 return isLoading
             }
         })
+
+        binding.toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_mark_all_read -> {
+                    Dengage.setAllInboxMessagesAsClicked()
+                    inboxMessages.forEach { it.isClicked = true }
+                    adapter.setItems(inboxMessages)
+                    true
+                }
+                R.id.action_delete_all -> {
+                    Dengage.deleteAllInboxMessages()
+                    inboxMessages.clear()
+                    adapter.setItems(ArrayList())
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun fetchInboxMessages(offset: Int) {
@@ -72,8 +88,10 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
 
     override fun onResult(result: MutableList<InboxMessage>) {
         isLoading = false
-        inboxMessages.addAll(result)
-        adapter.addItems(result)
+        binding.rvInboxMessages.post {
+            inboxMessages.addAll(result)
+            adapter.addItems(result)
+        }
     }
 
 }

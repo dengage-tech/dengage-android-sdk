@@ -322,6 +322,20 @@ object Dengage {
         )
     }
 
+    /**
+     * Delete all inbox messages
+     */
+    fun deleteAllInboxMessages() {
+        inboxMessageManager.deleteAllInboxMessages()
+    }
+
+    /**
+     * Mark all inbox messages as read
+     */
+    fun setAllInboxMessagesAsClicked() {
+        inboxMessageManager.setAllInboxMessagesAsClicked()
+    }
+
     fun getInAppMessages() {
         inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
             InAppMessageFetchCallback {

@@ -41,4 +41,25 @@ interface InboxMessageService {
         @Query("type") type: String,
         @Query("msgId") messageId: String,
     ): Response<Unit>
+
+
+    @Headers("CONNECT_TIMEOUT:10000", "READ_TIMEOUT:10000", "WRITE_TIMEOUT:10000")
+    @GET("/p/pi/setAsClickedAll")
+    suspend fun setAllInboxMessagesAsClicked(
+        @Query("appId") appId: String,
+        @Query("acc") account: String,
+        @Query("cdkey") cdKey: String,
+        @Query("did") deviceId: String,
+        @Query("type") type: String,
+    ): Response<Unit>
+
+    @Headers("CONNECT_TIMEOUT:10000", "READ_TIMEOUT:10000", "WRITE_TIMEOUT:10000")
+    @GET("/p/pi/setAsDeletedAll")
+    suspend fun setAllInboxMessagesAsDeleted(
+        @Query("appId") appId: String,
+        @Query("acc") account: String,
+        @Query("cdkey") cdKey: String,
+        @Query("did") deviceId: String,
+        @Query("type") type: String,
+    ): Response<Unit>
 }
