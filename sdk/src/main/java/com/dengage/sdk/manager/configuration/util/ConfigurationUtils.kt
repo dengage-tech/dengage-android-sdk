@@ -82,7 +82,10 @@ object ConfigurationUtils {
                     }
                 } catch (e: Exception) {
                     DengageLogger.error("GmsAdIdWorker Exception: ${e.message}")
+                } catch (t: Throwable) {
+                    DengageLogger.error("GmsAdIdWorker Throwable: ${t.message}")
                 }
+
             }
         }.start()
     }
