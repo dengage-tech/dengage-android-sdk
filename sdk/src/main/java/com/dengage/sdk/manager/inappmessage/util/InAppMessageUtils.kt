@@ -6,6 +6,14 @@ import android.content.res.Resources
 import android.os.Build
 import android.util.TypedValue
 import androidx.core.text.isDigitsOnly
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.Days
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.cache.Prefs.visitorInfo
 import com.dengage.sdk.domain.inappmessage.model.*
@@ -13,11 +21,7 @@ import com.dengage.sdk.manager.visitcount.VisitCountManager
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.GsonHolder
-import org.joda.time.DateTime
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.concurrent.TimeUnit
+
 
 object InAppMessageUtils {
 
@@ -512,7 +516,7 @@ object InAppMessageUtils {
 
             checkVisitorInfoAttr(criterion.parameter) -> {
                 if (criterion.parameter == SpecialRuleParameter.BIRTH_DATE.key) {
-                    return birthCriteriaValid(criterion.values, getVisitorInfoAttrValue(criterion))
+                    return birthdayCriteriaValid(criterion.values, getVisitorInfoAttrValue(criterion))
                 }
                 else if (criterion.dataType== DataType.DATETIME.name)
                 {
@@ -553,47 +557,55 @@ object InAppMessageUtils {
         }
     }
 
-
-    private fun birthCriteriaValid(values: List<String>?, birthDateVisitoInfo: String?): Boolean {
-        try {
-            if (values.isNullOrEmpty()) return false
-            val birthComparisonValue = values[0]
-            if (birthComparisonValue.contains("-")) {
-                val days =birthComparisonValue.replace("-", "").toInt()
-                for (i in 0..days)
-                {
-                    if (DateTime.now().minusDays(days).plusDays(i).toString()
-                            .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
-                    ) {
-                        return true
-                    }
-                }
-
-            } else if (birthComparisonValue == "0") {
-                val birthDateBasedOnComparison = DateTime.now().toLocalDateTime()
-                if (birthDateBasedOnComparison.toString()
-                        .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
-                ) {
-                    return true
-                }
-            } else {
-                val days =birthComparisonValue.replace("-", "").toInt()
-                for (i in 0..days)
-                {
-                    if (DateTime.now().plusDays(days).minusDays(i).toString()
-                            .split("T")[0] == (birthDateVisitoInfo?.split(" ")?.get(0) ?: "")
-                    ) {
-                        return true
-                    }
-                }
-
-
-            }
-        } catch (_: Exception) {
-        } catch (_: Throwable) {
+    private fun birthdayCriteriaValid(values: List<String>?, birthDateVisitorInfo: String?): Boolean {
+        if (values.isNullOrEmpty() || birthDateVisitorInfo.isNullOrEmpty()) {
+            return false
         }
-        return false
+        val comparisonValue = values[0].toIntOrNull() ?: return false
 
+        val birthLocalDate = try {
+            val fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+            fmt.parseLocalDate(birthDateVisitorInfo)
+        } catch (e: Exception) {
+            return false
+        }
+
+        val birthMonth = birthLocalDate.monthOfYear
+        val birthDay = birthLocalDate.dayOfMonth
+
+        val today = LocalDate.now()
+        val thisYearBirthday = birthLocalDate.withYear(today.year)
+
+        return when {
+            comparisonValue < 0 -> {
+                val window = -comparisonValue
+
+                val lastBirthday =
+                    if (thisYearBirthday.isAfter(today))
+                        thisYearBirthday.minusYears(1)
+                    else
+                        thisYearBirthday
+
+                val daysSince = Days.daysBetween(lastBirthday, today).days
+                daysSince in 0..window
+            }
+
+            comparisonValue == 0 -> {
+                today.monthOfYear == birthMonth && today.dayOfMonth == birthDay
+            }
+
+            else -> {
+                val window = comparisonValue
+                val nextBirthday =
+                    if (thisYearBirthday.isBefore(today))
+                        thisYearBirthday.plusYears(1)
+                    else
+                        thisYearBirthday
+
+                val daysUntil = Days.daysBetween(today, nextBirthday).days
+                daysUntil in 0..window
+            }
+        }
     }
 
     private fun checkVisitorInfoAttr(parameter: String): String? {
