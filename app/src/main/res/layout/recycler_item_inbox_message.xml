@@ -1,16 +1,57 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center"
     android:padding="10dp">
+
+    <LinearLayout
+        android:id="@+id/ll_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/ll_action_buttons"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dengage_color_black"
+            android:layout_marginBottom="5dp"
+            android:textSize="@dimen/small_text_size" />
+
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dengage_color_black"
+            android:layout_marginBottom="5dp"
+            android:textSize="@dimen/small_text_size" />
+
+        <TextView
+            android:id="@+id/tv_receive_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dengage_color_black"
+            android:layout_marginBottom="5dp"
+            android:textSize="@dimen/small_text_size" />
+
+        <TextView
+            android:id="@+id/tv_is_clicked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dengage_color_black"
+            android:textSize="@dimen/small_text_size"
+            android:layout_marginBottom="5dp" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ll_action_buttons"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="10dp">
 
         <androidx.appcompat.widget.AppCompatButton
             android:layout_width="wrap_content"
@@ -26,41 +67,10 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:layout_toStartOf="@+id/ll_action_buttons"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/dengage_color_black"
-            android:textSize="@dimen/small_text_size" />
-
-        <TextView
-            android:id="@+id/tv_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/dengage_color_black"
-            android:textSize="@dimen/small_text_size" />
-
-        <TextView
-            android:id="@+id/tv_receive_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/dengage_color_black"
-            android:textSize="@dimen/small_text_size" />
-
-        <TextView
-            android:id="@+id/tv_is_clicked"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/dengage_color_black"
-            android:textSize="@dimen/small_text_size" />
-
-    </LinearLayout>
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:background="#E0E0E0" />
 
 </RelativeLayout>

@@ -11,7 +11,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
-            android:title="Inbox"
+            android:title="@string/inbox"
             app:titleTextColor="@android:color/white"
             app:menu="@menu/menu_inbox_actions" />
 

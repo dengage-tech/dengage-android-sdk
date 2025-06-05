@@ -2,6 +2,7 @@ package com.dengage.android.kotlin.sample.ui.fragment
 
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.appcompat.app.AlertDialog
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentInboxMessagesBinding
 import com.dengage.android.kotlin.sample.ui.adapter.InboxMessagesAdapter
@@ -43,15 +44,29 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
         binding.toolbar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_mark_all_read -> {
-                    Dengage.setAllInboxMessagesAsClicked()
-                    inboxMessages.forEach { it.isClicked = true }
-                    adapter.setItems(inboxMessages)
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Mark All Read")
+                        .setMessage("Are you sure you want to mark all messages as read?")
+                        .setPositiveButton("Mark All Read") { _, _ ->
+                            Dengage.setAllInboxMessagesAsClicked()
+                            inboxMessages.forEach { it.isClicked = true }
+                            adapter.setItems(inboxMessages)
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
                     true
                 }
                 R.id.action_delete_all -> {
-                    Dengage.deleteAllInboxMessages()
-                    inboxMessages.clear()
-                    adapter.setItems(ArrayList())
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Delete All Messages")
+                        .setMessage("Are you sure you want to delete all messages?")
+                        .setPositiveButton("Delete All") { _, _ ->
+                            Dengage.deleteAllInboxMessages()
+                            inboxMessages.clear()
+                            adapter.setItems(inboxMessages)
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
                     true
                 }
                 else -> false

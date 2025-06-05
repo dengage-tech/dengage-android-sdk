@@ -59,4 +59,8 @@
     <string name="clear_device_info">Clear Device Info</string>
     <string name="add_new_device_info">Add New Device Info</string>
     <string name="subscribe">Subscribe</string>
+
+    <string name="read_status">Read: %1$s</string>
+    <string name="receive_date">Receive Date: %1$s</string>
+    <string name="inbox">Inbox</string>
 </resources>

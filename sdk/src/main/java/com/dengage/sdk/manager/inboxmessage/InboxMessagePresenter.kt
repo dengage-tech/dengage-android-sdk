@@ -52,8 +52,8 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
                         view { fetchedInboxMessages(it) }
 
 
-                            inboxMessages = it
-                            updateInboxMessages(it)
+                        inboxMessages = it
+                        updateInboxMessages(it)
 
                         dengageCallback.onResult(inboxMessages ?: mutableListOf())
                     }
@@ -118,7 +118,7 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
 
             setInboxMessageAsDeleted(this) {
                 onResponse = {
-                    view { inboxMessageDeleted() }
+                    view { allInboxMessagesDeleted() }
                 }
                 params = SetInboxMessageAsDeleted.Params(
                     account = sdkParameters?.accountName!!,
@@ -133,12 +133,15 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
         val subscription = Prefs.subscription
         val sdkParameters = Prefs.sdkParameters
         if (isInboxMessageEnabled(subscription, sdkParameters)) {
+
+            inboxMessages?.forEach { message ->
+                message.isClicked = true
+            }
+            Prefs.inboxMessages = inboxMessages
+
             setAllInboxMessagesAsClicked(this) {
                 onResponse = {
-                    inboxMessages?.forEach { message ->
-                        message.isClicked = true
-                    }
-                    Prefs.inboxMessages = inboxMessages
+
                     view { allInboxMessagesClicked() }
                 }
                 params = SetAllInboxMessagesAsClicked.Params(
@@ -154,13 +157,16 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
         val subscription = Prefs.subscription
         val sdkParameters = Prefs.sdkParameters
         if (isInboxMessageEnabled(subscription, sdkParameters)) {
+
+            inboxMessages?.forEach { message ->
+                message.isDeleted = true
+            }
+            Prefs.inboxMessages = inboxMessages
+            inboxMessages?.clear()
+
             setAllInboxMessagesAsDeleted(this) {
                 onResponse = {
-                    inboxMessages?.forEach { message ->
-                        message.isDeleted = true
-                    }
-                    Prefs.inboxMessages = inboxMessages
-                    inboxMessages?.clear()
+
                     view { allInboxMessagesDeleted() }
                 }
                 params = SetAllInboxMessagesAsDeleted.Params(
@@ -212,9 +218,10 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
         val filteredPrefsInboxMessages = prefsInboxMessages.filterNot {
             it.data.receiveDate?.let { receiveDate ->
                 try {
-                    val messageDate = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).apply {
-                        timeZone = TimeZone.getTimeZone("UTC")
-                    }.parse(receiveDate)?.time
+                    val messageDate =
+                        SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).apply {
+                            timeZone = TimeZone.getTimeZone("UTC")
+                        }.parse(receiveDate)?.time
                     messageDate != null && messageDate < oneWeekAgo
                 } catch (e: Exception) {
                     true // If parsing fails, remove
@@ -222,7 +229,8 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
             } ?: false
         }.toMutableList()
 
-        val existingMessageIndex = filteredPrefsInboxMessages.indexOfFirst { it.id == inboxMessage.id }
+        val existingMessageIndex =
+            filteredPrefsInboxMessages.indexOfFirst { it.id == inboxMessage.id }
 
         if (existingMessageIndex != -1) {
             filteredPrefsInboxMessages[existingMessageIndex] = inboxMessage
@@ -232,7 +240,6 @@ class InboxMessagePresenter : BaseAbstractPresenter<InboxMessageContract.View>()
 
         Prefs.inboxMessages = filteredPrefsInboxMessages
     }
-
 
 
 }
