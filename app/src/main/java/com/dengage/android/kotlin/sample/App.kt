@@ -10,12 +10,14 @@ import com.dengage.sdk.util.DengageLifecycleTracker
 import com.dengage.hms.DengageHmsManager
 import com.dengage.geofence.DengageGeofence
 import com.dengage.sdk.data.remote.api.ApiUrlConfiguration
+import com.google.firebase.FirebaseApp
 
 class App : Application() {
     /*lateinit var dengageManager: DengageManager
 */
     override fun onCreate() {
         super.onCreate()
+        FirebaseApp.initializeApp(this)
       /*  val data = HashMap<String, Any>()
         data["page_type"] = "test123"
         Dengage.pageView(data,this)*/
