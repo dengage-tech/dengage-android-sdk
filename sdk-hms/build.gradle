@@ -8,6 +8,7 @@ android {
 
     compileSdk 34
 
+    namespace "com.dengage.hms"
     defaultConfig {
         minSdk 19
 
