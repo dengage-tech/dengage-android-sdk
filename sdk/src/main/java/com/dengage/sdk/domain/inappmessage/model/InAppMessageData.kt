@@ -13,7 +13,8 @@ class InAppMessageData(
     @SerializedName("inlineTarget") val inlineTarget: InlineTarget?,
     @SerializedName("publicId") val publicId: String?,
     @SerializedName("nextDisplayTime") var nextDisplayTime: Long = 0,
-    @SerializedName("showCount") var showCount: Long = 0
+    @SerializedName("showCount") var showCount: Long = 0,
+    @SerializedName("dismissCount") var dismissCount: Long = 0
 ) : Serializable {
 
     fun isRealTime(): Boolean = !publicId.isNullOrEmpty()

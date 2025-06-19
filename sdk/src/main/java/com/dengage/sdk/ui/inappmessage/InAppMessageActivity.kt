@@ -176,7 +176,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     interface InAppMessageCallback {
         /** Clicked in app message */
-        fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?)
+        fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?, buttonType: String?)
 
         /** Dismissed in app message */
         fun inAppMessageDismissed(inAppMessage: InAppMessage)
@@ -281,17 +281,24 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         }
 
         @JavascriptInterface
+        fun sendClick(buttonId: String?, buttonType: String?) {
+            isClicked = true
+            DengageLogger.verbose("In app message: clicked button $buttonId $buttonType")
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId, buttonType)
+        }
+
+        @JavascriptInterface
         fun sendClick(buttonId: String?) {
             isClicked = true
             DengageLogger.verbose("In app message: clicked button $buttonId")
-            inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId)
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId, null)
         }
 
         @JavascriptInterface
         fun sendClick() {
             isClicked = true
             DengageLogger.verbose("In app message: clicked body/button with no Id")
-            inAppMessageCallback?.inAppMessageClicked(inAppMessage, null)
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, null, null)
         }
 
         @JavascriptInterface

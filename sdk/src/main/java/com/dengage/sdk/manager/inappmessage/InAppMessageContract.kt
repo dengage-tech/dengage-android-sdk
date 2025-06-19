@@ -20,7 +20,8 @@ interface InAppMessageContract {
         fun setInAppMessageAsDisplayed(inAppMessage: InAppMessage)
         fun setInAppMessageAsClicked(
             inAppMessage: InAppMessage,
-            buttonId: String?
+            buttonId: String?,
+            buttonType: String?
         )
 
         fun sendStoryEvent(

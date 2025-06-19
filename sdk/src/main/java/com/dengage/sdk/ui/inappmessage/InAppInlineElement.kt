@@ -55,7 +55,7 @@ open class InAppInlineElement : WebView {
         /**
         Clicked Inapp inlinee
          */
-        fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?)
+        fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?, buttonType: String?)
 
         /**
         Dismissed Inapp inlinee
@@ -145,17 +145,24 @@ open class InAppInlineElement : WebView {
         }
 
         @JavascriptInterface
+        fun sendClick(buttonId: String?, buttonType: String?) {
+            isClicked = true
+            DengageLogger.verbose ("Inapp inlinee: clicked button $buttonId $buttonType")
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId, buttonType)
+        }
+
+        @JavascriptInterface
         fun sendClick(buttonId: String?) {
             isClicked = true
             DengageLogger.verbose ("Inapp inlinee: clicked button $buttonId")
-            inAppMessageCallback?.inAppMessageClicked (inAppMessage, buttonId)
+            inAppMessageCallback?.inAppMessageClicked (inAppMessage, buttonId, null)
         }
 
         @JavascriptInterface
         fun sendClick() {
             isClicked = true
             DengageLogger.verbose ("Inapp inlinee: clicked body/button with no Id")
-            inAppMessageCallback?.inAppMessageClicked (inAppMessage, null)
+            inAppMessageCallback?.inAppMessageClicked (inAppMessage, null, null)
         }
 
         @JavascriptInterface

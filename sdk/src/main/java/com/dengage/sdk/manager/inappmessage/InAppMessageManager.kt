@@ -137,10 +137,10 @@ class InAppMessageManager :
      * Call service for setting in app message as clicked
      */
     private fun setInAppMessageAsClicked(
-        inAppMessage: InAppMessage, buttonId: String?
+        inAppMessage: InAppMessage, buttonId: String?, buttonType: String?
     ) {
         presenter.setInAppMessageAsClicked(
-            inAppMessage = inAppMessage, buttonId = buttonId
+            inAppMessage = inAppMessage, buttonId = buttonId, buttonType = buttonType
         )
     }
 
@@ -176,11 +176,11 @@ class InAppMessageManager :
                         if (inAppMessage.data.displayTiming.showEveryXMinutes != null && inAppMessage.data.displayTiming.showEveryXMinutes != 0) {
                             inAppMessage.data.nextDisplayTime =
                                 System.currentTimeMillis() + inAppMessage.data.displayTiming.showEveryXMinutes!! * 60000L
-                            inAppMessage.data.showCount = inAppMessage.data.showCount + 1
+                            inAppMessage.data.showCount += 1
                             updateInAppMessageOnCache(inAppMessage)
                         } else {
                             if (inAppMessage.data.isRealTime()) {
-                                inAppMessage.data.showCount = inAppMessage.data.showCount + 1
+                                inAppMessage.data.showCount += 1
                                 updateInAppMessageOnCache(inAppMessage)
                             } else {
                                 removeInAppMessageFromCache(inAppMessageId = inAppMessage.id)
@@ -202,7 +202,6 @@ class InAppMessageManager :
                                     activity, inAppMessage, resultCode
                                 ), resultCode
                             )
-
 
                             if (!inAppMessage.data.content.params.shouldAnimate) {
                                 activity.overridePendingTransition(0, 0)
@@ -268,9 +267,11 @@ class InAppMessageManager :
                         existingInAppMessage?.let {
                             val nextDisplayTime = it.data.nextDisplayTime
                             val showCount = it.data.showCount
+                            val dismissCount = it.data.dismissCount
                             it.data = inAppMessage.data
                             it.data.nextDisplayTime = nextDisplayTime
                             it.data.showCount = showCount
+                            it.data.dismissCount = dismissCount
                         }
                     }
 
@@ -287,6 +288,7 @@ class InAppMessageManager :
                         if (oldMsg != null) {
                             newMsg.data.nextDisplayTime = oldMsg.data.nextDisplayTime
                             newMsg.data.showCount = oldMsg.data.showCount
+                            newMsg.data.dismissCount = oldMsg.data.dismissCount
                         }
                         newMsg
                     }
@@ -309,9 +311,9 @@ class InAppMessageManager :
 
     override fun inAppMessageSetAsDismissed() = Unit
 
-    override fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?) {
+    override fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?, buttonType: String?) {
         setInAppMessageAsClicked(
-            inAppMessage = inAppMessage, buttonId = buttonId
+            inAppMessage = inAppMessage, buttonId = buttonId, buttonType = buttonType
         )
     }
 

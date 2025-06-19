@@ -136,7 +136,7 @@ object InAppMessageUtils {
     }
 
 
-    fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?, storyPropertyId: String?): Boolean {
+    private fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?, storyPropertyId: String?): Boolean {
         if ("STORY".equals(inAppMessage.data.content.type, ignoreCase = true)) {
             val isPropertyEmpty = storyPropertyId.isNullOrEmpty()
             val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
@@ -180,6 +180,7 @@ object InAppMessageUtils {
             )
         } != null
     }
+
     private fun operateRealTimeValues(
         displayRuleSet: DisplayRuleSet?,
         params: HashMap<String, String>?,
@@ -872,7 +873,7 @@ object InAppMessageUtils {
         return true
     }
 
-    fun operateScreenValues(
+    private fun operateScreenValues(
         screenNameFilterValue: List<String>?,
         screenName: String,
         operator: String,

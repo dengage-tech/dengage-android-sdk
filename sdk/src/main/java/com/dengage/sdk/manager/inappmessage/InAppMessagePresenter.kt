@@ -93,8 +93,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 }
 
             }
-        } catch (e: Exception) {
-        } catch (e: Throwable) {
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
         }
     }
 
@@ -139,6 +139,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     override fun setInAppMessageAsClicked(
         inAppMessage: InAppMessage,
         buttonId: String?,
+        buttonType: String?
     ) {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
@@ -166,11 +167,21 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             }
         } else {
             if (isInAppMessageEnabled(subscription, sdkParameters)) {
+
+                if (buttonType.equals("DISMISS", ignoreCase = true)) {
+                    inAppMessage.data.dismissCount += 1
+                    updateInAppMessageOnCache(inAppMessage)
+                } else {
+                    if (!inAppMessage.data.isRealTime()) {
+                        removeInAppMessageFromCache(inAppMessage.id)
+                    }
+                }
+
                 setInAppMessageAsClicked(this) {
                     onResponse = {
                         view {
                             val maxDismissCount = inAppMessage.data.displayTiming.maxDismissCount
-                            if (maxDismissCount == null || maxDismissCount <= 0 || inAppMessage.data.showCount >= maxDismissCount) {
+                            if (maxDismissCount == null || maxDismissCount <= 0 || inAppMessage.data.dismissCount >= maxDismissCount) {
                                 removeInAppMessageFromCache(inAppMessage.id)
                             }
                             inAppMessageSetAsClicked()
@@ -216,8 +227,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 }
             }
         }
-        catch (e:Exception){}
-        catch (e:Throwable){}
+        catch (_:Exception){}
+        catch (_:Throwable){}
     }
 
     override fun setInAppMessageAsDismissed(inAppMessage: InAppMessage) {
@@ -243,11 +254,14 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             }
         } else {
             if (isInAppMessageEnabled(subscription, sdkParameters)) {
+
+                removeInAppMessageFromCache(inAppMessage.id)
+
                 setInAppMessageAsDismissed(this) {
                     onResponse = {
                         view {
                             val maxDismissCount = inAppMessage.data.displayTiming.maxDismissCount
-                            if (maxDismissCount == null || maxDismissCount <= 0 || inAppMessage.data.showCount >= maxDismissCount) {
+                            if (maxDismissCount == null || maxDismissCount <= 0 || inAppMessage.data.dismissCount >= maxDismissCount) {
                                 removeInAppMessageFromCache(inAppMessage.id)
                             }
                             inAppMessageSetAsDismissed()
@@ -356,7 +370,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         Prefs.inAppMessages = inAppMessages
     }
 
-    fun updateInAppMessageOnCache(inAppMessage: InAppMessage) {
+    private fun updateInAppMessageOnCache(inAppMessage: InAppMessage) {
         val inAppMessages = Prefs.inAppMessages
         inAppMessages?.removeAll { message -> message.id == inAppMessage.id }
         inAppMessages?.add(inAppMessage)
