@@ -1,5 +1,6 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.view.View
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.appcompat.app.AlertDialog
@@ -27,6 +28,7 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
 
     override fun init() {
         fetchInboxMessages(0)
+        updateToolbarVisibility()
         binding.rvInboxMessages.adapter = adapter
 
         binding.rvInboxMessages.addOnScrollListener(object : RecyclerViewPaginationListener(
@@ -64,6 +66,7 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
                             Dengage.deleteAllInboxMessages()
                             inboxMessages.clear()
                             adapter.setItems(inboxMessages)
+                            updateToolbarVisibility()
                         }
                         .setNegativeButton("Cancel", null)
                         .show()
@@ -85,12 +88,26 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
             inboxMessages.firstOrNull { inboxMessage -> inboxMessage.id == id }
         inboxMessageToMarkAsRead?.isClicked = true
         adapter.setItems(inboxMessages)
+        updateToolbarVisibility()
     }
 
     override fun delete(id: String) {
+        val messageToDelete = inboxMessages.firstOrNull { it.id == id }
         Dengage.deleteInboxMessage(id)
         inboxMessages.removeAll { inboxMessage -> inboxMessage.id == id }
         adapter.setItems(inboxMessages)
+        updateToolbarVisibility()
+        AlertDialog.Builder(requireContext())
+            .setTitle("Deleted")
+            .setMessage(
+                if (messageToDelete != null) {
+                    "Message \"${messageToDelete.data.title}\" has been successfully deleted."
+                } else {
+                    "Message has been successfully deleted."
+                }
+            )
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     override fun onError(error: DengageError) {
@@ -106,7 +123,15 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
         binding.rvInboxMessages.post {
             inboxMessages.addAll(result)
             adapter.addItems(result)
+            updateToolbarVisibility()
         }
     }
+
+    private fun updateToolbarVisibility() {
+        binding.toolbar.visibility =
+            if (inboxMessages.isEmpty()) View.GONE
+            else View.VISIBLE
+    }
+
 
 }

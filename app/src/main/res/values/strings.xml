@@ -61,6 +61,6 @@
     <string name="subscribe">Subscribe</string>
 
     <string name="read_status">Read: %1$s</string>
-    <string name="receive_date">Receive Date: %1$s</string>
+    <string name="receive_date_time">Receive Date &amp; Time: %1$s</string>
     <string name="inbox">Inbox</string>
 </resources>

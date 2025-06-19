@@ -51,7 +51,7 @@ class InboxMessagesAdapter(
 
             val formattedDate = item.data.receiveDate?.let { formatDate(it) }
             itemView.findViewById<TextView>(R.id.tv_receive_date).text =
-                itemView.context.getString(R.string.receive_date, formattedDate)
+                itemView.context.getString(R.string.receive_date_time, formattedDate)
 
             itemView.findViewById<TextView>(R.id.tv_is_clicked).text =
                 itemView.context.getString(R.string.read_status, item.isClicked.toString())
