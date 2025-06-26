@@ -53,6 +53,11 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
                             Dengage.setAllInboxMessagesAsClicked()
                             inboxMessages.forEach { it.isClicked = true }
                             adapter.setItems(inboxMessages)
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Read All Messages")
+                                .setMessage("All messages have been marked as read.")
+                                .setPositiveButton("OK", null)
+                                .show()
                         }
                         .setNegativeButton("Cancel", null)
                         .show()
@@ -66,6 +71,11 @@ class InboxMessagesFragment : BaseDataBindingFragment<FragmentInboxMessagesBindi
                             Dengage.deleteAllInboxMessages()
                             inboxMessages.clear()
                             adapter.setItems(inboxMessages)
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Deleted All Messages")
+                                .setMessage("All messages have been successfully deleted.")
+                                .setPositiveButton("OK", null)
+                                .show()
                             updateToolbarVisibility()
                         }
                         .setNegativeButton("Cancel", null)
