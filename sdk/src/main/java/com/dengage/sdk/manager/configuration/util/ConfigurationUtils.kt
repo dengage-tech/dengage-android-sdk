@@ -66,7 +66,7 @@ object ConfigurationUtils {
         dengageHmsManager?.getHuaweiToken(onTokenResult)
     }
 
-    fun getGmsAdvertisingId(onAdIdResult: (String) -> Unit) {
+    fun getGmsAdvertisingId(onAdIdResult: (String?) -> Unit) {
         DengageLogger.debug("Getting GMS advertising ID")
         object : Thread() {
             override fun run() {
@@ -76,16 +76,17 @@ object ConfigurationUtils {
                     )
                     if (!advertisingIdInfo.isLimitAdTrackingEnabled) {
                         val advertisingId = advertisingIdInfo.id
-                        if (!advertisingId.isNullOrEmpty()) {
-                            onAdIdResult.invoke(advertisingId)
-                        }
+                        onAdIdResult.invoke(advertisingId)
+                    } else {
+                        onAdIdResult.invoke(null)
                     }
                 } catch (e: Exception) {
                     DengageLogger.error("GmsAdIdWorker Exception: ${e.message}")
+                    onAdIdResult.invoke(null)
                 } catch (t: Throwable) {
                     DengageLogger.error("GmsAdIdWorker Throwable: ${t.message}")
+                    onAdIdResult.invoke(null)
                 }
-
             }
         }.start()
     }

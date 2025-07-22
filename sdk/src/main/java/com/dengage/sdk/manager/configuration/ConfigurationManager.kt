@@ -186,14 +186,13 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             }
         )
 
-        ConfigurationUtils.getGmsAdvertisingId {
-            if (subscription != null && (subscription.advertisingId != it || subscription.advertisingId.isNullOrEmpty())) {
-                subscription.advertisingId = it
-                if (firebaseIntegrationKey != null) {
-                    subscription.integrationKey = firebaseIntegrationKey
-                }
-                configurationCallback?.sendSubscription(subscription)
+        ConfigurationUtils.getGmsAdvertisingId { adId ->
+            if (firebaseIntegrationKey != null) {
+                subscription.integrationKey = firebaseIntegrationKey
             }
+            subscription.advertisingId = adId ?: ""
+            subscription.trackingPermission = !adId.isNullOrEmpty()
+            configurationCallback?.sendSubscription(subscription)
         }
     }
 
