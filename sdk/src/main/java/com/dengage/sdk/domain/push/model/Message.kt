@@ -31,7 +31,8 @@ data class Message(
     @SerializedName("carouselContent") val carouselContent: List<CarouselItem>?,
     @SerializedName("actionButtons") val actionButtons: List<ActionButton>?,
     @SerializedName("addToInbox") val addToInbox: Boolean? = false,
-    @SerializedName("expireDate") val expireDate: String?
+    @SerializedName("expireDate") val expireDate: String?,
+    @SerializedName("appId") val appId: String?
 ) : Serializable {
 
     companion object {
@@ -55,13 +56,17 @@ data class Message(
                 NotificationType.RICH
             }
 
-            val messageId = if (bundleMap["messageId"].isNullOrEmpty().not() && bundleMap["messageId"]!!.isDigitsOnly()) {
+            val messageId = if (bundleMap["messageId"].isNullOrEmpty()
+                    .not() && bundleMap["messageId"]!!.isDigitsOnly()
+            ) {
                 bundleMap["messageId"]!!.toInt()
             } else {
                 0
             }
 
-            val campaignId = if (bundleMap["dengageCampId"].isNullOrEmpty().not() && bundleMap["dengageCampId"]!!.isDigitsOnly()) {
+            val campaignId = if (bundleMap["dengageCampId"].isNullOrEmpty()
+                    .not() && bundleMap["dengageCampId"]!!.isDigitsOnly()
+            ) {
                 bundleMap["dengageCampId"]!!.toInt()
             } else {
                 0
@@ -73,7 +78,9 @@ data class Message(
                 ""
             }
 
-            val sendId = if (bundleMap["dengageSendId"].isNullOrEmpty().not() && bundleMap["dengageSendId"]!!.isDigitsOnly()) {
+            val sendId = if (bundleMap["dengageSendId"].isNullOrEmpty()
+                    .not() && bundleMap["dengageSendId"]!!.isDigitsOnly()
+            ) {
                 bundleMap["dengageSendId"]!!.toInt()
             } else {
                 0
@@ -133,7 +140,9 @@ data class Message(
                 false
             }
 
-            val badgeCount = if (bundleMap["badgeCount"].isNullOrEmpty().not() && bundleMap["badgeCount"]!!.isDigitsOnly()) {
+            val badgeCount = if (bundleMap["badgeCount"].isNullOrEmpty()
+                    .not() && bundleMap["badgeCount"]!!.isDigitsOnly()
+            ) {
                 bundleMap["badgeCount"]!!.toInt()
             } else {
                 0
@@ -193,10 +202,9 @@ data class Message(
             if (media != null && media.isNotEmpty() && media[0].url != null) {
                 mediaUrl = media[0].url!!
             }
-            var current=-1
-            if(carouselContent!=null)
-            {
-                if(bundleMap.contains("current")) {
+            var current = -1
+            if (carouselContent != null) {
+                if (bundleMap.contains("current")) {
                     current = if (bundleMap["current"].isNullOrEmpty()
                             .not() && bundleMap["current"]!!.isDigitsOnly()
                     ) {
@@ -207,6 +215,12 @@ data class Message(
                 }
             }
 
+            val appId = if (bundleMap["appId"].isNullOrEmpty().not()) {
+                bundleMap["appId"]!!
+            } else {
+                ""
+            }
+
             return Message(
                 messageId = messageId,
                 messageSource = messageSource,
@@ -215,7 +229,7 @@ data class Message(
                 mediaUrl = mediaUrl,
                 media = media,
                 targetUrl = targetUrl,
-                source=source,
+                source = source,
                 title = title,
                 subTitle = subTitle,
                 message = message,
@@ -230,7 +244,7 @@ data class Message(
                 carouselContent = carouselContent,
                 actionButtons = actionButtons,
                 addToInbox = addToInbox,
-                expireDate = expireDate, current = current
+                expireDate = expireDate, current = current, appId = appId
             )
         }
     }

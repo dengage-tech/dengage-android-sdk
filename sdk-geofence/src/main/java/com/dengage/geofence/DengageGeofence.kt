@@ -3,10 +3,12 @@ package com.dengage.geofence
 import android.app.Activity
 import android.content.Context
 import android.location.Location
+import android.util.Log
 import com.dengage.geofence.manager.GeofenceLocationManager
 import com.dengage.geofence.manager.GeofencePermissionsHelper
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.domain.geofence.model.GeofenceLocationSource
+import com.dengage.sdk.util.DengageLogger
 
 object DengageGeofence {
 
@@ -32,10 +34,13 @@ object DengageGeofence {
     }
 
     fun startGeofence() {
+        DengageLogger.verbose("DengageGeofence -> startTracking")
+
         geofenceManager.startTracking()
     }
 
     fun stopGeofence() {
+        DengageLogger.verbose("DengageGeofence -> stopTracking")
         geofenceManager.stopGeofence()
     }
 

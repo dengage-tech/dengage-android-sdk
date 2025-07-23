@@ -19,6 +19,7 @@ import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
 import com.dengage.sdk.push.NRTrampoline.Companion
 import com.dengage.sdk.util.*
+import com.dengage.sdk.util.extension.shouldProcessPush
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
 
@@ -33,7 +34,8 @@ open class NotificationReceiver : BroadcastReceiver() {
             ContextHolder.resetContext(context)
 
             DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
-
+            var message = Message.createFromIntent(intent?.extras!!)
+            if(message.shouldProcessPush()==false)return
             when (intent?.action) {
                 Constants.PUSH_RECEIVE_EVENT -> onPushReceive(context, intent)
                 Constants.PUSH_OPEN_EVENT -> onPushOpen(context, intent)

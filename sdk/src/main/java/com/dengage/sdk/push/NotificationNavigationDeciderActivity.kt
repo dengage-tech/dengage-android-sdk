@@ -15,6 +15,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.launchActivity
+import com.dengage.sdk.util.extension.shouldProcessPush
 import com.dengage.sdk.util.extension.storeToPref
 
 class NotificationNavigationDeciderActivity : Activity() {
@@ -53,6 +54,7 @@ class NotificationNavigationDeciderActivity : Activity() {
 
                     if (extras != null) {
                         val message: Message? = Message.createFromIntent(extras)
+                        if(message?.shouldProcessPush()==false)return
                         var targetUrl: String? = ""
                         var carouselId: String?
                         if (message?.carouselContent.isNullOrEmpty()||!message?.source.isNullOrBlank()) {

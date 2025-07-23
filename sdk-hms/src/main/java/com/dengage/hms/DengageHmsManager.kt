@@ -60,4 +60,8 @@ class DengageHmsManager : IDengageHmsManager {
             }
         }.start()
     }
+
+    override fun checkStateOfHms() {
+        DengageLogger.debug("HMS IS ALIVE")
+    }
 }

@@ -45,6 +45,7 @@ import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
+import com.dengage.sdk.util.extension.shouldProcessPush
 import com.dengage.sdk.util.extension.toJson
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManager
@@ -468,23 +469,32 @@ object Dengage {
     }
 
     fun onMessageReceived(data: Map<String, String?>?) {
+        if (data.isNullOrEmpty()) return
+
         try {
-            DengageUtils.registerBroadcast()
             DengageLogger.verbose("onMessageReceived method is called")
-            if (!data.isNullOrEmpty()) {
-                val pushMessage = Message.createFromMap(data)
+
+            val pushMessage = Message.createFromMap(data)
+
+            if (pushMessage.shouldProcessPush()) {
+                DengageUtils.registerBroadcast()
                 val json = pushMessage.toJson()
                 DengageLogger.verbose("Message Json: $json")
-                val source = pushMessage.messageSource
-                if (Constants.MESSAGE_SOURCE == source) {
+
+                if (pushMessage.messageSource == Constants.MESSAGE_SOURCE) {
                     DengageLogger.debug("There is a message that received from dEngage")
                     sendBroadcast(json, data)
                 }
             }
+
         } catch (e: Exception) {
-        } catch (e: Throwable) {
+            DengageLogger.error("Exception in onMessageReceived: ${e.message}")
+        } catch (t: Throwable) {
+            DengageLogger.error("Throwable in onMessageReceived: ${t.message}")
         }
     }
+
+
 
     fun sendBroadcast(json: String, data: Map<String, String?>) {
         DengageLogger.verbose("sendBroadcast method is called")

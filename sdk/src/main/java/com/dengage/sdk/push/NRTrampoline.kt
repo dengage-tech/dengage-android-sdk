@@ -19,6 +19,7 @@ import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
 import com.dengage.sdk.push.NotificationReceiver.Companion
 import com.dengage.sdk.util.*
+import com.dengage.sdk.util.extension.shouldProcessPush
 import com.dengage.sdk.util.extension.toJson
 import java.util.*
 
@@ -31,7 +32,8 @@ open class NRTrampoline : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         try {
             ContextHolder.resetContext(context)
-
+            var message = Message.createFromIntent(intent?.extras!!)
+            if(message.shouldProcessPush()==false)return
             DengageLogger.verbose("$TAG onReceive, intent action = ${intent?.action}")
 
 

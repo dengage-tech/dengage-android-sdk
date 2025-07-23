@@ -71,3 +71,19 @@ fun Message.storeToPref() {
     }
     catch (e:Exception){}
 }
+
+fun Message.shouldProcessPush(): Boolean {
+    return try {
+        val messageAppId = this.appId
+        val sdkAppId = Prefs.sdkParameters?.appId
+
+        messageAppId.isNullOrEmpty() || sdkAppId.isNullOrEmpty() || messageAppId == sdkAppId
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    } catch (t: Throwable) {
+        t.printStackTrace()
+        false
+    }
+}
+
