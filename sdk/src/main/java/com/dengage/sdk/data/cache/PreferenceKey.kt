@@ -45,6 +45,7 @@ enum class PreferenceKey {
     INBOX_MESSAGES,
     IN_APP_DEVICE_INFO,
     LOCATION_PERMISSION,
+    TOKEN,
     ;
 
     override fun toString(): String = name

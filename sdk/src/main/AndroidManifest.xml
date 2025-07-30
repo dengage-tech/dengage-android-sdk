@@ -45,12 +45,15 @@
             android:name=".ui.story.StoryActivity"
             android:noHistory="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
         <activity
             android:name=".push.NotificationNavigationDeciderActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
             android:launchMode="singleTask"
             android:exported="false" />
+        <activity
+            android:name=".push.NotificationPermissionActivity"
+            android:noHistory="true"
+            android:theme="@style/Theme.Transparent" />
 
         <receiver android:name=".push.NotificationDismissReceiver" />
 

@@ -201,6 +201,10 @@ object Prefs {
         get() = preferences.get(PreferenceKey.LOCATION_PERMISSION) ?: ""
         set (value) = preferences.set(PreferenceKey.LOCATION_PERMISSION, value)
 
+    internal var token: String
+        get() = preferences.get(PreferenceKey.TOKEN, "") ?: ""
+        set(value) = preferences.set(PreferenceKey.TOKEN, value)
+
     fun clear() {
         preferences.edit().clear().apply()
     }

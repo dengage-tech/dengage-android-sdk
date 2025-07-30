@@ -1,5 +1,6 @@
 package com.dengage.sdk.manager.subscription
 
+import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.cache.PrefsOld
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
@@ -55,6 +56,7 @@ class SubscriptionManager :
 
     internal fun setToken(token: String?) {
         val sub = Prefs.subscription ?: return
+        Prefs.token = token ?: ""
         if (!sub.token.isNullOrEmpty()) return
         sub.tokenType = when (deviceConfigPref) {
             DeviceConfigurationPreference.Google -> TokenType.FIREBASE.type
@@ -65,7 +67,8 @@ class SubscriptionManager :
         } else {
             huaweiIntegrationKey.toString()
         }
-        sub.token = token
+        val notificationsEnabled = NotificationManagerCompat.from(ContextHolder.context).areNotificationsEnabled()
+        sub.token = if (notificationsEnabled) token else ""
         saveAndEnqueue(sub)
     }
 

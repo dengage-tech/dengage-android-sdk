@@ -40,6 +40,8 @@ import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.push.IDengageHmsManager
+import com.dengage.sdk.push.NotificationPermissionActivity
+import com.dengage.sdk.push.NotificationPermissionCallback
 import com.dengage.sdk.push.clearNotification
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.story.StoriesListView
@@ -843,7 +845,18 @@ object Dengage {
     {
         if (Build.VERSION.SDK_INT >= 33) {
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
+                val callback = object : NotificationPermissionCallback {
+                    override fun onPermissionResult(granted: Boolean) {
+                        if (granted && Prefs.token.isNotEmpty()) {
+                            setToken(Prefs.token)
+                        } else {
+                            setToken("")
+                        }
+                    }
+                }
+                NotificationPermissionActivity.callback = callback
+                val intent = Intent(activity, NotificationPermissionActivity::class.java)
+                activity.startActivity(intent)
             }
         }
     }

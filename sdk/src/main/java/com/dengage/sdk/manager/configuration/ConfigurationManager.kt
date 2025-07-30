@@ -3,6 +3,7 @@ package com.dengage.sdk.manager.configuration
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.DeadObjectException
+import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.remote.api.ApiUrlConfiguration
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
@@ -178,7 +179,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             firebaseApp = firebaseApp,
             onTokenResult = {
                 subscription.tokenType = TokenType.FIREBASE.type
-                subscription.token = it
+                Prefs.token = it
+                val notificationsEnabled = NotificationManagerCompat.from(ContextHolder.context).areNotificationsEnabled()
+                subscription.token = if (notificationsEnabled) it else ""
                 if (firebaseIntegrationKey != null) {
                     subscription.integrationKey = firebaseIntegrationKey
                 }
@@ -203,7 +206,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         ConfigurationUtils.getHuaweiToken(
             onTokenResult = {
                 subscription.tokenType = TokenType.HUAWEI.type
-                subscription.token = it
+                Prefs.token = it
+                val notificationsEnabled = NotificationManagerCompat.from(ContextHolder.context).areNotificationsEnabled()
+                subscription.token = if (notificationsEnabled) it else ""
                 if (huaweiIntegrationKey != null) {
                     subscription.integrationKey = huaweiIntegrationKey
                 }
@@ -212,7 +217,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         )
 
         ConfigurationUtils.getHmsAdvertisingId {
-            if (subscription != null && (subscription.advertisingId != it || subscription.advertisingId.isNullOrEmpty())) {
+            if (subscription.advertisingId != it || subscription.advertisingId.isEmpty()) {
                 subscription.advertisingId = it
                 if (huaweiIntegrationKey != null) {
                     subscription.integrationKey = huaweiIntegrationKey
