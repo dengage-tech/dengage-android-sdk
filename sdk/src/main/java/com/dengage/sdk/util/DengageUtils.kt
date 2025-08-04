@@ -335,7 +335,12 @@ object DengageUtils {
     }
 
     fun getChannelId(message: Message): String {
-        return if (message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID + "_" + getNotificationPreference() else message.sound + "_" + getNotificationPreference()
+        val baseChannelId = if (message.sound.isNullOrEmpty()) Constants.NOTIFICATION_CHANNEL_ID + "_" + getNotificationPreference() else message.sound + "_" + getNotificationPreference()
+        return if (message.muted == true) {
+            "${baseChannelId}_muted"
+        } else {
+            baseChannelId
+        }
     }
 
     fun getLanguage(): String {

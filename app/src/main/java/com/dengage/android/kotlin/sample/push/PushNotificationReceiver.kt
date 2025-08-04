@@ -108,7 +108,7 @@ class PushNotificationReceiver : NotificationReceiver() {
             .setCustomBigContentView(carouselView)
             .setContentIntent(contentPendingIntent)
             .setDeleteIntent(deletePendingIntent)
-            .setSound(message.sound.getSoundUri(context))
+            .setSound(if(message.muted == true) null else message.sound.getSoundUri(context))
             .build()
 
         // show message again silently with next, previous and current item.

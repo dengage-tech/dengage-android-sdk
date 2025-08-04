@@ -32,7 +32,8 @@ data class Message(
     @SerializedName("actionButtons") val actionButtons: List<ActionButton>?,
     @SerializedName("addToInbox") val addToInbox: Boolean? = false,
     @SerializedName("expireDate") val expireDate: String?,
-    @SerializedName("appId") val appId: String?
+    @SerializedName("appId") val appId: String?,
+    @SerializedName("muted") val muted: Boolean? = false
 ) : Serializable {
 
     companion object {
@@ -221,6 +222,12 @@ data class Message(
                 ""
             }
 
+            val muted = if (bundleMap["muted"].isNullOrEmpty().not()) {
+                bundleMap["muted"]!!.toBoolean()
+            } else {
+                false
+            }
+
             return Message(
                 messageId = messageId,
                 messageSource = messageSource,
@@ -244,7 +251,10 @@ data class Message(
                 carouselContent = carouselContent,
                 actionButtons = actionButtons,
                 addToInbox = addToInbox,
-                expireDate = expireDate, current = current, appId = appId
+                expireDate = expireDate,
+                current = current,
+                appId = appId,
+                muted = muted
             )
         }
     }

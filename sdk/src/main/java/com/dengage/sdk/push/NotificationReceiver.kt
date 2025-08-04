@@ -17,7 +17,6 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.push.model.NotificationType
-import com.dengage.sdk.push.NRTrampoline.Companion
 import com.dengage.sdk.util.*
 import com.dengage.sdk.util.extension.shouldProcessPush
 import com.dengage.sdk.util.extension.toJson
@@ -489,7 +488,13 @@ open class NotificationReceiver : BroadcastReceiver() {
             notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(message.message))
             notificationBuilder.setContentText(message.message)
         }
-        notificationBuilder.setSound(message.sound.getSoundUri(context))
+
+        if (message.muted == true) {
+            notificationBuilder.setSound(null)
+        } else {
+            notificationBuilder.setSound(message.sound.getSoundUri(context))
+        }
+
         if (message.badgeCount ?: 0 > 0) {
             notificationBuilder.setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
             notificationBuilder.setNumber(message.badgeCount ?: 0)
@@ -553,7 +558,11 @@ open class NotificationReceiver : BroadcastReceiver() {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                 .build()
-            notificationChannel.setSound(soundUri, audioAttributes)
+            if (message.muted == true) {
+                notificationChannel.setSound(null, null)
+            } else {
+                notificationChannel.setSound(soundUri, audioAttributes)
+            }
             notificationManager.createNotificationChannel(notificationChannel)
         }
         return channelId
