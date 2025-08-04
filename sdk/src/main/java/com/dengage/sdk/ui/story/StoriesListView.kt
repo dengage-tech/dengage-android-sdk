@@ -1,10 +1,10 @@
 package com.dengage.sdk.ui.story
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.util.AttributeSet
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,11 +14,11 @@ import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.model.StorySetFontWeight
-import com.google.android.exoplayer2.database.DatabaseProvider
-import com.google.android.exoplayer2.database.ExoDatabaseProvider
-import com.google.android.exoplayer2.upstream.cache.Cache
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
-import com.google.android.exoplayer2.upstream.cache.SimpleCache
+import androidx.media3.database.DatabaseProvider
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.Cache
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 
 class StoriesListView : LinearLayout {
     private var titleView: TextView? = null
@@ -40,7 +40,7 @@ class StoriesListView : LinearLayout {
     private fun init() {
         orientation = VERTICAL
         titleView = TextView(context).apply {
-            visibility = View.GONE
+            visibility = GONE
             textSize = 16f
             setTextColor(Color.BLACK)
             setPadding(8, 8, 8, 8)
@@ -58,14 +58,15 @@ class StoriesListView : LinearLayout {
         addView(recyclerView)
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     internal fun loadInAppMessage(inAppMessage: InAppMessage, publicId: String, contentId: String) {
         val title = inAppMessage.data.content.params.storySet?.title
         val styling = inAppMessage.data.content.params.storySet?.styling
         if (!title.isNullOrEmpty()) {
             titleView?.text = title
-            titleView?.visibility = View.VISIBLE
+            titleView?.visibility = VISIBLE
         } else {
-            titleView?.visibility = View.GONE
+            titleView?.visibility = GONE
         }
         styling?.headerTitle?.let {
             titleView?.setTextColor(it.textColorInt)
@@ -82,12 +83,13 @@ class StoriesListView : LinearLayout {
         recyclerView?.adapter = storiesListAdapter
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     companion object {
         const val TAG = "StoriesListView"
         var inAppMessageCallback: InAppMessageCallback? = null
         var recyclerView: RecyclerView? = null
         private val leastRecentlyUsedCacheEvictor = LeastRecentlyUsedCacheEvictor(90 * 1024 * 1024)
-        private val databaseProvider: DatabaseProvider = ExoDatabaseProvider(ContextHolder.context)
+        private val databaseProvider: DatabaseProvider = StandaloneDatabaseProvider(ContextHolder.context)
         var simpleCache: Cache = SimpleCache(
             ContextHolder.context.cacheDir,
             leastRecentlyUsedCacheEvictor,

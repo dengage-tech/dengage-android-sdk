@@ -1,9 +1,9 @@
 package com.dengage.sdk.ui.story
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -22,16 +22,11 @@ import com.dengage.sdk.domain.inappmessage.model.MimeType
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
 import com.dengage.sdk.util.DengageLogger
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.PlaybackException
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.google.android.exoplayer2.upstream.cache.CacheDataSource
-import com.google.android.exoplayer2.util.Util
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.ui.PlayerView
 import java.util.ArrayList
 
 class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
@@ -177,11 +172,12 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
         }
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private fun initializePlayer() {
         simpleExoPlayer?.release()
         simpleExoPlayer = ExoPlayer.Builder(requireContext()).build().apply {
-            val mediaSource = buildMediaSource(Uri.parse(stories[counter].mediaUrl))
-            setMediaSource(mediaSource)
+            val mediaItem = stories[counter].mediaUrl?.let { MediaItem.fromUri(it) }
+            mediaItem?.let { setMediaItem(it) }
             prepare()
             playWhenReady = onResumeCalled
         }
@@ -192,17 +188,6 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
         }
 
         simpleExoPlayer?.addListener(playerListener)
-    }
-
-    private fun buildMediaSource(uri: Uri): MediaSource {
-        val dataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(
-            Util.getUserAgent(requireContext(), getString(R.string.sdk_name))
-        )
-        val cacheDataSourceFactory = CacheDataSource.Factory().apply {
-            setCache(StoriesListView.simpleCache)
-            setUpstreamDataSourceFactory(dataSourceFactory)
-        }
-        return ProgressiveMediaSource.Factory(cacheDataSourceFactory).createMediaSource(MediaItem.fromUri(uri))
     }
 
     private val playerListener = object : Player.Listener {

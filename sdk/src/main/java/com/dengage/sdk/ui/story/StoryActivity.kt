@@ -12,13 +12,8 @@ import com.dengage.sdk.R
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.MimeType
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
-import com.dengage.sdk.ui.story.StoriesListView.Companion.simpleCache
 import com.dengage.sdk.util.Constants
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.google.android.exoplayer2.upstream.cache.CacheDataSource
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-
+import com.dengage.sdk.util.DengageLogger
 
 interface StoryPageViewOperator {
     fun backPageView()
@@ -55,7 +50,7 @@ class StoryActivity : AppCompatActivity(),
             try {
                 fakeDrag(false)
             } catch (e: Exception) {
-                //NO OP
+                DengageLogger.error(e.message)
             }
         }
     }
@@ -65,7 +60,7 @@ class StoryActivity : AppCompatActivity(),
             try {
                 fakeDrag(true)
             } catch (e: Exception) {
-                //NO OP
+                DengageLogger.error(e.message)
             }
         } else {
             //there is no next story
@@ -109,25 +104,7 @@ class StoryActivity : AppCompatActivity(),
                 }
             }
         }
-        preLoadVideos(videoList)
         preLoadImages(imageList)
-    }
-
-    private fun preLoadVideos(videoList: MutableList<String>) {
-        val dataSourceFactory = DefaultHttpDataSource.Factory().apply {
-            setUserAgent(getString(R.string.sdk_name))
-        }
-
-        videoList.map { _ ->
-            GlobalScope.async {
-                val cacheDataSourceFactory = CacheDataSource.Factory().apply {
-                    setCache(simpleCache)
-                    setUpstreamDataSourceFactory(dataSourceFactory)
-                    setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-                }
-                cacheDataSourceFactory.createDataSource()
-            }
-        }
     }
 
     private fun preLoadImages(imageList: MutableList<String>) {
