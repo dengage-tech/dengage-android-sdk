@@ -32,9 +32,15 @@ import java.util.ArrayList
 class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
 
     private val storyPosition by lazy { arguments?.getInt(EXTRA_POSITION) ?: 0 }
-    private val storyCover by lazy { arguments?.getSerializable(EXTRA_STORY_COVER) as StoryCover }
+    private val storyCover by lazy { 
+        arguments?.getSerializable(EXTRA_STORY_COVER) as? StoryCover 
+            ?: throw IllegalStateException("StoryCover is null or invalid")
+    }
     private val stories by lazy { storyCover.stories.toCollection(ArrayList())  }
-    private val inAppMessage by lazy { arguments?.getSerializable(EXTRA_INAPP_MESSAGE) as InAppMessage }
+    private val inAppMessage by lazy { 
+        arguments?.getSerializable(EXTRA_INAPP_MESSAGE) as? InAppMessage 
+            ?: throw IllegalStateException("InAppMessage is null or invalid")
+    }
 
     private var simpleExoPlayer: ExoPlayer? = null
     private var pageViewOperator: StoryPageViewOperator? = null
@@ -104,6 +110,10 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     }
 
     override fun onStartProgress(currentIndex: Int) {
+        if (currentIndex >= stories.size) {
+            DengageLogger.error("StoryDisplayFragment onStartProgress: Index $currentIndex is out of bounds for stories size ${stories.size}")
+            return
+        }
         val currentStory = stories[currentIndex]
         StoriesListView.inAppMessageCallback?.storyEvent(StoryEventType.STORY_DISPLAY, inAppMessage
                 ,storyCover.id, storyCover.name, currentStory.id, currentStory.name)
@@ -137,6 +147,10 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
 
     private fun updateStory() {
         simpleExoPlayer?.stop()
+        if (counter >= stories.size) {
+            DengageLogger.error("StoryDisplayFragment updateStory: Counter $counter is out of bounds for stories size ${stories.size}")
+            return
+        }
         val currentStory = stories[counter]
         val isVideo = currentStory.kind == MimeType.VIDEO
 
@@ -149,7 +163,9 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
             initializePlayer()
         } else {
             setGradientBackground(storyDisplayImage, null, counter)
-            Glide.with(this).load(currentStory.mediaUrl).into(storyDisplayImage)
+            currentStory.mediaUrl?.let { mediaUrl ->
+                Glide.with(this).load(mediaUrl).into(storyDisplayImage)
+            }
         }
 
         btnStory.visibility = if (currentStory.cta?.label.isNullOrEmpty()) View.GONE else View.VISIBLE
@@ -175,6 +191,10 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     @SuppressLint("UnsafeOptInUsageError")
     private fun initializePlayer() {
         simpleExoPlayer?.release()
+        if (counter >= stories.size) {
+            DengageLogger.error("StoryDisplayFragment initializePlayer: Counter $counter is out of bounds for stories size ${stories.size}")
+            return
+        }
         simpleExoPlayer = ExoPlayer.Builder(requireContext()).build().apply {
             val mediaItem = stories[counter].mediaUrl?.let { MediaItem.fromUri(it) }
             mediaItem?.let { setMediaItem(it) }
@@ -193,7 +213,7 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     private val playerListener = object : Player.Listener {
         override fun onPlayerError(error: PlaybackException) {
             storyDisplayVideoProgress.hide()
-            if (counter == stories.size - 1) {
+            if (stories.isEmpty() || counter == stories.size - 1) {
                 pageViewOperator?.nextPageView()
             } else {
                 storiesProgressView.skip()
@@ -216,6 +236,11 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
 
     private fun setGradientBackground(storyDisplayImage: AppCompatImageView? = null, storyDisplayVideo: PlayerView? = null, counter: Int) {
         var colors = intArrayOf(Color.WHITE, Color.WHITE)
+
+        if (counter >= stories.size) {
+            DengageLogger.error("StoryDisplayFragment setGradientBackground: Counter $counter is out of bounds for stories size ${stories.size}")
+            return
+        }
 
         if (stories[counter].gradColors.size == 1) {
             colors = intArrayOf(
@@ -249,7 +274,7 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
             override fun onClick(view: View) {
                 when (view) {
                     next -> {
-                        if (counter == stories.size - 1) {
+                        if (stories.isEmpty() || counter == stories.size - 1) {
                             pageViewOperator?.nextPageView()
                         } else {
                             storiesProgressView.skip()
@@ -295,8 +320,10 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
         storiesProgressView.setAllStoryDuration(STORY_DURATION)
         storiesProgressView.setStoriesListener(this)
 
-        Glide.with(this).load(storyCover.mediaUrl).circleCrop().into(storyDisplayProfilePicture)
-        storyDisplayNick.text = storyCover.name
+        storyCover.mediaUrl?.let { mediaUrl ->
+            Glide.with(this).load(mediaUrl).circleCrop().into(storyDisplayProfilePicture)
+        }
+        storyDisplayNick.text = storyCover.name ?: ""
     }
 
     private fun showStoryOverlay() {
@@ -320,6 +347,11 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     override fun onResume() {
         super.onResume()
         onResumeCalled = true
+
+        if (counter >= stories.size) {
+            DengageLogger.error("StoryDisplayFragment onResume: Counter $counter is out of bounds for stories size ${stories.size}")
+            return
+        }
 
         if (stories[counter].kind == MimeType.VIDEO && !onVideoPrepared) {
             simpleExoPlayer?.playWhenReady = false

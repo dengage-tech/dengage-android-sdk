@@ -69,6 +69,13 @@ class StoryActivity : AppCompatActivity(),
     }
 
     private fun setUpPager() {
+        // Check if inAppMessage is null and handle gracefully
+        if (inAppMessage == null) {
+            DengageLogger.error("StoryActivity: inAppMessage is null, finishing activity")
+            finish()
+            return
+        }
+        
         val storyCovers = inAppMessage?.data?.content?.params?.storySet?.covers ?: emptyList()
         preLoadStories(storyCovers)
 
@@ -86,7 +93,7 @@ class StoryActivity : AppCompatActivity(),
             }
 
             override fun onPageScrollCanceled() {
-                currentFragment().resumeCurrentStory()
+                currentFragment()?.resumeCurrentStory()
             }
         })
     }
@@ -113,8 +120,8 @@ class StoryActivity : AppCompatActivity(),
         }
     }
 
-    private fun currentFragment(): StoryDisplayFragment {
-        return pagerAdapter.findFragmentByPosition(viewPager, storyCoverPosition) as StoryDisplayFragment
+    private fun currentFragment(): StoryDisplayFragment? {
+        return pagerAdapter.findFragmentByPosition(viewPager, storyCoverPosition) as? StoryDisplayFragment
     }
 
     private var prevDragPosition = 0

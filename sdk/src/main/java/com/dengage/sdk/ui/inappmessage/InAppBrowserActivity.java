@@ -181,12 +181,18 @@ public class InAppBrowserActivity extends AppCompatActivity implements
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
                 // add title and url (subtitle) to list
-                mTitles.add(title);
-                mUrls.add(view.getUrl());
+                if (mTitles != null && title != null) {
+                    mTitles.add(title);
+                }
+                if (mUrls != null && view.getUrl() != null) {
+                    mUrls.add(view.getUrl());
+                }
                 // change title and subtitle
-                changeTitleSubtitle(
-                        mTitles.get(getLastIndex(mTitles)),
-                        mUrls.get(getLastIndex(mUrls)));
+                if (mTitles != null && !mTitles.isEmpty() && mUrls != null && !mUrls.isEmpty()) {
+                    changeTitleSubtitle(
+                            mTitles.get(getLastIndex(mTitles)),
+                            mUrls.get(getLastIndex(mUrls)));
+                }
             }
         });
 
@@ -195,6 +201,9 @@ public class InAppBrowserActivity extends AppCompatActivity implements
 
     // URL validator
     private String validateUrl(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            return "http://";
+        }
 
         String mUrl;
 
@@ -233,7 +242,7 @@ public class InAppBrowserActivity extends AppCompatActivity implements
 
     // get last index of list
     private int getLastIndex(List<String> list) {
-        return list.size() - 1;
+        return list != null && !list.isEmpty() ? list.size() - 1 : 0;
     }
 
     /**
@@ -248,9 +257,9 @@ public class InAppBrowserActivity extends AppCompatActivity implements
     @Override
     public void onRefresh() {
         // reload page
-        if (mUrls.size() > 0) {
+        if (mUrls != null && mUrls.size() > 0) {
             loadPage(mUrls.get(getLastIndex(mUrls)));
-        } else {
+        } else if (mUrl != null && !mUrl.trim().isEmpty()) {
             loadPage(mUrl);
         }
     }

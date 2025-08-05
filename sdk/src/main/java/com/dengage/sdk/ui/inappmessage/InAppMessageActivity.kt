@@ -54,9 +54,14 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             contentParams.backgroundColor?.let { color ->
-                window.decorView.setBackgroundColor(Color.parseColor(color.dropLast(2)))
-                window.decorView.background.alpha =
-                    InAppMessageUtils.hexToPercentageOpacity(color.takeLast(2)).toInt()
+                if(color.isNullOrEmpty() || color.length < 3) return@let
+                try {
+                    window.decorView.setBackgroundColor(Color.parseColor(color.dropLast(2)))
+                    window.decorView.background.alpha =
+                        InAppMessageUtils.hexToPercentageOpacity(color.takeLast(2)).toInt()
+                } catch (e: Exception) {
+                    DengageLogger.error("InAppMessageActivity: Error parsing background color: $color", e)
+                }
             }
         }
 
@@ -270,6 +275,10 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     intent.extras?.let { setResult(it.getInt(RESULT_CODE), intent) }
                 }
                 inAppBrowser -> {
+                    if(targetUrl.isEmpty()) {
+                        DengageLogger.error("In app message: target URL is empty")
+                        return
+                    }
                     val intent = InAppBrowserActivity.Builder
                         .getBuilder()
                         .withUrl(targetUrl)

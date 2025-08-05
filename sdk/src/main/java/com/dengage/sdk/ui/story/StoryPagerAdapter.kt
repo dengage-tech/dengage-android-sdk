@@ -15,8 +15,14 @@ class StoryPagerAdapter(
     private val storySet: StorySet
         get() = inAppMessage.data.content.params.storySet ?: StorySet()
 
-    override fun getItem(position: Int): Fragment =
-        StoryDisplayFragment.newInstance(position, storySet.covers[position], inAppMessage)
+    override fun getItem(position: Int): Fragment {
+        val covers = storySet.covers
+        if (position >= covers.size) {
+            // Return a safe fallback fragment or handle the error
+            throw IndexOutOfBoundsException("Position $position is out of bounds for covers size ${covers.size}")
+        }
+        return StoryDisplayFragment.newInstance(position, covers[position], inAppMessage)
+    }
 
     override fun getCount(): Int {
         return storySet.covers.size
