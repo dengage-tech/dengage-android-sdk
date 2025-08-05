@@ -60,7 +60,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                     window.decorView.background.alpha =
                         InAppMessageUtils.hexToPercentageOpacity(color.takeLast(2)).toInt()
                 } catch (e: Exception) {
-                    DengageLogger.error("InAppMessageActivity: Error parsing background color: $color", e)
+                    DengageLogger.error("InAppMessageActivity: Error parsing background color: $color")
                 }
             }
         }
