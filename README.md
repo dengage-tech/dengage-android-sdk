@@ -40,7 +40,9 @@
   - [Methods](#methods)
     - [Getting Inbox Messages](#getting-inbox-messages)
     - [Removing an Inbox Message](#removing-an-inbox-message)
+    - [Removing all Inbox Messages](#removing-all-inbox-messages)
     - [Marking an Inbox Message as Read](#marking-an-inbox-message-as-read)
+    - [Marking all Inbox Messages as Read](#marking-all-inbox-messages-as-read)
 - [In-App Messaging](#in-app-messaging)
   - [Methods](#methods)
   - [Real Time In-App Messaging](#real-time-in-app-messaging)
@@ -417,14 +419,14 @@ You can send all items in the wishlist for every event, simplifying the tracking
 // Add To Wishlist
 val data = hashMapOf<String, Any>(
     "product_id" to 123
-    // ... extra columns in wishlist_events table, can be added here
+    // ... extra columns in wishlist_events table can be added here
 )
 Dengage.addToWishList(data)
 
 // Remove From Wishlist
 val data = hashMapOf<String, Any>(
     "product_id" to 123
-    // ... extra columns in wishlist_events table, can be added here
+    // ... extra columns in wishlist_events table can be added here
 )
 Dengage.removeFromWishList(data)
 ```
@@ -1080,7 +1082,15 @@ Dengage.deleteInboxMessage(
 )
 ```
 
-#### Marking an Inbox Message as Clicked:
+#### Removing all Inbox Messages
+
+Delete all inbox messages:
+
+```kotlin
+Dengage.deleteAllInboxMessages()
+```
+
+#### Marking an Inbox Message as Clicked
 
 Mark a message as clicked to update its status:
 
@@ -1088,6 +1098,14 @@ Mark a message as clicked to update its status:
 Dengage.setInboxMessageAsClicked(
   messageId = "message-id" // ID of the message to mark as clicked
 )
+```
+
+#### Marking all Inbox Messages as Clicked
+
+Mark all messages as clicked to update their status:
+
+```kotlin
+Dengage.setAllInboxMessagesAsClicked()
 ```
 
 > `receiveDate` property is used to store inbox message receive date. It keeps date as a UTC time format ("yyyy-MM-ddTHH:mm:ss.fffZ"). The applications which are using our SDKs need to convert this UTC date to the client time zone if the applications want to display the message receive date to their users.
