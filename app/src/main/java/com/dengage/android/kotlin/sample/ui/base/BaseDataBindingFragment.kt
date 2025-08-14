@@ -40,7 +40,7 @@ abstract class BaseDataBindingFragment<ViewBinding : ViewDataBinding> : Fragment
     protected fun sendPageView(pageType: String) {
         val data = HashMap<String, Any>()
         data["page_type"] = pageType
-        Dengage.pageView(data)
+        //Dengage.pageView(data)
     }
 
     override fun onDestroy() {
