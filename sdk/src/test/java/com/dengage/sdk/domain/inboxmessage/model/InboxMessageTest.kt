@@ -9,6 +9,7 @@ class InboxMessageTest {
     fun `InboxMessage constructor test`() {
         val id = "id"
         val isClicked = false
+        val isDeleted = false
         val title = "title"
         val message = "message"
         val mediaUrl = "mediaUrl"
@@ -21,6 +22,7 @@ class InboxMessageTest {
         val inboxMessage = InboxMessage(
             id = id,
             isClicked = isClicked,
+            isDeleted = isDeleted,
             data = InboxMessageData(
                 title = title,
                 message = message,
@@ -35,6 +37,7 @@ class InboxMessageTest {
 
         Assert.assertEquals(id, inboxMessage.id)
         Assert.assertEquals(isClicked, inboxMessage.isClicked)
+        Assert.assertEquals(isDeleted, inboxMessage.isDeleted)
         Assert.assertEquals(title, inboxMessage.data.title)
         Assert.assertEquals(message, inboxMessage.data.message)
         Assert.assertEquals(mediaUrl, inboxMessage.data.mediaUrl)
