@@ -1,5 +1,6 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.widget.Toast
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentCustomEventBinding
 import com.dengage.android.kotlin.sample.ui.adapter.EventParametersAdapter
@@ -13,6 +14,8 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
         return R.layout.fragment_custom_event
     }
 
+    val mobileEventTest = "mobile_event_test"
+
     override fun init() {
         sendPageView("custom-events")
 
@@ -22,13 +25,21 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
         }
         binding.rvEventParameters.adapter = EventParametersAdapter(eventParameters)
 
-        binding.etTableName.setText("mobile_event_test")
+        binding.etTableName.setText(mobileEventTest)
 
         binding.btnSend.setOnClickListener {
             val customEventData = hashMapOf<String, Any>()
 
             for (eventParameter in eventParameters) {
-                customEventData[eventParameter.key!!] = eventParameter.value!!
+                if( eventParameter.key.isNullOrEmpty()) {
+                    showToast("Please enter a key for all parameters")
+                    return@setOnClickListener
+                }
+                if (eventParameter.value == null) {
+                    showToast("Please enter a value for all parameters")
+                    return@setOnClickListener
+                }
+                customEventData[eventParameter.key!!] = eventParameter.value ?: ""
             }
             val cartItems= arrayOf (HashMap<String, Any>())
 
@@ -49,6 +60,10 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
                 customEventData
             )
         }
+    }
+
+    fun showToast(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
 }
