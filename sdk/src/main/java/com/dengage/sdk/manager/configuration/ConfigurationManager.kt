@@ -149,7 +149,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             // if 24 hours passed after getting sdk params, you should get again
             val sdkParameters = Prefs.sdkParameters
             if (sdkParameters != null &&
-                System.currentTimeMillis() < sdkParameters.lastFetchTimeInMillis + (24 * 60 * 60 * 1000)
+                System.currentTimeMillis() < sdkParameters.lastFetchTimeInMillis + (1 * 60 * 1000)
             ) {
                 // fetch in app messages
                 configurationCallback?.fetchInAppMessages()
