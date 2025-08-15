@@ -46,6 +46,7 @@ enum class PreferenceKey {
     IN_APP_DEVICE_INFO,
     LOCATION_PERMISSION,
     TOKEN,
+    STORED_EVENTS,
     ;
 
     override fun toString(): String = name

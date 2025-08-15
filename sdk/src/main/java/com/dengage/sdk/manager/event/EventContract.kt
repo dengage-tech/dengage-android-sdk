@@ -6,7 +6,7 @@ import com.dengage.sdk.manager.base.BaseView
 interface EventContract {
 
     interface View : BaseView {
-        fun eventSent()
+        fun eventSent(tableName: String, key: String?, eventDetails: Map<String, Any>)
         fun transactionalOpenEventSent()
         fun openEventSent()
     }

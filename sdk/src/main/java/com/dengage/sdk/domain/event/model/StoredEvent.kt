@@ -1,0 +1,10 @@
+package com.dengage.sdk.domain.event.model
+
+import java.io.Serializable
+
+data class StoredEvent(
+    val tableName: String,
+    val key: String?,
+    val eventDetails: Map<String, Any>,
+    val timestamp: Long = System.currentTimeMillis()
+) : Serializable

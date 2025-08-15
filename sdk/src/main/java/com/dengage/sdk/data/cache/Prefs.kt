@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.VisitorInfo
+import com.dengage.sdk.domain.event.model.StoredEvent
 import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
@@ -204,6 +205,10 @@ object Prefs {
     internal var token: String
         get() = preferences.get(PreferenceKey.TOKEN, "") ?: ""
         set(value) = preferences.set(PreferenceKey.TOKEN, value)
+
+    internal var storedEvents: MutableMap<String, MutableList<StoredEvent>>
+        get() = preferences.get(PreferenceKey.STORED_EVENTS) ?: mutableMapOf()
+        set(value) = preferences.set(PreferenceKey.STORED_EVENTS, value)
 
     fun clear() {
         preferences.edit().clear().apply()

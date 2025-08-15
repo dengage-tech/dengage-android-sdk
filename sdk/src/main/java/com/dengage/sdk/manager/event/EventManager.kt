@@ -2,12 +2,15 @@ package com.dengage.sdk.manager.event
 
 import android.net.Uri
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.domain.event.model.FilterOperator
+import com.dengage.sdk.domain.event.model.StoredEvent
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>(),
     EventContract.View {
@@ -401,7 +404,165 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         }
     }
 
-    override fun eventSent() = Unit
+    override fun eventSent(tableName: String, key: String?, eventDetails: Map<String, Any>) {
+        try {
+            val sdkParameters = Prefs.sdkParameters ?: return
+            
+            // Find matching event mapping
+            val eventMapping = sdkParameters.eventMappings?.find { it.eventTableName == tableName } ?: return
+            
+            // Check if client history is enabled
+            if (eventMapping.enableClientHistory != true) return
+            
+            // Get client history options
+            val clientHistoryOptions = eventMapping.clientHistoryOptions ?: return
+            val maxEventCount = clientHistoryOptions.maxEventCount ?: Int.MAX_VALUE
+            val timeWindowInMinutes = clientHistoryOptions.timeWindowInMinutes ?: Int.MAX_VALUE
+            
+            // Check event type definitions
+            val eventTypeDefinitions = eventMapping.eventTypeDefinitions ?: return
+            
+            // Get the current stored events for this table
+            val storedEvents = Prefs.storedEvents
+            val tableEvents = storedEvents[tableName] ?: mutableListOf()
+            
+            // Check if the event meets the criteria from eventTypeDefinitions
+            val matchingEventType = eventTypeDefinitions.find { eventTypeDefinition ->
+                // Check event type
+                val eventType = eventDetails[EventKey.EVENT_TYPE.key] as? String ?: ""
+                
+                if (eventTypeDefinition.eventType != null && eventTypeDefinition.eventType != eventType && eventTypeDefinition.eventType.isNotEmpty()) {
+                    return@find false
+                }
+                
+                // Check filter conditions
+                val filterConditions = eventTypeDefinition.filterConditions
+                if (filterConditions.isNullOrEmpty()) {
+                    return@find true
+                }
+                
+                val logicOperator = eventTypeDefinition.logicOperator ?: "AND"
+
+                var filterCondition = false
+                when (logicOperator) {
+                    "AND" -> filterConditions.all { condition ->
+                        filterCondition = checkFilterCondition(condition.fieldName, condition.operator, condition.values, eventDetails)
+                        filterCondition
+                    }
+                    "OR" -> filterConditions.any { condition ->
+                        filterCondition = checkFilterCondition(condition.fieldName, condition.operator, condition.values, eventDetails)
+                        filterCondition
+                    }
+                    else -> false
+                }
+            }
+            
+            // If no matching event type definition, don't store the event
+            if (matchingEventType == null) return
+            
+            val storedEvent = StoredEvent(
+                tableName = tableName,
+                key = key,
+                eventDetails = eventDetails,
+                timestamp = System.currentTimeMillis()
+            )
+            
+            tableEvents.add(storedEvent)
+            
+            // Filter out events older than timeWindowInMinutes
+            val timeThreshold = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(timeWindowInMinutes.toLong())
+            val filteredEvents = tableEvents.filter { it.timestamp >= timeThreshold }.toMutableList()
+            
+            // Keep only the latest maxEventCount events
+            val finalEvents = if (filteredEvents.size > maxEventCount) {
+                filteredEvents.sortedByDescending { it.timestamp }.take(maxEventCount).toMutableList()
+            } else {
+                filteredEvents
+            }
+            
+            storedEvents[tableName] = finalEvents
+            Prefs.storedEvents = storedEvents
+            
+            DengageLogger.debug("Event stored for table: $tableName, current count: ${finalEvents.size}")
+        } catch (e: Exception) {
+            DengageLogger.error("Error storing event: ${e.message}")
+        }
+    }
+    
+    private fun checkFilterCondition(
+        fieldName: String?,
+        operatorValue: String?,
+        values: List<String>?,
+        eventDetails: Map<String, Any>
+    ): Boolean {
+        if (fieldName.isNullOrEmpty() || operatorValue == null) return true
+        
+        val fieldValue = eventDetails[fieldName]?.toString() ?: return false
+        
+        val operator = FilterOperator.fromValue(operatorValue) ?: return false
+        
+        return when (operator) {
+            FilterOperator.EQUALS -> values?.firstOrNull() == fieldValue
+            FilterOperator.NOT_EQUALS -> values?.firstOrNull() != fieldValue
+            FilterOperator.IN -> values?.contains(fieldValue) == true
+            FilterOperator.NOT_IN -> values?.contains(fieldValue) != true
+            FilterOperator.LIKE -> values?.firstOrNull()?.let { fieldValue.contains(it, ignoreCase = true) } ?: false
+            FilterOperator.NOT_LIKE -> values?.firstOrNull()?.let { !fieldValue.contains(it, ignoreCase = true) } ?: true
+            FilterOperator.STARTS_WITH -> values?.firstOrNull()?.let { fieldValue.startsWith(it, ignoreCase = true) } ?: false
+            FilterOperator.NOT_STARTS_WITH -> values?.firstOrNull()?.let { !fieldValue.startsWith(it, ignoreCase = true) } ?: true
+            FilterOperator.ENDS_WITH -> values?.firstOrNull()?.let { fieldValue.endsWith(it, ignoreCase = true) } ?: false
+            FilterOperator.NOT_ENDS_WITH -> values?.firstOrNull()?.let { !fieldValue.endsWith(it, ignoreCase = true) } ?: true
+            FilterOperator.GREATER_THAN -> try {
+                val numFieldValue = fieldValue.toDouble()
+                values?.firstOrNull()?.toDouble()?.let { numFieldValue > it } ?: false
+            } catch (e: Exception) {
+                false
+            }
+            FilterOperator.GREATER_EQUAL -> try {
+                val numFieldValue = fieldValue.toDouble()
+                values?.firstOrNull()?.toDouble()?.let { numFieldValue >= it } ?: false
+            } catch (e: Exception) {
+                false
+            }
+            FilterOperator.LESS_THAN -> try {
+                val numFieldValue = fieldValue.toDouble()
+                values?.firstOrNull()?.toDouble()?.let { numFieldValue < it } ?: false
+            } catch (e: Exception) {
+                false
+            }
+            FilterOperator.LESS_EQUAL -> try {
+                val numFieldValue = fieldValue.toDouble()
+                values?.firstOrNull()?.toDouble()?.let { numFieldValue <= it } ?: false
+            } catch (e: Exception) {
+                false
+            }
+            FilterOperator.BETWEEN -> try {
+                if ((values?.size ?: 0) < 2) return false
+                val numFieldValue = fieldValue.toDouble()
+                val min = values!![0].toDouble()
+                val max = values[1].toDouble()
+                numFieldValue in min..max
+            } catch (e: Exception) {
+                false
+            }
+            FilterOperator.NOT_BETWEEN -> try {
+                if ((values?.size ?: 0) < 2) return false
+                val numFieldValue = fieldValue.toDouble()
+                val min = values!![0].toDouble()
+                val max = values[1].toDouble()
+                numFieldValue !in min..max
+            } catch (e: Exception) {
+                false
+            }
+            FilterOperator.NULL -> fieldValue == null || fieldValue.isEmpty()
+            FilterOperator.NOT_NULL -> fieldValue != null && fieldValue.isNotEmpty()
+            FilterOperator.EMPTY -> fieldValue.isEmpty()
+            FilterOperator.NOT_EMPTY -> fieldValue.isNotEmpty()
+            // Handle other operators as needed
+            else -> false
+        }
+    }
+
     override fun transactionalOpenEventSent() = Unit
     override fun openEventSent() = Unit
 }

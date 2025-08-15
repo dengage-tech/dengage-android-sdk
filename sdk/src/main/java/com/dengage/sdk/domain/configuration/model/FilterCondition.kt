@@ -6,5 +6,5 @@ import java.io.Serializable
 data class FilterCondition(
     @SerializedName("fieldName") val fieldName: String?,
     @SerializedName("operator") val operator: String?,
-    @SerializedName("values") val values: List<Any>?
+    @SerializedName("values") val values: List<String>?
 ) : Serializable
