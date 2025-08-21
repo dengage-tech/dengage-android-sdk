@@ -435,6 +435,11 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                     return@find false
                 }
                 
+                // If there's only one eventTypeDefinition, skip filter condition check
+                if (eventTypeDefinitions.size == 1) {
+                    return@find true
+                }
+                
                 // Check filter conditions
                 val filterConditions = eventTypeDefinition.filterConditions
                 if (filterConditions.isNullOrEmpty()) {
@@ -443,15 +448,12 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 
                 val logicOperator = eventTypeDefinition.logicOperator ?: "AND"
 
-                var filterCondition = false
                 when (logicOperator) {
                     "AND" -> filterConditions.all { condition ->
-                        filterCondition = checkFilterCondition(condition.fieldName, condition.operator, condition.values, eventDetails)
-                        filterCondition
+                        checkFilterCondition(condition.fieldName, condition.operator, condition.values, eventDetails)
                     }
                     "OR" -> filterConditions.any { condition ->
-                        filterCondition = checkFilterCondition(condition.fieldName, condition.operator, condition.values, eventDetails)
-                        filterCondition
+                        checkFilterCondition(condition.fieldName, condition.operator, condition.values, eventDetails)
                     }
                     else -> false
                 }
