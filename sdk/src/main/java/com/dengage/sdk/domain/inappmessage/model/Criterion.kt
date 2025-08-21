@@ -10,4 +10,18 @@ data class Criterion(
     @SerializedName("comparison") val operator: String,
     @SerializedName("values") val values: List<String>?,
     @SerializedName("valueSource") val valueSource: String,
+    // New optional properties for EVENT_HISTORY
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("aggregateType") val aggregateType: String? = null,
+    @SerializedName("field") val field: String? = null,
+    @SerializedName("event") val event: String? = null,
+    @SerializedName("window") val window: String? = null,
+    @SerializedName("filtersLogicalOp") val filtersLogicalOp: String? = null,
+    @SerializedName("filters") val filters: List<Filter>? = null
+) : Serializable
+
+data class Filter(
+    @SerializedName("field") val field: String,
+    @SerializedName("op") val op: String,
+    @SerializedName("values") val values: List<String>
 ) : Serializable
