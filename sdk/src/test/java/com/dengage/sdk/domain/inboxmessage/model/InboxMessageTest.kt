@@ -17,10 +17,12 @@ class InboxMessageTest {
         val androidTargetUrl = "androidTargetUrl"
         val receiveDate = "receiveDate"
         val carouselItems = null
+        val isDeleted = false
 
         val inboxMessage = InboxMessage(
             id = id,
             isClicked = isClicked,
+            isDeleted = isDeleted,
             data = InboxMessageData(
                 title = title,
                 message = message,
@@ -35,6 +37,7 @@ class InboxMessageTest {
 
         Assert.assertEquals(id, inboxMessage.id)
         Assert.assertEquals(isClicked, inboxMessage.isClicked)
+        Assert.assertEquals(isDeleted, inboxMessage.isDeleted)
         Assert.assertEquals(title, inboxMessage.data.title)
         Assert.assertEquals(message, inboxMessage.data.message)
         Assert.assertEquals(mediaUrl, inboxMessage.data.mediaUrl)

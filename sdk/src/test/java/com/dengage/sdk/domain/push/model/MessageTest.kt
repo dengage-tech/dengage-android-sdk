@@ -29,6 +29,7 @@ class MessageTest {
         val actionButtons = null
         val addToInbox = true
         val expireDate = "expireDate"
+        val appId = "appId"
 
         val pushMessage = Message(
             messageId = messageId,
@@ -52,7 +53,8 @@ class MessageTest {
             carouselContent = carouselContent,
             actionButtons = actionButtons,
             addToInbox = addToInbox,
-            expireDate = expireDate
+            expireDate = expireDate,
+            appId = appId
         )
 
         Assert.assertEquals(messageId, pushMessage.messageId)

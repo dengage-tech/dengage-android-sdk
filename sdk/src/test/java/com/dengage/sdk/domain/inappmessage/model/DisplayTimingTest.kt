@@ -10,16 +10,19 @@ class DisplayTimingTest {
         val delay = 10
         val showEveryXMinutes = 20
         val maxShowCount = 20
+        val maxDismissCount = 5
 
         val displayTiming = DisplayTiming(
             delay = delay,
             showEveryXMinutes = showEveryXMinutes,
-            maxShowCount = maxShowCount
+            maxShowCount = maxShowCount,
+            maxDismissCount = maxDismissCount
         )
 
         Assert.assertEquals(delay, displayTiming.delay)
         Assert.assertEquals(showEveryXMinutes, displayTiming.showEveryXMinutes)
         Assert.assertEquals(maxShowCount, displayTiming.maxShowCount)
+        Assert.assertEquals(maxDismissCount, displayTiming.maxDismissCount)
     }
 
 }
