@@ -11,7 +11,6 @@ data class Criterion(
     @SerializedName("values") val values: List<String>?,
     @SerializedName("valueSource") val valueSource: String,
     // New optional properties for EVENT_HISTORY
-    @SerializedName("type") val type: String? = null,
     @SerializedName("aggregateType") val aggregateType: String? = null,
     @SerializedName("field") val field: String? = null,
     @SerializedName("event") val event: String? = null,

@@ -422,10 +422,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             // Check event type definitions
             val eventTypeDefinitions = eventMapping.eventTypeDefinitions ?: return
             
-            // Get the current stored events for this table
-            val storedEvents = Prefs.storedEvents
-            val tableEvents = storedEvents[tableName] ?: mutableListOf()
-            
             // Check if the event meets the criteria from eventTypeDefinitions
             val matchingEventType = eventTypeDefinitions.find { eventTypeDefinition ->
                 // Check event type
@@ -461,12 +457,19 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             
             // If no matching event type definition, don't store the event
             if (matchingEventType == null) return
-            
+
+
+            // Get the current stored events for this table
+            val storedEvents = Prefs.storedEvents
+            val tableEvents = storedEvents[matchingEventType.eventType] ?: mutableListOf()
+            val eventType = eventDetails[EventKey.EVENT_TYPE.key] as? String ?: return
+
             val storedEvent = StoredEvent(
                 tableName = tableName,
                 key = key,
                 eventDetails = eventDetails,
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                eventType = eventType
             )
             
             tableEvents.add(storedEvent)
@@ -482,7 +485,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 filteredEvents
             }
             
-            storedEvents[tableName] = finalEvents
+            storedEvents[eventType] = finalEvents
             Prefs.storedEvents = storedEvents
             
             DengageLogger.debug("Event stored for table: $tableName, current count: ${finalEvents.size}")

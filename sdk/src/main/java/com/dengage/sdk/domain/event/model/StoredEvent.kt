@@ -4,6 +4,7 @@ import java.io.Serializable
 
 data class StoredEvent(
     val tableName: String,
+    val eventType: String,
     val key: String?,
     val eventDetails: Map<String, Any>,
     val timestamp: Long = System.currentTimeMillis()
