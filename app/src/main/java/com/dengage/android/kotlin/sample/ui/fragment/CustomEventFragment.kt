@@ -76,11 +76,19 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
         }
 
 
+
+        Dengage.sendDeviceEvent(
+            tableName,
+            eventData
+        )
+
+        /*
         Dengage.sendCustomEvent(
             tableName,
             Dengage.getSubscription()?.contactKey!!,
             eventData
         )
+        */
 
         //repeat(100) {
 
