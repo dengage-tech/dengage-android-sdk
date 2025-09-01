@@ -1,9 +1,8 @@
 package com.dengage.sdk.manager.event
 
-import android.net.Uri
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.event.model.FilterOperator
-import com.dengage.sdk.domain.event.model.StoredEvent
+import com.dengage.sdk.domain.event.model.ClientEvent
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.session.SessionManager
@@ -11,6 +10,7 @@ import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import java.util.*
 import java.util.concurrent.TimeUnit
+import androidx.core.net.toUri
 
 class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>(),
     EventContract.View {
@@ -24,7 +24,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         try {
             val data = HashMap<String, Any>()
             try {
-                val uri = Uri.parse(referer)
+                val uri = referer.toUri()
                 uri.getQueryParameter("utm_source")?.let {
                     data["utm_source"] = it
                 }
@@ -458,25 +458,24 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             // If no matching event type definition, don't store the event
             if (matchingEventType == null) return
 
-
-            // Get the current stored events for this table
-            val storedEvents = Prefs.storedEvents
-            val tableEvents = storedEvents[matchingEventType.eventType] ?: mutableListOf()
+            // Get the current client events for this table
+            val clientEvents = Prefs.clientEvents
+            val eventTypeEvents = clientEvents[matchingEventType.eventType] ?: mutableListOf()
             val eventType = eventDetails[EventKey.EVENT_TYPE.key] as? String ?: return
 
-            val storedEvent = StoredEvent(
+            val clientEvent = ClientEvent(
                 tableName = tableName,
                 key = key,
                 eventDetails = eventDetails,
                 timestamp = System.currentTimeMillis(),
                 eventType = eventType
             )
-            
-            tableEvents.add(storedEvent)
+
+            eventTypeEvents.add(clientEvent)
             
             // Filter out events older than timeWindowInMinutes
             val timeThreshold = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(timeWindowInMinutes.toLong())
-            val filteredEvents = tableEvents.filter { it.timestamp >= timeThreshold }.toMutableList()
+            val filteredEvents = eventTypeEvents.filter { it.timestamp >= timeThreshold }.toMutableList()
             
             // Keep only the latest maxEventCount events
             val finalEvents = if (filteredEvents.size > maxEventCount) {
@@ -484,11 +483,11 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             } else {
                 filteredEvents
             }
+
+            clientEvents[eventType] = finalEvents
+            Prefs.clientEvents = clientEvents
             
-            storedEvents[eventType] = finalEvents
-            Prefs.storedEvents = storedEvents
-            
-            DengageLogger.debug("Event stored for table: $tableName, current count: ${finalEvents.size}")
+            DengageLogger.debug("Client Event stored for table: $tableName for eventType: $eventType, current count: ${finalEvents.size}")
         } catch (e: Exception) {
             DengageLogger.error("Error storing event: ${e.message}")
         }

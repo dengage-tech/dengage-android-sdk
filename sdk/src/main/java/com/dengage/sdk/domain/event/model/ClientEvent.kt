@@ -2,7 +2,7 @@ package com.dengage.sdk.domain.event.model
 
 import java.io.Serializable
 
-data class StoredEvent(
+data class ClientEvent(
     val tableName: String,
     val eventType: String,
     val key: String?,

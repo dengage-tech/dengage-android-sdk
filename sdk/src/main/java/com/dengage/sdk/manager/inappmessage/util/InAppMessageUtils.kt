@@ -16,7 +16,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.cache.Prefs.visitorInfo
-import com.dengage.sdk.domain.event.model.StoredEvent
+import com.dengage.sdk.domain.event.model.ClientEvent
 import com.dengage.sdk.domain.inappmessage.model.*
 import com.dengage.sdk.manager.visitcount.VisitCountManager
 import com.dengage.sdk.util.Constants
@@ -973,16 +973,16 @@ object InAppMessageUtils {
 
     private fun operateEventHistoryFilter(criterion: Criterion): Boolean {
         try {
-            val tableName = criterion.event ?: return false
-            val storedEvents = Prefs.storedEvents
-            val tableEvents = storedEvents[tableName] ?: return false
+            val eventType = criterion.event ?: return false
+            val clientEvents = Prefs.clientEvents
+            val eventTypeEvents = clientEvents[eventType] ?: return false
 
             // Parse window (e.g., "P7D" = 7 days)
             val windowMillis = parseTimeWindow(criterion.window)
             val cutoffTime = System.currentTimeMillis() - windowMillis
 
             // Filter events by time window
-            val eventsInWindow = tableEvents.filter { it.timestamp >= cutoffTime }
+            val eventsInWindow = eventTypeEvents.filter { it.timestamp >= cutoffTime }
 
             // Apply filters if present
             val filteredEvents = if (!criterion.filters.isNullOrEmpty()) {
@@ -1047,10 +1047,10 @@ object InAppMessageUtils {
     }
 
     private fun applyEventFilters(
-        events: List<StoredEvent>,
+        events: List<ClientEvent>,
         filters: List<Filter>,
         logicalOp: String?
-    ): List<StoredEvent> {
+    ): List<ClientEvent> {
         if (filters.isEmpty()) return events
 
         return events.filter { event ->
@@ -1066,7 +1066,7 @@ object InAppMessageUtils {
         }
     }
 
-    private fun applyEventFilter(event: StoredEvent, filter: Filter): Boolean {
+    private fun applyEventFilter(event: ClientEvent, filter: Filter): Boolean {
         val fieldValue = event.eventDetails[filter.field]?.toString() ?: return false
 
         return when (filter.op) {

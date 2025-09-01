@@ -350,6 +350,16 @@ object Dengage {
     }
 
     /**
+     * Set cart for using in real time in app comparisons
+     */
+    fun setCart(items: List<HashMap<String, Any>>) {
+
+
+
+        //RealTimeInAppParamHolder.categoryPath = path
+    }
+
+    /**
      * Set category path for using in real time in app comparisons
      */
     fun setCategoryPath(path: String?) {
