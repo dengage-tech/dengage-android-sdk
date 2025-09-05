@@ -10,7 +10,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.dengage.sdk.callback.DengageCallback
 import com.dengage.sdk.callback.ReviewDialogCallback
@@ -18,6 +17,7 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.remote.api.ApiUrlConfiguration
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
+import com.dengage.sdk.domain.inappmessage.model.Cart
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
@@ -351,12 +351,20 @@ object Dengage {
 
     /**
      * Set cart for using in real time in app comparisons
+     * 
+     * @param cart Cart object containing cart items
      */
-    fun setCart(items: List<HashMap<String, Any>>) {
-
-
-
-        //RealTimeInAppParamHolder.categoryPath = path
+    fun setCart(cart: Cart) {
+        RealTimeInAppParamHolder.setCart(cart)
+    }
+    
+    /**
+     * Get current cart
+     * 
+     * @return Cart object containing all cart items
+     */
+    fun getCart(): Cart {
+        return RealTimeInAppParamHolder.getCart()
     }
 
     /**

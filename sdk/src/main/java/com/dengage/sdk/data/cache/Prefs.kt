@@ -1,7 +1,9 @@
 package com.dengage.sdk.data.cache
 
+import java.util.Locale
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.VisitorInfo
@@ -16,8 +18,8 @@ import com.dengage.sdk.domain.visitcount.model.VisitCountItem
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageUtils
-import java.util.Locale
-import androidx.core.content.edit
+
+import com.dengage.sdk.domain.inappmessage.model.Cart
 
 object Prefs {
 
@@ -210,6 +212,10 @@ object Prefs {
     internal var clientEvents: MutableMap<String, MutableList<ClientEvent>>
         get() = preferences.get(PreferenceKey.CLIENT_EVENTS) ?: mutableMapOf()
         set(value) = preferences.set(PreferenceKey.CLIENT_EVENTS, value)
+
+    internal var clientCart: Cart?
+        get() = preferences.get(PreferenceKey.CLIENT_CART)
+        set(value) = preferences.set(PreferenceKey.CLIENT_CART, value)
 
     fun clear() {
         preferences.edit { clear() }

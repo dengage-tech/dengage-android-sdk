@@ -520,24 +520,28 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 val numFieldValue = fieldValue.toDouble()
                 values?.firstOrNull()?.toDouble()?.let { numFieldValue > it } ?: false
             } catch (e: Exception) {
+                DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
             FilterOperator.GREATER_EQUAL -> try {
                 val numFieldValue = fieldValue.toDouble()
                 values?.firstOrNull()?.toDouble()?.let { numFieldValue >= it } ?: false
             } catch (e: Exception) {
+                DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
             FilterOperator.LESS_THAN -> try {
                 val numFieldValue = fieldValue.toDouble()
                 values?.firstOrNull()?.toDouble()?.let { numFieldValue < it } ?: false
             } catch (e: Exception) {
+                DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
             FilterOperator.LESS_EQUAL -> try {
                 val numFieldValue = fieldValue.toDouble()
                 values?.firstOrNull()?.toDouble()?.let { numFieldValue <= it } ?: false
             } catch (e: Exception) {
+                DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
             FilterOperator.BETWEEN -> try {
@@ -547,6 +551,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 val max = values[1].toDouble()
                 numFieldValue in min..max
             } catch (e: Exception) {
+                DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
             FilterOperator.NOT_BETWEEN -> try {
@@ -556,6 +561,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 val max = values[1].toDouble()
                 numFieldValue !in min..max
             } catch (e: Exception) {
+                DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
             FilterOperator.NULL -> fieldValue == null || fieldValue.isEmpty()
