@@ -1,6 +1,3 @@
-
-
-/*
 package com.dengage.sdk.domain.configuration.model
 
 import org.junit.Assert
@@ -25,6 +22,23 @@ class SdkParametersTest {
         val realTimeInAppEnabled = true
         val realTimeInAppFetchIntervalInMinutes = 30
         val realTimeInAppSessionTimeoutMinutes = 30
+        val expiredMessagesFetchIntervalInMin = 30
+        val surveyCheckEndpoint = "endpoint"
+        val eventMappings = listOf(EventMapping(
+            eventTableName = "eventTableName",
+            enableClientHistory = true,
+            clientHistoryOptions = ClientHistoryOptions(maxEventCount = 3, timeWindowInMinutes = 30),
+            eventTypeDefinitions = listOf(EventTypeDefinition(
+                eventTypeId = 30,
+                eventType = "eventType",
+                logicOperator = "AND",
+                filterConditions = listOf(FilterCondition(
+                    fieldName = "fieldName",
+                    operator = "OR",
+                    values = listOf("value1", "value2")
+                ))
+            ))
+        ))
 
         val sdkParameters = SdkParameters(
             appId = appId,
@@ -42,6 +56,9 @@ class SdkParametersTest {
             realTimeInAppEnabled = realTimeInAppEnabled,
             realTimeInAppFetchIntervalInMinutes = realTimeInAppFetchIntervalInMinutes,
             realTimeInAppSessionTimeoutMinutes = realTimeInAppSessionTimeoutMinutes,
+            expiredMessagesFetchIntervalInMin = expiredMessagesFetchIntervalInMin,
+            surveyCheckEndpoint = surveyCheckEndpoint,
+            eventMappings = eventMappings,
         )
 
         Assert.assertEquals(appId, sdkParameters.appId)
@@ -59,7 +76,9 @@ class SdkParametersTest {
         Assert.assertEquals(realTimeInAppEnabled, sdkParameters.realTimeInAppEnabled)
         Assert.assertEquals(realTimeInAppFetchIntervalInMinutes, sdkParameters.realTimeInAppFetchIntervalInMinutes)
         Assert.assertEquals(realTimeInAppSessionTimeoutMinutes, sdkParameters.realTimeInAppSessionTimeoutMinutes)
+        Assert.assertEquals(expiredMessagesFetchIntervalInMin, sdkParameters.expiredMessagesFetchIntervalInMin)
+        Assert.assertEquals(surveyCheckEndpoint, sdkParameters.surveyCheckEndpoint)
+        Assert.assertEquals(eventMappings, sdkParameters.eventMappings)
     }
 
 }
-*/
