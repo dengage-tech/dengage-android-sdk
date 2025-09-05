@@ -675,9 +675,9 @@ class InAppMessageUtilsTest {
                 valueSource = "SERVER_SIDE",
                 //type = null,
                 aggregateType = null,
-                field = null,
-                event = null,
-                window = null,
+                aggregateField = null,
+                eventType = null,
+                timeWindow = null,
                 filtersLogicalOp = null,
                 filters = null
             )
@@ -692,9 +692,9 @@ class InAppMessageUtilsTest {
                 valueSource = "SERVER_SIDE",
                 //type = null,
                 aggregateType = null,
-                field = null,
-                event = null,
-                window = null,
+                aggregateField = null,
+                eventType = null,
+                timeWindow = null,
                 filtersLogicalOp = null,
                 filters = null
             )

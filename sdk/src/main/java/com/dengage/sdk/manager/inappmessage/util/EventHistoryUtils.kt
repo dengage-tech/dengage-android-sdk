@@ -3,47 +3,52 @@ package com.dengage.sdk.manager.inappmessage.util
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.event.model.ClientEvent
 import com.dengage.sdk.domain.inappmessage.model.Criterion
-import com.dengage.sdk.domain.inappmessage.model.Filter
+import com.dengage.sdk.domain.inappmessage.model.EventFilter
+import com.dengage.sdk.domain.inappmessage.model.TimeWindow
 import com.dengage.sdk.util.DengageLogger
 
 object EventHistoryUtils {
 
     fun operateEventHistoryFilter(criterion: Criterion): Boolean {
         try {
-            val eventType = criterion.event ?: return false
+            val eventType = criterion.eventType ?: return false
             val clientEvents = Prefs.clientEvents
             val eventTypeEvents = clientEvents[eventType] ?: return false
 
-            // Parse window (e.g., "P7D" = 7 days)
-            val windowMillis = parseTimeWindow(criterion.window)
+            val windowMillis = parseTimeWindow(criterion.timeWindow)
             val cutoffTime = System.currentTimeMillis() - windowMillis
 
             // Filter events by time window
             val eventsInWindow = eventTypeEvents.filter { it.timestamp >= cutoffTime }
 
             // Apply filters if present
-            val filteredEvents = if (!criterion.filters.isNullOrEmpty()) {
-                applyEventFilters(eventsInWindow, criterion.filters, criterion.filtersLogicalOp)
-            } else {
-                eventsInWindow
+            val filteredEvents = when {
+                !criterion.filters.isNullOrEmpty() -> {
+                    applyEventFilters(eventsInWindow, criterion.filters, criterion.filtersLogicalOp)
+                }
+
+                else -> {
+                    eventsInWindow
+                }
             }
 
             // Calculate aggregate value
-            val aggregateValue = when (criterion.aggregateType) {
-                "count" -> filteredEvents.size
-                "distinct_count" -> {
-                    val field = criterion.field ?: return false
+            val aggregateValue = when (criterion.aggregateType?.uppercase()) {
+                "COUNT" -> filteredEvents.size
+                "DISTINCT_COUNT" -> {
+                    val field = criterion.aggregateField ?: return false
                     filteredEvents.mapNotNull { event ->
                         event.eventDetails[field]?.toString()
                     }.distinct().size
                 }
+
                 else -> return false
             }
 
             // Compare with criterion values
             val targetValue = criterion.values?.firstOrNull()?.toIntOrNull() ?: return false
 
-            return when (criterion.operator) {
+            return when (criterion.operator.uppercase()) {
                 "EQUALS", "EQ" -> aggregateValue == targetValue
                 "NOT_EQUALS", "NE" -> aggregateValue != targetValue
                 "GREATER_THAN", "GT" -> aggregateValue > targetValue
@@ -59,32 +64,29 @@ object EventHistoryUtils {
         }
     }
 
-    private fun parseTimeWindow(window: String?): Long {
-        if (window.isNullOrEmpty()) return Long.MAX_VALUE
-
+    private fun parseTimeWindow(timeWindow: TimeWindow?): Long {
         try {
-            // Parse ISO 8601 duration format (e.g., P7D, PT24H, P30M)
-            val regex = Regex("P(?:(\\d+)D)?(?:T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?)?")
-            val matchResult = regex.find(window) ?: return Long.MAX_VALUE
+            val unit = timeWindow?.unit?.toLongOrNull() ?: return Long.MAX_VALUE
 
-            val days = matchResult.groupValues[1].toLongOrNull() ?: 0
-            val hours = matchResult.groupValues[2].toLongOrNull() ?: 0
-            val minutes = matchResult.groupValues[3].toLongOrNull() ?: 0
-            val seconds = matchResult.groupValues[4].toLongOrNull() ?: 0
-
-            return (days * 24 * 60 * 60 * 1000) +
-                    (hours * 60 * 60 * 1000) +
-                    (minutes * 60 * 1000) +
-                    (seconds * 1000)
+            return when (timeWindow.value.uppercase()) {
+                "DAY" -> unit * 24 * 60 * 60 * 1000
+                "HOUR" -> unit * 60 * 60 * 1000
+                "MINUTE" -> unit * 60 * 1000
+                "SECOND" -> unit * 1000
+                else -> {
+                    DengageLogger.error("Unknown time window value: ${timeWindow.value}")
+                    Long.MAX_VALUE
+                }
+            }
         } catch (e: Exception) {
-            DengageLogger.error("Error parsing time window: ${e.message}")
+            DengageLogger.error("Error parsing new time window: ${e.message}")
             return Long.MAX_VALUE
         }
     }
 
     private fun applyEventFilters(
         events: List<ClientEvent>,
-        filters: List<Filter>,
+        filters: List<EventFilter>,
         logicalOp: String?
     ): List<ClientEvent> {
         if (filters.isEmpty()) return events
@@ -94,7 +96,7 @@ object EventHistoryUtils {
                 applyEventFilter(event, filter)
             }
 
-            when (logicalOp) {
+            when (logicalOp?.uppercase()) {
                 "AND" -> filterResults.all { it }
                 "OR" -> filterResults.any { it }
                 else -> filterResults.all { it } // default to AND
@@ -102,10 +104,10 @@ object EventHistoryUtils {
         }
     }
 
-    private fun applyEventFilter(event: ClientEvent, filter: Filter): Boolean {
+    private fun applyEventFilter(event: ClientEvent, filter: EventFilter): Boolean {
         val fieldValue = event.eventDetails[filter.field]?.toString() ?: return false
 
-        return when (filter.op) {
+        return when (filter.op.uppercase()) {
             "EQUALS", "EQ" -> filter.values.contains(fieldValue)
             "NOT_EQUALS", "NE" -> !filter.values.contains(fieldValue)
             "IN" -> filter.values.contains(fieldValue)
@@ -121,22 +123,27 @@ object EventHistoryUtils {
                 val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
                 numFieldValue > numFilterValue
             }
+
             "GREATER_EQUAL", "GTE" -> {
                 val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
                 val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
                 numFieldValue >= numFilterValue
             }
+
             "LESS_THAN", "LT" -> {
                 val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
                 val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
                 numFieldValue < numFilterValue
             }
+
             "LESS_EQUAL", "LTE" -> {
                 val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
                 val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
                 numFieldValue <= numFilterValue
             }
+
             else -> false
         }
     }
+
 }
