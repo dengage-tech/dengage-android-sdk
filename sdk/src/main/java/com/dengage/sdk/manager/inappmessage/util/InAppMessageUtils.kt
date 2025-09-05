@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import com.dengage.sdk.data.cache.Prefs
-import com.dengage.sdk.data.cache.Prefs.visitorInfo
 import com.dengage.sdk.domain.inappmessage.model.*
 import com.dengage.sdk.manager.visitcount.VisitCountManager
 import com.dengage.sdk.util.Constants
@@ -59,7 +58,6 @@ object InAppMessageUtils {
         inAppMessages: List<InAppMessage>,
         screenName: String? = null,
         params: HashMap<String, String>? = null,
-        isRealTime: Boolean = false,
         propertyId: String? = "",
         storyPropertyId: String? = null,
     ): InAppMessage? {
@@ -76,7 +74,8 @@ object InAppMessageUtils {
                         isInlineInApp(inAppMessage, propertyId, storyPropertyId) &&
                         inAppMessage.data.isDisplayTimeAvailable() &&
                         operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                            params, isRealTime)
+                            params
+                        )
             }
 
         return if (screenName.isNullOrEmpty()) {
@@ -90,16 +89,11 @@ object InAppMessageUtils {
                         isInlineInApp(inAppMessage, propertyId, storyPropertyId) &&
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
-                            params,
-                            isRealTime
+                            params
                         )
             }
 
-            if (matchedWithScreenFilters != null) {
-                return matchedWithScreenFilters
-            } else {
-                return matchedWithoutScreenFilters
-            }
+            return matchedWithScreenFilters ?: matchedWithoutScreenFilters
 
         }
 
@@ -156,13 +150,13 @@ object InAppMessageUtils {
         } else if (storyPropertyId.isNullOrEmpty()) {
             return if (propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
                 false
-            } else if (inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == true && propertyId.isNullOrEmpty()) {
+            } else if (inAppMessage.data.inlineTarget?.androidSelector?.isEmpty() == true && propertyId.isNullOrEmpty()) {
                 true
             } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isEmpty() == true) {
                 false
             } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNotEmpty() == true) {
                 inAppMessage.data.inlineTarget?.androidSelector?.equals(propertyId) == true
-            } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isNullOrEmpty() == null) {
+            } else if (!propertyId.isNullOrEmpty() && inAppMessage.data.inlineTarget?.androidSelector?.isEmpty() == null) {
                 false
             } else true
         }
@@ -183,19 +177,18 @@ object InAppMessageUtils {
 
     private fun operateRealTimeValues(
         displayRuleSet: DisplayRuleSet?,
-        params: HashMap<String, String>?,
-        isRealTime: Boolean
+        params: HashMap<String, String>?
     ): Boolean {
         if (displayRuleSet != null) {
             when (displayRuleSet.logicOperator) {
                 LogicOperator.AND.name -> {
                     return displayRuleSet.displayRules.all {
-                        operateDisplayRule(it, params, isRealTime)
+                        operateDisplayRule(it, params)
                     }
                 }
                 LogicOperator.OR.name -> {
                     return !displayRuleSet.displayRules.all {
-                        !operateDisplayRule(it, params, isRealTime)
+                        !operateDisplayRule(it, params)
                     }
                 }
             }
@@ -206,17 +199,16 @@ object InAppMessageUtils {
     private fun operateDisplayRule(
         displayRule: DisplayRule,
         params: HashMap<String, String>?,
-        isRealTime: Boolean,
     ): Boolean {
         when (displayRule.logicOperator) {
             LogicOperator.AND.name -> {
                 return displayRule.criterionList.all {
-                    operateCriterion(it, params, isRealTime)
+                    operateCriterion(it, params)
                 }
             }
             LogicOperator.OR.name -> {
                 return !displayRule.criterionList.all {
-                    !operateCriterion(it, params, isRealTime)
+                    !operateCriterion(it, params)
                 }
             }
         }
@@ -226,9 +218,7 @@ object InAppMessageUtils {
     @SuppressLint("SimpleDateFormat")
     private fun operateCriterion(
         criterion: Criterion,
-        params: HashMap<String, String>?,
-        isRealTime: Boolean,
-    ): Boolean {
+        params: HashMap<String, String>?): Boolean {
         val subscription = Prefs.subscription
         val visitorInfo = Prefs.visitorInfo
 
@@ -238,8 +228,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.categoryPath ?: "",
-                    isRealTime = isRealTime
+                    userParam = RealTimeInAppParamHolder.categoryPath ?: ""
                 )
             }
             SpecialRuleParameter.CART_ITEM_COUNT.key -> {
@@ -247,8 +236,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.cartItemCount ?: "0",
-                    isRealTime = isRealTime
+                    userParam = RealTimeInAppParamHolder.cartItemCount ?: "0"
                 )
             }
             SpecialRuleParameter.CART_AMOUNT.key -> {
@@ -256,8 +244,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.cartAmount ?: "0",
-                    isRealTime = isRealTime
+                    userParam = RealTimeInAppParamHolder.cartAmount ?: "0"
                 )
             }
             SpecialRuleParameter.STATE.key -> {
@@ -265,8 +252,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.state ?: "",
-                    isRealTime = isRealTime
+                    userParam = RealTimeInAppParamHolder.state ?: ""
                 )
             }
             SpecialRuleParameter.CITY.key -> {
@@ -274,8 +260,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.city ?: "",
-                    isRealTime = isRealTime
+                    userParam = RealTimeInAppParamHolder.city ?: ""
                 )
             }
             SpecialRuleParameter.TIMEZONE.key -> {
@@ -283,8 +268,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.timezone,
-                    isRealTime = isRealTime
+                    userParam = subscription?.timezone
                 )
             }
             SpecialRuleParameter.LANGUAGE.key -> {
@@ -292,8 +276,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.language,
-                    isRealTime = isRealTime
+                    userParam = subscription?.language
                 )
             }
             SpecialRuleParameter.SCREEN_WIDTH.key -> {
@@ -301,8 +284,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Resources.getSystem().displayMetrics.widthPixels.toString(),
-                    isRealTime = isRealTime
+                    userParam = Resources.getSystem().displayMetrics.widthPixels.toString()
                 )
             }
             SpecialRuleParameter.SCREEN_HEIGHT.key -> {
@@ -310,8 +292,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Resources.getSystem().displayMetrics.heightPixels.toString(),
-                    isRealTime = isRealTime
+                    userParam = Resources.getSystem().displayMetrics.heightPixels.toString()
                 )
             }
             SpecialRuleParameter.OS_VERSION.key -> {
@@ -319,8 +300,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.VERSION.RELEASE.toString(),
-                    isRealTime = isRealTime
+                    userParam = Build.VERSION.RELEASE.toString()
                 )
             }
             SpecialRuleParameter.OS.key -> {
@@ -328,8 +308,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = "android",
-                    isRealTime = isRealTime
+                    userParam = "android"
                 )
             }
             SpecialRuleParameter.DEVICE_NAME.key -> {
@@ -337,8 +316,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.DEVICE,
-                    isRealTime = isRealTime
+                    userParam = Build.DEVICE
                 )
             }
             SpecialRuleParameter.COUNTRY.key -> {
@@ -346,8 +324,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.country,
-                    isRealTime = isRealTime
+                    userParam = subscription?.country
                 )
             }
             SpecialRuleParameter.MONTH.key -> {
@@ -356,8 +333,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = dateFormat.format(Date()),
-                    isRealTime = isRealTime
+                    userParam = dateFormat.format(Date())
                 )
             }
             SpecialRuleParameter.WEEK_DAY.key -> {
@@ -366,8 +342,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = dateFormat.format(Date()),
-                    isRealTime = isRealTime
+                    userParam = dateFormat.format(Date())
                 )
             }
             SpecialRuleParameter.HOUR.key -> {
@@ -376,8 +351,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = dateFormat.format(Date()),
-                    isRealTime = isRealTime
+                    userParam = dateFormat.format(Date())
                 )
             }
             SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key -> {
@@ -385,8 +359,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.pageViewVisitCount.toString(),
-                    isRealTime = isRealTime
+                    userParam = RealTimeInAppParamHolder.pageViewVisitCount.toString()
                 )
             }
             SpecialRuleParameter.ANONYMOUS.key -> {
@@ -394,8 +367,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.contactKey.isNullOrEmpty().toString(),
-                    isRealTime = isRealTime
+                    userParam = subscription?.contactKey.isNullOrEmpty().toString()
                 )
             }
             SpecialRuleParameter.VISIT_DURATION.key -> {
@@ -404,8 +376,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = visitDurationInMinutes.toString(),
-                    isRealTime = isRealTime
+                    userParam = visitDurationInMinutes.toString()
                 )
             }
             SpecialRuleParameter.FIRST_VISIT.key -> {
@@ -419,8 +390,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = firstVisit,
-                    isRealTime = isRealTime
+                    userParam = firstVisit
                 )
             }
             SpecialRuleParameter.LAST_VISIT.key -> {
@@ -428,8 +398,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Prefs.lastSessionVisitTime.toString(),
-                    isRealTime = isRealTime
+                    userParam = Prefs.lastSessionVisitTime.toString()
                 )
             }
             SpecialRuleParameter.BRAND_NAME.key -> {
@@ -437,8 +406,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.BRAND,
-                    isRealTime = isRealTime
+                    userParam = Build.BRAND
                 )
             }
             SpecialRuleParameter.MODEL_NAME.key -> {
@@ -446,8 +414,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.MODEL,
-                    isRealTime = isRealTime
+                    userParam = Build.MODEL
                 )
             }
             SpecialRuleParameter.PUSH_PERMISSION.key -> {
@@ -455,8 +422,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = (subscription?.permission ?: true).toString(),
-                    isRealTime = isRealTime
+                    userParam = (subscription?.permission ?: true).toString()
                 )
             }
             SpecialRuleParameter.VISIT_COUNT.key -> {
@@ -473,14 +439,14 @@ object InAppMessageUtils {
                                 dataType = DataType.INT.name,
                                 ruleParam = listOf(visitCount.count.toString()),
                                 userParam = VisitCountManager.findVisitCountSinceDays(visitCount.timeAmount)
-                                    .toString(),
-                                isRealTime = isRealTime
+                                    .toString()
                             )
                         }
                     } else {
                         true
                     }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     true
                 }
             }
@@ -530,12 +496,7 @@ object InAppMessageUtils {
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = changeDateFormat(
-                            "yyyy-MM-dd'T'HH:mm:ss.SSS",
-                            "yyyy-MM-dd HH:mm:ss",
-                            DateTime.now().toLocalDateTime().toString()
-                        ),
-                        isRealTime = isRealTime
+                        userParam = changeDateFormat(DateTime.now().toLocalDateTime().toString())
                     )
 
                 } else {
@@ -543,8 +504,7 @@ object InAppMessageUtils {
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = getVisitorInfoAttrValue(criterion).toString(),
-                        isRealTime = isRealTime
+                        userParam = getVisitorInfoAttrValue(criterion).toString()
                     )
                 }
             }
@@ -555,8 +515,7 @@ object InAppMessageUtils {
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = params?.get(criterion.parameter),
-                        isRealTime = isRealTime
+                        userParam = params?.get(criterion.parameter)
                     )
                 } else {
                     return false
@@ -576,6 +535,7 @@ object InAppMessageUtils {
             val fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
             fmt.parseLocalDate(birthDateVisitorInfo)
         } catch (e: Exception) {
+            e.printStackTrace()
             return false
         }
 
@@ -619,7 +579,7 @@ object InAppMessageUtils {
 
     private fun checkVisitorInfoAttr(parameter: String): String? {
         try {
-            val attr: HashMap<String, String>? = visitorInfo?.attr
+            val attr: HashMap<String, String>? = Prefs.visitorInfo?.attr
             if (attr?.contains(parameter) == true) {
                 return parameter
             }
@@ -635,7 +595,7 @@ object InAppMessageUtils {
 
     private fun getVisitorInfoAttrValue(parameter: Criterion): String? {
         try {
-            val attr: HashMap<String, String>? = visitorInfo?.attr
+            val attr: HashMap<String, String>? = Prefs.visitorInfo?.attr
 
             if (attr?.contains(parameter.parameter) == true) {
                 return attr[parameter.parameter]
@@ -678,9 +638,7 @@ object InAppMessageUtils {
         operator: String,
         dataType: String,
         ruleParam: List<String>?,
-        userParam: String?,
-        isRealTime: Boolean,
-    ): Boolean {
+        userParam: String?): Boolean {
         if (ruleParam.isNullOrEmpty() || userParam == null) return false
         when (operator) {
             Operator.EQUALS.operator -> {
@@ -741,6 +699,7 @@ object InAppMessageUtils {
                                 return convertedRuleParam.firstOrNull { convertedUserParam <= it } == null
                             }
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             return true
                         }
                     }
@@ -765,6 +724,7 @@ object InAppMessageUtils {
                                 return convertedRuleParam.firstOrNull { convertedUserParam < it } == null
                             }
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             return true
                         }
                     }
@@ -789,6 +749,7 @@ object InAppMessageUtils {
                                 return convertedRuleParam.firstOrNull { convertedUserParam >= it } == null
                             }
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             return true
                         }
                     }
@@ -813,6 +774,7 @@ object InAppMessageUtils {
                                 return convertedRuleParam.firstOrNull { convertedUserParam > it } == null
                             }
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             return true
                         }
                     }
@@ -841,6 +803,7 @@ object InAppMessageUtils {
                                         (convertedUserParam in (lastRuleParam + 1) until firstRuleParam)
                             }
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             return true
                         }
                     }
@@ -869,6 +832,7 @@ object InAppMessageUtils {
                                         convertedUserParam !in (lastRuleParam + 1) until firstRuleParam
                             }
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             return true
                         }
                     }
@@ -935,12 +899,12 @@ object InAppMessageUtils {
     }
 
     private fun changeDateFormat(
-        currentFormat: String,
-        requiredFormat: String,
         dateString: String,
     ): String {
+        val currentFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
+        val requiredFormat = "yyyy-MM-dd HH:mm:ss"
         var result = ""
-        if (dateString.isNullOrEmpty()) {
+        if (dateString.isEmpty()) {
             return result
         }
         val formatterOld = SimpleDateFormat(currentFormat, Locale.getDefault())
