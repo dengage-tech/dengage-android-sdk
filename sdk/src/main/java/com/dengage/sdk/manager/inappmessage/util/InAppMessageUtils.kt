@@ -480,9 +480,11 @@ object InAppMessageUtils {
                     )
                 }
             }
-
             SpecialRuleParameter.EVENT_HISTORY.key -> {
                 EventHistoryUtils.operateEventHistoryFilter(criterion)
+            }
+            SpecialRuleParameter.CART.key -> {
+                CartUtils.operateCartFilter(criterion)
             }
 
             checkVisitorInfoAttr(criterion.parameter) -> {

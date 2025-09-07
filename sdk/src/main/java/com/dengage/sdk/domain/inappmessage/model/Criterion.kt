@@ -30,10 +30,3 @@ data class EventFilter(
     @SerializedName("comparison") val op: String,
     @SerializedName("values") val values: List<String>
 ) : Serializable
-
-// Keep the old Filter class for backward compatibility
-data class Filter(
-    @SerializedName("field") val field: String,
-    @SerializedName("op") val op: String,
-    @SerializedName("values") val values: List<String>
-) : Serializable
