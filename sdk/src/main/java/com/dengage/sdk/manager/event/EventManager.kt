@@ -276,8 +276,15 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         try {
             DengageLogger.verbose("sendCustomEvent method is called")
 
+            val subscription = Prefs.subscription
+
             val sessionId = SessionManager.getSessionId()
             eventDetails[EventKey.SESSION_ID.key] = sessionId
+
+
+            subscription?.deviceId?.let { eventDetails.put(EventKey.DN_DEVICE_ID.key, it) }
+            subscription?.contactKey?.let { eventDetails.put(EventKey.DN_CONTACT_KEY.key, it) }
+
 
             presenter.sendEvent(
                 accountId = Prefs.sdkParameters!!.accountId,
