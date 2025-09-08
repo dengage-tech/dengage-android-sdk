@@ -14,6 +14,7 @@ import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
+import com.dengage.sdk.ui.inappmessage.Mustache
 import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
@@ -85,14 +86,25 @@ class InAppMessageManager :
                         if (!"INLINE".equals(priorInAppMessage.data.content.type, ignoreCase = true) && inAppInlineElement != null) {
                            return
                         } else {
-                            showInAppMessage(
-                                activity,
-                                priorInAppMessage,
-                                resultCode,
-                                inAppInlineElement = inAppInlineElement,
-                                propertyId = propertyId
-                            )
+
+
+                            if (priorInAppMessage.data.content.params.html?.let { 
+                                Mustache.hasCouponSection(it) 
+                            } == true) {
+                                val couponContent = Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
+                                return
+                            } else {
+                                showInAppMessage(
+                                    activity,
+                                    priorInAppMessage,
+                                    resultCode,
+                                    inAppInlineElement = inAppInlineElement,
+                                    propertyId = propertyId
+                                )
+                            }
                         }
+
+
                     }
                 }
 
@@ -168,6 +180,9 @@ class InAppMessageManager :
             timer.schedule(object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
+
+
+
                         setInAppMessageAsDisplayed(
                             inAppMessage = inAppMessage
                         )
