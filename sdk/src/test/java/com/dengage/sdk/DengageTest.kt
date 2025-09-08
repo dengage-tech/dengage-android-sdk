@@ -27,6 +27,8 @@ class DengageTest {
     @Before
     fun setup() {
         ContextHolder.context = InstrumentationRegistry.getInstrumentation().context
+        // Reset Dengage initialization state before each test
+        Dengage.initialized = false
         // Clear cached data before each test
         Prefs.clientCart = null
         RealTimeInAppParamHolder.categoryPath = null
