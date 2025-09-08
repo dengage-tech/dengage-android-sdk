@@ -65,7 +65,7 @@ class EventHistoryUtilsTest {
             aggregateType = "COUNT",
             operator = "EQ",
             values = listOf("1"),
-            timeWindow = TimeWindow("TIME", "7", "DAY")
+            timeWindow = TimeWindow("TIME", "DAY", "7")
         )
 
         val result = EventHistoryUtils.operateEventHistoryFilter(criterion)
@@ -85,7 +85,7 @@ class EventHistoryUtilsTest {
             aggregateType = "COUNT",
             operator = "EQ",
             values = listOf("1"),
-            timeWindow = TimeWindow("TIME", "1", "HOUR")
+            timeWindow = TimeWindow("TIME", "HOUR", "1")
         )
 
         val result = EventHistoryUtils.operateEventHistoryFilter(criterion)
@@ -105,7 +105,7 @@ class EventHistoryUtilsTest {
             aggregateType = "COUNT",
             operator = "EQ",
             values = listOf("1"),
-            timeWindow = TimeWindow("TIME", "10", "MINUTE")
+            timeWindow = TimeWindow("TIME", "MINUTE", "10")
         )
 
         val result = EventHistoryUtils.operateEventHistoryFilter(criterion)
@@ -350,7 +350,7 @@ class EventHistoryUtilsTest {
             aggregateType = "COUNT",
             operator = "EQ",
             values = listOf("1"),
-            timeWindow = TimeWindow("TIME", "1", "UNKNOWN_UNIT")
+            timeWindow = TimeWindow("TIME", "UNKNOWN_UNIT", "1")
         )
 
         val result = EventHistoryUtils.operateEventHistoryFilter(criterion)
