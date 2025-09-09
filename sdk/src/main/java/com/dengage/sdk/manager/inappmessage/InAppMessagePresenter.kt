@@ -10,6 +10,7 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.manager.session.SessionManager
+import org.json.JSONObject
 
 class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>(),
     InAppMessageContract.Presenter {
@@ -25,6 +26,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val setRealTimeInAppMessageAsDisplayed by lazy { SetRealTimeInAppMessageAsDisplayed() }
     private val sendStoryEvent by lazy { SendStoryEvent() }
     private val getVisitorInfo by lazy { GetVisitorInfo() }
+    private val assignCoupon by lazy { AssignCoupon() }
 
     override fun getInAppMessages() {
         try {
@@ -231,6 +233,62 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         catch (_:Throwable){}
     }
 
+    override fun validateCoupon(
+        couponContent: String,
+        inAppMessageId: String,
+        onValidCoupon: (couponCode: String) -> Unit,
+        onInvalidCoupon: (errorMessage: String) -> Unit
+    ) {
+        try {
+            val sdkParameters = Prefs.sdkParameters
+            val subscription = Prefs.subscription
+            
+            if (sdkParameters?.accountName != null && subscription != null) {
+                assignCoupon.execute(this, callback(
+                    onStart = null,
+                    onResponse = { response ->
+                        if (response.isSuccessful && response.body() != null) {
+                            val couponCode = response.body()?.code
+                            if (!couponCode.isNullOrEmpty()) {
+                                onValidCoupon(couponCode)
+                            } else {
+                                onInvalidCoupon("Coupon code is empty")
+                            }
+                        } else {
+                            val errorMessage = try {
+                                response.errorBody()?.string()?.let { errorBody ->
+                                    val jsonObject = JSONObject(errorBody)
+                                    jsonObject.optString("message", "Unknown error")
+                                }
+                            } catch (e: Exception) {
+                                null
+                            } ?: "Failed to validate coupon. Response code: ${response.code()}"
+                            
+                            onInvalidCoupon(errorMessage)
+                        }
+                    },
+                    onError = { throwable ->
+                        val errorMessage = throwable.message ?: "Unknown error occurred during coupon validation"
+                        onInvalidCoupon(errorMessage)
+                    },
+                    onComplete = null
+                ), AssignCoupon.Params(
+                    accountId = sdkParameters.accountName,
+                    listKey = couponContent,
+                    contactKey = subscription.contactKey ?: "",
+                    deviceId = subscription.getSafeDeviceId(),
+                    campaignId = inAppMessageId
+                ))
+            } else {
+                onInvalidCoupon("Missing SDK parameters or subscription")
+            }
+        } catch (e: Exception) {
+            onInvalidCoupon("Exception occurred: ${e.message}")
+        } catch (t: Throwable) {
+            onInvalidCoupon("Throwable occurred: ${t.message}")
+        }
+    }
+
     override fun setInAppMessageAsDismissed(inAppMessage: InAppMessage) {
         val sdkParameters = Prefs.sdkParameters
         val subscription = Prefs.subscription
@@ -378,7 +436,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     }
 
     private fun isInAppAvailableInCache(): Boolean {
-        return Prefs.inAppMessages?.let { it.size > 0 } ?: false
+        return Prefs.inAppMessages?.isNotEmpty() ?: false
     }
 
     private fun shouldFetchVisitorInfo(): Boolean {

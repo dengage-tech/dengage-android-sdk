@@ -468,8 +468,7 @@ object Dengage {
             activity = activity,
             screenName = screenName,
             params = params,
-            resultCode,
-            isRealTime = true
+            resultCode
 
         )
     }

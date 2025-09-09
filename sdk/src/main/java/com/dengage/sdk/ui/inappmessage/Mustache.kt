@@ -20,6 +20,11 @@ object Mustache {
         return getCouponContents(template).firstOrNull()
     }
 
+    fun replaceCouponSections(template: String, couponCode: String): String {
+        val couponSectionRegex = "\\{\\{#coupon\\}\\}.*?\\{\\{/coupon\\}\\}".toRegex(RegexOption.DOT_MATCHES_ALL)
+        return couponSectionRegex.replace(template, couponCode)
+    }
+
     fun render(template: String, view: Any?): String {
         return try {
             val (tokens, _) = parseTokens(template, 0, stopTag = null)

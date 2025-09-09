@@ -1,9 +1,10 @@
 package com.dengage.sdk.manager.inappmessage
 
+import java.util.*
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.view.View
+import androidx.core.net.toUri
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
@@ -21,7 +22,6 @@ import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
-import java.util.*
 
 class InAppMessageManager :
     BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
@@ -44,7 +44,6 @@ class InAppMessageManager :
         screenName: String? = null,
         params: HashMap<String, String>? = null,
         resultCode: Int = -1,
-        isRealTime: Boolean = false,
         inAppInlineElement: InAppInlineElement? = null,
         propertyId: String? = "",
         hideIfNotFound: Boolean? = false,
@@ -79,7 +78,7 @@ class InAppMessageManager :
                             ignoreCase = true
                         )
                     ) {
-                        showAppStory(activity, priorInAppMessage, storiesListView)
+                        showAppStory(priorInAppMessage, storiesListView)
                     }
                 } else {
                     if(storiesListView == null) {
@@ -87,19 +86,38 @@ class InAppMessageManager :
                            return
                         } else {
 
-
                             if (priorInAppMessage.data.content.params.html?.let { 
                                 Mustache.hasCouponSection(it) 
                             } == true) {
-                                val couponContent = Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
-                                return
+                                val couponContent: String? = Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
+                                
+                                couponContent?.let { content ->
+                                    presenter.validateCoupon(
+                                        couponContent = content,
+                                        inAppMessageId = priorInAppMessage.id,
+                                        onValidCoupon = { couponCode ->
+                                            showInAppMessage(
+                                                activity,
+                                                priorInAppMessage,
+                                                resultCode,
+                                                inAppInlineElement = inAppInlineElement,
+                                                propertyId = propertyId,
+                                                couponCode = couponCode
+                                            )
+                                        },
+                                        onInvalidCoupon = { errorMessage ->
+                                            DengageLogger.error("Coupon validation failed: $errorMessage")
+                                        }
+                                    )
+                                }
                             } else {
                                 showInAppMessage(
                                     activity,
                                     priorInAppMessage,
                                     resultCode,
                                     inAppInlineElement = inAppInlineElement,
-                                    propertyId = propertyId
+                                    propertyId = propertyId,
+                                    couponCode = null
                                 )
                             }
                         }
@@ -172,7 +190,8 @@ class InAppMessageManager :
         inAppMessage: InAppMessage,
         resultCode: Int = -1,
         propertyId: String? = "",
-        inAppInlineElement: InAppInlineElement?
+        inAppInlineElement: InAppInlineElement?,
+        couponCode: String? = null
     ) {
         try {
             // set delay for showing in app message
@@ -212,12 +231,19 @@ class InAppMessageManager :
 
                         } else {
                             activity.startActivityForResult(
-                                InAppMessageActivity.newIntent(
-                                    activity, inAppMessage, resultCode
-                                ), resultCode
+                                if (couponCode != null) {
+                                    InAppMessageActivity.newIntent(
+                                        activity, inAppMessage, resultCode, couponCode
+                                    )
+                                } else {
+                                    InAppMessageActivity.newIntent(
+                                        activity, inAppMessage, resultCode
+                                    )
+                                }, resultCode
                             )
 
                             if (!inAppMessage.data.content.params.shouldAnimate) {
+                                @Suppress("DEPRECATION")
                                 activity.overridePendingTransition(0, 0)
                             }
                             InAppMessageActivity.inAppMessageCallback = this@InAppMessageManager
@@ -356,7 +382,7 @@ class InAppMessageManager :
         }
     }
 
-    private fun showAppStory(activity: Activity, inAppMessage: InAppMessage, storiesListView: StoriesListView) {
+    private fun showAppStory(inAppMessage: InAppMessage, storiesListView: StoriesListView) {
         val data = inAppMessage.data
         if(!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
             StoriesListView.inAppMessageCallback = this@InAppMessageManager
@@ -391,7 +417,7 @@ class InAppMessageManager :
             if(eventType == StoryEventType.STORY_CLICK) {
                 if (DengageUtils.isDeeplink(buttonUrl)) {
                     try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(buttonUrl))
+                        val intent = Intent(Intent.ACTION_VIEW, buttonUrl.toUri())
                         intent.putExtra("targetUrl", buttonUrl)
                         DengageUtils.sendBroadCast(intent.apply {
                             this.action = Constants.DEEPLINK_RETRIEVE_EVENT
@@ -400,7 +426,7 @@ class InAppMessageManager :
                         DengageLogger.error(e.message)
                     }
                 } else{
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(buttonUrl))
+                    val intent = Intent(Intent.ACTION_VIEW, buttonUrl.toUri())
                     intent.putExtra("targetUrl", buttonUrl)
                     ContextHolder.context.launchActivity(intent, buttonUrl)
                 }
