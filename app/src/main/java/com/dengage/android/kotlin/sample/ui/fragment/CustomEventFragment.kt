@@ -117,7 +117,7 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
                         "collection_id" to "vk90",
                         "color" to "red",
                         "shade_code" to "R12",
-                        "eligible" to true
+                        "eligible" to "true"
                     )
                 ),
                 CartItem(
@@ -133,7 +133,7 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
                         "brand" to "WCollection",
                         "size" to "M",
                         "material" to "cotton",
-                        "eligible" to true
+                        "eligible" to "true"
                     )
                 ),
                 CartItem(
@@ -149,7 +149,7 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
                         "brand" to "Nike",
                         "size" to "42",
                         "material" to "leather",
-                        "eligible" to false
+                        "eligible" to "false"
                     )
                 )
             )

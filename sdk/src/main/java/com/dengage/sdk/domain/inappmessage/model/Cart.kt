@@ -17,7 +17,7 @@ data class CartItem(
     @SerializedName("has_discount") val hasDiscount: Boolean?,
     @SerializedName("has_promotion") val hasPromotion: Boolean?,
     @SerializedName("quantity") val quantity: Int?,
-    @SerializedName("attributes") val attributes: Map<String, Any>?,
+    @SerializedName("attributes") val attributes: Map<String, String>?,
     // Calculated fields - these will be computed by the SDK
     @SerializedName("effective_price") val effectivePrice: Int = calculateEffectivePrice(price, discountedPrice, hasDiscount, hasPromotion),
     @SerializedName("line_total") val lineTotal: Int = calculateLineTotal(price, quantity),
