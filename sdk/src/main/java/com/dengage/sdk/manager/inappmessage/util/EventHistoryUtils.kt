@@ -38,6 +38,7 @@ object EventHistoryUtils {
                 !criterion.filters.isNullOrEmpty() -> {
                     applyEventFilters(eventsInWindow, criterion.filters, criterion.filtersLogicalOp)
                 }
+
                 else -> eventsInWindow
             }
 
@@ -50,18 +51,21 @@ object EventHistoryUtils {
                         event.eventDetails[field]?.toString()?.toDoubleOrNull() ?: 0.0
                     }
                 }
+
                 "MIN" -> {
                     val field = criterion.aggregateField ?: return false
                     filteredEvents.mapNotNull { event ->
                         event.eventDetails[field]?.toString()?.toDoubleOrNull()
                     }.minOrNull() ?: return false
                 }
+
                 "MAX" -> {
                     val field = criterion.aggregateField ?: return false
                     filteredEvents.mapNotNull { event ->
                         event.eventDetails[field]?.toString()?.toDoubleOrNull()
                     }.maxOrNull() ?: return false
                 }
+
                 "AVG" -> {
                     val field = criterion.aggregateField ?: return false
                     val values = filteredEvents.mapNotNull { event ->
@@ -70,12 +74,14 @@ object EventHistoryUtils {
                     if (values.isEmpty()) return false
                     values.average()
                 }
+
                 "DISTINCT_COUNT" -> {
                     val field = criterion.aggregateField ?: return false
                     filteredEvents.mapNotNull { event ->
                         event.eventDetails[field]?.toString()
                     }.distinct().size
                 }
+
                 else -> return false
             }
 
@@ -131,9 +137,9 @@ object EventHistoryUtils {
     }
 
     private fun applyEventFilter(event: ClientEvent, filter: EventFilter): Boolean {
-        val fieldValue = event.eventDetails[filter.field]?.toString() ?: return false
+        val fieldValue = event.eventDetails[filter.parameter]?.toString() ?: return false
 
-        return when (filter.op.uppercase()) {
+        return when (filter.comparison.uppercase()) {
             "EQUALS", "EQ" -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
             "NOT_EQUALS", "NE" -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
             "IN" -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
@@ -149,32 +155,95 @@ object EventHistoryUtils {
             "CONTAINS_ALL" -> filter.values.all { value ->
                 fieldValue.contains(value, ignoreCase = true)
             }
+
             "CONTAINS_ANY" -> filter.values.any { value ->
                 fieldValue.contains(value, ignoreCase = true)
             }
+
             "GREATER_THAN", "GT" -> {
-                val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
-                val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
-                numFieldValue > numFilterValue
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toIntOrNull() ?: return false
+                        numFieldValue > numFilterValue
+                    }
+
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
+                        numFieldValue > numFilterValue
+                    }
+
+                    else -> false
+                }
             }
+
             "GREATER_EQUAL", "GTE" -> {
-                val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
-                val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
-                numFieldValue >= numFilterValue
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toIntOrNull() ?: return false
+                        numFieldValue >= numFilterValue
+                    }
+
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
+                        numFieldValue >= numFilterValue
+                    }
+
+                    else -> false
+                }
             }
+
             "LESS_THAN", "LT" -> {
-                val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
-                val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
-                numFieldValue < numFilterValue
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toIntOrNull() ?: return false
+                        numFieldValue < numFilterValue
+                    }
+
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
+                        numFieldValue < numFilterValue
+                    }
+
+                    else -> false
+                }
             }
+
             "LESS_EQUAL", "LTE" -> {
-                val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
-                val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
-                numFieldValue <= numFilterValue
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toIntOrNull() ?: return false
+                        numFieldValue <= numFilterValue
+                    }
+
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
+                        numFieldValue <= numFilterValue
+                    }
+
+                    else -> false
+                }
             }
+
             "EXISTS" -> fieldValue.isNotEmpty()
             "NOT_EXISTS" -> fieldValue.isEmpty()
             else -> false
         }
     }
+
 }

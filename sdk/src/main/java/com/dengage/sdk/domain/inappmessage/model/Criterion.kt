@@ -26,7 +26,8 @@ data class TimeWindow(
 ) : Serializable
 
 data class EventFilter(
-    @SerializedName("parameter") val field: String,
-    @SerializedName("comparison") val op: String,
+    @SerializedName("parameter") val parameter: String,
+    @SerializedName("comparison") val comparison: String,
+    @SerializedName("dataType") val dataType: String,
     @SerializedName("values") val values: List<String>
 ) : Serializable

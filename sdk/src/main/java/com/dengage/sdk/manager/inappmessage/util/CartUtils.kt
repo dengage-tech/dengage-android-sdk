@@ -90,9 +90,9 @@ object CartUtils {
     }
 
     private fun applyCartFilter(item: CartItem, filter: EventFilter): Boolean {
-        val fieldValue = getFieldValue(item, filter.field) ?: return false
+        val fieldValue = getFieldValue(item, filter.parameter) ?: return false
 
-        return when (filter.op.uppercase()) {
+        return when (filter.comparison.uppercase()) {
             "EQUALS", "EQ" -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
             "NOT_EQUALS", "NE" -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
             "IN" -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
@@ -107,7 +107,7 @@ object CartUtils {
             "NOT_CONTAINS" -> !filter.values.any { fieldValue.contains(it, ignoreCase = true) }
             "CONTAINS_ALL" -> {
                 // Special case for category_path - check if all values are present in the path
-                if (filter.field == "category_path") {
+                if (filter.parameter == "category_path") {
                     filter.values.all { value ->
                         fieldValue.contains(value, ignoreCase = true)
                     }
