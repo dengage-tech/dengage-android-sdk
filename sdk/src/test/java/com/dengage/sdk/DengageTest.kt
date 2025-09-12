@@ -18,7 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import org.mockito.Mockito
+import io.mockk.*
 
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner::class)
@@ -349,7 +349,7 @@ class DengageTest {
                     "collection_id" to "vk90",
                     "color" to "red",
                     "shade_code" to "R12",
-                    "eligible" to true
+                    "eligible" to "true"
                 )
             ),
             createCartItem(
@@ -365,7 +365,7 @@ class DengageTest {
                     "brand" to "WCollection",
                     "size" to "M",
                     "material" to "cotton",
-                    "eligible" to true
+                    "eligible" to "true"
                 )
             )
         )
@@ -718,7 +718,7 @@ class DengageTest {
     @Test
     fun `init should set initialized to true with firebase app`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        val mockFirebaseApp = Mockito.mock(FirebaseApp::class.java)
+        val mockFirebaseApp = mockk<FirebaseApp>()
         
         Dengage.init(
             context = context,
@@ -732,7 +732,7 @@ class DengageTest {
     @Test
     fun `init should set initialized to true with hms manager`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        val mockHmsManager = Mockito.mock(IDengageHmsManager::class.java)
+        val mockHmsManager = mockk<IDengageHmsManager>()
         
         Dengage.init(
             context = context,
@@ -746,8 +746,8 @@ class DengageTest {
     @Test
     fun `init should set initialized to true with all parameters`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        val mockFirebaseApp = Mockito.mock(FirebaseApp::class.java)
-        val mockHmsManager = Mockito.mock(IDengageHmsManager::class.java)
+        val mockFirebaseApp = mockk<FirebaseApp>()
+        val mockHmsManager = mockk<IDengageHmsManager>()
         val apiUrlConfig = ApiUrlConfiguration(
             denEventApiUrl = "https://custom-event-api.dengage.com",
             denPushApiUrl = "https://custom-push-api.dengage.com",
@@ -954,7 +954,7 @@ class DengageTest {
         hasDiscount: Boolean? = null,
         hasPromotion: Boolean? = null,
         quantity: Int? = 1,
-        attributes: Map<String, Any>? = null
+        attributes: Map<String, String>? = null
     ): CartItem {
         return CartItem(
             productId = productId,

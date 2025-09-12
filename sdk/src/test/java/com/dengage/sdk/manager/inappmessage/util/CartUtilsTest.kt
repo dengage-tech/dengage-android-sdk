@@ -182,7 +182,7 @@ class CartUtilsTest {
         Prefs.clientCart = Cart(cartItems)
 
         val filters = listOf(
-            EventFilter("has_discount", "EQUALS", listOf("false"))
+            EventFilter("has_discount", "EQUALS", "TEXT", listOf("false"))
         )
 
         val criterion = createCriterion(
@@ -206,7 +206,7 @@ class CartUtilsTest {
         Prefs.clientCart = Cart(cartItems)
 
         val filters = listOf(
-            EventFilter("price", "GREATER_THAN", listOf("1000"))
+            EventFilter("price", "GREATER_THAN", "TEXT", listOf("1000"))
         )
 
         val criterion = createCriterion(
@@ -230,7 +230,7 @@ class CartUtilsTest {
         Prefs.clientCart = Cart(cartItems)
 
         val filters = listOf(
-            EventFilter("category_path", "CONTAINS_ALL", listOf("kozmetik", "parfum"))
+            EventFilter("category_path", "CONTAINS_ALL", "TEXT", listOf("kozmetik", "parfum"))
         )
 
         val criterion = createCriterion(
@@ -254,7 +254,7 @@ class CartUtilsTest {
         Prefs.clientCart = Cart(cartItems)
 
         val filters = listOf(
-            EventFilter("attributes.brand", "EQUALS", listOf("VakkoBeauty"))
+            EventFilter("attributes.brand", "EQUALS", "TEXT", listOf("VakkoBeauty"))
         )
 
         val criterion = createCriterion(
@@ -278,8 +278,8 @@ class CartUtilsTest {
         Prefs.clientCart = Cart(cartItems)
 
         val filters = listOf(
-            EventFilter("price", "GREATER_THAN", listOf("1000")),
-            EventFilter("has_discount", "EQUALS", listOf("false"))
+            EventFilter("price", "GREATER_THAN", "TEXT", listOf("1000")),
+            EventFilter("has_discount", "EQUALS", "TEXT", listOf("false"))
         )
 
         val criterion = createCriterion(
@@ -304,8 +304,8 @@ class CartUtilsTest {
         Prefs.clientCart = Cart(cartItems)
 
         val filters = listOf(
-            EventFilter("price", "GREATER_THAN", listOf("2000")),
-            EventFilter("has_discount", "EQUALS", listOf("false"))
+            EventFilter("price", "GREATER_THAN", "TEXT", listOf("2000")),
+            EventFilter("has_discount", "EQUALS", "TEXT", listOf("false"))
         )
 
         val criterion = createCriterion(
@@ -434,7 +434,7 @@ class CartUtilsTest {
         Prefs.clientCart = Cart(cartItems)
 
         val filters = listOf(
-            EventFilter("category_path", "LIKE", listOf("kozmetik"))
+            EventFilter("category_path", "LIKE", "TEXT", listOf("kozmetik"))
         )
 
         val criterion = createCriterion(
@@ -504,7 +504,7 @@ class CartUtilsTest {
         hasDiscount: Boolean? = null,
         hasPromotion: Boolean? = null,
         quantity: Int? = 1,
-        attributes: Map<String, Any>? = null
+        attributes: Map<String, String>? = null
     ): CartItem {
         return CartItem(
             productId = productId,
