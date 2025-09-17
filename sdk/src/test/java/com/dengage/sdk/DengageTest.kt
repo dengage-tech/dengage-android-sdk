@@ -324,7 +324,7 @@ class DengageTest {
     @Test
     fun `clearInAppDeviceInfo should clear all device info`() {
         Dengage.setInAppDeviceInfo("test_key", "test_value")
-        
+
         Dengage.clearInAppDeviceInfo()
 
         val deviceInfo = Dengage.getInAppDeviceInfo()
@@ -376,7 +376,7 @@ class DengageTest {
         val storedCart = Prefs.clientCart
         Assert.assertNotNull(storedCart)
         Assert.assertEquals(2, storedCart?.items?.size)
-        
+
         // Test first item (discounted)
         val firstItem = storedCart?.items?.get(0)
         Assert.assertEquals("LIPSTICK-001", firstItem?.productId)
@@ -385,7 +385,7 @@ class DengageTest {
         Assert.assertEquals(219800, firstItem?.effectiveLineTotal) // 109900 * 2
         Assert.assertEquals("kozmetik", firstItem?.categoryRoot)
         Assert.assertEquals("VakkoBeauty", firstItem?.attributes?.get("brand"))
-        
+
         // Test second item (not discounted)
         val secondItem = storedCart?.items?.get(1)
         Assert.assertEquals("TSHIRT-123", secondItem?.productId)
@@ -400,7 +400,13 @@ class DengageTest {
     fun `setCart should calculate cart summary correctly`() {
         val cartItems = listOf(
             createCartItem("123", price = 100000, quantity = 2), // 2000 TL
-            createCartItem("456", price = 150000, discountedPrice = 120000, hasDiscount = true, quantity = 1) // 1200 TL effective
+            createCartItem(
+                "456",
+                price = 150000,
+                discountedPrice = 120000,
+                hasDiscount = true,
+                quantity = 1
+            ) // 1200 TL effective
         )
         val cart = Cart(cartItems)
 
@@ -408,7 +414,7 @@ class DengageTest {
 
         val storedCart = Prefs.clientCart
         Assert.assertNotNull(storedCart)
-        
+
         val summary = storedCart?.summary
         Assert.assertNotNull(summary)
         Assert.assertEquals(2, summary?.linesCount) // 2 different products
@@ -420,9 +426,9 @@ class DengageTest {
     }
 
     @Test
-    fun `setCart should handle null or empty attributes`() {
+    fun `setCart should handle empty attributes`() {
         val cartItems = listOf(
-            createCartItem("123", price = 100000, attributes = null),
+            createCartItem("123", price = 100000, attributes = emptyMap()),
             createCartItem("456", price = 200000, attributes = emptyMap())
         )
         val cart = Cart(cartItems)
@@ -432,10 +438,10 @@ class DengageTest {
         val storedCart = Prefs.clientCart
         Assert.assertNotNull(storedCart)
         Assert.assertEquals(2, storedCart?.items?.size)
-        
+
         val firstItem = storedCart?.items?.get(0)
         Assert.assertNull(firstItem?.attributes?.get("any_key"))
-        
+
         val secondItem = storedCart?.items?.get(1)
         Assert.assertNull(secondItem?.attributes?.get("any_key"))
     }
@@ -461,7 +467,10 @@ class DengageTest {
         Assert.assertEquals(originalCart.items[0].categoryPath, retrievedCart.items[0].categoryPath)
         Assert.assertEquals(originalCart.items[0].price, retrievedCart.items[0].price)
         Assert.assertEquals(originalCart.items[0].quantity, retrievedCart.items[0].quantity)
-        Assert.assertEquals(originalCart.items[0].attributes?.get("test_attr"), retrievedCart.items[0].attributes?.get("test_attr"))
+        Assert.assertEquals(
+            originalCart.items[0].attributes["test_attr"],
+            retrievedCart.items[0].attributes["test_attr"]
+        )
     }
 
     @Test
@@ -472,7 +481,7 @@ class DengageTest {
                 price = index * 1000,
                 quantity = if (index % 2 == 0) 2 else 1,
                 hasDiscount = index % 3 == 0,
-                discountedPrice = if (index % 3 == 0) (index * 1000 * 0.8).toInt() else null
+                discountedPrice = if (index % 3 == 0) (index * 1000 * 0.8).toInt() else 0
             )
         }
         val cart = Cart(cartItems)
@@ -528,102 +537,102 @@ class DengageTest {
     @Test
     fun `init should set initialized to true with firebase integration key`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key"
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with huawei integration key`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             huaweiIntegrationKey = "test_huawei_key"
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with both integration keys`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             huaweiIntegrationKey = "test_huawei_key"
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with device configuration preference`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             deviceConfigurationPreference = DeviceConfigurationPreference.Google
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with custom device id`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             deviceId = "custom_device_id_123"
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with contact key`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             contactKey = "test_contact@example.com"
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with partner device id`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             partnerDeviceId = "partner_device_123"
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with notification priority configuration`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
@@ -637,20 +646,20 @@ class DengageTest {
             denGeofenceApiUrl = "https://custom-geofence-api.dengage.com",
             fetchRealTimeInAppApiUrl = "https://custom-realtime-api.dengage.com"
         )
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             apiUrlConfiguration = apiUrlConfig
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with geofence enabled`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         // When initForGeofence is true, the method might throw exception if metadata is missing
         // So we provide API URL configuration to avoid manifest metadata lookup
         val apiUrlConfig = ApiUrlConfiguration(
@@ -660,7 +669,7 @@ class DengageTest {
             denGeofenceApiUrl = "https://geofence-api.dengage.com",
             fetchRealTimeInAppApiUrl = "https://realtime-api.dengage.com"
         )
-        
+
         try {
             Dengage.init(
                 context = context,
@@ -668,20 +677,23 @@ class DengageTest {
                 apiUrlConfiguration = apiUrlConfig,
                 initForGeofence = true
             )
-            
+
             Assert.assertTrue(Dengage.initialized)
         } catch (e: RuntimeException) {
             // If geofence initialization fails due to missing metadata, 
             // we still expect the SDK to be marked as initialized
             println("error happened while calling Dengage.init: ${e.message}")
-            Assert.assertTrue("SDK should be initialized even if geofence fails", Dengage.initialized)
+            Assert.assertTrue(
+                "SDK should be initialized even if geofence fails",
+                Dengage.initialized
+            )
         }
     }
 
     @Test
     fun `init should handle geofence initialization without throwing exception when API config is provided`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         // Test that providing ApiUrlConfiguration prevents manifest metadata errors
         val apiUrlConfig = ApiUrlConfiguration(
             denEventApiUrl = "https://test-event-api.dengage.com",
@@ -690,7 +702,7 @@ class DengageTest {
             denGeofenceApiUrl = "https://test-geofence-api.dengage.com",
             fetchRealTimeInAppApiUrl = "https://test-realtime-api.dengage.com"
         )
-        
+
         // This should not throw an exception since we provide API URLs
         Dengage.init(
             context = context,
@@ -698,20 +710,20 @@ class DengageTest {
             apiUrlConfiguration = apiUrlConfig,
             initForGeofence = false // Set to false to avoid potential issues
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with disable open web url`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             disableOpenWebUrl = true
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
@@ -719,13 +731,13 @@ class DengageTest {
     fun `init should set initialized to true with firebase app`() {
         val context = InstrumentationRegistry.getInstrumentation().context
         val mockFirebaseApp = mockk<FirebaseApp>()
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
             firebaseApp = mockFirebaseApp
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
@@ -733,13 +745,13 @@ class DengageTest {
     fun `init should set initialized to true with hms manager`() {
         val context = InstrumentationRegistry.getInstrumentation().context
         val mockHmsManager = mockk<IDengageHmsManager>()
-        
+
         Dengage.init(
             context = context,
             huaweiIntegrationKey = "test_huawei_key",
             dengageHmsManager = mockHmsManager
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
@@ -755,7 +767,7 @@ class DengageTest {
             denGeofenceApiUrl = "https://custom-geofence-api.dengage.com",
             fetchRealTimeInAppApiUrl = "https://custom-realtime-api.dengage.com"
         )
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_firebase_key",
@@ -771,25 +783,25 @@ class DengageTest {
             apiUrlConfiguration = apiUrlConfig,
             initForGeofence = true
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set initialized to true with minimal parameters`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(context = context)
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should update context holder`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(context = context)
-        
+
         Assert.assertEquals(context, ContextHolder.context)
     }
 
@@ -797,102 +809,102 @@ class DengageTest {
     @Test
     fun `init should handle null integration keys gracefully`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = null,
             huaweiIntegrationKey = null
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should handle empty integration keys gracefully`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "",
             huaweiIntegrationKey = ""
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should set device configuration preference correctly`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         // Test Google preference
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_key",
             deviceConfigurationPreference = DeviceConfigurationPreference.Google
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
-        
+
         // Test Huawei preference  
         Dengage.init(
             context = context,
             huaweiIntegrationKey = "test_key",
             deviceConfigurationPreference = DeviceConfigurationPreference.Huawei
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should handle notification priority configurations`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         // Test default priority
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "test_key",
             notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
-        
+
         // Test high priority
         Dengage.init(
             context = context,
-            firebaseIntegrationKey = "test_key", 
+            firebaseIntegrationKey = "test_key",
             notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should handle multiple initialization calls`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         // First init
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "first_key"
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
-        
+
         // Second init - should remain initialized
         Dengage.init(
             context = context,
             firebaseIntegrationKey = "second_key"
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     @Test
     fun `init should work with only context parameter`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         Dengage.init(context = context)
-        
+
         Assert.assertTrue(Dengage.initialized)
         Assert.assertEquals(context, ContextHolder.context)
     }
@@ -902,12 +914,12 @@ class DengageTest {
         val context = InstrumentationRegistry.getInstrumentation().context
         val apiUrlConfig = ApiUrlConfiguration(
             denEventApiUrl = "https://test-event-api.dengage.com",
-            denPushApiUrl = "https://test-push-api.dengage.com", 
+            denPushApiUrl = "https://test-push-api.dengage.com",
             denInAppApiUrl = "https://test-inapp-api.dengage.com",
             denGeofenceApiUrl = "https://test-geofence-api.dengage.com",
             fetchRealTimeInAppApiUrl = "https://test-realtime-api.dengage.com"
         )
-        
+
         // Test comprehensive configuration
         Dengage.init(
             context = context,
@@ -921,7 +933,7 @@ class DengageTest {
             apiUrlConfiguration = apiUrlConfig,
             initForGeofence = false
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
         Assert.assertEquals(context, ContextHolder.context)
     }
@@ -929,7 +941,7 @@ class DengageTest {
     @Test
     fun `init should handle edge case parameters`() {
         val context = InstrumentationRegistry.getInstrumentation().context
-        
+
         // Test with extreme values
         Dengage.init(
             context = context,
@@ -940,21 +952,21 @@ class DengageTest {
             disableOpenWebUrl = null, // null boolean
             initForGeofence = false
         )
-        
+
         Assert.assertTrue(Dengage.initialized)
     }
 
     // Helper method to create cart items for testing
     private fun createCartItem(
         productId: String,
-        productVariantId: String? = null,
-        categoryPath: String? = null,
-        price: Int? = null,
-        discountedPrice: Int? = null,
-        hasDiscount: Boolean? = null,
-        hasPromotion: Boolean? = null,
-        quantity: Int? = 1,
-        attributes: Map<String, String>? = null
+        productVariantId: String = "",
+        categoryPath: String = "",
+        price: Int = 0,
+        discountedPrice: Int = 0,
+        hasDiscount: Boolean = false,
+        hasPromotion: Boolean = false,
+        quantity: Int = 0,
+        attributes: Map<String, String> = emptyMap()
     ): CartItem {
         return CartItem(
             productId = productId,
