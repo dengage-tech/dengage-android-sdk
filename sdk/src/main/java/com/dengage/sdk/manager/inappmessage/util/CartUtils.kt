@@ -93,10 +93,90 @@ object CartUtils {
         val fieldValue = getFieldValue(item, filter.parameter) ?: return false
 
         return when (filter.comparison.uppercase()) {
-            "EQUALS", "EQ" -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
-            "NOT_EQUALS", "NE" -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
-            "IN" -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
-            "NOT_IN" -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+            "EQUALS", "EQ" -> {
+                when (filter.dataType.uppercase()) {
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        filter.values.any { value ->
+                            val boolFilterValue = value.toBooleanStrictOrNull() ?: value.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                            boolFieldValue == boolFilterValue
+                        }
+                    }
+
+                    else -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+                }
+            }
+
+            "NOT_EQUALS", "NE" -> {
+                when (filter.dataType.uppercase()) {
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        !filter.values.any { value ->
+                            val boolFilterValue = value.toBooleanStrictOrNull() ?: value.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                            boolFieldValue == boolFilterValue
+                        }
+                    }
+
+                    else -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+                }
+            }
+
+            "IN" -> {
+                when (filter.dataType.uppercase()) {
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        filter.values.any { value ->
+                            val boolFilterValue = value.toBooleanStrictOrNull() ?: value.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                            boolFieldValue == boolFilterValue
+                        }
+                    }
+
+                    else -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+                }
+            }
+
+            "NOT_IN" -> {
+                when (filter.dataType.uppercase()) {
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        !filter.values.any { value ->
+                            val boolFilterValue = value.toBooleanStrictOrNull() ?: value.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                            boolFieldValue == boolFilterValue
+                        }
+                    }
+
+                    else -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+                }
+            }
+
             "LIKE" -> filter.values.any { fieldValue.contains(it, ignoreCase = true) }
             "NOT_LIKE" -> !filter.values.any { fieldValue.contains(it, ignoreCase = true) }
             "STARTS_WITH" -> filter.values.any { fieldValue.startsWith(it, ignoreCase = true) }
@@ -125,27 +205,140 @@ object CartUtils {
             }
 
             "GREATER_THAN", "GT" -> {
-                val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
-                val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
-                numFieldValue > numFilterValue
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toIntOrNull() ?: return false
+                        numFieldValue > numFilterValue
+                    }
+
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
+                        numFieldValue > numFilterValue
+                    }
+
+                    "BOOL" -> {
+                        // For boolean: true > false (true = 1, false = 0)
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        val boolFilterValue = filter.values.firstOrNull()?.let { value ->
+                            value.toBooleanStrictOrNull() ?: value.equals("true", ignoreCase = true)
+                        } ?: return false
+                        val fieldInt = if (boolFieldValue) 1 else 0
+                        val filterInt = if (boolFilterValue) 1 else 0
+                        fieldInt > filterInt
+                    }
+
+                    else -> false
+                }
             }
 
             "GREATER_EQUAL", "GTE" -> {
-                val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
-                val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
-                numFieldValue >= numFilterValue
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toIntOrNull() ?: return false
+                        numFieldValue >= numFilterValue
+                    }
+
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
+                        numFieldValue >= numFilterValue
+                    }
+
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        val boolFilterValue = filter.values.firstOrNull()?.let { value ->
+                            value.toBooleanStrictOrNull() ?: value.equals("true", ignoreCase = true)
+                        } ?: return false
+                        val fieldInt = if (boolFieldValue) 1 else 0
+                        val filterInt = if (boolFilterValue) 1 else 0
+                        fieldInt >= filterInt
+                    }
+
+                    else -> false
+                }
             }
 
             "LESS_THAN", "LT" -> {
-                val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
-                val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
-                numFieldValue < numFilterValue
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toIntOrNull() ?: return false
+                        numFieldValue < numFilterValue
+                    }
+
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
+                        numFieldValue < numFilterValue
+                    }
+
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        val boolFilterValue = filter.values.firstOrNull()?.let { value ->
+                            value.toBooleanStrictOrNull() ?: value.equals("true", ignoreCase = true)
+                        } ?: return false
+                        val fieldInt = if (boolFieldValue) 1 else 0
+                        val filterInt = if (boolFilterValue) 1 else 0
+                        fieldInt < filterInt
+                    }
+
+                    else -> false
+                }
             }
 
             "LESS_EQUAL", "LTE" -> {
-                val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
-                val numFilterValue = filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
-                numFieldValue <= numFilterValue
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toIntOrNull() ?: return false
+                        numFieldValue <= numFilterValue
+                    }
+
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        val numFilterValue =
+                            filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
+                        numFieldValue <= numFilterValue
+                    }
+
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        val boolFilterValue = filter.values.firstOrNull()?.let { value ->
+                            value.toBooleanStrictOrNull() ?: value.equals("true", ignoreCase = true)
+                        } ?: return false
+                        val fieldInt = if (boolFieldValue) 1 else 0
+                        val filterInt = if (boolFilterValue) 1 else 0
+                        fieldInt <= filterInt
+                    }
+
+                    else -> false
+                }
             }
 
             "EXISTS" -> fieldValue.isNotEmpty()
@@ -159,11 +352,11 @@ object CartUtils {
             "product_id" -> item.productId
             "product_variant_id" -> item.productVariantId
             "category_path" -> item.categoryPath
-            "price" -> item.price?.toString()
-            "discounted_price" -> item.discountedPrice?.toString()
-            "has_discount" -> item.hasDiscount?.toString()
-            "has_promotion" -> item.hasPromotion?.toString()
-            "quantity" -> item.quantity?.toString()
+            "price" -> item.price.toString()
+            "discounted_price" -> item.discountedPrice.toString()
+            "has_discount" -> item.hasDiscount.toString()
+            "has_promotion" -> item.hasPromotion.toString()
+            "quantity" -> item.quantity.toString()
             "effective_price" -> item.effectivePrice.toString()
             "line_total" -> item.lineTotal.toString()
             "discounted_line_total" -> item.discountedLineTotal.toString()
@@ -173,9 +366,9 @@ object CartUtils {
                 // Handle attributes with dot notation (e.g., "attributes.brand")
                 if (field.startsWith("attributes.")) {
                     val attributeKey = field.removePrefix("attributes.")
-                    item.attributes?.get(attributeKey)?.toString()
+                    item.attributes[attributeKey]
                 } else {
-                    item.attributes?.get(field)?.toString()
+                    item.attributes[field]
                 }
             }
         }
@@ -191,9 +384,9 @@ object CartUtils {
     private fun getSumValue(items: List<CartItem>, field: String): Double {
         return items.sumOf { item ->
             when (field) {
-                "price" -> item.price?.toDouble() ?: 0.0
-                "discounted_price" -> item.discountedPrice?.toDouble() ?: 0.0
-                "quantity" -> item.quantity?.toDouble() ?: 0.0
+                "price" -> item.price.toDouble()
+                "discounted_price" -> item.discountedPrice.toDouble()
+                "quantity" -> item.quantity.toDouble()
                 "effective_price" -> item.effectivePrice.toDouble()
                 "line_total" -> item.lineTotal.toDouble()
                 "discounted_line_total" -> item.discountedLineTotal.toDouble()
@@ -209,9 +402,9 @@ object CartUtils {
     private fun getMinValue(items: List<CartItem>, field: String): Double {
         val values = items.mapNotNull { item ->
             when (field) {
-                "price" -> item.price?.toDouble()
-                "discounted_price" -> item.discountedPrice?.toDouble()
-                "quantity" -> item.quantity?.toDouble()
+                "price" -> item.price.toDouble()
+                "discounted_price" -> item.discountedPrice.toDouble()
+                "quantity" -> item.quantity.toDouble()
                 "effective_price" -> item.effectivePrice.toDouble()
                 "line_total" -> item.lineTotal.toDouble()
                 "discounted_line_total" -> item.discountedLineTotal.toDouble()
@@ -228,9 +421,9 @@ object CartUtils {
     private fun getMaxValue(items: List<CartItem>, field: String): Double {
         val values = items.mapNotNull { item ->
             when (field) {
-                "price" -> item.price?.toDouble()
-                "discounted_price" -> item.discountedPrice?.toDouble()
-                "quantity" -> item.quantity?.toDouble()
+                "price" -> item.price.toDouble()
+                "discounted_price" -> item.discountedPrice.toDouble()
+                "quantity" -> item.quantity.toDouble()
                 "effective_price" -> item.effectivePrice.toDouble()
                 "line_total" -> item.lineTotal.toDouble()
                 "discounted_line_total" -> item.discountedLineTotal.toDouble()

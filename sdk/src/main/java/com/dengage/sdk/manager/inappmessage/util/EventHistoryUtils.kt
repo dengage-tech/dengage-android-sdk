@@ -140,10 +140,90 @@ object EventHistoryUtils {
         val fieldValue = event.eventDetails[filter.parameter]?.toString() ?: return false
 
         return when (filter.comparison.uppercase()) {
-            "EQUALS", "EQ" -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
-            "NOT_EQUALS", "NE" -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
-            "IN" -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
-            "NOT_IN" -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+            "EQUALS", "EQ" -> {
+                when (filter.dataType.uppercase()) {
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        filter.values.any { value ->
+                            val boolFilterValue = value.toBooleanStrictOrNull() ?: value.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                            boolFieldValue == boolFilterValue
+                        }
+                    }
+
+                    else -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+                }
+            }
+
+            "NOT_EQUALS", "NE" -> {
+                when (filter.dataType.uppercase()) {
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        !filter.values.any { value ->
+                            val boolFilterValue = value.toBooleanStrictOrNull() ?: value.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                            boolFieldValue == boolFilterValue
+                        }
+                    }
+
+                    else -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+                }
+            }
+
+            "IN" -> {
+                when (filter.dataType.uppercase()) {
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        filter.values.any { value ->
+                            val boolFilterValue = value.toBooleanStrictOrNull() ?: value.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                            boolFieldValue == boolFilterValue
+                        }
+                    }
+
+                    else -> filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+                }
+            }
+
+            "NOT_IN" -> {
+                when (filter.dataType.uppercase()) {
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        !filter.values.any { value ->
+                            val boolFilterValue = value.toBooleanStrictOrNull() ?: value.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                            boolFieldValue == boolFilterValue
+                        }
+                    }
+
+                    else -> !filter.values.any { it.equals(fieldValue, ignoreCase = true) }
+                }
+            }
+
             "LIKE" -> filter.values.any { fieldValue.contains(it, ignoreCase = true) }
             "NOT_LIKE" -> !filter.values.any { fieldValue.contains(it, ignoreCase = true) }
             "STARTS_WITH" -> filter.values.any { fieldValue.startsWith(it, ignoreCase = true) }
@@ -176,6 +256,21 @@ object EventHistoryUtils {
                         numFieldValue > numFilterValue
                     }
 
+                    "BOOL" -> {
+                        // For boolean: true > false (true = 1, false = 0)
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        val boolFilterValue = filter.values.firstOrNull()?.let { value ->
+                            value.toBooleanStrictOrNull() ?: value.equals("true", ignoreCase = true)
+                        } ?: return false
+                        val fieldInt = if (boolFieldValue) 1 else 0
+                        val filterInt = if (boolFilterValue) 1 else 0
+                        fieldInt > filterInt
+                    }
+
                     else -> false
                 }
             }
@@ -194,6 +289,20 @@ object EventHistoryUtils {
                         val numFilterValue =
                             filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
                         numFieldValue >= numFilterValue
+                    }
+
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        val boolFilterValue = filter.values.firstOrNull()?.let { value ->
+                            value.toBooleanStrictOrNull() ?: value.equals("true", ignoreCase = true)
+                        } ?: return false
+                        val fieldInt = if (boolFieldValue) 1 else 0
+                        val filterInt = if (boolFilterValue) 1 else 0
+                        fieldInt >= filterInt
                     }
 
                     else -> false
@@ -216,6 +325,20 @@ object EventHistoryUtils {
                         numFieldValue < numFilterValue
                     }
 
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        val boolFilterValue = filter.values.firstOrNull()?.let { value ->
+                            value.toBooleanStrictOrNull() ?: value.equals("true", ignoreCase = true)
+                        } ?: return false
+                        val fieldInt = if (boolFieldValue) 1 else 0
+                        val filterInt = if (boolFilterValue) 1 else 0
+                        fieldInt < filterInt
+                    }
+
                     else -> false
                 }
             }
@@ -234,6 +357,20 @@ object EventHistoryUtils {
                         val numFilterValue =
                             filter.values.firstOrNull()?.toDoubleOrNull() ?: return false
                         numFieldValue <= numFilterValue
+                    }
+
+                    "BOOL" -> {
+                        val boolFieldValue =
+                            fieldValue.toBooleanStrictOrNull() ?: fieldValue.equals(
+                                "true",
+                                ignoreCase = true
+                            )
+                        val boolFilterValue = filter.values.firstOrNull()?.let { value ->
+                            value.toBooleanStrictOrNull() ?: value.equals("true", ignoreCase = true)
+                        } ?: return false
+                        val fieldInt = if (boolFieldValue) 1 else 0
+                        val filterInt = if (boolFilterValue) 1 else 0
+                        fieldInt <= filterInt
                     }
 
                     else -> false
