@@ -26,8 +26,6 @@ class SdkParametersTest {
         val surveyCheckEndpoint = "endpoint"
         val eventMappings = listOf(EventMapping(
             eventTableName = "eventTableName",
-            enableClientHistory = true,
-            clientHistoryOptions = ClientHistoryOptions(maxEventCount = 3, timeWindowInMinutes = 30),
             eventTypeDefinitions = listOf(EventTypeDefinition(
                 eventTypeId = 30,
                 eventType = "eventType",
@@ -36,7 +34,9 @@ class SdkParametersTest {
                     fieldName = "fieldName",
                     operator = "OR",
                     values = listOf("value1", "value2")
-                ))
+                )),
+                enableClientHistory = true,
+                clientHistoryOptions = ClientHistoryOptions(maxEventCount = 3, timeWindowInMinutes = 30)
             ))
         ))
 

@@ -149,7 +149,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             }
             copyData[EventKey.EVENT_TYPE.key] = EventType.CANCEL.type
             if (copyData.containsKey(EventKey.TOTAL_AMOUNT.key)) {
-                if(copyData[EventKey.TOTAL_AMOUNT.key].toString().toIntOrNull()!=null) {
+                if (copyData[EventKey.TOTAL_AMOUNT.key].toString().toIntOrNull() != null) {
                     val totalAmount: Int = copyData[EventKey.TOTAL_AMOUNT.key] as Int
                     copyData[EventKey.TOTAL_AMOUNT.key] = totalAmount.unaryMinus()
                 }
@@ -165,7 +165,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                             val toString = copyData[EventKey.ORDER_ID.key].toString()
                             product[EventKey.ORDER_ID.key] =
                                 toString
-                            product[EventKey.EVENT_TYPE.key] =  EventType.CANCEL.type
+                            product[EventKey.EVENT_TYPE.key] = EventType.CANCEL.type
                         }
                         sendDeviceEvent(EventTable.ORDER_EVENTS_DETAIL.tableName, product)
                     }
@@ -201,7 +201,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                         if (copyData.containsKey(EventKey.ORDER_ID.key)) {
                             product[EventKey.ORDER_ID.key] =
                                 copyData[EventKey.ORDER_ID.key].toString()
-                            product[EventKey.EVENT_TYPE.key] =  EventType.ORDER.type
+                            product[EventKey.EVENT_TYPE.key] = EventType.ORDER.type
                         }
                         sendDeviceEvent(EventTable.ORDER_EVENTS_DETAIL.tableName, product)
                     }
@@ -302,13 +302,13 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         tableName: String,
         eventDetails: HashMap<String, Any>
     ) {
-        try{
-        DengageLogger.verbose("sendDeviceEvent method is called")
-        sendCustomEvent(
-            tableName = tableName,
-            key = Prefs.subscription?.getSafeDeviceId()!!,
-            eventDetails = eventDetails
-        )
+        try {
+            DengageLogger.verbose("sendDeviceEvent method is called")
+            sendCustomEvent(
+                tableName = tableName,
+                key = Prefs.subscription?.getSafeDeviceId()!!,
+                eventDetails = eventDetails
+            )
         } catch (e: Exception) {
             DengageLogger.error(e.message)
         }
@@ -414,56 +414,69 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     override fun eventSent(tableName: String, key: String?, eventDetails: Map<String, Any>) {
         try {
             val sdkParameters = Prefs.sdkParameters ?: return
-            
+
             // Find matching event mapping
-            val eventMapping = sdkParameters.eventMappings?.find { it.eventTableName == tableName } ?: return
-            
-            // Check if client history is enabled
-            if (eventMapping.enableClientHistory != true) return
-            
-            // Get client history options
-            val clientHistoryOptions = eventMapping.clientHistoryOptions ?: return
-            val maxEventCount = clientHistoryOptions.maxEventCount ?: Int.MAX_VALUE
-            val timeWindowInMinutes = clientHistoryOptions.timeWindowInMinutes ?: Int.MAX_VALUE
-            
+            val eventMapping =
+                sdkParameters.eventMappings?.find { it.eventTableName == tableName } ?: return
+
             // Check event type definitions
             val eventTypeDefinitions = eventMapping.eventTypeDefinitions ?: return
-            
+
             // Check if the event meets the criteria from eventTypeDefinitions
             val matchingEventType = eventTypeDefinitions.find { eventTypeDefinition ->
+                // Check if client history is enabled for this event type definition
+                if (eventTypeDefinition.enableClientHistory != true) return@find false
+
                 // Check event type
                 val eventType = eventDetails[EventKey.EVENT_TYPE.key] as? String ?: ""
-                
+
                 if (eventTypeDefinition.eventType != null && eventTypeDefinition.eventType != eventType && eventTypeDefinition.eventType.isNotEmpty()) {
                     return@find false
                 }
-                
+
                 // If there's only one eventTypeDefinition, skip filter condition check
                 if (eventTypeDefinitions.size == 1) {
                     return@find true
                 }
-                
+
                 // Check filter conditions
                 val filterConditions = eventTypeDefinition.filterConditions
                 if (filterConditions.isNullOrEmpty()) {
                     return@find true
                 }
-                
+
                 val logicOperator = eventTypeDefinition.logicOperator ?: "AND"
 
                 when (logicOperator) {
                     "AND" -> filterConditions.all { condition ->
-                        checkFilterCondition(condition.fieldName, condition.operator, condition.values, eventDetails)
+                        checkFilterCondition(
+                            condition.fieldName,
+                            condition.operator,
+                            condition.values,
+                            eventDetails
+                        )
                     }
+
                     "OR" -> filterConditions.any { condition ->
-                        checkFilterCondition(condition.fieldName, condition.operator, condition.values, eventDetails)
+                        checkFilterCondition(
+                            condition.fieldName,
+                            condition.operator,
+                            condition.values,
+                            eventDetails
+                        )
                     }
+
                     else -> false
                 }
             }
-            
+
             // If no matching event type definition, don't store the event
             if (matchingEventType == null) return
+
+            // Get client history options from the matching event type definition
+            val clientHistoryOptions = matchingEventType.clientHistoryOptions ?: return
+            val maxEventCount = clientHistoryOptions.maxEventCount ?: Int.MAX_VALUE
+            val timeWindowInMinutes = clientHistoryOptions.timeWindowInMinutes ?: Int.MAX_VALUE
 
             // Get the current client events for this table
             val clientEvents = Prefs.clientEvents
@@ -479,27 +492,30 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             )
 
             eventTypeEvents.add(clientEvent)
-            
+
             // Filter out events older than timeWindowInMinutes
-            val timeThreshold = System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(timeWindowInMinutes.toLong())
-            val filteredEvents = eventTypeEvents.filter { it.timestamp >= timeThreshold }.toMutableList()
-            
+            val timeThreshold =
+                System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(timeWindowInMinutes.toLong())
+            val filteredEvents =
+                eventTypeEvents.filter { it.timestamp >= timeThreshold }.toMutableList()
+
             // Keep only the latest maxEventCount events
             val finalEvents = if (filteredEvents.size > maxEventCount) {
-                filteredEvents.sortedByDescending { it.timestamp }.take(maxEventCount).toMutableList()
+                filteredEvents.sortedByDescending { it.timestamp }.take(maxEventCount)
+                    .toMutableList()
             } else {
                 filteredEvents
             }
 
             clientEvents[eventType] = finalEvents
             Prefs.clientEvents = clientEvents
-            
+
             DengageLogger.debug("Client Event stored for table: $tableName for eventType: $eventType, current count: ${finalEvents.size}")
         } catch (e: Exception) {
             DengageLogger.error("Error storing event: ${e.message}")
         }
     }
-    
+
     private fun checkFilterCondition(
         fieldName: String?,
         operatorValue: String?,
@@ -507,22 +523,34 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         eventDetails: Map<String, Any>
     ): Boolean {
         if (fieldName.isNullOrEmpty() || operatorValue == null) return true
-        
+
         val fieldValue = eventDetails[fieldName]?.toString() ?: return false
-        
+
         val operator = FilterOperator.fromValue(operatorValue) ?: return false
-        
+
         return when (operator) {
             FilterOperator.EQUALS -> values?.firstOrNull() == fieldValue
             FilterOperator.NOT_EQUALS -> values?.firstOrNull() != fieldValue
             FilterOperator.IN -> values?.contains(fieldValue) == true
             FilterOperator.NOT_IN -> values?.contains(fieldValue) != true
-            FilterOperator.LIKE -> values?.firstOrNull()?.let { fieldValue.contains(it, ignoreCase = true) } ?: false
-            FilterOperator.NOT_LIKE -> values?.firstOrNull()?.let { !fieldValue.contains(it, ignoreCase = true) } ?: true
-            FilterOperator.STARTS_WITH -> values?.firstOrNull()?.let { fieldValue.startsWith(it, ignoreCase = true) } ?: false
-            FilterOperator.NOT_STARTS_WITH -> values?.firstOrNull()?.let { !fieldValue.startsWith(it, ignoreCase = true) } ?: true
-            FilterOperator.ENDS_WITH -> values?.firstOrNull()?.let { fieldValue.endsWith(it, ignoreCase = true) } ?: false
-            FilterOperator.NOT_ENDS_WITH -> values?.firstOrNull()?.let { !fieldValue.endsWith(it, ignoreCase = true) } ?: true
+            FilterOperator.LIKE -> values?.firstOrNull()
+                ?.let { fieldValue.contains(it, ignoreCase = true) } ?: false
+
+            FilterOperator.NOT_LIKE -> values?.firstOrNull()
+                ?.let { !fieldValue.contains(it, ignoreCase = true) } ?: true
+
+            FilterOperator.STARTS_WITH -> values?.firstOrNull()
+                ?.let { fieldValue.startsWith(it, ignoreCase = true) } ?: false
+
+            FilterOperator.NOT_STARTS_WITH -> values?.firstOrNull()
+                ?.let { !fieldValue.startsWith(it, ignoreCase = true) } ?: true
+
+            FilterOperator.ENDS_WITH -> values?.firstOrNull()
+                ?.let { fieldValue.endsWith(it, ignoreCase = true) } ?: false
+
+            FilterOperator.NOT_ENDS_WITH -> values?.firstOrNull()
+                ?.let { !fieldValue.endsWith(it, ignoreCase = true) } ?: true
+
             FilterOperator.GREATER_THAN -> try {
                 val numFieldValue = fieldValue.toDouble()
                 values?.firstOrNull()?.toDouble()?.let { numFieldValue > it } ?: false
@@ -530,6 +558,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
+
             FilterOperator.GREATER_EQUAL -> try {
                 val numFieldValue = fieldValue.toDouble()
                 values?.firstOrNull()?.toDouble()?.let { numFieldValue >= it } ?: false
@@ -537,6 +566,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
+
             FilterOperator.LESS_THAN -> try {
                 val numFieldValue = fieldValue.toDouble()
                 values?.firstOrNull()?.toDouble()?.let { numFieldValue < it } ?: false
@@ -544,6 +574,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
+
             FilterOperator.LESS_EQUAL -> try {
                 val numFieldValue = fieldValue.toDouble()
                 values?.firstOrNull()?.toDouble()?.let { numFieldValue <= it } ?: false
@@ -551,6 +582,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
+
             FilterOperator.BETWEEN -> try {
                 if ((values?.size ?: 0) < 2) return false
                 val numFieldValue = fieldValue.toDouble()
@@ -561,6 +593,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
+
             FilterOperator.NOT_BETWEEN -> try {
                 if ((values?.size ?: 0) < 2) return false
                 val numFieldValue = fieldValue.toDouble()
@@ -571,6 +604,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 DengageLogger.error("Error checkFilterCondition: ${e.message}")
                 false
             }
+
             FilterOperator.NULL -> fieldValue == null || fieldValue.isEmpty()
             FilterOperator.NOT_NULL -> fieldValue != null && fieldValue.isNotEmpty()
             FilterOperator.EMPTY -> fieldValue.isEmpty()
