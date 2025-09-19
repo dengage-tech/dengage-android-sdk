@@ -30,7 +30,7 @@
                     android:layout_width="0dp"
                     android:layout_height="@dimen/base_component_height"
                     android:layout_weight="1"
-                    android:text="Add Parameter" />
+                    android:text="@string/add_parameter" />
 
             </LinearLayout>
 

@@ -63,4 +63,11 @@
     <string name="read_status">Read: %1$s</string>
     <string name="receive_date_time">Receive Date &amp; Time: %1$s</string>
     <string name="inbox">Inbox</string>
+    <string name="event_history">Event History</string>
+    <string name="cart">Cart</string>
+    <string name="app_story">App Story</string>
+    <string name="real_time_inapp_filters">Real Time InApp Filters</string>
+    <string name="inapp_inline">InApp Inline</string>
+    <string name="add_parameter">Add Parameter</string>
+    <string name="set_cart">Set Cart</string>
 </resources>

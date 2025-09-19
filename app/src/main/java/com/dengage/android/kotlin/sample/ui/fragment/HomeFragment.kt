@@ -1,10 +1,8 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
-import android.content.Intent
 import androidx.navigation.fragment.findNavController
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentHomeBinding
-import com.dengage.android.kotlin.sample.ui.activity.MainActivity2
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
 import com.dengage.sdk.Dengage
 
@@ -77,6 +75,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
 
         binding.btnAppStory.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToAppStory())
+        }
+
+        binding.btnRealTimeInAppFilters.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToRealTimeInAppFilters())
         }
     }
 
