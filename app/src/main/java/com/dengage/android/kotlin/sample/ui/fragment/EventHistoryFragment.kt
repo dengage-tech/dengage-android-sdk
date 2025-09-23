@@ -135,7 +135,7 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
 
     private fun updateTableNameLabel(eventType: String) {
         val tableName = eventTypesMap[eventType]?.tableName ?: ""
-        binding.tvTableName.text = "Table: $tableName"
+        binding.tvTableName.text = getString(R.string.table_name_display, tableName)
     }
 
     private fun setupRecyclerView() {
