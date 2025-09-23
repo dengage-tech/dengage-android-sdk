@@ -36,7 +36,8 @@ class SdkParametersTest {
                     values = listOf("value1", "value2")
                 )),
                 enableClientHistory = true,
-                clientHistoryOptions = ClientHistoryOptions(maxEventCount = 3, timeWindowInMinutes = 30)
+                clientHistoryOptions = ClientHistoryOptions(maxEventCount = 3, timeWindowInMinutes = 30),
+                attributes = null
             ))
         ))
 

@@ -9,5 +9,6 @@ data class EventTypeDefinition(
     @SerializedName("logicOperator") val logicOperator: String?,
     @SerializedName("filterConditions") val filterConditions: List<FilterCondition>?,
     @SerializedName("enableClientHistory") val enableClientHistory: Boolean?,
-    @SerializedName("clientHistoryOptions") val clientHistoryOptions: ClientHistoryOptions?
+    @SerializedName("clientHistoryOptions") val clientHistoryOptions: ClientHistoryOptions?,
+    @SerializedName("attributes") val attributes: List<EventAttribute>?
 ) : Serializable

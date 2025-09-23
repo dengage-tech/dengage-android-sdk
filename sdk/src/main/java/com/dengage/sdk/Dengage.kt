@@ -19,6 +19,7 @@ import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.inappmessage.model.Cart
 import com.dengage.sdk.domain.configuration.model.AppTracking
+import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.rfm.model.RFMGender
@@ -939,5 +940,9 @@ object Dengage {
 
     fun getSdkVersion(): String {
         return DengageUtils.getSdkVersion()
+    }
+
+    fun getSdkParameters(): SdkParameters? {
+        return Prefs.sdkParameters
     }
 }
