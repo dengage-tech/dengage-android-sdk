@@ -30,6 +30,7 @@ import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
+import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchApplicationSettingsActivity
 import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
@@ -43,6 +44,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
         inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as? InAppMessage ?: run {
             finish()
             return
@@ -51,6 +53,9 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         val contentParams = inAppMessage.data.content.params
         setThemeAccordingToContentParams(contentParams)
         setContentView(R.layout.activity_in_app_message)
+        
+        // Enable edge-to-edge display for Android 15 with proper insets handling
+        //EdgeToEdgeUtils.enableEdgeToEdgeWithInsets(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             contentParams.backgroundColor?.let { color ->

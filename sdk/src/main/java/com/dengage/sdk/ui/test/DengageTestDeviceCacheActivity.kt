@@ -6,12 +6,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dengage.sdk.R
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.ui.test.adapter.DengageInfoAdapter
+import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.util.extension.toJson
 
 class DengageTestDeviceCacheActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Enable edge-to-edge display for Android 15
+        EdgeToEdgeUtils.enableEdgeToEdge(this)
+        
         setContentView(R.layout.activity_dengage_test_device_info)
 
         val infoPairs = mutableListOf<Pair<String, String?>>()

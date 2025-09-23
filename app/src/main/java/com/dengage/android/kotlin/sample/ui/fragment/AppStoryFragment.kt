@@ -29,7 +29,14 @@ class AppStoryFragment : BaseDataBindingFragment<FragmentAppStoryBinding>() {
 
             Dengage.showStoriesList(screenName = screenName.ifEmpty { null },
                 storiesListView = binding.storiesListView,
-                storyPropertyId = storyPropertyId,
+                storyPropertyId = "123",
+                activity = requireActivity(),
+                customParams = customParams.ifEmpty { null }
+            )
+
+            Dengage.showStoriesList(screenName = screenName.ifEmpty { null },
+                storiesListView = binding.storiesListView,
+                storyPropertyId = "1141",
                 activity = requireActivity(),
                 customParams = customParams.ifEmpty { null }
             )
