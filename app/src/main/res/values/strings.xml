@@ -70,4 +70,5 @@
     <string name="inapp_inline">InApp Inline</string>
     <string name="add_parameter">Add Parameter</string>
     <string name="set_cart">Set Cart</string>
+    <string name="send_event">Send Event</string>
 </resources>
