@@ -21,51 +21,9 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
         val parameters: List<EventParameter>
     )
     
-    private val eventTypesMap = hashMapOf(
-        "order" to EventTypeConfig(
-            tableName = "order_events",
-            parameters = listOf(
-                EventParameter("page_type", ""),
-                EventParameter("category", ""),
-                EventParameter("user_id", "")
-            )
-        ),
-        "Product View" to EventTypeConfig(
-            tableName = "product_view_events",
-            parameters = listOf(
-                EventParameter("product_id", ""),
-                EventParameter("product_name", ""),
-                EventParameter("price", ""),
-                EventParameter("category", "")
-            )
-        ),
-        "Add to Cart" to EventTypeConfig(
-            tableName = "cart_events",
-            parameters = listOf(
-                EventParameter("product_id", ""),
-                EventParameter("quantity", ""),
-                EventParameter("price", ""),
-                EventParameter("total_amount", "")
-            )
-        ),
-        "Purchase" to EventTypeConfig(
-            tableName = "purchase_events",
-            parameters = listOf(
-                EventParameter("order_id", ""),
-                EventParameter("total_amount", ""),
-                EventParameter("currency", ""),
-                EventParameter("items_count", "")
-            )
-        ),
-        "User Registration" to EventTypeConfig(
-            tableName = "registration_events",
-            parameters = listOf(
-                EventParameter("user_id", ""),
-                EventParameter("email", ""),
-                EventParameter("registration_method", "")
-            )
-        )
-    )
+    private var eventTypesMap = hashMapOf<String, EventTypeConfig>()
+
+    private val allowedEventTypes = setOf("category_view", "product_view", "remove_from_basket", "add_to_basket")
 
     override fun getLayoutRes(): Int {
         return R.layout.fragment_event_history
@@ -73,9 +31,84 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
 
     override fun init() {
         sendPageView("event_history")
+        loadEventTypesFromSdk()
         setupSpinner()
         setupRecyclerView()
         setupClickListeners()
+    }
+
+    private fun loadEventTypesFromSdk() {
+        val sdkParameters = Dengage.getSdkParameters()
+        eventTypesMap.clear()
+        
+        val systemAttributes = setOf("event_time", "device_id", "session_id", "event_type")
+        
+        sdkParameters?.eventMappings?.forEach { eventMapping ->
+            val tableName = eventMapping.eventTableName ?: ""
+            
+            eventMapping.eventTypeDefinitions?.forEach { eventTypeDefinition ->
+                val eventType = eventTypeDefinition.eventType
+                if (!eventType.isNullOrEmpty() && tableName.isNotEmpty() && allowedEventTypes.contains(eventType)) {
+                    val parameters = eventTypeDefinition.attributes?.mapNotNull { attribute ->
+                        attribute.name?.let { name -> 
+                            if (!systemAttributes.contains(name)) {
+                                EventParameter(name, "")
+                            } else {
+                                null
+                            }
+                        }
+                    } ?: emptyList()
+                    
+                    eventTypesMap[eventType] = EventTypeConfig(
+                        tableName = tableName,
+                        parameters = parameters
+                    )
+                }
+            }
+        }
+        
+        // Fallback to default configuration if no event mappings found
+        if (eventTypesMap.isEmpty()) {
+            loadDefaultEventTypes()
+        }
+    }
+    
+    private fun loadDefaultEventTypes() {
+        eventTypesMap = hashMapOf(
+            "category_view" to EventTypeConfig(
+                tableName = "category_view_events",
+                parameters = listOf(
+                    EventParameter("category_id", ""),
+                    EventParameter("category_name", "")
+                )
+            ),
+            "product_view" to EventTypeConfig(
+                tableName = "product_view_events",
+                parameters = listOf(
+                    EventParameter("product_id", ""),
+                    EventParameter("product_name", ""),
+                    EventParameter("price", ""),
+                    EventParameter("category", "")
+                )
+            ),
+            "remove_from_basket" to EventTypeConfig(
+                tableName = "cart_events",
+                parameters = listOf(
+                    EventParameter("product_id", ""),
+                    EventParameter("quantity", ""),
+                    EventParameter("price", "")
+                )
+            ),
+            "add_to_basket" to EventTypeConfig(
+                tableName = "cart_events",
+                parameters = listOf(
+                    EventParameter("product_id", ""),
+                    EventParameter("quantity", ""),
+                    EventParameter("price", ""),
+                    EventParameter("total_amount", "")
+                )
+            )
+        )
     }
 
     private fun setupSpinner() {
@@ -88,10 +121,21 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedEventType = eventTypes[position]
                 loadParametersForEventType(selectedEventType)
+                updateTableNameLabel(selectedEventType)
             }
             
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+        
+        // Set initial table name if there are event types
+        if (eventTypes.isNotEmpty()) {
+            updateTableNameLabel(eventTypes[0])
+        }
+    }
+
+    private fun updateTableNameLabel(eventType: String) {
+        val tableName = eventTypesMap[eventType]?.tableName ?: ""
+        binding.tvTableName.text = "Table: $tableName"
     }
 
     private fun setupRecyclerView() {
@@ -147,6 +191,7 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
         }
 
         val eventData = HashMap<String, Any>()
+        eventData["event_type"] = selectedEventType
         eventParameters.forEach { parameter ->
             if (parameter.key.isNotEmpty()) {
                 eventData[parameter.key] = parameter.value

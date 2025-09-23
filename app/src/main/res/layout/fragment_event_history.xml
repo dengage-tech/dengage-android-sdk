@@ -16,7 +16,16 @@
                 android:id="@+id/spinnerEventType"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvTableName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text=""
+                android:textSize="14sp"
+                android:textStyle="italic" />
 
             <LinearLayout
                 android:layout_width="match_parent"
