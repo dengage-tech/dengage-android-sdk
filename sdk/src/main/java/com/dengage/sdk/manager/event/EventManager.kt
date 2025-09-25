@@ -69,8 +69,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 return
             }
             sendDeviceEvent(EventTable.PAGE_VIEW_EVENTS.tableName, eventDetails)
-
-            RealTimeInAppParamHolder.addPageView()
         } catch (e: Exception) {
             DengageLogger.error(e.message)
         }
@@ -275,6 +273,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     ) {
         try {
             DengageLogger.verbose("sendCustomEvent method is called")
+
+            if(tableName == EventTable.PAGE_VIEW_EVENTS.tableName){
+                RealTimeInAppParamHolder.addPageView()
+            }
 
             val subscription = Prefs.subscription
 
