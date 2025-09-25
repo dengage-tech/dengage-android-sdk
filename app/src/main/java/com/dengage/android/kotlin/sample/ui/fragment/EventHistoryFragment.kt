@@ -41,7 +41,7 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
         val sdkParameters = Dengage.getSdkParameters()
         eventTypesMap.clear()
         
-        val systemAttributes = setOf("event_time", "device_id", "session_id", "event_type")
+        val systemAttributes = setOf("event_time", "device_id", "session_id")
         
         sdkParameters?.eventMappings?.forEach { eventMapping ->
             val tableName = eventMapping.eventTableName ?: ""
@@ -49,15 +49,59 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
             eventMapping.eventTypeDefinitions?.forEach { eventTypeDefinition ->
                 val eventType = eventTypeDefinition.eventType
                 if (!eventType.isNullOrEmpty() && tableName.isNotEmpty() && allowedEventTypes.contains(eventType)) {
-                    val parameters = eventTypeDefinition.attributes?.mapNotNull { attribute ->
+                    val parameters = mutableListOf<EventParameter>()
+                    
+                    // Add filter condition parameters first
+                    eventTypeDefinition.filterConditions?.forEach { filterCondition ->
+                        val fieldName = filterCondition.fieldName
+                        if (!fieldName.isNullOrEmpty() && !systemAttributes.contains(fieldName)) {
+                            when (filterCondition.operator) {
+                                "Equals" -> {
+                                    val value = filterCondition.values?.firstOrNull() ?: ""
+                                    parameters.add(
+                                        EventParameter(
+                                            key = fieldName,
+                                            value = value,
+                                            isReadOnly = true,
+                                            inputType = EventParameter.InputType.TEXT
+                                        )
+                                    )
+                                }
+                                "In" -> {
+                                    val values = filterCondition.values ?: emptyList()
+                                    val defaultValue = values.firstOrNull() ?: ""
+                                    parameters.add(
+                                        EventParameter(
+                                            key = fieldName,
+                                            value = defaultValue,
+                                            isReadOnly = false,
+                                            inputType = EventParameter.InputType.DROPDOWN,
+                                            options = values
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Add regular attribute parameters
+                    val attributeParameters = eventTypeDefinition.attributes?.mapNotNull { attribute ->
                         attribute.name?.let { name -> 
                             if (!systemAttributes.contains(name)) {
-                                EventParameter(name, "")
+                                // Check if this attribute is already added as filter condition
+                                val alreadyExists = parameters.any { it.key == name }
+                                if (!alreadyExists) {
+                                    EventParameter(name, "")
+                                } else {
+                                    null
+                                }
                             } else {
                                 null
                             }
                         }
                     } ?: emptyList()
+                    
+                    parameters.addAll(attributeParameters)
                     
                     eventTypesMap[eventType] = EventTypeConfig(
                         tableName = tableName,
@@ -191,7 +235,7 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
         }
 
         val eventData = HashMap<String, Any>()
-        eventData["event_type"] = selectedEventType
+
         eventParameters.forEach { parameter ->
             if (parameter.key.isNotEmpty()) {
                 eventData[parameter.key] = parameter.value

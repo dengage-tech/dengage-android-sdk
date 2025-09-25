@@ -29,6 +29,13 @@
         android:hint="@string/event_value"
         android:textSize="@dimen/dengage_text_size_small" />
 
+    <Spinner
+        android:id="@+id/spinnerEventValue"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/base_component_height"
+        android:layout_weight="0.4"
+        android:visibility="gone" />
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnRemove"
         android:layout_width="0dp"
