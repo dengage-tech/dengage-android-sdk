@@ -427,13 +427,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 // Check if client history is enabled for this event type definition
                 if (eventTypeDefinition.enableClientHistory != true) return@find false
 
-                // Check event type
-                val eventType = eventDetails[EventKey.EVENT_TYPE.key] as? String ?: ""
-
-                if (eventTypeDefinition.eventType != null && eventTypeDefinition.eventType != eventType && eventTypeDefinition.eventType.isNotEmpty()) {
-                    return@find false
-                }
-
                 // If there's only one eventTypeDefinition, skip filter condition check
                 if (eventTypeDefinitions.size == 1) {
                     return@find true
