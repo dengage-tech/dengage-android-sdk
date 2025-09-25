@@ -46,6 +46,7 @@
 - [In-App Messaging](#in-app-messaging)
   - [Methods](#methods)
   - [Real Time In-App Messaging](#real-time-in-app-messaging)
+  - [Custom Device Information for In-App Messages](#custom-device-information-for-in-app-messages)
   - [In-App Inline](#in-app-inline)
   - [App Stories](#app-stories)
 - [Geofence](#geofence)
@@ -1168,6 +1169,26 @@ Dengage.setState(name = "state-name")
 
 // Set city for using in real time in app comparisons
 Dengage.setCity(name = "city-name")
+```
+
+### Custom Device Information for In-App Messages
+
+You can set custom device information that will be available in your in-app message templates using Mustache templating.
+
+```kotlin
+// Set custom device information
+Dengage.setInAppDeviceInfo("user_level", "premium")
+Dengage.setInAppDeviceInfo("theme", "dark")
+
+// Clear all custom device information
+Dengage.clearInAppDeviceInfo()
+```
+
+The custom device information you set will be accessible in your in-app message HTML content through the `dnInAppDeviceInfo` object. For example, in your in-app message template, you can use:
+
+```html
+<div>Welcome {{#dnInAppDeviceInfo.user_level}}{{.}}{{/dnInAppDeviceInfo.user_level}} user!</div>
+<div>You are using {{#dnInAppDeviceInfo.theme}}{{.}}{{/dnInAppDeviceInfo.theme}} app theme</div>
 ```
 
 ### In-App Inline
