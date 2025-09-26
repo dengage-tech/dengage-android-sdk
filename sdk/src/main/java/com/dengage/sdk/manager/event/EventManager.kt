@@ -466,7 +466,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             }
 
             // If no matching event type definition, don't store the event
-            if (matchingEventType == null) return
+            if (matchingEventType == null || matchingEventType.eventType == null) return
 
             // Get client history options from the matching event type definition
             val clientHistoryOptions = matchingEventType.clientHistoryOptions ?: return
@@ -476,14 +476,13 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             // Get the current client events for this table
             val clientEvents = Prefs.clientEvents
             val eventTypeEvents = clientEvents[matchingEventType.eventType] ?: mutableListOf()
-            val eventType = eventDetails[EventKey.EVENT_TYPE.key] as? String ?: return
 
             val clientEvent = ClientEvent(
                 tableName = tableName,
                 key = key,
                 eventDetails = eventDetails,
                 timestamp = System.currentTimeMillis(),
-                eventType = eventType
+                eventType = matchingEventType.eventType
             )
 
             eventTypeEvents.add(clientEvent)
@@ -502,10 +501,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 filteredEvents
             }
 
-            clientEvents[eventType] = finalEvents
+            clientEvents[matchingEventType.eventType] = finalEvents
             Prefs.clientEvents = clientEvents
 
-            DengageLogger.debug("Client Event stored for table: $tableName for eventType: $eventType, current count: ${finalEvents.size}")
+            DengageLogger.debug("Client Event stored for table: $tableName for eventType: $matchingEventType.eventType, current count: ${finalEvents.size}")
         } catch (e: Exception) {
             DengageLogger.error("Error storing event: ${e.message}")
         }
