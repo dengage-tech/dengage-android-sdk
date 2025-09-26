@@ -30,7 +30,6 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
     }
 
     override fun init() {
-        sendPageView("event_history")
         loadEventTypesFromSdk()
         setupSpinner()
         setupRecyclerView()
@@ -202,7 +201,15 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
     private fun loadParametersForEventType(eventType: String) {
         eventParameters.clear()
         eventTypesMap[eventType]?.let { config ->
-            eventParameters.addAll(config.parameters.map { EventParameter(it.key, it.value) })
+            eventParameters.addAll(config.parameters.map { 
+                EventParameter(
+                    key = it.key, 
+                    value = it.value,
+                    isReadOnly = it.isReadOnly,
+                    inputType = it.inputType,
+                    options = it.options
+                ) 
+            })
         }
         adapter.setItems(eventParameters)
     }
