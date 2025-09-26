@@ -483,7 +483,7 @@ object InAppMessageUtils {
             SpecialRuleParameter.EVENT_HISTORY.key -> {
                 EventHistoryUtils.operateEventHistoryFilter(criterion)
             }
-            SpecialRuleParameter.CART.key -> {
+            SpecialRuleParameter.CART_ITEMS.key -> {
                 CartUtils.operateCartFilter(criterion)
             }
 

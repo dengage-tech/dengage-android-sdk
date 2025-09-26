@@ -30,5 +30,5 @@ enum class SpecialRuleParameter(val key: String) {
     TAG("dn.tag"),
     BIRTH_DATE("dn.master_contact.birth_date"),
     EVENT_HISTORY("event_history"),
-    CART("cart")
+    CART_ITEMS("cart_items")
 }
