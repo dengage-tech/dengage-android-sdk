@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Editable Fields -->
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etProductId"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:hint="Product ID"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etProductVariantId"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:hint="Product Variant ID"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/etCategoryPath"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:hint="Category Path"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etPrice"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_weight="1"
+                android:hint="Price"
+                android:inputType="number"
+                android:layout_marginEnd="4dp" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etDiscountedPrice"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_weight="1"
+                android:hint="Discounted Price"
+                android:inputType="number"
+                android:layout_marginStart="4dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etQuantity"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_weight="1"
+                android:hint="Quantity"
+                android:inputType="number"
+                android:layout_marginEnd="8dp" />
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/cbHasDiscount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Has Discount"
+                android:layout_marginEnd="8dp" />
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/cbHasPromotion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Has Promotion" />
+
+        </LinearLayout>
+
+        <!-- Read-only Calculated Fields -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#CCCCCC"
+            android:layout_marginVertical="8dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvEffectivePrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Effective Price: 0"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvLineTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Line Total: 0"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDiscountedLineTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Discounted Line Total: 0"
+            android:textSize="14sp"
+            android:layout_marginBottom="4dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvEffectiveLineTotal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Effective Line Total: 0"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnRemoveItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Remove Item"
+            android:layout_gravity="end" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
