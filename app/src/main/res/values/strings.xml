@@ -85,5 +85,7 @@
     <string name="discounted_line_total_display">Discounted Line Total: %s</string>
     <string name="effective_line_total_display">Effective Line Total: %s</string>
     <string name="remove_item">Remove Item</string>
+    <string name="add_item">Add Item</string>
+    <string name="update_cart">Update Cart</string>
 
 </resources>

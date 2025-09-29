@@ -23,8 +23,7 @@ object EventHistoryUtils {
                 // For SESSION type, filter events that belong to current session
                 val currentSessionId = SessionManager.getSessionId()
                 eventTypeEvents.filter { event ->
-                    val eventSessionId = event.eventDetails[EventKey.SESSION_ID.key]?.toString()
-                    eventSessionId == currentSessionId
+                    event.sessionId == currentSessionId
                 }
             } else {
                 // For other time window types, filter by time
@@ -384,3 +383,4 @@ object EventHistoryUtils {
     }
 
 }
+

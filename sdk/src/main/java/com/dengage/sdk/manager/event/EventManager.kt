@@ -413,8 +413,48 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         }
     }
 
+    private fun transformEventDetailsKeys(
+        tableName: String, 
+        eventDetails: Map<String, Any>
+    ): Map<String, Any> {
+        try {
+            val sdkParameters = Prefs.sdkParameters ?: return eventDetails
+            
+            // Find matching event mapping
+            val eventMapping = sdkParameters.eventMappings?.find { 
+                it.eventTableName == tableName 
+            } ?: return eventDetails
+            
+            // Get all attributes from all event type definitions
+            val allAttributes = eventMapping.eventTypeDefinitions?.flatMap { 
+                it.attributes ?: emptyList() 
+            } ?: return eventDetails
+            
+            // Create mapping from tableColumnName to name
+            val keyMappings = allAttributes.associate { attribute ->
+                attribute.tableColumnName to attribute.name
+            }.filterValues { it != null }.mapValues { it.value!! }
+            
+            // Transform the event details
+            val transformedDetails = mutableMapOf<String, Any>()
+            
+            eventDetails.forEach { (key, value) ->
+                val newKey = keyMappings[key] ?: key
+                transformedDetails[newKey] = value
+            }
+            
+            return transformedDetails
+        } catch (e: Exception) {
+            DengageLogger.error("Error transforming event details keys: ${e.message}")
+            return eventDetails
+        }
+    }
+
     override fun eventSent(tableName: String, key: String?, eventDetails: Map<String, Any>) {
         try {
+            // Transform event details keys first
+            val transformedEventDetails = transformEventDetailsKeys(tableName, eventDetails)
+            
             val sdkParameters = Prefs.sdkParameters ?: return
 
             // Find matching event mapping
@@ -448,7 +488,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                             condition.fieldName,
                             condition.operator,
                             condition.values,
-                            eventDetails
+                            transformedEventDetails
                         )
                     }
 
@@ -457,7 +497,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                             condition.fieldName,
                             condition.operator,
                             condition.values,
-                            eventDetails
+                            transformedEventDetails
                         )
                     }
 
@@ -480,7 +520,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             val clientEvent = ClientEvent(
                 tableName = tableName,
                 key = key,
-                eventDetails = eventDetails,
+                eventDetails = transformedEventDetails,
                 timestamp = System.currentTimeMillis(),
                 eventType = matchingEventType.eventType
             )

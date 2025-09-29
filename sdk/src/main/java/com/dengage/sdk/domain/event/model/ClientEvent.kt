@@ -7,5 +7,6 @@ data class ClientEvent(
     val eventType: String,
     val key: String?,
     val eventDetails: Map<String, Any>,
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Long = System.currentTimeMillis(),
+    val sessionId: String? = eventDetails["session_id"]?.toString()
 ) : Serializable

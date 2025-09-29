@@ -83,14 +83,14 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
                         }
                     }
                     
-                    // Add regular attribute parameters
+                    // Add regular attribute parameters using tableColumnName
                     val attributeParameters = eventTypeDefinition.attributes?.mapNotNull { attribute ->
-                        attribute.name?.let { name -> 
-                            if (!systemAttributes.contains(name)) {
+                        attribute.tableColumnName?.let { tableColumnName -> 
+                            if (!systemAttributes.contains(tableColumnName)) {
                                 // Check if this attribute is already added as filter condition
-                                val alreadyExists = parameters.any { it.key == name }
+                                val alreadyExists = parameters.any { it.key == tableColumnName }
                                 if (!alreadyExists) {
-                                    EventParameter(name, "")
+                                    EventParameter(tableColumnName, "")
                                 } else {
                                     null
                                 }
