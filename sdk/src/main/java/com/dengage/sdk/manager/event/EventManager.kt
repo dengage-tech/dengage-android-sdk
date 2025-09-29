@@ -1,5 +1,8 @@
 package com.dengage.sdk.manager.event
 
+import java.util.*
+import java.util.concurrent.TimeUnit
+import androidx.core.net.toUri
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.event.model.FilterOperator
 import com.dengage.sdk.domain.event.model.ClientEvent
@@ -8,9 +11,7 @@ import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
-import java.util.*
-import java.util.concurrent.TimeUnit
-import androidx.core.net.toUri
+import com.dengage.sdk.domain.configuration.model.EventTypeDefinition
 
 class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>(),
     EventContract.View {
@@ -420,21 +421,12 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     }
 
     private fun transformEventDetailsKeys(
-        tableName: String, 
+        matchingEventType: EventTypeDefinition,
         eventDetails: Map<String, Any>
     ): Map<String, Any> {
         try {
-            val sdkParameters = Prefs.sdkParameters ?: return eventDetails
-            
-            // Find matching event mapping
-            val eventMapping = sdkParameters.eventMappings?.find { 
-                it.eventTableName == tableName 
-            } ?: return eventDetails
-            
-            // Get all attributes from all event type definitions
-            val allAttributes = eventMapping.eventTypeDefinitions?.flatMap { 
-                it.attributes ?: emptyList() 
-            } ?: return eventDetails
+            // Get attributes for matching event type definition
+            val allAttributes = matchingEventType.attributes ?: return eventDetails
             
             // Create mapping from tableColumnName to name
             val keyMappings = allAttributes.associate { attribute ->
@@ -458,8 +450,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
     override fun eventSent(tableName: String, key: String?, eventDetails: Map<String, Any>) {
         try {
-            // Transform event details keys first
-            val transformedEventDetails = transformEventDetailsKeys(tableName, eventDetails)
             
             val sdkParameters = Prefs.sdkParameters ?: return
 
@@ -494,7 +484,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                             condition.fieldName,
                             condition.operator,
                             condition.values,
-                            transformedEventDetails
+                            eventDetails
                         )
                     }
 
@@ -503,7 +493,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                             condition.fieldName,
                             condition.operator,
                             condition.values,
-                            transformedEventDetails
+                            eventDetails
                         )
                     }
 
@@ -513,6 +503,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
             // If no matching event type definition, don't store the event
             if (matchingEventType == null || matchingEventType.eventType == null) return
+
+
+            // Transform event details keys first
+            val transformedEventDetails = transformEventDetailsKeys(matchingEventType, eventDetails)
 
             // Get client history options from the matching event type definition
             val clientHistoryOptions = matchingEventType.clientHistoryOptions ?: return
