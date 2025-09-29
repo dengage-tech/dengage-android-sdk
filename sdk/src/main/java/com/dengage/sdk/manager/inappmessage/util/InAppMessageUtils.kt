@@ -187,8 +187,8 @@ object InAppMessageUtils {
                     }
                 }
                 LogicOperator.OR.name -> {
-                    return !displayRuleSet.displayRules.all {
-                        !operateDisplayRule(it, params)
+                    return displayRuleSet.displayRules.any {
+                        operateDisplayRule(it, params)
                     }
                 }
             }
@@ -207,8 +207,8 @@ object InAppMessageUtils {
                 }
             }
             LogicOperator.OR.name -> {
-                return !displayRule.criterionList.all {
-                    !operateCriterion(it, params)
+                return displayRule.criterionList.any {
+                    operateCriterion(it, params)
                 }
             }
         }
