@@ -106,52 +106,12 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
                         tableName = tableName,
                         parameters = parameters
                     )
+
+
                 }
             }
         }
-        
-        // Fallback to default configuration if no event mappings found
-        if (eventTypesMap.isEmpty()) {
-            loadDefaultEventTypes()
-        }
-    }
-    
-    private fun loadDefaultEventTypes() {
-        eventTypesMap = hashMapOf(
-            "category_view" to EventTypeConfig(
-                tableName = "category_view_events",
-                parameters = listOf(
-                    EventParameter("category_id", ""),
-                    EventParameter("category_name", "")
-                )
-            ),
-            "product_view" to EventTypeConfig(
-                tableName = "product_view_events",
-                parameters = listOf(
-                    EventParameter("product_id", ""),
-                    EventParameter("product_name", ""),
-                    EventParameter("price", ""),
-                    EventParameter("category", "")
-                )
-            ),
-            "remove_from_basket" to EventTypeConfig(
-                tableName = "cart_events",
-                parameters = listOf(
-                    EventParameter("product_id", ""),
-                    EventParameter("quantity", ""),
-                    EventParameter("price", "")
-                )
-            ),
-            "add_to_basket" to EventTypeConfig(
-                tableName = "cart_events",
-                parameters = listOf(
-                    EventParameter("product_id", ""),
-                    EventParameter("quantity", ""),
-                    EventParameter("price", ""),
-                    EventParameter("total_amount", "")
-                )
-            )
-        )
+
     }
 
     private fun setupSpinner() {

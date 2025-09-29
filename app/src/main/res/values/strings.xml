@@ -73,5 +73,17 @@
     <string name="send_event">Send Event</string>
     <string name="table_name_display">Table: %s</string>
     <string name="x">X</string>
+    <string name="product_id">Product ID</string>
+    <string name="product_variant_id">Product Variant ID</string>
+    <string name="price">Price</string>
+    <string name="discounted_price">Discounted Price</string>
+    <string name="quantity">Quantity</string>
+    <string name="has_discount">Has Discount</string>
+    <string name="has_promotion">Has Promotion</string>
+    <string name="effective_price_display">Effective Price: %s</string>
+    <string name="line_total_display">Line Total: %s</string>
+    <string name="discounted_line_total_display">Discounted Line Total: %s</string>
+    <string name="effective_line_total_display">Effective Line Total: %s</string>
+    <string name="remove_item">Remove Item</string>
 
 </resources>

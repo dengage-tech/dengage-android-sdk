@@ -54,7 +54,6 @@ class CartFragment : BaseDataBindingFragment<FragmentCartBinding>() {
             adapter.setItems(cartItems.map { it as Any })
             adapter.notifyDataSetChanged()
             
-            updateCartSummary(currentCart)
         } catch (e: Exception) {
             showToast("Error loading cart: ${e.message}")
         }
@@ -103,28 +102,11 @@ class CartFragment : BaseDataBindingFragment<FragmentCartBinding>() {
             cartItems.clear()
             cartItems.addAll(updatedItems)
             
-            // Update summary display
-            updateCartSummary(newCart)
-            
             showToast("Cart updated successfully!")
             
         } catch (e: Exception) {
             showToast("Error updating cart: ${e.message}")
         }
-    }
-
-    private fun updateCartSummary(cart: Cart) {
-        val summary = cart.summary
-        val summaryText = """
-            Cart Summary:
-            Items Count: ${summary.itemsCount}
-            Lines Count: ${summary.linesCount}
-            Subtotal: ${summary.subtotal}
-            Effective Subtotal: ${summary.effectiveSubtotal}
-            Any Discounted: ${summary.anyDiscounted}
-        """.trimIndent()
-        
-        //binding.tvCartSummary.text = summaryText
     }
 
     private fun showToast(message: String) {
