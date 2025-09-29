@@ -1,14 +1,5 @@
 package com.dengage.sdk.manager.inappmessage.util
 
-import androidx.test.platform.app.InstrumentationRegistry
-import com.dengage.sdk.Dengage
-import com.dengage.sdk.domain.inappmessage.model.Criterion
-import com.dengage.sdk.domain.inappmessage.model.DataType
-import com.dengage.sdk.domain.inappmessage.model.Operator
-import com.dengage.sdk.domain.inappmessage.model.Priority
-import com.dengage.sdk.domain.inappmessage.model.SpecialRuleParameter
-import com.dengage.sdk.util.Constants
-import com.dengage.sdk.util.ContextHolder
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +8,18 @@ import java.text.SimpleDateFormat
 import java.util.*
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import androidx.test.platform.app.InstrumentationRegistry
+import com.dengage.sdk.Dengage
+import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.domain.inappmessage.model.Criterion
+import com.dengage.sdk.domain.inappmessage.model.DataType
+import com.dengage.sdk.domain.inappmessage.model.Operator
+import com.dengage.sdk.domain.inappmessage.model.Priority
+import com.dengage.sdk.domain.inappmessage.model.SpecialRuleParameter
+import com.dengage.sdk.domain.subscription.model.Subscription
+import com.dengage.sdk.util.Constants
+import com.dengage.sdk.util.ContextHolder
+
 
 @Config(manifest=Config.NONE)
 @RunWith(RobolectricTestRunner::class)
@@ -725,4 +728,64 @@ class InAppMessageUtilsTest {
 
         Assert.assertEquals(priorInAppMessage?.id, id2)
     }
+
+    @Test
+    fun `findPriorRealTimeInApp anonymous true when contact key is empty set test`() {
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val criterionList = mutableListOf<Criterion>()
+        criterionList.add(
+            Criterion(
+                id = 1,
+                parameter = SpecialRuleParameter.ANONYMOUS.key,
+                dataType = DataType.BOOL.name,
+                operator = Operator.EQUALS.operator,
+                values = listOf("true"),
+                valueSource = "SERVER_SIDE"
+            )
+        )
+        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
+            id = Math.random().toString(),
+            priority = Priority.MEDIUM,
+            expireDate = expireDate,
+            criterionList = criterionList
+        )
+        val inAppMessages = listOf(realTimeInAppMessage)
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = inAppMessages
+        )
+        Assert.assertNotNull(priorInAppMessage)
+    }
+
+    @Test
+    fun `findPriorRealTimeInApp anonymous true when contact key is not empty test`() {
+        Prefs.subscription = Subscription(
+            contactKey = "testContactKey"
+        )
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val criterionList = mutableListOf<Criterion>()
+        criterionList.add(
+            Criterion(
+                id = 1,
+                parameter = SpecialRuleParameter.ANONYMOUS.key,
+                dataType = DataType.BOOL.name,
+                operator = Operator.EQUALS.operator,
+                values = listOf("false"),
+                valueSource = "SERVER_SIDE"
+            )
+        )
+        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
+            id = Math.random().toString(),
+            priority = Priority.MEDIUM,
+            expireDate = expireDate,
+            criterionList = criterionList
+        )
+        val inAppMessages = listOf(realTimeInAppMessage)
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = inAppMessages
+        )
+        Assert.assertNotNull(priorInAppMessage)
+    }
+
 }
