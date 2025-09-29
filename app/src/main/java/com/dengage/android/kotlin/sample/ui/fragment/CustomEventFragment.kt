@@ -20,9 +20,8 @@ class CustomEventFragment : BaseDataBindingFragment<FragmentCustomEventBinding>(
         //sendPageView("custom-events")
         setupRecyclerView()
         setupClickListeners()
-        setEventTableName("order_events")
-        addNewParameter("event_type", "order")
-        addNewParameter("page_type", "category")
+        setEventTableName("page_view_events")
+        addNewParameter("page_type", "cart")
     }
 
     private fun setupRecyclerView() {
