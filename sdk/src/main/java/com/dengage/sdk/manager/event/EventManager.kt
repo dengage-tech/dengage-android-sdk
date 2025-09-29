@@ -68,6 +68,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 DengageLogger.error("data must have a valid page_type parameter")
                 return
             }
+            
+            // Set page parameters for real-time in-app messages
+            RealTimeInAppParamHolder.setClientPageInfo(eventDetails)
+            
             sendDeviceEvent(EventTable.PAGE_VIEW_EVENTS.tableName, eventDetails)
         } catch (e: Exception) {
             DengageLogger.error(e.message)
@@ -276,6 +280,8 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
             if(tableName == EventTable.PAGE_VIEW_EVENTS.tableName){
                 RealTimeInAppParamHolder.addPageView()
+                // Set page parameters for page view events
+                RealTimeInAppParamHolder.setClientPageInfo(eventDetails)
             }
 
             val subscription = Prefs.subscription

@@ -20,6 +20,7 @@ import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageUtils
 
 import com.dengage.sdk.domain.inappmessage.model.Cart
+import com.dengage.sdk.domain.inappmessage.model.ClientPageInfo
 
 object Prefs {
 
@@ -216,6 +217,10 @@ object Prefs {
     internal var clientCart: Cart?
         get() = preferences.get(PreferenceKey.CLIENT_CART)
         set(value) = preferences.set(PreferenceKey.CLIENT_CART, value)
+
+    internal var clientPageInfo: ClientPageInfo?
+        get() = preferences.get(PreferenceKey.CLIENT_PAGE_INFO) ?: ClientPageInfo()
+        set(value) = preferences.set(PreferenceKey.CLIENT_PAGE_INFO, value)
 
     fun clear() {
         preferences.edit { clear() }

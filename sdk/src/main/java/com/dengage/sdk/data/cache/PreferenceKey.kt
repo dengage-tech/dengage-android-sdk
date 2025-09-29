@@ -48,6 +48,7 @@ enum class PreferenceKey {
     TOKEN,
     CLIENT_EVENTS,
     CLIENT_CART,
+    CLIENT_PAGE_INFO,
     ;
 
     override fun toString(): String = name

@@ -486,6 +486,46 @@ object InAppMessageUtils {
             SpecialRuleParameter.CART_ITEMS.key -> {
                 CartUtils.operateCartFilter(criterion)
             }
+            SpecialRuleParameter.LAST_PRODUCT_ID.key -> {
+                operateRuleParameter(
+                    operator = criterion.operator,
+                    dataType = criterion.dataType,
+                    ruleParam = criterion.values,
+                    userParam = RealTimeInAppParamHolder.getLastProductId() ?: ""
+                )
+            }
+            SpecialRuleParameter.LAST_PRODUCT_PRICE.key -> {
+                operateRuleParameter(
+                    operator = criterion.operator,
+                    dataType = criterion.dataType,
+                    ruleParam = criterion.values,
+                    userParam = RealTimeInAppParamHolder.getLastProductPrice() ?: ""
+                )
+            }
+            SpecialRuleParameter.LAST_CATEGORY_PATH.key -> {
+                operateRuleParameter(
+                    operator = criterion.operator,
+                    dataType = criterion.dataType,
+                    ruleParam = criterion.values,
+                    userParam = RealTimeInAppParamHolder.getLastCategoryPath() ?: ""
+                )
+            }
+            SpecialRuleParameter.CURRENT_PAGE_TITLE.key -> {
+                operateRuleParameter(
+                    operator = criterion.operator,
+                    dataType = criterion.dataType,
+                    ruleParam = criterion.values,
+                    userParam = RealTimeInAppParamHolder.getCurrentPageTitle() ?: ""
+                )
+            }
+            SpecialRuleParameter.CURRENT_PAGE_TYPE.key -> {
+                operateRuleParameter(
+                    operator = criterion.operator,
+                    dataType = criterion.dataType,
+                    ruleParam = criterion.values,
+                    userParam = RealTimeInAppParamHolder.getCurrentPageType() ?: ""
+                )
+            }
 
             checkVisitorInfoAttr(criterion.parameter) -> {
                 if (criterion.parameter == SpecialRuleParameter.BIRTH_DATE.key) {
