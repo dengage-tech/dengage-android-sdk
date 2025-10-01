@@ -222,6 +222,11 @@ object InAppMessageUtils {
         val subscription = Prefs.subscription
         val visitorInfo = Prefs.visitorInfo
 
+        // temporary return for empty parameter. Another library should be used instead of Gson
+        if(criterion.parameter.isNullOrEmpty()) {
+            return false
+        }
+
         return when (criterion.parameter) {
             SpecialRuleParameter.CATEGORY_PATH.key -> {
                 operateRuleParameter(
