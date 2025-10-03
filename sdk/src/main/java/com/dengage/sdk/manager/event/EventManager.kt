@@ -420,6 +420,89 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         }
     }
 
+    internal fun cleanupClientEvents() {
+        try {
+            DengageLogger.debug("cleanupClientEvents has been called")
+            val currentTime = System.currentTimeMillis()
+            val lastCleanupTime = Prefs.clientEventsLastCleanupTime
+            
+            // Only cleanup if it's been more than 10 minutes since last cleanup
+            val cleanupInterval = 10 * 60 * 1000L // 10 minutes in milliseconds
+            if (currentTime - lastCleanupTime < cleanupInterval) {
+                return
+            }
+            
+            val sdkParameters = Prefs.sdkParameters ?: return
+            val clientEvents = Prefs.clientEvents
+            var hasChanges = false
+            
+            // Get all valid event types from eventMappings
+            val validEventTypes = sdkParameters.eventMappings
+                ?.flatMap { it.eventTypeDefinitions ?: emptyList() }
+                ?.mapNotNull { it.eventType }
+                ?.toSet() ?: emptySet()
+            
+            // Remove events that are no longer in eventMappings
+            val orphanedEventTypes = clientEvents.keys.filter { eventType ->
+                !validEventTypes.contains(eventType)
+            }
+            
+            orphanedEventTypes.forEach { eventType ->
+                clientEvents.remove(eventType)
+                hasChanges = true
+                DengageLogger.debug("Removed orphaned event type: $eventType (not found in eventMappings)")
+            }
+            
+            // Process remaining valid event types
+            clientEvents.forEach { (eventType, eventTypeEvents) ->
+                if (eventTypeEvents.isNotEmpty()) {
+                    val matchingEventTypeDefinition = sdkParameters.eventMappings
+                        ?.flatMap { it.eventTypeDefinitions ?: emptyList() }
+                        ?.find { it.eventType == eventType }
+                    
+                    if (matchingEventTypeDefinition?.enableClientHistory == true) {
+                        val clientHistoryOptions = matchingEventTypeDefinition.clientHistoryOptions
+                        if (clientHistoryOptions != null) {
+                            val maxEventCount = clientHistoryOptions.maxEventCount ?: Int.MAX_VALUE
+                            val timeWindowInMinutes = clientHistoryOptions.timeWindowInMinutes ?: Int.MAX_VALUE
+                            
+                            val timeThreshold = currentTime - TimeUnit.MINUTES.toMillis(timeWindowInMinutes.toLong())
+                            val filteredEvents = eventTypeEvents.filter { it.timestamp >= timeThreshold }.toMutableList()
+                            
+                            // Keep only the latest maxEventCount events
+                            val finalEvents = if (filteredEvents.size > maxEventCount) {
+                                filteredEvents.sortedByDescending { it.timestamp }.take(maxEventCount).toMutableList()
+                            } else {
+                                filteredEvents
+                            }
+                            
+                            // Update if there are changes
+                            if (finalEvents.size != eventTypeEvents.size) {
+                                clientEvents[eventType] = finalEvents
+                                hasChanges = true
+                                DengageLogger.debug("Cleaned up events for type: $eventType, removed: ${eventTypeEvents.size - finalEvents.size} events")
+                            }
+                        }
+                    } else {
+                        // Remove events for event types that have enableClientHistory = false
+                        clientEvents.remove(eventType)
+                        hasChanges = true
+                        DengageLogger.debug("Removed events for type: $eventType (client history disabled)")
+                    }
+                }
+            }
+            
+            // Save changes and update cleanup time
+            if (hasChanges) {
+                Prefs.clientEvents = clientEvents
+            }
+            Prefs.clientEventsLastCleanupTime = currentTime
+            
+        } catch (e: Exception) {
+            DengageLogger.error("Error cleaning up client events: ${e.message}")
+        }
+    }
+
     private fun transformEventDetailsKeys(
         matchingEventType: EventTypeDefinition,
         eventDetails: Map<String, Any>
@@ -427,20 +510,20 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         try {
             // Get attributes for matching event type definition
             val allAttributes = matchingEventType.attributes ?: return eventDetails
-            
+
             // Create mapping from tableColumnName to name
             val keyMappings = allAttributes.associate { attribute ->
                 attribute.tableColumnName to attribute.name
             }.filterValues { it != null }.mapValues { it.value!! }
-            
+
             // Transform the event details
             val transformedDetails = mutableMapOf<String, Any>()
-            
+
             eventDetails.forEach { (key, value) ->
                 val newKey = keyMappings[key] ?: key
                 transformedDetails[newKey] = value
             }
-            
+
             return transformedDetails
         } catch (e: Exception) {
             DengageLogger.error("Error transforming event details keys: ${e.message}")
@@ -450,12 +533,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
     override fun eventSent(tableName: String, key: String?, eventDetails: Map<String, Any>) {
         try {
-            
             val sdkParameters = Prefs.sdkParameters ?: return
 
             // Find matching event mapping
-            val eventMapping =
-                sdkParameters.eventMappings?.find { it.eventTableName == tableName } ?: return
+            val eventMapping = sdkParameters.eventMappings?.find { it.eventTableName == tableName } ?: return
 
             // Check event type definitions
             val eventTypeDefinitions = eventMapping.eventTypeDefinitions ?: return
@@ -504,14 +585,8 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             // If no matching event type definition, don't store the event
             if (matchingEventType == null || matchingEventType.eventType == null) return
 
-
             // Transform event details keys first
             val transformedEventDetails = transformEventDetailsKeys(matchingEventType, eventDetails)
-
-            // Get client history options from the matching event type definition
-            val clientHistoryOptions = matchingEventType.clientHistoryOptions ?: return
-            val maxEventCount = clientHistoryOptions.maxEventCount ?: Int.MAX_VALUE
-            val timeWindowInMinutes = clientHistoryOptions.timeWindowInMinutes ?: Int.MAX_VALUE
 
             // Get the current client events for this table
             val clientEvents = Prefs.clientEvents
@@ -526,25 +601,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             )
 
             eventTypeEvents.add(clientEvent)
-
-            // Filter out events older than timeWindowInMinutes
-            val timeThreshold =
-                System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(timeWindowInMinutes.toLong())
-            val filteredEvents =
-                eventTypeEvents.filter { it.timestamp >= timeThreshold }.toMutableList()
-
-            // Keep only the latest maxEventCount events
-            val finalEvents = if (filteredEvents.size > maxEventCount) {
-                filteredEvents.sortedByDescending { it.timestamp }.take(maxEventCount)
-                    .toMutableList()
-            } else {
-                filteredEvents
-            }
-
-            clientEvents[matchingEventType.eventType] = finalEvents
+            clientEvents[matchingEventType.eventType] = eventTypeEvents
             Prefs.clientEvents = clientEvents
 
-            DengageLogger.debug("Client Event stored for table: $tableName for eventType: $matchingEventType.eventType, current count: ${finalEvents.size}")
+            DengageLogger.debug("Client Event stored for table: $tableName for eventType: ${matchingEventType.eventType}, current count: ${eventTypeEvents.size}")
         } catch (e: Exception) {
             DengageLogger.error("Error storing event: ${e.message}")
         }

@@ -222,6 +222,10 @@ object Prefs {
         get() = preferences.get(PreferenceKey.CLIENT_PAGE_INFO) ?: ClientPageInfo()
         set(value) = preferences.set(PreferenceKey.CLIENT_PAGE_INFO, value)
 
+    internal var clientEventsLastCleanupTime: Long
+        get() = preferences.get(PreferenceKey.CLIENT_EVENTS_LAST_CLEANUP_TIME, 0L) ?: 0L
+        set(value) = preferences.set(PreferenceKey.CLIENT_EVENTS_LAST_CLEANUP_TIME, value)
+
     fun clear() {
         preferences.edit { clear() }
     }

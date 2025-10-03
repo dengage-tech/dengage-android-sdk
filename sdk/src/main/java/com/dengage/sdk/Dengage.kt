@@ -945,4 +945,8 @@ object Dengage {
     fun getSdkParameters(): SdkParameters? {
         return Prefs.sdkParameters
     }
+
+    internal fun cleanupClientEvents() {
+        eventManager.cleanupClientEvents()
+    }
 }
