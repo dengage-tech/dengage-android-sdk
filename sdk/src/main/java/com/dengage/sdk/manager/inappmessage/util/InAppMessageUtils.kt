@@ -730,6 +730,16 @@ object InAppMessageUtils {
             Operator.NOT_IN.operator -> {
                 return ruleParam.firstOrNull { it.lowercase() == userParam.lowercase() } == null
             }
+            Operator.CONTAINS_ALL.operator -> {
+                return ruleParam.all { value ->
+                    userParam.lowercase().contains(value.lowercase())
+                }
+            }
+            Operator.CONTAINS_ANY.operator -> {
+                return ruleParam.any { value ->
+                    userParam.lowercase().contains(value.lowercase())
+                }
+            }
             Operator.GREATER_THAN.operator -> {
                 when (dataType) {
                     DataType.INT.name, DataType.DATETIME.name -> {
