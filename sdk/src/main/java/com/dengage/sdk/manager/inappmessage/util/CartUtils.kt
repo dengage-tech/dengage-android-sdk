@@ -343,6 +343,56 @@ object CartUtils {
 
             "EXISTS" -> fieldValue.isNotEmpty()
             "NOT_EXISTS" -> fieldValue.isEmpty()
+            "BETWEEN" -> {
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        if (filter.values.size >= 2) {
+                            val firstValue = filter.values[0].toIntOrNull() ?: return false
+                            val lastValue = filter.values[1].toIntOrNull() ?: return false
+                            val minValue = minOf(firstValue, lastValue)
+                            val maxValue = maxOf(firstValue, lastValue)
+                            numFieldValue in (minValue + 1) until maxValue
+                        } else false
+                    }
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        if (filter.values.size >= 2) {
+                            val firstValue = filter.values[0].toDoubleOrNull() ?: return false
+                            val lastValue = filter.values[1].toDoubleOrNull() ?: return false
+                            val minValue = minOf(firstValue, lastValue)
+                            val maxValue = maxOf(firstValue, lastValue)
+                            numFieldValue > minValue && numFieldValue < maxValue
+                        } else false
+                    }
+                    else -> false
+                }
+            }
+            "NOT_BETWEEN" -> {
+                when (filter.dataType.uppercase()) {
+                    "INT" -> {
+                        val numFieldValue = fieldValue.toIntOrNull() ?: return false
+                        if (filter.values.size >= 2) {
+                            val firstValue = filter.values[0].toIntOrNull() ?: return false
+                            val lastValue = filter.values[1].toIntOrNull() ?: return false
+                            val minValue = minOf(firstValue, lastValue)
+                            val maxValue = maxOf(firstValue, lastValue)
+                            numFieldValue !in (minValue + 1) until maxValue
+                        } else true
+                    }
+                    "TEXT" -> {
+                        val numFieldValue = fieldValue.toDoubleOrNull() ?: return false
+                        if (filter.values.size >= 2) {
+                            val firstValue = filter.values[0].toDoubleOrNull() ?: return false
+                            val lastValue = filter.values[1].toDoubleOrNull() ?: return false
+                            val minValue = minOf(firstValue, lastValue)
+                            val maxValue = maxOf(firstValue, lastValue)
+                            !(numFieldValue > minValue && numFieldValue < maxValue)
+                        } else true
+                    }
+                    else -> true
+                }
+            }
             else -> false
         }
     }
