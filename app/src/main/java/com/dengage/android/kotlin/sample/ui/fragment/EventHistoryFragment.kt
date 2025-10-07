@@ -23,7 +23,7 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
     
     private var eventTypesMap = hashMapOf<String, EventTypeConfig>()
 
-    private val allowedEventTypes = setOf("category_view", "product_view", "remove_from_basket", "add_to_basket")
+    //private val allowedEventTypes = setOf("category_view", "product_view", "remove_from_basket", "add_to_basket")
 
     override fun getLayoutRes(): Int {
         return R.layout.fragment_event_history
@@ -47,7 +47,7 @@ class EventHistoryFragment : BaseDataBindingFragment<FragmentEventHistoryBinding
             
             eventMapping.eventTypeDefinitions?.forEach { eventTypeDefinition ->
                 val eventType = eventTypeDefinition.eventType
-                if (!eventType.isNullOrEmpty() && tableName.isNotEmpty() && allowedEventTypes.contains(eventType)) {
+                if (!eventType.isNullOrEmpty() && tableName.isNotEmpty()) {
                     val parameters = mutableListOf<EventParameter>()
                     
                     // Add filter condition parameters first
