@@ -22,6 +22,13 @@ import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
+import com.dengage.sdk.domain.inappmessage.DebugLogRequest
+import com.dengage.sdk.domain.inappmessage.DebugLoggingRepository
+import com.dengage.sdk.manager.session.SessionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 class InAppMessageManager :
     BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
@@ -31,6 +38,8 @@ class InAppMessageManager :
     override fun providePresenter() = InAppMessagePresenter()
 
     private var inAppMessageFetchCallback: InAppMessageFetchCallback? = null
+    private val debugLoggingRepository = DebugLoggingRepository()
+    private val debugScope = CoroutineScope(Dispatchers.IO)
 
     companion object {
         private var timer = Timer()
@@ -107,6 +116,14 @@ class InAppMessageManager :
                                         },
                                         onInvalidCoupon = { errorMessage ->
                                             DengageLogger.error("Coupon validation failed: $errorMessage")
+                                            
+                                            // Send debug log for invalid coupon if debug device
+                                            sendCouponValidationFailureLog(
+                                                couponContent = content,
+                                                errorMessage = errorMessage,
+                                                inAppMessage = priorInAppMessage,
+                                                screenName = screenName
+                                            )
                                         }
                                     )
                                 }
@@ -470,6 +487,57 @@ class InAppMessageManager :
             }
         }
         return storyCovers
+    }
+
+    private fun isDebugDevice(deviceId: String?, debugDeviceIds: List<String>?): Boolean {
+        return !deviceId.isNullOrEmpty() && !debugDeviceIds.isNullOrEmpty() && debugDeviceIds.contains(deviceId)
+    }
+
+    private fun sendCouponValidationFailureLog(
+        couponContent: String,
+        errorMessage: String,
+        inAppMessage: InAppMessage,
+        screenName: String?
+    ) {
+        debugScope.launch {
+            try {
+                val subscription = Prefs.subscription
+                val sdkParameters = Prefs.sdkParameters
+
+                val isDebugDevice = isDebugDevice(
+                    subscription?.getSafeDeviceId(),
+                    sdkParameters?.debugDeviceIds
+                )
+
+                if (isDebugDevice) {
+                    val traceId = UUID.randomUUID().toString()
+                    val campaignId = inAppMessage.data.publicId ?: inAppMessage.id
+                    
+                    val debugLog = DebugLogRequest(
+                        traceId = traceId,
+                        appGuid = sdkParameters?.appId,
+                        appId = sdkParameters?.appId,
+                        account = sdkParameters?.accountName,
+                        device = subscription?.getSafeDeviceId() ?: "",
+                        sessionId = SessionManager.getSessionId(),
+                        sdkVersion = DengageUtils.getSdkVersion(),
+                        currentCampaignList = emptyList(),
+                        campaignId = campaignId,
+                        campaignType = if (inAppMessage.data.isRealTime()) "realtime" else "bulk",
+                        sendId = null,
+                        message = "Coupon validation failed: $couponContent - $errorMessage traceId:$traceId campaignId:$campaignId",
+                        context = mapOf("coupon_code" to couponContent),
+                        contactKey = subscription?.contactKey,
+                        channel = "android",
+                        currentRules = mapOf()
+                    )
+
+                    debugLoggingRepository.sendDebugLog(screenName ?: "unknown", debugLog)
+                }
+            } catch (e: Exception) {
+                DengageLogger.error("Error sending coupon validation failure debug log: ${e.message}")
+            }
+        }
     }
 
 }

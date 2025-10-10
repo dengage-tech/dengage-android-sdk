@@ -6,6 +6,9 @@ import android.content.res.Resources
 import android.os.Build
 import android.util.TypedValue
 import androidx.core.text.isDigitsOnly
+import com.dengage.sdk.domain.inappmessage.DebugLogRequest
+import com.dengage.sdk.domain.inappmessage.DebugLoggingRepository
+import com.dengage.sdk.manager.session.SessionManager
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
@@ -19,10 +22,16 @@ import com.dengage.sdk.domain.inappmessage.model.*
 import com.dengage.sdk.manager.visitcount.VisitCountManager
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.GsonHolder
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object InAppMessageUtils {
+
+    private val debugLoggingRepository = DebugLoggingRepository()
+    private val debugScope = CoroutineScope(Dispatchers.IO)
 
     /**
      * Find not expired in app messages with controlling expire date and date now
@@ -61,6 +70,17 @@ object InAppMessageUtils {
         propertyId: String? = "",
         storyPropertyId: String? = null,
     ): InAppMessage? {
+        val subscription = Prefs.subscription
+        val sdkParameters = Prefs.sdkParameters
+        val isDebugDevice = isDebugDevice(subscription?.getSafeDeviceId(), sdkParameters?.debugDeviceIds)
+        val traceId = if (isDebugDevice) UUID.randomUUID().toString() else null
+        val currentCampaignList = if (isDebugDevice) {
+            inAppMessages.map { inAppMessage ->
+                val prefix = if (inAppMessage.data.isRealTime()) "r_" else "f_"
+                prefix + (inAppMessage.data.publicId ?: inAppMessage.id)
+            }
+        } else emptyList()
+
         // sort list with comparator
         val sortedInAppMessages = inAppMessages.sortedWith(InAppMessageComparator())
 
@@ -70,33 +90,96 @@ object InAppMessageUtils {
         // Also control nextDisplayTime for showEveryXMinutes type in app messages
         val matchedWithoutScreenFilters =
             sortedInAppMessages.firstOrNull { inAppMessage: InAppMessage ->
-                inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
+
+                val context: MutableMap<String, String>? =
+                    if (isDebugDevice) mutableMapOf<String, String>() else null
+                var criterionIndex = 0
+
+                // Check display time availability and add context
+                val isDisplayTimeAvailable = if (isDebugDevice && context != null) {
+                    inAppMessage.data.isDisplayTimeAvailable(context, criterionIndex).also {
+                        criterionIndex += 2 // We add 2 entries for time constraints
+                    }
+                } else {
+                    inAppMessage.data.isDisplayTimeAvailable()
+                }
+
+                val result = inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
                         isInlineInApp(inAppMessage, propertyId, storyPropertyId) &&
-                        inAppMessage.data.isDisplayTimeAvailable() &&
-                        operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet,
-                            params
+                        isDisplayTimeAvailable &&
+                        operateRealTimeValues(
+                            inAppMessage.data.displayCondition.displayRuleSet,
+                            params, context, criterionIndex
                         )
+
+                if (isDebugDevice && traceId != null && inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() && context != null) {
+                    sendEvaluationLog(
+                        inAppMessage = inAppMessage,
+                        traceId = traceId,
+                        screenName = screenName,
+                        currentCampaignList = currentCampaignList,
+                        matched = result,
+                        context = context
+                    )
+                }
+                result
             }
 
         return if (screenName.isNullOrEmpty()) {
             matchedWithoutScreenFilters
         } else {
-
             val matchedWithScreenFilters = sortedInAppMessages.firstOrNull { inAppMessage ->
-                !inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
-                        inAppMessage.data.isDisplayTimeAvailable() &&
+                val context: MutableMap<String, String>? =
+                    if (isDebugDevice) mutableMapOf<String, String>() else null
+                var criterionIndex = 0
+
+                // Add screen name context if present
+                val screenNameFilter = inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull()
+                val expectedScreenName = screenNameFilter?.value?.joinToString(",") ?: ""
+                val operator = screenNameFilter?.operator ?: "EQUALS"
+                val screenNameResult = isScreenNameFound(inAppMessage, screenName)
+                if(context != null) {
+                    context["screen_name_${criterionIndex}"] = "$expectedScreenName|$screenName|$operator|$screenNameResult"
+                    criterionIndex++
+                }
+                // Check display time availability and add context
+                val isDisplayTimeAvailable = if (isDebugDevice && context != null) {
+                    inAppMessage.data.isDisplayTimeAvailable(context, criterionIndex).also {
+                        criterionIndex += 2 // We add 2 entries for time constraints
+                    }
+                } else {
+                    inAppMessage.data.isDisplayTimeAvailable()
+                }
+
+                val result = !inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
+                        isDisplayTimeAvailable &&
                         isScreenNameFound(inAppMessage, screenName) &&
                         isInlineInApp(inAppMessage, propertyId, storyPropertyId) &&
                         operateRealTimeValues(
                             inAppMessage.data.displayCondition.displayRuleSet,
-                            params
+                            params, context, criterionIndex
                         )
+
+                if (isDebugDevice && traceId != null && context != null) {
+                    sendEvaluationLog(
+                        inAppMessage = inAppMessage,
+                        traceId = traceId,
+                        screenName = screenName,
+                        currentCampaignList = currentCampaignList,
+                        matched = result,
+                        context = context
+                    )
+                }
+                result
             }
 
             return matchedWithScreenFilters ?: matchedWithoutScreenFilters
-
         }
 
+    }
+
+    private fun isDebugDevice(deviceId: String?, debugDeviceIds: List<String>?): Boolean {
+        return !deviceId.isNullOrEmpty() && !debugDeviceIds.isNullOrEmpty() && debugDeviceIds.contains(deviceId)
     }
 
     private fun isScreenNameFound(inAppMessage: InAppMessage, screenName: String): Boolean {
@@ -116,7 +199,7 @@ object InAppMessageUtils {
         return when {
             operatorFilter.equals("AND") -> screenNameCheckArrayList.none { !it }
             operatorFilter.equals("OR") -> screenNameCheckArrayList.any { it }
-            else -> useOldScreenNameFilter(inAppMessage,screenName)
+            else -> useOldScreenNameFilter(inAppMessage, screenName)
         }
         /*     return inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
                   operateScreenValues(
@@ -164,9 +247,8 @@ object InAppMessageUtils {
         //return true
     }
 
-    private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String) :Boolean
-    {
-        return  inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
+    private fun useOldScreenNameFilter(inAppMessage: InAppMessage, screenName: String): Boolean {
+        return inAppMessage.data.displayCondition.screenNameFilters?.firstOrNull { screenNameFilter ->
             operateScreenValues(
                 screenNameFilter.value,
                 screenName,
@@ -177,18 +259,21 @@ object InAppMessageUtils {
 
     private fun operateRealTimeValues(
         displayRuleSet: DisplayRuleSet?,
-        params: HashMap<String, String>?
+        params: HashMap<String, String>?,
+        context: MutableMap<String, String>? = null,
+        startingIndex: Int = 0
     ): Boolean {
+        var criterionIndex = startingIndex
         if (displayRuleSet != null) {
             when (displayRuleSet.logicOperator) {
                 LogicOperator.AND.name -> {
                     return displayRuleSet.displayRules.all {
-                        operateDisplayRule(it, params)
+                        operateDisplayRule(it, params, context, criterionIndex)
                     }
                 }
                 LogicOperator.OR.name -> {
                     return displayRuleSet.displayRules.any {
-                        operateDisplayRule(it, params)
+                        operateDisplayRule(it, params, context, criterionIndex)
                     }
                 }
             }
@@ -199,16 +284,27 @@ object InAppMessageUtils {
     private fun operateDisplayRule(
         displayRule: DisplayRule,
         params: HashMap<String, String>?,
+        context: MutableMap<String, String>? = null,
+        startingIndex: Int = 0
     ): Boolean {
+        var criterionIndex = startingIndex
         when (displayRule.logicOperator) {
             LogicOperator.AND.name -> {
                 return displayRule.criterionList.all {
-                    operateCriterion(it, params)
+                    val result = operateCriterion(it, params, context, criterionIndex)
+                    if (context != null) {
+                        criterionIndex++
+                    }
+                    result
                 }
             }
             LogicOperator.OR.name -> {
                 return displayRule.criterionList.any {
-                    operateCriterion(it, params)
+                    val result = operateCriterion(it, params, context, criterionIndex)
+                    if (context != null) {
+                        criterionIndex++
+                    }
+                    result
                 }
             }
         }
@@ -218,22 +314,85 @@ object InAppMessageUtils {
     @SuppressLint("SimpleDateFormat")
     private fun operateCriterion(
         criterion: Criterion,
-        params: HashMap<String, String>?): Boolean {
+        params: HashMap<String, String>?,
+        context: MutableMap<String, String>? = null,
+        criterionIndex: Int = 0
+    ): Boolean {
         val subscription = Prefs.subscription
         val visitorInfo = Prefs.visitorInfo
 
         // temporary return for empty parameter. Another library should be used instead of Gson
-        if(criterion.parameter.isNullOrEmpty()) {
+        if (criterion.parameter.isNullOrEmpty()) {
             return false
         }
 
-        return when (criterion.parameter) {
+        var actualValue = when (criterion.parameter) {
+            SpecialRuleParameter.CATEGORY_PATH.key -> RealTimeInAppParamHolder.categoryPath ?: ""
+            SpecialRuleParameter.CART_ITEM_COUNT.key -> RealTimeInAppParamHolder.cartItemCount ?: "0"
+            SpecialRuleParameter.CART_AMOUNT.key -> RealTimeInAppParamHolder.cartAmount ?: "0"
+            SpecialRuleParameter.STATE.key -> RealTimeInAppParamHolder.state ?: ""
+            SpecialRuleParameter.CITY.key -> RealTimeInAppParamHolder.city ?: ""
+            SpecialRuleParameter.TIMEZONE.key -> subscription?.timezone ?: ""
+            SpecialRuleParameter.LANGUAGE.key -> subscription?.language ?: ""
+            SpecialRuleParameter.SCREEN_WIDTH.key -> Resources.getSystem().displayMetrics.widthPixels.toString()
+            SpecialRuleParameter.SCREEN_HEIGHT.key -> Resources.getSystem().displayMetrics.heightPixels.toString()
+            SpecialRuleParameter.OS_VERSION.key -> Build.VERSION.RELEASE.toString()
+            SpecialRuleParameter.OS.key -> "android"
+            SpecialRuleParameter.DEVICE_NAME.key -> Build.DEVICE
+            SpecialRuleParameter.COUNTRY.key -> subscription?.country ?: ""
+            SpecialRuleParameter.MONTH.key -> {
+                val dateFormat = SimpleDateFormat("MMM")
+                dateFormat.format(Date())
+            }
+            SpecialRuleParameter.WEEK_DAY.key -> {
+                val dateFormat = SimpleDateFormat("EEE")
+                dateFormat.format(Date())
+            }
+            SpecialRuleParameter.HOUR.key -> {
+                val dateFormat = SimpleDateFormat("HH")
+                dateFormat.format(Date())
+            }
+            SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key -> RealTimeInAppParamHolder.pageViewVisitCount.toString()
+            SpecialRuleParameter.ANONYMOUS.key -> subscription?.contactKey.isNullOrEmpty().toString()
+            SpecialRuleParameter.VISIT_DURATION.key -> {
+                val visitDurationInMinutes = ((TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) - Prefs.lastSessionStartTime) / 60).toInt()
+                visitDurationInMinutes.toString()
+            }
+            SpecialRuleParameter.FIRST_VISIT.key -> {
+                if (System.currentTimeMillis() / 1000 - Prefs.firstLaunchTime < 3600) "true" else "false"
+            }
+            SpecialRuleParameter.LAST_VISIT.key -> Prefs.lastSessionVisitTime.toString()
+            SpecialRuleParameter.BRAND_NAME.key -> Build.BRAND
+            SpecialRuleParameter.MODEL_NAME.key -> Build.MODEL
+            SpecialRuleParameter.PUSH_PERMISSION.key -> (subscription?.permission ?: true).toString()
+            SpecialRuleParameter.LAST_PRODUCT_ID.key -> RealTimeInAppParamHolder.getLastProductId() ?: ""
+            SpecialRuleParameter.LAST_PRODUCT_PRICE.key -> RealTimeInAppParamHolder.getLastProductPrice() ?: ""
+            SpecialRuleParameter.LAST_CATEGORY_PATH.key -> RealTimeInAppParamHolder.getLastCategoryPath() ?: ""
+            SpecialRuleParameter.CURRENT_PAGE_TITLE.key -> RealTimeInAppParamHolder.getCurrentPageTitle() ?: ""
+            SpecialRuleParameter.CURRENT_PAGE_TYPE.key -> RealTimeInAppParamHolder.getCurrentPageType() ?: ""
+            checkVisitorInfoAttr(criterion.parameter) -> {
+                if (criterion.dataType == DataType.DATETIME.name) {
+                    changeDateFormat(DateTime.now().toLocalDateTime().toString())
+                } else {
+                    getVisitorInfoAttrValue(criterion).toString()
+                }
+            }
+            else -> {
+                if (!criterion.parameter.contains("dn.")) {
+                    params?.get(criterion.parameter) ?: ""
+                } else {
+                    getVisitorInfoAttrValue(criterion).toString()
+                }
+            }
+        }
+
+        val result = when (criterion.parameter) {
             SpecialRuleParameter.CATEGORY_PATH.key -> {
                 operateRuleParameter(
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.categoryPath ?: ""
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.CART_ITEM_COUNT.key -> {
@@ -241,7 +400,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.cartItemCount ?: "0"
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.CART_AMOUNT.key -> {
@@ -249,7 +408,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.cartAmount ?: "0"
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.STATE.key -> {
@@ -257,7 +416,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.state ?: ""
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.CITY.key -> {
@@ -265,7 +424,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = RealTimeInAppParamHolder.city ?: ""
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.TIMEZONE.key -> {
@@ -273,7 +432,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.timezone
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.LANGUAGE.key -> {
@@ -281,7 +440,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.language
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.SCREEN_WIDTH.key -> {
@@ -289,7 +448,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Resources.getSystem().displayMetrics.widthPixels.toString()
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.SCREEN_HEIGHT.key -> {
@@ -297,7 +456,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Resources.getSystem().displayMetrics.heightPixels.toString()
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.OS_VERSION.key -> {
@@ -305,7 +464,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.VERSION.RELEASE.toString()
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.OS.key -> {
@@ -313,7 +472,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = "android"
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.DEVICE_NAME.key -> {
@@ -321,7 +480,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = Build.DEVICE
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.COUNTRY.key -> {
@@ -329,7 +488,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = subscription?.country
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.MONTH.key -> {
@@ -427,7 +586,7 @@ object InAppMessageUtils {
                     operator = criterion.operator,
                     dataType = criterion.dataType,
                     ruleParam = criterion.values,
-                    userParam = (subscription?.permission ?: true).toString()
+                    userParam = actualValue
                 )
             }
             SpecialRuleParameter.VISIT_COUNT.key -> {
@@ -439,12 +598,12 @@ object InAppMessageUtils {
                         if (visitCount == null) {
                             true
                         } else {
+                            actualValue = VisitCountManager.findVisitCountSinceDays(visitCount.timeAmount).toString()
                             operateRuleParameter(
                                 operator = criterion.operator,
                                 dataType = DataType.INT.name,
                                 ruleParam = listOf(visitCount.count.toString()),
-                                userParam = VisitCountManager.findVisitCountSinceDays(visitCount.timeAmount)
-                                    .toString()
+                                userParam = actualValue
                             )
                         }
                     } else {
@@ -462,6 +621,7 @@ object InAppMessageUtils {
                     val segments = visitorInfo?.segments?.map {
                         it.toString()
                     }
+                    actualValue = segments?.joinToString(",") ?: ""
                     operateVisitorRuleParameter(
                         operator = criterion.operator,
                         dataType = criterion.dataType,
@@ -477,6 +637,7 @@ object InAppMessageUtils {
                     val tags = visitorInfo?.tags?.map {
                         it.toString()
                     }
+                    actualValue = tags?.joinToString(",") ?: ""
                     operateVisitorRuleParameter(
                         operator = criterion.operator,
                         dataType = criterion.dataType,
@@ -536,14 +697,14 @@ object InAppMessageUtils {
                 if (criterion.parameter == SpecialRuleParameter.BIRTH_DATE.key) {
                     return birthdayCriteriaValid(
                         criterion.values,
-                        getVisitorInfoAttrValue(criterion)
+                        actualValue
                     )
                 } else if (criterion.dataType == DataType.DATETIME.name) {
                     operateRuleParameter(
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = changeDateFormat(DateTime.now().toLocalDateTime().toString())
+                        userParam = actualValue
                     )
 
                 } else {
@@ -551,7 +712,7 @@ object InAppMessageUtils {
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = getVisitorInfoAttrValue(criterion).toString()
+                        userParam = actualValue
                     )
                 }
             }
@@ -562,13 +723,65 @@ object InAppMessageUtils {
                         operator = criterion.operator,
                         dataType = criterion.dataType,
                         ruleParam = criterion.values,
-                        userParam = params?.get(criterion.parameter)
+                        userParam = actualValue
                     )
                 } else {
-                    return false
+                    false
                 }
             }
+        }
 
+        // Add to context if provided
+        if (context != null) {
+            val key = "${criterion.parameter}_${criterionIndex}"
+            val expectedValue = criterion.values?.joinToString(",") ?: ""
+            context[key] = "$expectedValue|$actualValue|${criterion.operator}|$result"
+        }
+
+        return result
+    }
+
+    private fun sendEvaluationLog(
+        inAppMessage: InAppMessage,
+        traceId: String,
+        screenName: String?,
+        currentCampaignList: List<String>,
+        matched: Boolean,
+        context: Map<String, String>
+    ) {
+        debugScope.launch {
+            try {
+                val subscription = Prefs.subscription
+                val sdkParameters = Prefs.sdkParameters
+
+                val campaignId = inAppMessage.data.publicId ?: inAppMessage.id
+
+                val debugLog = DebugLogRequest(
+                    traceId = traceId,
+                    appGuid = sdkParameters?.appId,
+                    appId = sdkParameters?.appId,
+                    account = sdkParameters?.accountName,
+                    device = subscription?.getSafeDeviceId() ?: "",
+                    sessionId = SessionManager.getSessionId(),
+                    sdkVersion = DengageUtils.getSdkVersion(),
+                    currentCampaignList = currentCampaignList,
+                    campaignId = campaignId,
+                    campaignType = if (inAppMessage.data.isRealTime()) "realtime" else "bulk",
+                    sendId = if (!inAppMessage.data.isRealTime()) inAppMessage.id else null,
+                    message = if (matched) "Campaign matched for evaluation traceId:$traceId campaignId:$campaignId" else
+                        "Campaign unmatched for evaluation traceId:$traceId campaignId:$campaignId",
+                    context = context,
+                    contactKey = subscription?.contactKey,
+                    channel = "android",
+                    currentRules = mapOf(
+                        "displayCondition" to GsonHolder.toJson(inAppMessage.data.displayCondition)
+                    )
+                )
+
+                debugLoggingRepository.sendDebugLog(screenName ?: "unknown", debugLog)
+            } catch (e: Exception) {
+                DengageLogger.error("Error sending evaluation debug log: ${e.message}")
+            }
         }
     }
 
