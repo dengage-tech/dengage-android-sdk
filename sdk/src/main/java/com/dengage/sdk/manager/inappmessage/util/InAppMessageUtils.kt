@@ -364,7 +364,8 @@ object InAppMessageUtils {
             SpecialRuleParameter.LAST_VISIT.key -> Prefs.lastSessionVisitTime.toString()
             SpecialRuleParameter.BRAND_NAME.key -> Build.BRAND
             SpecialRuleParameter.MODEL_NAME.key -> Build.MODEL
-            SpecialRuleParameter.PUSH_PERMISSION.key -> (subscription?.permission ?: true).toString()
+            SpecialRuleParameter.PUSH_PERMISSION.key -> (subscription?.permission == true && subscription.token.isNullOrEmpty()
+                .not()).toString()
             SpecialRuleParameter.LAST_PRODUCT_ID.key -> RealTimeInAppParamHolder.getLastProductId() ?: ""
             SpecialRuleParameter.LAST_PRODUCT_PRICE.key -> RealTimeInAppParamHolder.getLastProductPrice() ?: ""
             SpecialRuleParameter.LAST_CATEGORY_PATH.key -> RealTimeInAppParamHolder.getLastCategoryPath() ?: ""
