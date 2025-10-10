@@ -442,6 +442,15 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                 ?.mapNotNull { it.eventType }
                 ?.toSet() ?: emptySet()
             
+            // Add missing valid event types with empty lists
+            validEventTypes.forEach { eventType ->
+                if (!clientEvents.containsKey(eventType)) {
+                    clientEvents[eventType] = mutableListOf()
+                    hasChanges = true
+                    DengageLogger.debug("Added missing event type: $eventType with empty list")
+                }
+            }
+            
             // Remove events that are no longer in eventMappings
             val orphanedEventTypes = clientEvents.keys.filter { eventType ->
                 !validEventTypes.contains(eventType)
