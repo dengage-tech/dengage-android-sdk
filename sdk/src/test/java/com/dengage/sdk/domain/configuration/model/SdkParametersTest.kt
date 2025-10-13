@@ -60,6 +60,7 @@ class SdkParametersTest {
             expiredMessagesFetchIntervalInMin = expiredMessagesFetchIntervalInMin,
             surveyCheckEndpoint = surveyCheckEndpoint,
             eventMappings = eventMappings,
+            debugDeviceIds = listOf()
         )
 
         Assert.assertEquals(appId, sdkParameters.appId)

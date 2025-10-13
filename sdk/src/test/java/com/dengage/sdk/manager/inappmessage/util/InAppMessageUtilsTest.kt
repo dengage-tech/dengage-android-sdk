@@ -788,4 +788,33 @@ class InAppMessageUtilsTest {
         Assert.assertNotNull(priorInAppMessage)
     }
 
+    @Test
+    fun `findPriorRealTimeInApp between 1 value test`() {
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val criterionList = mutableListOf<Criterion>()
+        criterionList.add(
+            Criterion(
+                id = 1,
+                parameter = SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key,
+                dataType = DataType.INT.name,
+                operator = Operator.BETWEEN.operator,
+                values = listOf("0"),
+                valueSource = "SERVER_SIDE"
+            )
+        )
+        RealTimeInAppParamHolder.pageViewVisitCount = 2
+        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
+            id = Math.random().toString(),
+            priority = Priority.MEDIUM,
+            expireDate = expireDate,
+            criterionList = criterionList
+        )
+        val inAppMessages = listOf(realTimeInAppMessage)
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = inAppMessages
+        )
+        Assert.assertNull(priorInAppMessage)
+    }
+
 }
