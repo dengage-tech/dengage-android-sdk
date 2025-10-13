@@ -817,4 +817,62 @@ class InAppMessageUtilsTest {
         Assert.assertNull(priorInAppMessage)
     }
 
+    @Test
+    fun `findPriorRealTimeInApp between value test`() {
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val criterionList = mutableListOf<Criterion>()
+        criterionList.add(
+            Criterion(
+                id = 1,
+                parameter = SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key,
+                dataType = DataType.INT.name,
+                operator = Operator.BETWEEN.operator,
+                values = listOf("0", "5"),
+                valueSource = "SERVER_SIDE"
+            )
+        )
+        RealTimeInAppParamHolder.pageViewVisitCount = 2
+        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
+            id = Math.random().toString(),
+            priority = Priority.MEDIUM,
+            expireDate = expireDate,
+            criterionList = criterionList
+        )
+        val inAppMessages = listOf(realTimeInAppMessage)
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = inAppMessages
+        )
+        Assert.assertNotNull(priorInAppMessage)
+    }
+
+    @Test
+    fun `findPriorRealTimeInApp not between value test`() {
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val criterionList = mutableListOf<Criterion>()
+        criterionList.add(
+            Criterion(
+                id = 1,
+                parameter = SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key,
+                dataType = DataType.INT.name,
+                operator = Operator.NOT_BETWEEN.operator,
+                values = listOf("0", "5"),
+                valueSource = "SERVER_SIDE"
+            )
+        )
+        RealTimeInAppParamHolder.pageViewVisitCount = 2
+        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
+            id = Math.random().toString(),
+            priority = Priority.MEDIUM,
+            expireDate = expireDate,
+            criterionList = criterionList
+        )
+        val inAppMessages = listOf(realTimeInAppMessage)
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = inAppMessages
+        )
+        Assert.assertNull(priorInAppMessage)
+    }
+
 }
