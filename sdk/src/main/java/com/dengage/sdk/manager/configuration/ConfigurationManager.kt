@@ -6,6 +6,7 @@ import android.os.DeadObjectException
 import android.os.Handler
 import android.os.Looper
 import androidx.core.app.NotificationManagerCompat
+import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.remote.api.ApiUrlConfiguration
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
@@ -174,6 +175,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
 
     override fun sdkParametersFetched(sdkParameters: SdkParameters) {
         configurationCallback?.fetchInAppMessages()
+        Dengage.cleanupClientEvents()
         if (sdkParameters.appTrackingEnabled) {
             configurationCallback?.startAppTracking(sdkParameters.appTrackingList)
         }
