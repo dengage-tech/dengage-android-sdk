@@ -352,7 +352,7 @@ object CartUtils {
                             val lastValue = filter.values[1].toIntOrNull() ?: return false
                             val minValue = minOf(firstValue, lastValue)
                             val maxValue = maxOf(firstValue, lastValue)
-                            numFieldValue in (minValue + 1) until maxValue
+                            numFieldValue >= minValue && numFieldValue <= maxValue
                         } else false
                     }
                     "TEXT" -> {
@@ -362,7 +362,7 @@ object CartUtils {
                             val lastValue = filter.values[1].toDoubleOrNull() ?: return false
                             val minValue = minOf(firstValue, lastValue)
                             val maxValue = maxOf(firstValue, lastValue)
-                            numFieldValue > minValue && numFieldValue < maxValue
+                            numFieldValue >= minValue && numFieldValue <= maxValue
                         } else false
                     }
                     else -> false
@@ -377,7 +377,7 @@ object CartUtils {
                             val lastValue = filter.values[1].toIntOrNull() ?: return false
                             val minValue = minOf(firstValue, lastValue)
                             val maxValue = maxOf(firstValue, lastValue)
-                            numFieldValue !in (minValue + 1) until maxValue
+                            !(numFieldValue >= minValue && numFieldValue <= maxValue)
                         } else true
                     }
                     "TEXT" -> {
@@ -387,7 +387,7 @@ object CartUtils {
                             val lastValue = filter.values[1].toDoubleOrNull() ?: return false
                             val minValue = minOf(firstValue, lastValue)
                             val maxValue = maxOf(firstValue, lastValue)
-                            !(numFieldValue > minValue && numFieldValue < maxValue)
+                            !(numFieldValue >= minValue && numFieldValue <= maxValue)
                         } else true
                     }
                     else -> true

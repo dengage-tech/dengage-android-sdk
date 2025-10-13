@@ -1070,9 +1070,9 @@ object InAppMessageUtils {
 
                                 val firstRuleParam = convertedRuleParam.first()
                                 val lastRuleParam = convertedRuleParam.last()
-                                return (convertedUserParam in (firstRuleParam + 1) until lastRuleParam) ||
-                                        (convertedUserParam in (lastRuleParam + 1) until firstRuleParam)
-                            }
+                                return (convertedUserParam >= firstRuleParam && convertedUserParam <= lastRuleParam) ||
+                                        (convertedUserParam >= lastRuleParam && convertedUserParam <= firstRuleParam)
+                            } else return false
                         } catch (e: Exception) {
                             e.printStackTrace()
                             return true
@@ -1099,9 +1099,9 @@ object InAppMessageUtils {
 
                                 val firstRuleParam = convertedRuleParam.first()
                                 val lastRuleParam = convertedRuleParam.last()
-                                return convertedUserParam !in (firstRuleParam + 1) until lastRuleParam &&
-                                        convertedUserParam !in (lastRuleParam + 1) until firstRuleParam
-                            }
+                                return !(convertedUserParam >= firstRuleParam && convertedUserParam <= lastRuleParam) &&
+                                        !(convertedUserParam >= lastRuleParam && convertedUserParam <= firstRuleParam)
+                            } else return false
                         } catch (e: Exception) {
                             e.printStackTrace()
                             return true
