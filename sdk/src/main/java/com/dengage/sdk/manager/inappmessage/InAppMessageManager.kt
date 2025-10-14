@@ -296,6 +296,7 @@ class InAppMessageManager :
         inAppMessageFetchCallback?.inAppMessageFetched(isRealTime)
 
         if (inAppMessages != null) {
+
             var existingInAppMessages = Prefs.inAppMessages
             if (existingInAppMessages == null) {
                 existingInAppMessages = mutableListOf()

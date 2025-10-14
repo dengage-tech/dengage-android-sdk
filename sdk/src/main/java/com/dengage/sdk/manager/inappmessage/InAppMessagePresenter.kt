@@ -17,6 +17,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     private val getInAppMessages by lazy { GetInAppMessages() }
     private val getRealTimeInAppMessages by lazy { GetRealTimeInAppMessages() }
+    private val getRealTimeInAppMessagesV2 by lazy { GetRealTimeInAppMessagesV2() }
     private val setInAppMessageAsClicked by lazy { SetInAppMessageAsClicked() }
     private val setRealTimeInAppMessageAsClicked by lazy { SetRealTimeInAppMessageAsClicked() }
     private val setInAppMessageAsDismissed by lazy { SetInAppMessageAsDismissed() }
@@ -78,7 +79,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
                 }
 
-                getRealTimeInAppMessages(this) {
+                getRealTimeInAppMessagesV2(this) {
                     onResponse = {
                         view {
                             fetchedInAppMessages(it, true)
@@ -86,9 +87,28 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     }
                     onError = {
                         Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
-                        view { showError(it) }
+                        view {
+                            showError(it)
+                            getRealTimeInAppMessages(this@InAppMessagePresenter) {
+                                onResponse = {
+                                    view {
+                                        fetchedInAppMessages(it, true)
+                                    }
+                                }
+                                onError = {
+                                    Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
+                                    view {
+                                        showError(it)
+                                    }
+                                }
+                                params = GetRealTimeInAppMessages.Params(
+                                    accountId = sdkParameters?.accountName!!,
+                                    appId = sdkParameters.appId!!
+                                )
+                            }
+                        }
                     }
-                    params = GetRealTimeInAppMessages.Params(
+                    params = GetRealTimeInAppMessagesV2.Params(
                         accountId = sdkParameters?.accountName!!,
                         appId = sdkParameters.appId!!
                     )
@@ -260,7 +280,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                                     val jsonObject = JSONObject(errorBody)
                                     jsonObject.optString("message", "Unknown error")
                                 }
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 null
                             } ?: "Failed to validate coupon. Response code: ${response.code()}"
                             
