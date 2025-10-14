@@ -163,9 +163,8 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
                 return
             }
 
-            Handler(Looper.getMainLooper()).postDelayed({
-                presenter.getSdkParameters(integrationKey = subscription!!.integrationKey)
-            }, Random.nextLong(0, 60000))
+            presenter.getSdkParameters(integrationKey = subscription!!.integrationKey)
+
         } catch (e: Exception) {
             e.printStackTrace()
         } catch (e: Throwable) {
