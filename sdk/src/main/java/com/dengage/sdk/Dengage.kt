@@ -405,10 +405,14 @@ object Dengage {
 
     internal fun setLastSessionStartTime() {
         inAppSessionManager.setLastSessionStartTime()
+        // Start hourly fetch timer when app comes to foreground
+        inAppMessageManager.startHourlyFetchTimer()
     }
 
     internal fun setLastSessionDuration() {
         inAppSessionManager.setLastSessionDuration()
+        // Stop hourly fetch timer when app goes to background
+        inAppMessageManager.stopHourlyFetchTimer()
     }
 
     internal fun setLastVisitTime() {
@@ -949,4 +953,5 @@ object Dengage {
     internal fun cleanupClientEvents() {
         eventManager.cleanupClientEvents()
     }
+
 }

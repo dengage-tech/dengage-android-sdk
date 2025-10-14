@@ -43,6 +43,7 @@ class InAppMessageManager :
 
     companion object {
         private var timer = Timer()
+        private var hourlyFetchTimer: Timer? = null
     }
 
     /**
@@ -59,6 +60,27 @@ class InAppMessageManager :
         storyPropertyId: String? = null,
         storiesListView: StoriesListView? = null,
     ) {
+
+        val sdkParameters = Prefs.sdkParameters
+        if (sdkParameters != null) {
+            val currentTime = System.currentTimeMillis()
+            val fetchIntervalInMin = sdkParameters.inAppFetchIntervalInMin ?: 0
+            val timeoutMinutes = maxOf(fetchIntervalInMin * 4, 60) // Use 1 hour minimum
+            val timeoutMilliseconds = timeoutMinutes * 60 * 1000L
+
+            val lastSuccessfulInAppFetch = Prefs.lastSuccessfulInAppMessageFetchTime
+            val lastSuccessfulRealTimeFetch = Prefs.lastSuccessfulRealTimeInAppMessageFetchTime
+
+            val timeSinceLastInAppFetch = currentTime - lastSuccessfulInAppFetch
+            val timeSinceLastRealTimeFetch = currentTime - lastSuccessfulRealTimeFetch
+
+            // If both fetches are older than the timeout, log warning and return
+            if (timeSinceLastInAppFetch > timeoutMilliseconds && timeSinceLastRealTimeFetch > timeoutMilliseconds) {
+                DengageLogger.warning("setNavigation blocked: No successful in-app message fetch in the last $timeoutMinutes minutes")
+                return
+            }
+        }
+
         if (propertyId.isNullOrEmpty()) {
             cancelTimer()
         }
@@ -66,6 +88,7 @@ class InAppMessageManager :
         if (Prefs.isDevelopmentStatusDebug == false) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
         }
+
         val inAppMessages =
             InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
         Prefs.inAppMessages = inAppMessages
@@ -293,6 +316,13 @@ class InAppMessageManager :
     override fun fetchedInAppMessages(
         inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean
     ) {
+
+        if (isRealTime) {
+            Prefs.lastSuccessfulRealTimeInAppMessageFetchTime = System.currentTimeMillis()
+        } else {
+            Prefs.lastSuccessfulInAppMessageFetchTime = System.currentTimeMillis()
+        }
+
         inAppMessageFetchCallback?.inAppMessageFetched(isRealTime)
 
         if (inAppMessages != null) {
@@ -361,6 +391,29 @@ class InAppMessageManager :
 
             Prefs.inAppMessages = existingInAppMessages
         }
+    }
+
+    internal fun startHourlyFetchTimer() {
+        stopHourlyFetchTimer()
+
+        val oneHourInMilliSeconds = 60 * 60 * 1000L
+        hourlyFetchTimer = Timer().apply {
+            schedule(object : TimerTask() {
+                override fun run() {
+                    if (DengageUtils.isAppInForeground()) {
+                        fetchInAppMessages(null)
+                    }
+                    // Reschedule for next hour
+                    startHourlyFetchTimer()
+                }
+            }, oneHourInMilliSeconds) // 1 hour in milliseconds
+        }
+    }
+
+    internal fun stopHourlyFetchTimer() {
+        hourlyFetchTimer?.cancel()
+        hourlyFetchTimer?.purge()
+        hourlyFetchTimer = null
     }
 
     override fun inAppMessageSetAsDisplayed() = Unit

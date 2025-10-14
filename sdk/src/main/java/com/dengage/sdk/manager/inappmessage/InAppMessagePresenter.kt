@@ -1,5 +1,6 @@
 package com.dengage.sdk.manager.inappmessage
 
+import org.json.JSONObject
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.usecase.GetVisitorInfo
@@ -10,7 +11,7 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.manager.session.SessionManager
-import org.json.JSONObject
+
 
 class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>(),
     InAppMessageContract.Presenter {

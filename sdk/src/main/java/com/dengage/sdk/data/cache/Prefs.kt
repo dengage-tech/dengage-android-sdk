@@ -226,6 +226,14 @@ object Prefs {
         get() = preferences.get(PreferenceKey.CLIENT_EVENTS_LAST_CLEANUP_TIME, 0L) ?: 0L
         set(value) = preferences.set(PreferenceKey.CLIENT_EVENTS_LAST_CLEANUP_TIME, value)
 
+    internal var lastSuccessfulInAppMessageFetchTime: Long
+        get() = preferences.get(PreferenceKey.LAST_SUCCESSFUL_IN_APP_MESSAGE_FETCH_TIME, 0L) ?: 0L
+        set(value) = preferences.set(PreferenceKey.LAST_SUCCESSFUL_IN_APP_MESSAGE_FETCH_TIME, value)
+
+    internal var lastSuccessfulRealTimeInAppMessageFetchTime: Long
+        get() = preferences.get(PreferenceKey.LAST_SUCCESSFUL_REAL_TIME_IN_APP_MESSAGE_FETCH_TIME, 0L) ?: 0L
+        set(value) = preferences.set(PreferenceKey.LAST_SUCCESSFUL_REAL_TIME_IN_APP_MESSAGE_FETCH_TIME, value)
+
     fun clear() {
         preferences.edit { clear() }
     }
