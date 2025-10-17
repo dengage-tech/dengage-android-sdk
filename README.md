@@ -89,11 +89,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Lates SDK version: `6.0.81`
+Lates SDK version: `6.0.82`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.81'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
 }
 ```
 
@@ -1155,6 +1155,22 @@ Dengage.showRealTimeInApp(
   params = customParams // For filtering in app messages with respect to custom parameters(optional)
 )
 
+// Set cart for using in real time in app comparisons
+val cart = Cart(listOf(
+  CartItem(
+    productId = "product123",
+    productVariantId = "variant456",
+    categoryPath = "Electronics/Phones",
+    price = 999,
+    discountedPrice = 799,
+    hasDiscount = true,
+    hasPromotion = false,
+    quantity = 2,
+    attributes = mapOf("color" to "black", "storage" to "128GB")
+  )
+))
+Dengage.setCart(cart = cart)
+
 // Set category path for using in real time in app comparisons
 Dengage.setCategoryPath(path = "category-path")
 
@@ -1323,8 +1339,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.81'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.81'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.82'
 }
 ```
 
@@ -1378,8 +1394,8 @@ DengageGeofence.requestLocationPermissions(activity)
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.81'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.81'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.82'
 }
 ```
 
