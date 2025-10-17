@@ -1154,6 +1154,22 @@ Dengage.showRealTimeInApp(
   params = customParams // For filtering in app messages with respect to custom parameters(optional)
 )
 
+// Set cart for using in real time in app comparisons
+val cart = Cart(listOf(
+  CartItem(
+    productId = "product123",
+    productVariantId = "variant456",
+    categoryPath = "Electronics/Phones",
+    price = 999,
+    discountedPrice = 799,
+    hasDiscount = true,
+    hasPromotion = false,
+    quantity = 2,
+    attributes = mapOf("color" to "black", "storage" to "128GB")
+  )
+))
+Dengage.setCart(cart = cart)
+
 // Set category path for using in real time in app comparisons
 Dengage.setCategoryPath(path = "category-path")
 
