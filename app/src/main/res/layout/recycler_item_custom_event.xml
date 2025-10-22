@@ -10,23 +10,38 @@
         android:id="@+id/etEventKey"
         android:layout_width="0dp"
         android:layout_height="@dimen/base_component_height"
-        android:layout_weight="0.45"
+        android:layout_weight="0.4"
         android:gravity="center_horizontal"
         android:hint="@string/event_key"
-        android:textSize="@dimen/dengage_text_size_medium" />
+        android:textSize="@dimen/dengage_text_size_small" />
 
     <View
         android:layout_width="0dp"
         android:layout_height="@dimen/base_component_height"
-        android:layout_weight="0.1" />
+        android:layout_weight="0.05" />
 
     <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/etEventValue"
         android:layout_width="0dp"
         android:layout_height="@dimen/base_component_height"
-        android:layout_weight="0.45"
+        android:layout_weight="0.4"
         android:gravity="center_horizontal"
         android:hint="@string/event_value"
-        android:textSize="@dimen/dengage_text_size_medium" />
+        android:textSize="@dimen/dengage_text_size_small" />
+
+    <Spinner
+        android:id="@+id/spinnerEventValue"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/base_component_height"
+        android:layout_weight="0.4"
+        android:visibility="gone" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnRemove"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/base_component_height"
+        android:layout_weight="0.15"
+        android:text="@string/x"
+        android:textSize="12sp" />
 
 </LinearLayout>

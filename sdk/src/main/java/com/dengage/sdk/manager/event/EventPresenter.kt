@@ -23,7 +23,7 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
     ) {
         sendEvent(this) {
             onResponse = {
-                view { eventSent() }
+                view { eventSent(eventTableName, key, eventDetails) }
             }
             params = SendEvent.Params(
                 accountId = accountId,

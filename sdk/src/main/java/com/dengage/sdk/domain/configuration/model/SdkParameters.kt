@@ -20,4 +20,7 @@ data class SdkParameters(
     @SerializedName("realTimeInAppEnabled") val realTimeInAppEnabled: Boolean?,
     @SerializedName("realTimeInAppFetchIntervalInMinutes") val realTimeInAppFetchIntervalInMinutes: Int?,
     @SerializedName("realTimeInAppSessionTimeoutMinutes") val realTimeInAppSessionTimeoutMinutes: Int?,
+    @SerializedName("surveyCheckEndpoint") val surveyCheckEndpoint: String?,
+    @SerializedName("eventMappings") val eventMappings: List<EventMapping>?,
+    @SerializedName("debugDeviceIds") val debugDeviceIds: List<String>?
 ) : Serializable

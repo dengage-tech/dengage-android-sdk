@@ -14,4 +14,11 @@ interface GetRealTimeInAppService {
         @Path("appId") appId: String?,
     ): MutableList<InAppMessageData>?
 
+    @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
+    @GET("{accountId}/{appId}/v2/campaign.json")
+    suspend fun getRealTimeInAppMessagesV2(
+        @Path("accountId") accountId: String,
+        @Path("appId") appId: String?,
+    ): MutableList<InAppMessageData>?
+
 }
