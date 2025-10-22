@@ -6,12 +6,17 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import com.dengage.sdk.R
+import com.dengage.sdk.util.EdgeToEdgeUtils
 
 class DengageTestActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
         setContentView(R.layout.activity_dengage_test)
+        
+        // Enable edge-to-edge display for Android 15 with proper insets handling
+        EdgeToEdgeUtils.enableEdgeToEdgeWithInsets(this)
 
         findViewById<Button>(R.id.btnPushTest).setOnClickListener(this)
         findViewById<Button>(R.id.btnInAppTest).setOnClickListener(this)

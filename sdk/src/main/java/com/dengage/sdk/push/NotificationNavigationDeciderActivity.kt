@@ -14,6 +14,7 @@ import android.text.TextUtils
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.util.*
+import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.shouldProcessPush
 import com.dengage.sdk.util.extension.storeToPref
@@ -21,7 +22,7 @@ import com.dengage.sdk.util.extension.storeToPref
 class NotificationNavigationDeciderActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
         val id = intent.extras?.getString("id", "")
         if ("NO".equals(id, ignoreCase = true)) {
             val requestCode = intent.extras?.getInt("requestCode")

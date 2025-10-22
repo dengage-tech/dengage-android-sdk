@@ -30,6 +30,7 @@ class MessageTest {
         val addToInbox = true
         val expireDate = "expireDate"
         val appId = "appId"
+        val muted = true
 
         val pushMessage = Message(
             messageId = messageId,
@@ -54,7 +55,8 @@ class MessageTest {
             actionButtons = actionButtons,
             addToInbox = addToInbox,
             expireDate = expireDate,
-            appId = appId
+            appId = appId,
+            muted = muted
         )
 
         Assert.assertEquals(messageId, pushMessage.messageId)
@@ -79,6 +81,8 @@ class MessageTest {
         Assert.assertEquals(actionButtons, pushMessage.actionButtons)
         Assert.assertEquals(addToInbox, pushMessage.addToInbox)
         Assert.assertEquals(expireDate, pushMessage.expireDate)
+        Assert.assertEquals(appId, pushMessage.appId)
+        Assert.assertEquals(muted, pushMessage.muted)
     }
 
 }

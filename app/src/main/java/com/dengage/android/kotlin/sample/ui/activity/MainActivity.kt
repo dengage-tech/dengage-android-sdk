@@ -10,6 +10,7 @@ import com.dengage.android.kotlin.sample.R
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.push.PushMessageCallback
+import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.util.GsonHolder
 import com.dengage.sdk.util.PushDataParser
 
@@ -17,7 +18,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
         setContentView(R.layout.activity_main)
+        
+        // Enable edge-to-edge display for Android 15 with proper insets handling
+        EdgeToEdgeUtils.enableEdgeToEdgeWithInsets(this)
        // Log.d("oops", intent.toString())
         Dengage.requestNotificationPermission(this)
         PushDataParser.parseIntent(intent, pushMessageCallback = object : PushMessageCallback {

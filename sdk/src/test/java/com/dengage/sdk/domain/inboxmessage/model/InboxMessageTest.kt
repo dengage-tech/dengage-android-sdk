@@ -9,6 +9,7 @@ class InboxMessageTest {
     fun `InboxMessage constructor test`() {
         val id = "id"
         val isClicked = false
+        val isDeleted = false
         val title = "title"
         val message = "message"
         val mediaUrl = "mediaUrl"

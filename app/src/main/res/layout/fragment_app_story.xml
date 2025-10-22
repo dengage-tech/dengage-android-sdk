@@ -46,7 +46,7 @@
         <com.dengage.sdk.ui.story.StoriesListView
             android:id="@+id/storiesListView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="300dp"
             android:layout_marginTop="12dp" />
 
     </LinearLayout>
