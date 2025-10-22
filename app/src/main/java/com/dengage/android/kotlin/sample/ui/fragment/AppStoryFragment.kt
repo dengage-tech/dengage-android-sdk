@@ -7,6 +7,7 @@ import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentAppStoryBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
 import com.dengage.sdk.Dengage
+import androidx.core.graphics.toColorInt
 
 class AppStoryFragment : BaseDataBindingFragment<FragmentAppStoryBinding>() {
 
@@ -29,25 +30,19 @@ class AppStoryFragment : BaseDataBindingFragment<FragmentAppStoryBinding>() {
 
             Dengage.showStoriesList(screenName = screenName.ifEmpty { null },
                 storiesListView = binding.storiesListView,
-                storyPropertyId = "123",
+                storyPropertyId = storyPropertyId,
                 activity = requireActivity(),
                 customParams = customParams.ifEmpty { null }
             )
 
-            Dengage.showStoriesList(screenName = screenName.ifEmpty { null },
-                storiesListView = binding.storiesListView,
-                storyPropertyId = "1141",
-                activity = requireActivity(),
-                customParams = customParams.ifEmpty { null }
-            )
         }
 
         binding.btnBackgroundColor.setOnClickListener {
             val backgroundColorText = binding.etBackgroundColor.text.toString().trim()
             try {
-                val color = Color.parseColor(backgroundColorText)
+                val color = backgroundColorText.toColorInt()
                 binding.storiesListView.setBackgroundColor(color)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 Toast.makeText(requireContext(), "Invalid Color Code", Toast.LENGTH_SHORT).show()
             }
         }

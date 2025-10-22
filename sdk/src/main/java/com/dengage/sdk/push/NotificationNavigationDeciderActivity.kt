@@ -1,8 +1,6 @@
 package com.dengage.sdk.push
 
 import android.app.Activity
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
 import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -14,7 +12,6 @@ import android.text.TextUtils
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.util.*
-import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.shouldProcessPush
 import com.dengage.sdk.util.extension.storeToPref

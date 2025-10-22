@@ -46,7 +46,6 @@ class App : Application() {
             dengageHmsManager = dengageHmsManager,
             deviceConfigurationPreference = DeviceConfigurationPreference.Google,
             disableOpenWebUrl = false,
-            contactKey = "klo",
             notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY
         )
 
