@@ -36,7 +36,7 @@ object DengageUtils {
         } catch (e: Exception) {
             DengageLogger.error(e.message)
             ""
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
             ""
         }
     }
@@ -48,13 +48,13 @@ object DengageUtils {
         } catch (e: Exception) {
             DengageLogger.error(e.message)
             null
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
             null
         }
     }
 
     fun getSdkVersion(): String {
-        return "6.0.82";
+        return "6.0.83"
     }
 
     fun getUserAgent(context: Context): String {
@@ -64,9 +64,9 @@ object DengageUtils {
                     "${System.getProperty("http.agent")} Mobile/${Build.ID}"
 
             return appLabel.replace("[^\\x00-\\x7F]".toRegex(), "")
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
-        } catch (e: Throwable) {
+        } catch (_: Throwable) {
 
         }
         return ""
@@ -78,12 +78,12 @@ object DengageUtils {
         try {
             lApplicationInfo =
                 lPackageManager.getApplicationInfo(context.applicationInfo.packageName, 0)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
         } catch (ex: Throwable) {
             ex.printStackTrace()
 
-        } catch (e: DeadObjectException) {
+        } catch (_: DeadObjectException) {
 
         }
         return (if (lApplicationInfo != null) lPackageManager.getApplicationLabel(lApplicationInfo) else defaultText) as String?
@@ -101,7 +101,7 @@ object DengageUtils {
             )
             val bundle = applicationInfo.metaData
             bundle.getString(name)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         } catch (ex: Throwable) {
             ex.printStackTrace()
@@ -147,13 +147,13 @@ object DengageUtils {
             val appProcessInfo = ActivityManager.RunningAppProcessInfo()
             ActivityManager.getMyMemoryState(appProcessInfo)
             appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
             return false
         } catch (ex: Throwable) {
             ex.printStackTrace()
             return false
-        } catch (e: DeadObjectException) {
+        } catch (_: DeadObjectException) {
             return false
         }
     }
@@ -180,7 +180,7 @@ object DengageUtils {
             }
 
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             //  e.printStackTrace()
         } catch (ex: Throwable) {
             ex.printStackTrace()
@@ -193,9 +193,9 @@ object DengageUtils {
 
             //ContextHolder.context.applicationContext.unregisterReceiver(NRTrampoline())
 
-        } catch (e: Exception) {
-//e.printStackTrace()
-        } catch (ex: Throwable) {
+        } catch (_: Exception) {
+            //e.printStackTrace()
+        } catch (_: Throwable) {
             //  ex.printStackTrace()
 
         }
@@ -217,9 +217,9 @@ object DengageUtils {
             }
 
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             //  e.printStackTrace()
-        } catch (ex: Throwable) {
+        } catch (_: Throwable) {
             //  ex.printStackTrace()
 
         }
@@ -230,9 +230,9 @@ object DengageUtils {
 
             ContextHolder.context.applicationContext.unregisterReceiver(InAppBroadcastReceiver())
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             //   e.printStackTrace()
-        } catch (ex: Throwable) {
+        } catch (_: Throwable) {
             //  ex.printStackTrace()
 
         }
@@ -243,9 +243,9 @@ object DengageUtils {
             val broadCastIntent = Intent(intent.action)
             broadCastIntent.putExtras(intent.extras!!)
             ContextHolder.context.applicationContext.sendBroadcast(broadCastIntent)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             //e.printStackTrace()
-        } catch (ex: Throwable) {
+        } catch (_: Throwable) {
             // ex.printStackTrace()
 
         }
@@ -296,7 +296,7 @@ object DengageUtils {
                 restartApplication = Dengage.getCurrentActivity() == null
             }
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
 
             restartApplication = true
         }
@@ -310,8 +310,8 @@ object DengageUtils {
                 return className
             }
             return Prefs.className
-        } catch (e: Exception) {
-        } catch (t: Throwable) {
+        } catch (_: Exception) {
+        } catch (_: Throwable) {
         }
         return className
     }
@@ -328,8 +328,8 @@ object DengageUtils {
     fun getNotificationPreference(): Int {
         try {
             return if (Prefs.notificationDisplayPriorityConfiguration == NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY.ordinal) NotificationManager.IMPORTANCE_DEFAULT else NotificationManager.IMPORTANCE_HIGH
-        } catch (e: java.lang.Exception) {
-        } catch (t: Throwable) {
+        } catch (_: java.lang.Exception) {
+        } catch (_: Throwable) {
         }
         return NotificationManager.IMPORTANCE_DEFAULT
     }

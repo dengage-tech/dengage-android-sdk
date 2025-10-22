@@ -46,6 +46,7 @@
 - [In-App Messaging](#in-app-messaging)
   - [Methods](#methods)
   - [Real Time In-App Messaging](#real-time-in-app-messaging)
+  - [Custom Device Information for In-App Messages](#custom-device-information-for-in-app-messages)
   - [In-App Inline](#in-app-inline)
   - [App Stories](#app-stories)
 - [Geofence](#geofence)
@@ -88,11 +89,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Lates SDK version: `6.0.82`
+Lates SDK version: `6.0.83`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.83'
 }
 ```
 
@@ -1186,6 +1187,26 @@ Dengage.setState(name = "state-name")
 Dengage.setCity(name = "city-name")
 ```
 
+### Custom Device Information for In-App Messages
+
+You can set custom device information that will be available in your in-app message templates using Mustache templating.
+
+```kotlin
+// Set custom device information
+Dengage.setInAppDeviceInfo("user_level", "premium")
+Dengage.setInAppDeviceInfo("theme", "dark")
+
+// Clear all custom device information
+Dengage.clearInAppDeviceInfo()
+```
+
+The custom device information you set will be accessible in your in-app message HTML content through the `dnInAppDeviceInfo` object. For example, in your in-app message template, you can use:
+
+```html
+<div>Welcome {{#dnInAppDeviceInfo.user_level}}{{.}}{{/dnInAppDeviceInfo.user_level}} user!</div>
+<div>You are using {{#dnInAppDeviceInfo.theme}}{{.}}{{/dnInAppDeviceInfo.theme}} app theme</div>
+```
+
 ### In-App Inline
 
 The **In-App Inline** feature allows you to seamlessly integrate inline in-app messages into your app's content, dynamically populating specific parts of your app for a better user experience.
@@ -1318,8 +1339,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.82'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.83'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.83'
 }
 ```
 
@@ -1373,8 +1394,8 @@ DengageGeofence.requestLocationPermissions(activity)
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.82'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.83'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.83'
 }
 ```
 
