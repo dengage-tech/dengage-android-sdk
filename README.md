@@ -1377,7 +1377,7 @@ DengageGeofence.requestLocationPermissions(activity)
           maven {url 'http://developer.huawei.com/repo/'}
       }
       dependencies {        
-          classpath "com.huawei.agconnect:agcp:1.9.1.300"
+          classpath "com.huawei.agconnect:agcp:1.6.2.300"
       }
     }
     ```
