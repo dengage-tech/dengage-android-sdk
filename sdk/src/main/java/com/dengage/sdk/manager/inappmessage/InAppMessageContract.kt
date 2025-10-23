@@ -24,6 +24,7 @@ interface InAppMessageContract {
             buttonType: String?
         )
 
+        fun setInAppMessageAsDismissed(inAppMessage: InAppMessage)
         fun sendStoryEvent(
             storyEventType: StoryEventType,
             inAppMessage: InAppMessage,
@@ -35,12 +36,13 @@ interface InAppMessageContract {
 
         fun setStoryCoverShown(storyCoverId: String, storySetId: String)
         fun sortStoryCovers(storyCovers: List<StoryCover>, storySetId: String): List<StoryCover>
-
-        fun getVisitorInfo()
-
-
         fun fetchInAppExpiredMessageIds()
-        fun setInAppMessageAsDismissed(inAppMessage: InAppMessage)
+        fun getVisitorInfo()
+        fun validateCoupon(
+            couponContent: String,
+            inAppMessageId: String,
+            onValidCoupon: (couponCode: String) -> Unit,
+            onInvalidCoupon: (errorMessage: String) -> Unit
+        )
     }
-
 }

@@ -1,9 +1,10 @@
 package com.dengage.sdk.manager.inappmessage
 
+import java.util.*
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.view.View
+import androidx.core.net.toUri
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
@@ -14,13 +15,20 @@ import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
+import com.dengage.sdk.ui.inappmessage.Mustache
 import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
-import java.util.*
+import com.dengage.sdk.domain.inappmessage.DebugLogRequest
+import com.dengage.sdk.domain.inappmessage.DebugLoggingRepository
+import com.dengage.sdk.manager.session.SessionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 class InAppMessageManager :
     BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
@@ -30,9 +38,12 @@ class InAppMessageManager :
     override fun providePresenter() = InAppMessagePresenter()
 
     private var inAppMessageFetchCallback: InAppMessageFetchCallback? = null
+    private val debugLoggingRepository = DebugLoggingRepository()
+    private val debugScope = CoroutineScope(Dispatchers.IO)
 
     companion object {
         private var timer = Timer()
+        private var hourlyFetchTimer: Timer? = null
     }
 
     /**
@@ -43,13 +54,33 @@ class InAppMessageManager :
         screenName: String? = null,
         params: HashMap<String, String>? = null,
         resultCode: Int = -1,
-        isRealTime: Boolean = false,
         inAppInlineElement: InAppInlineElement? = null,
         propertyId: String? = "",
         hideIfNotFound: Boolean? = false,
         storyPropertyId: String? = null,
         storiesListView: StoriesListView? = null,
     ) {
+
+        val sdkParameters = Prefs.sdkParameters
+        if (sdkParameters != null) {
+            val currentTime = System.currentTimeMillis()
+            val fetchIntervalInMin = sdkParameters.inAppFetchIntervalInMin ?: 0
+            val timeoutMinutes = maxOf(fetchIntervalInMin * 4, 60) // Use 1 hour minimum
+            val timeoutMilliseconds = timeoutMinutes * 60 * 1000L
+
+            val lastSuccessfulInAppFetch = Prefs.lastSuccessfulInAppMessageFetchTime
+            val lastSuccessfulRealTimeFetch = Prefs.lastSuccessfulRealTimeInAppMessageFetchTime
+
+            val timeSinceLastInAppFetch = currentTime - lastSuccessfulInAppFetch
+            val timeSinceLastRealTimeFetch = currentTime - lastSuccessfulRealTimeFetch
+
+            // If both fetches are older than the timeout, log warning and return
+            if (timeSinceLastInAppFetch > timeoutMilliseconds && timeSinceLastRealTimeFetch > timeoutMilliseconds) {
+                DengageLogger.warning("setNavigation blocked: No successful in-app message fetch in the last $timeoutMinutes minutes")
+                return
+            }
+        }
+
         if (propertyId.isNullOrEmpty()) {
             cancelTimer()
         }
@@ -57,6 +88,7 @@ class InAppMessageManager :
         if (Prefs.isDevelopmentStatusDebug == false) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
         }
+
         val inAppMessages =
             InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
         Prefs.inAppMessages = inAppMessages
@@ -66,7 +98,6 @@ class InAppMessageManager :
                     inAppMessages,
                     screenName,
                     params,
-                    isRealTime,
                     propertyId,
                     storyPropertyId
                 )
@@ -79,21 +110,59 @@ class InAppMessageManager :
                             ignoreCase = true
                         )
                     ) {
-                        showAppStory(activity, priorInAppMessage, storiesListView)
+                        showAppStory(priorInAppMessage, storiesListView)
                     }
                 } else {
                     if(storiesListView == null) {
                         if (!"INLINE".equals(priorInAppMessage.data.content.type, ignoreCase = true) && inAppInlineElement != null) {
                            return
                         } else {
-                            showInAppMessage(
-                                activity,
-                                priorInAppMessage,
-                                resultCode,
-                                inAppInlineElement = inAppInlineElement,
-                                propertyId = propertyId
-                            )
+
+                            if (priorInAppMessage.data.content.params.html?.let { 
+                                Mustache.hasCouponSection(it) 
+                            } == true) {
+                                val couponContent: String? = Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
+                                
+                                couponContent?.let { content ->
+                                    presenter.validateCoupon(
+                                        couponContent = content,
+                                        inAppMessageId = priorInAppMessage.id,
+                                        onValidCoupon = { couponCode ->
+                                            showInAppMessage(
+                                                activity,
+                                                priorInAppMessage,
+                                                resultCode,
+                                                inAppInlineElement = inAppInlineElement,
+                                                propertyId = propertyId,
+                                                couponCode = couponCode
+                                            )
+                                        },
+                                        onInvalidCoupon = { errorMessage ->
+                                            DengageLogger.error("Coupon validation failed: $errorMessage")
+                                            
+                                            // Send debug log for invalid coupon if debug device
+                                            sendCouponValidationFailureLog(
+                                                couponContent = content,
+                                                errorMessage = errorMessage,
+                                                inAppMessage = priorInAppMessage,
+                                                screenName = screenName
+                                            )
+                                        }
+                                    )
+                                }
+                            } else {
+                                showInAppMessage(
+                                    activity,
+                                    priorInAppMessage,
+                                    resultCode,
+                                    inAppInlineElement = inAppInlineElement,
+                                    propertyId = propertyId,
+                                    couponCode = null
+                                )
+                            }
                         }
+
+
                     }
                 }
 
@@ -161,7 +230,8 @@ class InAppMessageManager :
         inAppMessage: InAppMessage,
         resultCode: Int = -1,
         propertyId: String? = "",
-        inAppInlineElement: InAppInlineElement?
+        inAppInlineElement: InAppInlineElement?,
+        couponCode: String? = null
     ) {
         try {
             // set delay for showing in app message
@@ -169,6 +239,9 @@ class InAppMessageManager :
             timer.schedule(object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
+
+
+
                         setInAppMessageAsDisplayed(
                             inAppMessage = inAppMessage
                         )
@@ -198,12 +271,19 @@ class InAppMessageManager :
 
                         } else {
                             activity.startActivityForResult(
-                                InAppMessageActivity.newIntent(
-                                    activity, inAppMessage, resultCode
-                                ), resultCode
+                                if (couponCode != null) {
+                                    InAppMessageActivity.newIntent(
+                                        activity, inAppMessage, resultCode, couponCode
+                                    )
+                                } else {
+                                    InAppMessageActivity.newIntent(
+                                        activity, inAppMessage, resultCode
+                                    )
+                                }, resultCode
                             )
 
                             if (!inAppMessage.data.content.params.shouldAnimate) {
+                                @Suppress("DEPRECATION")
                                 activity.overridePendingTransition(0, 0)
                             }
                             InAppMessageActivity.inAppMessageCallback = this@InAppMessageManager
@@ -236,9 +316,17 @@ class InAppMessageManager :
     override fun fetchedInAppMessages(
         inAppMessages: MutableList<InAppMessage>?, isRealTime: Boolean
     ) {
+
+        if (isRealTime) {
+            Prefs.lastSuccessfulRealTimeInAppMessageFetchTime = System.currentTimeMillis()
+        } else {
+            Prefs.lastSuccessfulInAppMessageFetchTime = System.currentTimeMillis()
+        }
+
         inAppMessageFetchCallback?.inAppMessageFetched(isRealTime)
 
-        if (!inAppMessages.isNullOrEmpty()) {
+        if (inAppMessages != null) {
+
             var existingInAppMessages = Prefs.inAppMessages
             if (existingInAppMessages == null) {
                 existingInAppMessages = mutableListOf()
@@ -305,6 +393,29 @@ class InAppMessageManager :
         }
     }
 
+    internal fun startHourlyFetchTimer() {
+        stopHourlyFetchTimer()
+
+        val oneHourInMilliSeconds = 60 * 60 * 1000L
+        hourlyFetchTimer = Timer().apply {
+            schedule(object : TimerTask() {
+                override fun run() {
+                    if (DengageUtils.isAppInForeground()) {
+                        fetchInAppMessages(null)
+                    }
+                    // Reschedule for next hour
+                    startHourlyFetchTimer()
+                }
+            }, oneHourInMilliSeconds) // 1 hour in milliseconds
+        }
+    }
+
+    internal fun stopHourlyFetchTimer() {
+        hourlyFetchTimer?.cancel()
+        hourlyFetchTimer?.purge()
+        hourlyFetchTimer = null
+    }
+
     override fun inAppMessageSetAsDisplayed() = Unit
 
     override fun inAppMessageSetAsClicked() = Unit
@@ -342,7 +453,7 @@ class InAppMessageManager :
         }
     }
 
-    private fun showAppStory(activity: Activity, inAppMessage: InAppMessage, storiesListView: StoriesListView) {
+    private fun showAppStory(inAppMessage: InAppMessage, storiesListView: StoriesListView) {
         val data = inAppMessage.data
         if(!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
             StoriesListView.inAppMessageCallback = this@InAppMessageManager
@@ -377,7 +488,7 @@ class InAppMessageManager :
             if(eventType == StoryEventType.STORY_CLICK) {
                 if (DengageUtils.isDeeplink(buttonUrl)) {
                     try {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(buttonUrl))
+                        val intent = Intent(Intent.ACTION_VIEW, buttonUrl.toUri())
                         intent.putExtra("targetUrl", buttonUrl)
                         DengageUtils.sendBroadCast(intent.apply {
                             this.action = Constants.DEEPLINK_RETRIEVE_EVENT
@@ -386,7 +497,7 @@ class InAppMessageManager :
                         DengageLogger.error(e.message)
                     }
                 } else{
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(buttonUrl))
+                    val intent = Intent(Intent.ACTION_VIEW, buttonUrl.toUri())
                     intent.putExtra("targetUrl", buttonUrl)
                     ContextHolder.context.launchActivity(intent, buttonUrl)
                 }
@@ -430,6 +541,57 @@ class InAppMessageManager :
             }
         }
         return storyCovers
+    }
+
+    private fun isDebugDevice(deviceId: String?, debugDeviceIds: List<String>?): Boolean {
+        return !deviceId.isNullOrEmpty() && !debugDeviceIds.isNullOrEmpty() && debugDeviceIds.contains(deviceId)
+    }
+
+    private fun sendCouponValidationFailureLog(
+        couponContent: String,
+        errorMessage: String,
+        inAppMessage: InAppMessage,
+        screenName: String?
+    ) {
+        debugScope.launch {
+            try {
+                val subscription = Prefs.subscription
+                val sdkParameters = Prefs.sdkParameters
+
+                val isDebugDevice = isDebugDevice(
+                    subscription?.getSafeDeviceId(),
+                    sdkParameters?.debugDeviceIds
+                )
+
+                if (isDebugDevice) {
+                    val traceId = UUID.randomUUID().toString()
+                    val campaignId = inAppMessage.data.publicId ?: inAppMessage.id
+                    
+                    val debugLog = DebugLogRequest(
+                        traceId = traceId,
+                        appGuid = sdkParameters?.appId,
+                        appId = sdkParameters?.appId,
+                        account = sdkParameters?.accountName,
+                        device = subscription?.getSafeDeviceId() ?: "",
+                        sessionId = SessionManager.getSessionId(),
+                        sdkVersion = DengageUtils.getSdkVersion(),
+                        currentCampaignList = emptyList(),
+                        campaignId = campaignId,
+                        campaignType = if (inAppMessage.data.isRealTime()) "realtime" else "bulk",
+                        sendId = null,
+                        message = "Coupon validation failed: $couponContent - $errorMessage traceId:$traceId campaignId:$campaignId",
+                        context = mapOf("coupon_code" to couponContent),
+                        contactKey = subscription?.contactKey,
+                        channel = "android",
+                        currentRules = mapOf()
+                    )
+
+                    debugLoggingRepository.sendDebugLog(screenName ?: "unknown", debugLog)
+                }
+            } catch (e: Exception) {
+                DengageLogger.error("Error sending coupon validation failure debug log: ${e.message}")
+            }
+        }
     }
 
 }

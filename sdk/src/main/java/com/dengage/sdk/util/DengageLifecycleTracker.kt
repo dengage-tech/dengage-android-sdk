@@ -16,10 +16,10 @@ open class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
             // app went to foreground
             ContextHolder.resetContext(activity.applicationContext)
             Dengage.getInAppMessages()
-
             Dengage.setLastSessionStartTime()
             Dengage.sendAppForegroundEvent()
             Dengage.getInAppExpiredMessageIds()
+            Dengage.cleanupClientEvents()
         }
         startedActivityCount++
     }

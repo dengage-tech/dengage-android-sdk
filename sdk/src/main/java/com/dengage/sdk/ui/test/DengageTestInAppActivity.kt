@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.R
+import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.*
 import java.util.*
@@ -14,6 +15,10 @@ class DengageTestInAppActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Enable edge-to-edge display for Android 15
+        EdgeToEdgeUtils.enableEdgeToEdge(this)
+        
         setContentView(R.layout.activity_dengage_test_in_app)
 
         findViewById<Button>(R.id.btnFullScreen1).setOnClickListener(this)

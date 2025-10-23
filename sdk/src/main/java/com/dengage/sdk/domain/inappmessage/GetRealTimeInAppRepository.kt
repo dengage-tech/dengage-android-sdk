@@ -20,6 +20,16 @@ class GetRealTimeInAppRepository {
         )
     }
 
+    suspend fun getRealTimeInAppMessagesV2(
+        accountId: String,
+        appId: String?,
+    ): MutableList<InAppMessageData>? {
+        return service.getRealTimeInAppMessagesV2(
+            accountId = accountId,
+            appId = appId
+        )
+    }
+
 
 
 }

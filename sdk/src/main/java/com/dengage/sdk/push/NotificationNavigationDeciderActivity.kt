@@ -1,8 +1,6 @@
 package com.dengage.sdk.push
 
 import android.app.Activity
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
 import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -21,7 +19,7 @@ import com.dengage.sdk.util.extension.storeToPref
 class NotificationNavigationDeciderActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
         val id = intent.extras?.getString("id", "")
         if ("NO".equals(id, ignoreCase = true)) {
             val requestCode = intent.extras?.getInt("requestCode")
