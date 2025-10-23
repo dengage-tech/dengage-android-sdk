@@ -163,6 +163,13 @@ Dengage.init(
 | **deviceConfigurationPreference** | Specifies the configuration preference. For Google Play applications, it should be set to `Google`.                                    |
 | **disableOpenWebUrl**             | Set this parameter to `true` if you want to prevent the browser from opening when a push notification is clicked.                      |
 
+If you need to update the Dengage Firebase app integration key after the SDK has been initialized, call `setFirebaseIntegrationKey` with the new key.
+
+```kotlin
+Dengage.setFirebaseIntegrationKey(
+    integrationKey = "your-firebase-integration-key"
+)
+```
 
 ### Logging
 
@@ -1425,6 +1432,14 @@ Dengage.init(
   dengageHmsManager = dengageHmsManager,
   deviceConfigurationPreference = DeviceConfigurationPreference.Huawei,
   disableOpenWebUrl = false
+)
+```
+
+Use `setHuaweiIntegrationKey` if you manage a Huawei build and need to provide or rotate the Dengage Huawei app integration key after initialization.
+
+```kotlin
+Dengage.setHuaweiIntegrationKey(
+    integrationKey = "your-huawei-integration-key"
 )
 ```
 
