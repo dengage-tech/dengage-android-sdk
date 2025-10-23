@@ -89,7 +89,7 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Lates SDK version: `6.0.83`
+Latest SDK version: `6.0.83`
 
 ```groovy
 dependencies {
