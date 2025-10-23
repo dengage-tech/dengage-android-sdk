@@ -49,11 +49,5 @@ enum class Operator(val operator: String) {
     BETWEEN("BETWEEN"),
 
     @SerializedName("NOT_BETWEEN")
-    NOT_BETWEEN("NOT_BETWEEN"),
-
-    @SerializedName("CONTAINS_ALL")
-    CONTAINS_ALL("CONTAINS_ALL"),
-
-    @SerializedName("CONTAINS_ANY")
-    CONTAINS_ANY("CONTAINS_ANY")
+    NOT_BETWEEN("NOT_BETWEEN")
 }

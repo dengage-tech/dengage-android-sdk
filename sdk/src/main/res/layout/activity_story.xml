@@ -3,14 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="false"
     tools:context=".ui.story.StoryActivity">
 
     <com.dengage.sdk.ui.story.FixedViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"
-        android:fitsSystemWindows="false" />
+        android:background="@android:color/black" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

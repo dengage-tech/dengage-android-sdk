@@ -14,7 +14,6 @@ import com.dengage.sdk.domain.inappmessage.model.MimeType
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.EdgeToEdgeUtils
 
 interface StoryPageViewOperator {
     fun backPageView()
@@ -35,10 +34,6 @@ class StoryActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Enable immersive edge-to-edge display for Android 15
-        EdgeToEdgeUtils.enableImmersiveEdgeToEdge(this)
-        
         setContentView(R.layout.activity_story)
         viewPager = findViewById(R.id.viewPager)
         storyCoverPosition = intent.getIntExtra(Constants.STORY_COVER_POSITION, 0)

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -23,7 +22,6 @@ import com.dengage.sdk.domain.inappmessage.model.MimeType
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
 import com.dengage.sdk.util.DengageLogger
-import com.dengage.sdk.util.EdgeToEdgeUtils
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.PlaybackException
@@ -86,7 +84,6 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         storyDisplayVideo.useController = false
-        EdgeToEdgeUtils.setupEdgeToEdgeInsets(view)
         updateStory()
         setUpUi()
     }

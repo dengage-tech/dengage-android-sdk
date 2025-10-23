@@ -30,7 +30,6 @@ import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
-import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchApplicationSettingsActivity
 import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
@@ -44,7 +43,6 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
         inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as? InAppMessage ?: run {
             finish()
             return
@@ -53,9 +51,6 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         val contentParams = inAppMessage.data.content.params
         setThemeAccordingToContentParams(contentParams)
         setContentView(R.layout.activity_in_app_message)
-        
-        // Enable edge-to-edge display for Android 15 with proper insets handling
-        //EdgeToEdgeUtils.enableEdgeToEdgeWithInsets(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             contentParams.backgroundColor?.let { color ->
@@ -147,16 +142,8 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         webView.addJavascriptInterface(JavaScriptInterface(), "Dn")
 
         contentParams.html?.let { html ->
-            var processedHtml = html
-
-            val couponCode = intent.getStringExtra(EXTRA_COUPON_CODE)
-            if (!couponCode.isNullOrEmpty() && Mustache.hasCouponSection(processedHtml)) {
-                processedHtml = Mustache.replaceCouponSections(processedHtml, couponCode)
-            }
-
             val dataMap = mapOf("dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo())
-            val renderedHtml = Mustache.render(processedHtml, dataMap)
-
+            val renderedHtml = Mustache.render(html, dataMap)
             webView.loadDataWithBaseURL(null, renderedHtml, "text/html", "UTF-8", null)
         }
 
@@ -207,21 +194,12 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         var inAppMessageCallback: InAppMessageCallback? = null
 
         const val EXTRA_IN_APP_MESSAGE = "EXTRA_IN_APP_MESSAGE"
-        const val EXTRA_COUPON_CODE = "EXTRA_COUPON_CODE"
         const val RESULT_CODE = "RESULT_CODE"
 
         fun newIntent(activity: Activity, inAppMessage: InAppMessage, resultCode: Int): Intent {
             return Intent(activity, InAppMessageActivity::class.java).apply {
                 putExtra(EXTRA_IN_APP_MESSAGE, inAppMessage)
                 putExtra(RESULT_CODE, resultCode)
-            }
-        }
-
-        fun newIntent(activity: Activity, inAppMessage: InAppMessage, resultCode: Int, couponCode: String?): Intent {
-            return Intent(activity, InAppMessageActivity::class.java).apply {
-                putExtra(EXTRA_IN_APP_MESSAGE, inAppMessage)
-                putExtra(RESULT_CODE, resultCode)
-                putExtra(EXTRA_COUPON_CODE, couponCode)
             }
         }
     }

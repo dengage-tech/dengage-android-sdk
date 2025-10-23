@@ -46,9 +46,6 @@
         <action
             android:id="@+id/actionHomeToAppStory"
             app:destination="@id/appStoryFragment" />
-        <action
-            android:id="@+id/actionHomeToRealTimeInAppFilters"
-            app:destination="@id/realTimeInAppFiltersFragment" />
     </fragment>
     <fragment
         android:id="@+id/deviceInfoFragment"
@@ -110,30 +107,4 @@
         android:name="com.dengage.android.kotlin.sample.ui.fragment.AppStoryFragment"
         android:label="fragment_app_story"
         tools:layout="@layout/fragment_app_story" />
-    <fragment
-        android:id="@+id/realTimeInAppFiltersFragment"
-        android:name="com.dengage.android.kotlin.sample.ui.fragment.RealTimeInAppFiltersFragment"
-        android:label="Real Time InApp Filters"
-        tools:layout="@layout/fragment_real_time_in_app_filters">
-        
-        <action
-            android:id="@+id/action_realTimeInAppFilters_to_eventHistory"
-            app:destination="@id/eventHistoryFragment" />
-            
-        <action
-            android:id="@+id/action_realTimeInAppFilters_to_cart"
-            app:destination="@id/cartFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/eventHistoryFragment"
-        android:name="com.dengage.android.kotlin.sample.ui.fragment.EventHistoryFragment"
-        android:label="Event History"
-        tools:layout="@layout/fragment_event_history" />
-
-    <fragment
-        android:id="@+id/cartFragment"
-        android:name="com.dengage.android.kotlin.sample.ui.fragment.CartFragment"
-        android:label="Cart"
-        tools:layout="@layout/fragment_cart" />
 </navigation>

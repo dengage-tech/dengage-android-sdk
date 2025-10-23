@@ -9,7 +9,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.geofence.model.DengageLocationPermission
-import com.dengage.sdk.util.EdgeToEdgeUtils
 
 class GeofencePermissionActivity : Activity() {
     companion object {
@@ -19,7 +18,7 @@ class GeofencePermissionActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         val accessFineLocationPermission = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_FINE_LOCATION

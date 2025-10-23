@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Button
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.R
-import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.domain.push.model.ActionButton
 import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.CustomParam
@@ -19,10 +18,6 @@ class DengageTestPushActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Enable edge-to-edge display for Android 15
-        EdgeToEdgeUtils.enableEdgeToEdge(this)
-        
         setContentView(R.layout.activity_dengage_test_push)
 
         findViewById<Button>(R.id.btnCarousel).setOnClickListener(this)

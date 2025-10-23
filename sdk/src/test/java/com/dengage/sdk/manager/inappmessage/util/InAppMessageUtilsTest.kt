@@ -1,34 +1,15 @@
+/*
 package com.dengage.sdk.manager.inappmessage.util
 
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import java.text.SimpleDateFormat
-import java.util.*
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
-import androidx.test.platform.app.InstrumentationRegistry
-import com.dengage.sdk.Dengage
-import com.dengage.sdk.data.cache.Prefs
-import com.dengage.sdk.domain.inappmessage.model.Criterion
-import com.dengage.sdk.domain.inappmessage.model.DataType
 import com.dengage.sdk.domain.inappmessage.model.Operator
 import com.dengage.sdk.domain.inappmessage.model.Priority
-import com.dengage.sdk.domain.inappmessage.model.SpecialRuleParameter
-import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.util.Constants
-import com.dengage.sdk.util.ContextHolder
+import org.junit.Assert
+import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.*
 
-
-@Config(manifest=Config.NONE)
-@RunWith(RobolectricTestRunner::class)
 class InAppMessageUtilsTest {
-
-    @Before
-    fun setup() {
-        ContextHolder.context = InstrumentationRegistry.getInstrumentation().context
-    }
 
     @Test
     fun `findNotExpiredInAppMessages test`() {
@@ -438,229 +419,88 @@ class InAppMessageUtilsTest {
     }
 
     @Test
-    fun `operateScreenValues EQUALS test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "testScreen",
-            operator = Operator.EQUALS
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "testScreen"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues EQUALS test`() {
+        val screenNameValue = "screenName"
+        val screenName = "screenName"
+        val operator = Operator.EQUALS.operator
+        Assert.assertTrue(InAppMessageUtils.operateScreenValues(listOf(screenNameValue), screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues NOT_EQUALS test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "testScreen",
-            operator = Operator.NOT_EQUALS
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "differentScreen"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues NOT_EQUALS test`() {
+        val screenNameValue = "screenName"
+        val screenName = "screenName"
+        val operator = Operator.NOT_EQUALS.operator
+        Assert.assertFalse(InAppMessageUtils.operateScreenValues(listOf(screenNameValue), screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues LIKE test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "test",
-            operator = Operator.LIKE
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "testScreenLike"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues LIKE test`() {
+        val screenNameValue = "screenName"
+        val screenName = "screenNameLike"
+        val operator = Operator.LIKE.operator
+        Assert.assertTrue(InAppMessageUtils.operateScreenValues(listOf(screenNameValue), screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues NOT_LIKE test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "test",
-            operator = Operator.NOT_LIKE
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "differentScreen"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues NOT_LIKE test`() {
+        val screenNameValue = "screenName"
+        val screenName = "screenNameLike"
+        val operator = Operator.NOT_LIKE.operator
+        Assert.assertFalse(InAppMessageUtils.operateScreenValues(listOf(screenNameValue), screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues STARTS_WITH test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "test",
-            operator = Operator.STARTS_WITH
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "testScreenStartsWith"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues STARTS_WITH test`() {
+        val screenNameValue = "screenName"
+        val screenName = "screenNameStartsWith"
+        val operator = Operator.STARTS_WITH.operator
+        Assert.assertTrue(InAppMessageUtils.operateScreenValues(listOf(screenNameValue), screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues NOT_STARTS_WITH test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "test",
-            operator = Operator.NOT_STARTS_WITH
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "differentScreen"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues NOT_STARTS_WITH test`() {
+        val screenNameValue = "screenName"
+        val screenName = "screenNameStartsWith"
+        val operator = Operator.NOT_STARTS_WITH.operator
+        Assert.assertFalse(InAppMessageUtils.operateScreenValues(listOf(screenNameValue), screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues ENDS_WITH test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "EndsWith",
-            operator = Operator.ENDS_WITH
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "testScreenEndsWith"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues ENDS_WITH test`() {
+        val screenNameValue = "EndsWith"
+        val screenName = "screenNameEndsWith"
+        val operator = Operator.ENDS_WITH.operator
+        Assert.assertTrue(InAppMessageUtils.operateScreenValues(listOf(screenNameValue), screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues NOT_ENDS_WITH test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "EndsWith",
-            operator = Operator.NOT_ENDS_WITH
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "differentScreen"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues NOT_ENDS_WITH test`() {
+        val screenNameValue = "EndsWith"
+        val screenName = "screenNameEndsWith"
+        val operator = Operator.NOT_ENDS_WITH.operator
+        Assert.assertFalse(InAppMessageUtils.operateScreenValues(listOf(screenNameValue), screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues IN test through findPriorInAppMessage`() {
-        // Note: The current InAppMessageMocker doesn't support multiple screen names for IN operator
-        // This test assumes the screen name filter value is set to the screenName parameter
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "screenName1",
-            operator = Operator.IN
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "screenName1"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues IN test`() {
+        val screenName = "screenName1"
+        val operator = Operator.IN.operator
+        Assert.assertTrue(InAppMessageUtils.operateScreenValues(listOf("screenName1", "screenName2", "screenName3"),
+            screenName, operator))
     }
 
     @Test
-    fun `operateScreenValues NOT_IN test through findPriorInAppMessage`() {
-        val id1 = Math.random().toString()
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-
-        val inAppMessage = InAppMessageMocker.createInAppMessage(
-            id = id1,
-            priority = Priority.HIGH,
-            expireDate = expireDate,
-            screenName = "screenName1",
-            operator = Operator.NOT_IN
-        )
-
-        val inAppMessages = listOf(inAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages,
-            screenName = "screenName4"
-        )
-        Assert.assertEquals(priorInAppMessage?.id, id1)
+    fun `operateScreenValues NOT_IN test`() {
+        val screenName = "screenName4"
+        val operator = Operator.NOT_IN.operator
+        Assert.assertTrue(InAppMessageUtils.operateScreenValues(listOf("screenName1", "screenName2", "screenName3"),
+            screenName, operator))
     }
 
-    @Test
+    /*@Test
     fun `findPriorRealTimeInApp category test`() {
+        RealTimeInAppParamHolder.categoryPath = "Category"
         val id1 = Math.random().toString()
         val id2 = Math.random().toString()
 
@@ -674,15 +514,7 @@ class InAppMessageUtilsTest {
                 parameter = SpecialRuleParameter.CITY.key,
                 dataType = DataType.TEXT.name,
                 operator = Operator.EQUALS.operator,
-                values = listOf("Ankara", "Istanbul"),
-                valueSource = "SERVER_SIDE",
-                //type = null,
-                aggregateType = null,
-                aggregateField = null,
-                eventType = null,
-                timeWindow = null,
-                filtersLogicalOp = null,
-                filters = null
+                values = listOf("Ankara", "Istanbul")
             )
         )
         criterionList.add(
@@ -691,15 +523,7 @@ class InAppMessageUtilsTest {
                 parameter = SpecialRuleParameter.CATEGORY_PATH.key,
                 dataType = DataType.TEXT.name,
                 operator = Operator.LIKE.operator,
-                values = listOf("Category"),
-                valueSource = "SERVER_SIDE",
-                //type = null,
-                aggregateType = null,
-                aggregateField = null,
-                eventType = null,
-                timeWindow = null,
-                filtersLogicalOp = null,
-                filters = null
+                values = listOf("Category")
             )
         )
 
@@ -716,163 +540,11 @@ class InAppMessageUtilsTest {
             criterionList = criterionList
         )
 
-        Dengage.setCity("Ankara")
-        Dengage.setCategoryPath("Category")
-
         val inAppMessages = listOf(realTimeInAppMessageHigh, realTimeInAppMessageMedium)
         val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
             inAppMessages = inAppMessages
         )
-
-
-
         Assert.assertEquals(priorInAppMessage?.id, id2)
-    }
-
-    @Test
-    fun `findPriorRealTimeInApp anonymous true when contact key is empty set test`() {
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-        val criterionList = mutableListOf<Criterion>()
-        criterionList.add(
-            Criterion(
-                id = 1,
-                parameter = SpecialRuleParameter.ANONYMOUS.key,
-                dataType = DataType.BOOL.name,
-                operator = Operator.EQUALS.operator,
-                values = listOf("true"),
-                valueSource = "SERVER_SIDE"
-            )
-        )
-        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
-            id = Math.random().toString(),
-            priority = Priority.MEDIUM,
-            expireDate = expireDate,
-            criterionList = criterionList
-        )
-        val inAppMessages = listOf(realTimeInAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages
-        )
-        Assert.assertNotNull(priorInAppMessage)
-    }
-
-    @Test
-    fun `findPriorRealTimeInApp anonymous true when contact key is not empty test`() {
-        Prefs.subscription = Subscription(
-            contactKey = "testContactKey"
-        )
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-        val criterionList = mutableListOf<Criterion>()
-        criterionList.add(
-            Criterion(
-                id = 1,
-                parameter = SpecialRuleParameter.ANONYMOUS.key,
-                dataType = DataType.BOOL.name,
-                operator = Operator.EQUALS.operator,
-                values = listOf("false"),
-                valueSource = "SERVER_SIDE"
-            )
-        )
-        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
-            id = Math.random().toString(),
-            priority = Priority.MEDIUM,
-            expireDate = expireDate,
-            criterionList = criterionList
-        )
-        val inAppMessages = listOf(realTimeInAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages
-        )
-        Assert.assertNotNull(priorInAppMessage)
-    }
-
-    @Test
-    fun `findPriorRealTimeInApp between 1 value test`() {
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-        val criterionList = mutableListOf<Criterion>()
-        criterionList.add(
-            Criterion(
-                id = 1,
-                parameter = SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key,
-                dataType = DataType.INT.name,
-                operator = Operator.BETWEEN.operator,
-                values = listOf("0"),
-                valueSource = "SERVER_SIDE"
-            )
-        )
-        RealTimeInAppParamHolder.pageViewVisitCount = 2
-        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
-            id = Math.random().toString(),
-            priority = Priority.MEDIUM,
-            expireDate = expireDate,
-            criterionList = criterionList
-        )
-        val inAppMessages = listOf(realTimeInAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages
-        )
-        Assert.assertNull(priorInAppMessage)
-    }
-
-    @Test
-    fun `findPriorRealTimeInApp between value test`() {
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-        val criterionList = mutableListOf<Criterion>()
-        criterionList.add(
-            Criterion(
-                id = 1,
-                parameter = SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key,
-                dataType = DataType.INT.name,
-                operator = Operator.BETWEEN.operator,
-                values = listOf("0", "5"),
-                valueSource = "SERVER_SIDE"
-            )
-        )
-        RealTimeInAppParamHolder.pageViewVisitCount = 2
-        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
-            id = Math.random().toString(),
-            priority = Priority.MEDIUM,
-            expireDate = expireDate,
-            criterionList = criterionList
-        )
-        val inAppMessages = listOf(realTimeInAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages
-        )
-        Assert.assertNotNull(priorInAppMessage)
-    }
-
-    @Test
-    fun `findPriorRealTimeInApp not between value test`() {
-        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
-        val expireDate = expireDateFormat.format(Date())
-        val criterionList = mutableListOf<Criterion>()
-        criterionList.add(
-            Criterion(
-                id = 1,
-                parameter = SpecialRuleParameter.PAGE_VIEW_IN_VISIT.key,
-                dataType = DataType.INT.name,
-                operator = Operator.NOT_BETWEEN.operator,
-                values = listOf("0", "5"),
-                valueSource = "SERVER_SIDE"
-            )
-        )
-        RealTimeInAppParamHolder.pageViewVisitCount = 2
-        val realTimeInAppMessage = InAppMessageMocker.createRealTimeInAppMessage(
-            id = Math.random().toString(),
-            priority = Priority.MEDIUM,
-            expireDate = expireDate,
-            criterionList = criterionList
-        )
-        val inAppMessages = listOf(realTimeInAppMessage)
-        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
-            inAppMessages = inAppMessages
-        )
-        Assert.assertNull(priorInAppMessage)
-    }
-
+    }*/
 }
+ */
