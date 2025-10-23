@@ -63,29 +63,4 @@
     <string name="read_status">Read: %1$s</string>
     <string name="receive_date_time">Receive Date &amp; Time: %1$s</string>
     <string name="inbox">Inbox</string>
-    <string name="event_history">Event History</string>
-    <string name="cart">Cart</string>
-    <string name="app_story">App Story</string>
-    <string name="real_time_inapp_filters">Real Time InApp Filters</string>
-    <string name="inapp_inline">InApp Inline</string>
-    <string name="add_parameter">Add Parameter</string>
-    <string name="set_cart">Set Cart</string>
-    <string name="send_event">Send Event</string>
-    <string name="table_name_display">Table: %s</string>
-    <string name="x">X</string>
-    <string name="product_id">Product ID</string>
-    <string name="product_variant_id">Product Variant ID</string>
-    <string name="price">Price</string>
-    <string name="discounted_price">Discounted Price</string>
-    <string name="quantity">Quantity</string>
-    <string name="has_discount">Has Discount</string>
-    <string name="has_promotion">Has Promotion</string>
-    <string name="effective_price_display">Effective Price: %s</string>
-    <string name="line_total_display">Line Total: %s</string>
-    <string name="discounted_line_total_display">Discounted Line Total: %s</string>
-    <string name="effective_line_total_display">Effective Line Total: %s</string>
-    <string name="remove_item">Remove Item</string>
-    <string name="add_item">Add Item</string>
-    <string name="update_cart">Update Cart</string>
-
 </resources>

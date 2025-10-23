@@ -22,7 +22,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.dengage.sdk.R;
-import com.dengage.sdk.util.EdgeToEdgeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +46,7 @@ public class InAppBrowserActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
         setContentView(R.layout.activity_in_app_browser);
-        
-        // Set status bar icons to dark/grey without enabling edge-to-edge
-        EdgeToEdgeUtils.INSTANCE.setStatusBarIconsToDark(this);
 
         // init empty list
         mTitles = new ArrayList<>();

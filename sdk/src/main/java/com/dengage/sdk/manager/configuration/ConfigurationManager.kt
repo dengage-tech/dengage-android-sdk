@@ -3,10 +3,7 @@ package com.dengage.sdk.manager.configuration
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.DeadObjectException
-import android.os.Handler
-import android.os.Looper
 import androidx.core.app.NotificationManagerCompat
-import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.data.remote.api.ApiUrlConfiguration
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
@@ -25,7 +22,6 @@ import com.dengage.sdk.util.DengageUtils
 import com.google.firebase.FirebaseApp
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         ConfigurationContract.Presenter>(), ConfigurationContract.View {
@@ -150,31 +146,25 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             val subscription = Prefs.subscription
             if (subscription?.integrationKey.isNullOrEmpty()) return
             if (!DengageUtils.isAppInForeground()) return
+            // if 24 hours passed after getting sdk params, you should get again
             val sdkParameters = Prefs.sdkParameters
-
-            if (sdkParameters == null) {
-                presenter.getSdkParameters(integrationKey = subscription!!.integrationKey)
-                return
-            }
-
-            if (System.currentTimeMillis() < sdkParameters.lastFetchTimeInMillis + (1 * 60 * 1000)) {
+            if (sdkParameters != null &&
+                System.currentTimeMillis() < sdkParameters.lastFetchTimeInMillis + (24 * 60 * 60 * 1000)
+            ) {
                 // fetch in app messages
                 configurationCallback?.fetchInAppMessages()
                 return
             }
-
-            presenter.getSdkParameters(integrationKey = subscription!!.integrationKey)
-
+            presenter.getSdkParameters(
+                integrationKey = subscription!!.integrationKey
+            )
         } catch (e: Exception) {
-            e.printStackTrace()
         } catch (e: Throwable) {
-            e.printStackTrace()
         }
     }
 
     override fun sdkParametersFetched(sdkParameters: SdkParameters) {
         configurationCallback?.fetchInAppMessages()
-        Dengage.cleanupClientEvents()
         if (sdkParameters.appTrackingEnabled) {
             configurationCallback?.startAppTracking(sdkParameters.appTrackingList)
         }

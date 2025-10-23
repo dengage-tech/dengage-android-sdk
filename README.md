@@ -89,11 +89,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Latest SDK version: `6.0.83`
+Lates SDK version: `6.0.82`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.83'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
 }
 ```
 
@@ -1339,8 +1339,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.83'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.83'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.82'
 }
 ```
 
@@ -1394,8 +1394,8 @@ DengageGeofence.requestLocationPermissions(activity)
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.83'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.83'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.82'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.82'
 }
 ```
 

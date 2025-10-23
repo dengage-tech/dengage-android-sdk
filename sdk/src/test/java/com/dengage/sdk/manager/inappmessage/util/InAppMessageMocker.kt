@@ -1,3 +1,4 @@
+/*
 package com.dengage.sdk.manager.inappmessage.util
 
 import com.dengage.sdk.domain.inappmessage.model.*
@@ -5,16 +6,13 @@ import com.dengage.sdk.domain.inappmessage.model.*
 object InAppMessageMocker {
 
     fun createInAppMessage(
-        id: String,
-        priority: Priority,
+        id: String, priority: Priority,
         expireDate: String,
         screenName: String? = null,
         operator: Operator? = null,
         isRealTime: Boolean = false,
         hasRules: Boolean = true,
-        maxShowCount: Int = 1,
-        showCount: Long = 0,
-        androidSelector: String = ""
+        maxShowCount :Int = 1
     ): InAppMessage {
         val contentParams = ContentParams(
             position = ContentPosition.BOTTOM.position,
@@ -26,9 +24,7 @@ object InAppMessageMocker {
             marginBottom = null,
             marginLeft = null,
             marginRight = null,
-            dismissOnTouchOutside = false,
-            backgroundColor = "#FFFFFF",
-            storySet = null
+            dismissOnTouchOutside = false
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -68,8 +64,7 @@ object InAppMessageMocker {
         val displayTiming = DisplayTiming(
             delay = 10,
             showEveryXMinutes = 5,
-            maxShowCount = maxShowCount,
-            maxDismissCount = 5
+            maxShowCount = maxShowCount
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -82,13 +77,7 @@ object InAppMessageMocker {
                 "publicId"
             } else {
                 null
-            },
-            inlineTarget = InlineTarget(
-                androidSelector = androidSelector,
-            ),
-            nextDisplayTime = 0,
-            showCount = showCount,
-            dismissCount = 2
+            }
         )
 
         return InAppMessage(
@@ -105,9 +94,7 @@ object InAppMessageMocker {
         criterionList: MutableList<Criterion>? = null,
         criterionOperator: LogicOperator? = null,
         ruleSetOperator: LogicOperator? = null,
-        maxShowCount: Int = 1,
-        showCount: Long = 0,
-        androidSelector: String = ""
+        maxShowCount: Int = 1
     ): InAppMessage {
         val ruleSet = if (criterionList == null) {
             null
@@ -135,9 +122,7 @@ object InAppMessageMocker {
             marginBottom = null,
             marginLeft = null,
             marginRight = null,
-            dismissOnTouchOutside = false,
-            backgroundColor = "#FFFFFF",
-            storySet = null
+            dismissOnTouchOutside = false
         )
         val content = Content(
             type = ContentType.HTML.type,
@@ -158,8 +143,7 @@ object InAppMessageMocker {
         val displayTiming = DisplayTiming(
             delay = 10,
             showEveryXMinutes = 5,
-            maxShowCount = maxShowCount,
-            maxDismissCount = 5
+            maxShowCount = maxShowCount
         )
         val inAppMessageData = InAppMessageData(
             messageDetails = "messageDetails",
@@ -168,13 +152,7 @@ object InAppMessageMocker {
             content = content,
             displayCondition = displayCondition,
             displayTiming = displayTiming,
-            publicId = "publicId",
-            inlineTarget = InlineTarget(
-                androidSelector = androidSelector,
-            ),
-            nextDisplayTime = 0,
-            showCount = showCount,
-            dismissCount = 2
+            publicId = "publicId"
         )
 
         return InAppMessage(
@@ -184,3 +162,5 @@ object InAppMessageMocker {
     }
 
 }
+
+ */

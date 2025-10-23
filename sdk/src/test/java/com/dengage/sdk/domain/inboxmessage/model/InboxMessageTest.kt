@@ -18,7 +18,6 @@ class InboxMessageTest {
         val androidTargetUrl = "androidTargetUrl"
         val receiveDate = "receiveDate"
         val carouselItems = null
-        val isDeleted = false
 
         val inboxMessage = InboxMessage(
             id = id,

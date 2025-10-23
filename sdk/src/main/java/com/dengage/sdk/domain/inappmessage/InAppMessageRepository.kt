@@ -14,7 +14,6 @@ import retrofit2.Response
 class InAppMessageRepository {
 
     private val service: InAppMessageService by service(PUSH)
-    private val couponService: CouponService by service(PUSH)
 
     suspend fun getInAppMessages(
         account: String,
@@ -81,7 +80,7 @@ class InAppMessageRepository {
     }
 
 
-    suspend fun getInAppExpiredMessageIds(
+    suspend fun GetInAppExpiredMessageIds(
         account: String,
         subscription: Subscription,
         sdkParameters: SdkParameters
@@ -121,16 +120,6 @@ class InAppMessageRepository {
             appId = appId,
             sessionId = sessionId,
             duration = duration
-        )
-    }
-
-    suspend fun assignCoupon(
-        accountId: String,
-        request: CouponAssignRequest
-    ): Response<CouponAssignResponse> {
-        return couponService.assignCoupon(
-            accountId = accountId,
-            request = request
         )
     }
 

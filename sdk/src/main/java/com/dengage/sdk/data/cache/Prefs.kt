@@ -1,13 +1,10 @@
 package com.dengage.sdk.data.cache
 
-import java.util.Locale
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.core.content.edit
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.model.VisitorInfo
-import com.dengage.sdk.domain.event.model.ClientEvent
 import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
@@ -18,9 +15,7 @@ import com.dengage.sdk.domain.visitcount.model.VisitCountItem
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageUtils
-
-import com.dengage.sdk.domain.inappmessage.model.Cart
-import com.dengage.sdk.domain.inappmessage.model.ClientPageInfo
+import java.util.Locale
 
 object Prefs {
 
@@ -120,7 +115,7 @@ object Prefs {
         get() = preferences.get(PreferenceKey.SUBSCRIPTION_CALL_TIME, 0) ?: 0
         set(value) = preferences.set(PreferenceKey.SUBSCRIPTION_CALL_TIME, value)
 
-    internal var previousSubscription: Subscription?
+    internal var previouSubscription: Subscription?
         get() = preferences.get(PreferenceKey.PREVIOUS_SUBSCRIPTION)
         set(value) = preferences.set(PreferenceKey.PREVIOUS_SUBSCRIPTION, value)
 
@@ -210,31 +205,7 @@ object Prefs {
         get() = preferences.get(PreferenceKey.TOKEN, "") ?: ""
         set(value) = preferences.set(PreferenceKey.TOKEN, value)
 
-    internal var clientEvents: MutableMap<String, MutableList<ClientEvent>>
-        get() = preferences.get(PreferenceKey.CLIENT_EVENTS) ?: mutableMapOf()
-        set(value) = preferences.set(PreferenceKey.CLIENT_EVENTS, value)
-
-    internal var clientCart: Cart?
-        get() = preferences.get(PreferenceKey.CLIENT_CART)
-        set(value) = preferences.set(PreferenceKey.CLIENT_CART, value)
-
-    internal var clientPageInfo: ClientPageInfo?
-        get() = preferences.get(PreferenceKey.CLIENT_PAGE_INFO) ?: ClientPageInfo()
-        set(value) = preferences.set(PreferenceKey.CLIENT_PAGE_INFO, value)
-
-    internal var clientEventsLastCleanupTime: Long
-        get() = preferences.get(PreferenceKey.CLIENT_EVENTS_LAST_CLEANUP_TIME, 0L) ?: 0L
-        set(value) = preferences.set(PreferenceKey.CLIENT_EVENTS_LAST_CLEANUP_TIME, value)
-
-    internal var lastSuccessfulInAppMessageFetchTime: Long
-        get() = preferences.get(PreferenceKey.LAST_SUCCESSFUL_IN_APP_MESSAGE_FETCH_TIME, 0L) ?: 0L
-        set(value) = preferences.set(PreferenceKey.LAST_SUCCESSFUL_IN_APP_MESSAGE_FETCH_TIME, value)
-
-    internal var lastSuccessfulRealTimeInAppMessageFetchTime: Long
-        get() = preferences.get(PreferenceKey.LAST_SUCCESSFUL_REAL_TIME_IN_APP_MESSAGE_FETCH_TIME, 0L) ?: 0L
-        set(value) = preferences.set(PreferenceKey.LAST_SUCCESSFUL_REAL_TIME_IN_APP_MESSAGE_FETCH_TIME, value)
-
     fun clear() {
-        preferences.edit { clear() }
+        preferences.edit().clear().apply()
     }
 }
