@@ -4,27 +4,6 @@ import com.dengage.sdk.util.DengageLogger
 
 object Mustache {
 
-    fun hasCouponSection(template: String): Boolean {
-        val couponSectionRegex = "\\{\\{#coupon\\}\\}.*?\\{\\{/coupon\\}\\}".toRegex(RegexOption.DOT_MATCHES_ALL)
-        return couponSectionRegex.containsMatchIn(template)
-    }
-
-    fun getCouponContents(template: String): List<String> {
-        val couponSectionRegex = "\\{\\{#coupon\\}\\}(.*?)\\{\\{/coupon\\}\\}".toRegex(RegexOption.DOT_MATCHES_ALL)
-        return couponSectionRegex.findAll(template)
-            .map { it.groupValues[1].trim() }
-            .toList()
-    }
-
-    fun getCouponContent(template: String): String? {
-        return getCouponContents(template).firstOrNull()
-    }
-
-    fun replaceCouponSections(template: String, couponCode: String): String {
-        val couponSectionRegex = "\\{\\{#coupon\\}\\}.*?\\{\\{/coupon\\}\\}".toRegex(RegexOption.DOT_MATCHES_ALL)
-        return couponSectionRegex.replace(template, couponCode)
-    }
-
     fun render(template: String, view: Any?): String {
         return try {
             val (tokens, _) = parseTokens(template, 0, stopTag = null)

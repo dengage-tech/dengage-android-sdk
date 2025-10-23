@@ -37,7 +37,7 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
         sendSubscriptionUseCase(this) {
             onResponse = {
                 view {
-                    Prefs.previousSubscription = Prefs.subscription
+                    Prefs.previouSubscription = Prefs.subscription
                     Prefs.subscriptionCallTime = System.currentTimeMillis() + (TWENTY_MINUTES)
                     subscriptionSent()
                 }
@@ -58,7 +58,7 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
         if(!DengageUtils.isAppInForeground()) return false
         val now = System.currentTimeMillis()
         val nextAllowedTime = Prefs.subscriptionCallTime
-        val prevSubscription = Prefs.previousSubscription
+        val prevSubscription = Prefs.previouSubscription
         val subscriptionChanged = (subscription != prevSubscription)
         val timePassed = now >= nextAllowedTime
         return (subscriptionChanged || timePassed)

@@ -12,7 +12,7 @@ class GetInAppExpiredMessageIds : CoroutineUseCase<MutableList<InAppRemovalId>?,
     private val repository: InAppMessageRepository by createLazy()
 
     override suspend fun buildUseCase(params: Params?): MutableList<InAppRemovalId>? =
-        repository.getInAppExpiredMessageIds(
+        repository.GetInAppExpiredMessageIds(
             account = params!!.account,
             subscription = params.subscription,
             sdkParameters = params.sdkParameters

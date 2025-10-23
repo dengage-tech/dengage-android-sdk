@@ -3,15 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="false">
+    android:layout_height="match_parent">
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/storyDisplayVideo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        android:fitsSystemWindows="false"
         app:surface_type="texture_view" />
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -20,8 +18,7 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         android:background="@color/cardview_dark_background"
-        android:scaleType="fitCenter"
-        android:fitsSystemWindows="false" />
+        android:scaleType="fitCenter" />
 
     <ProgressBar
         android:id="@+id/storyDisplayVideoProgress"
@@ -35,8 +32,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:fitsSystemWindows="false">
+        android:orientation="horizontal">
 
         <View
             android:id="@+id/previous"
@@ -56,7 +52,6 @@
         android:id="@+id/storyOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false"
         app:layout_constraintTop_toTopOf="parent">
 
         <View
