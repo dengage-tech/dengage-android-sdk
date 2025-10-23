@@ -88,7 +88,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/base_component_height"
                 android:layout_marginTop="8dp"
-                android:text="InApp inline" />
+                android:text="@string/inapp_inline" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnGeofencePage"
@@ -102,7 +102,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/base_component_height"
                 android:layout_marginTop="8dp"
-                android:text="App Story" />
+                android:text="@string/app_story" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnRealTimeInAppFilters"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/real_time_inapp_filters" />
 
         </LinearLayout>
 

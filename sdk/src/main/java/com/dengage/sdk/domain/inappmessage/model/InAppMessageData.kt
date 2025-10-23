@@ -33,4 +33,50 @@ class InAppMessageData(
                 displayTiming.maxShowCount == 0 ||
                 showCount < displayTiming.maxShowCount)
     }
+
+    fun isDisplayTimeAvailable(
+        context: MutableMap<String, String>,
+        baseIndex: Int = 0
+    ): Boolean {
+        val currentTime = System.currentTimeMillis()
+        var criterionIndex = baseIndex
+
+        // Check show every X minutes constraint
+        val isTimeConstraintMet =
+            if (displayTiming.showEveryXMinutes != null && displayTiming.showEveryXMinutes != 0 && displayTiming.showEveryXMinutes != -1) {
+                val timeConstraintMet = nextDisplayTime <= currentTime
+                context.let {
+                    it["show_every_x_minutes_${criterionIndex}"] =
+                        "${displayTiming.showEveryXMinutes}|$nextDisplayTime<=$currentTime|TIME_CONSTRAINT|$timeConstraintMet"
+                    criterionIndex++
+                }
+                timeConstraintMet
+            } else {
+                context.let {
+                    it["show_every_x_minutes_${criterionIndex}"] =
+                        "noLimit|noLimit|TIME_CONSTRAINT|true"
+                    criterionIndex++
+                }
+                true
+            }
+
+        // Check max show count constraint
+        val isShowCountConstraintMet =
+            if (displayTiming.maxShowCount != null && displayTiming.maxShowCount != 0 && displayTiming.maxShowCount != -1) {
+                val showCountConstraintMet = showCount < displayTiming.maxShowCount
+                context.let {
+                    it["max_show_count_${criterionIndex}"] =
+                        "${displayTiming.maxShowCount}|$showCount<${displayTiming.maxShowCount}|SHOW_COUNT_CONSTRAINT|$showCountConstraintMet"
+                }
+                showCountConstraintMet
+            } else {
+                context.let {
+                    it["max_show_count_${criterionIndex}"] =
+                        "noLimit|noLimit|SHOW_COUNT_CONSTRAINT|true"
+                }
+                true
+            }
+
+        return isTimeConstraintMet && isShowCountConstraintMet
+    }
 }

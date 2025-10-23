@@ -1,5 +1,6 @@
 package com.dengage.sdk.manager.inappmessage
 
+import org.json.JSONObject
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.usecase.GetVisitorInfo
@@ -11,11 +12,13 @@ import com.dengage.sdk.manager.base.BaseAbstractPresenter
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.manager.session.SessionManager
 
+
 class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>(),
     InAppMessageContract.Presenter {
 
     private val getInAppMessages by lazy { GetInAppMessages() }
     private val getRealTimeInAppMessages by lazy { GetRealTimeInAppMessages() }
+    private val getRealTimeInAppMessagesV2 by lazy { GetRealTimeInAppMessagesV2() }
     private val setInAppMessageAsClicked by lazy { SetInAppMessageAsClicked() }
     private val setRealTimeInAppMessageAsClicked by lazy { SetRealTimeInAppMessageAsClicked() }
     private val setInAppMessageAsDismissed by lazy { SetInAppMessageAsDismissed() }
@@ -25,6 +28,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val setRealTimeInAppMessageAsDisplayed by lazy { SetRealTimeInAppMessageAsDisplayed() }
     private val sendStoryEvent by lazy { SendStoryEvent() }
     private val getVisitorInfo by lazy { GetVisitorInfo() }
+    private val assignCoupon by lazy { AssignCoupon() }
 
     override fun getInAppMessages() {
         try {
@@ -76,7 +80,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
                 }
 
-                getRealTimeInAppMessages(this) {
+                getRealTimeInAppMessagesV2(this) {
                     onResponse = {
                         view {
                             fetchedInAppMessages(it, true)
@@ -84,9 +88,28 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     }
                     onError = {
                         Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
-                        view { showError(it) }
+                        view {
+                            showError(it)
+                            getRealTimeInAppMessages(this@InAppMessagePresenter) {
+                                onResponse = {
+                                    view {
+                                        fetchedInAppMessages(it, true)
+                                    }
+                                }
+                                onError = {
+                                    Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
+                                    view {
+                                        showError(it)
+                                    }
+                                }
+                                params = GetRealTimeInAppMessages.Params(
+                                    accountId = sdkParameters?.accountName!!,
+                                    appId = sdkParameters.appId!!
+                                )
+                            }
+                        }
                     }
-                    params = GetRealTimeInAppMessages.Params(
+                    params = GetRealTimeInAppMessagesV2.Params(
                         accountId = sdkParameters?.accountName!!,
                         appId = sdkParameters.appId!!
                     )
@@ -229,6 +252,62 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         }
         catch (_:Exception){}
         catch (_:Throwable){}
+    }
+
+    override fun validateCoupon(
+        couponContent: String,
+        inAppMessageId: String,
+        onValidCoupon: (couponCode: String) -> Unit,
+        onInvalidCoupon: (errorMessage: String) -> Unit
+    ) {
+        try {
+            val sdkParameters = Prefs.sdkParameters
+            val subscription = Prefs.subscription
+            
+            if (sdkParameters?.accountName != null && subscription != null) {
+                assignCoupon.execute(this, callback(
+                    onStart = null,
+                    onResponse = { response ->
+                        if (response.isSuccessful && response.body() != null) {
+                            val couponCode = response.body()?.code
+                            if (!couponCode.isNullOrEmpty()) {
+                                onValidCoupon(couponCode)
+                            } else {
+                                onInvalidCoupon("Coupon code is empty")
+                            }
+                        } else {
+                            val errorMessage = try {
+                                response.errorBody()?.string()?.let { errorBody ->
+                                    val jsonObject = JSONObject(errorBody)
+                                    jsonObject.optString("message", "Unknown error")
+                                }
+                            } catch (_: Exception) {
+                                null
+                            } ?: "Failed to validate coupon. Response code: ${response.code()}"
+                            
+                            onInvalidCoupon(errorMessage)
+                        }
+                    },
+                    onError = { throwable ->
+                        val errorMessage = throwable.message ?: "Unknown error occurred during coupon validation"
+                        onInvalidCoupon(errorMessage)
+                    },
+                    onComplete = null
+                ), AssignCoupon.Params(
+                    accountId = sdkParameters.accountName,
+                    listKey = couponContent,
+                    contactKey = subscription.contactKey ?: "",
+                    deviceId = subscription.getSafeDeviceId(),
+                    campaignId = inAppMessageId
+                ))
+            } else {
+                onInvalidCoupon("Missing SDK parameters or subscription")
+            }
+        } catch (e: Exception) {
+            onInvalidCoupon("Exception occurred: ${e.message}")
+        } catch (t: Throwable) {
+            onInvalidCoupon("Throwable occurred: ${t.message}")
+        }
     }
 
     override fun setInAppMessageAsDismissed(inAppMessage: InAppMessage) {
@@ -378,7 +457,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     }
 
     private fun isInAppAvailableInCache(): Boolean {
-        return Prefs.inAppMessages?.let { it.size > 0 } ?: false
+        return Prefs.inAppMessages?.isNotEmpty() ?: false
     }
 
     private fun shouldFetchVisitorInfo(): Boolean {
