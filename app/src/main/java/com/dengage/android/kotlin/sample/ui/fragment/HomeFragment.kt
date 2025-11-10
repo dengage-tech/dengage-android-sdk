@@ -69,6 +69,11 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
             findNavController().navigate(HomeFragmentDirections.actionHomeToinappInline())
         }
 
+        binding.btnInAppInlineCompose.setOnClickListener {
+            val intent = android.content.Intent(activity, com.dengage.android.kotlin.sample.ui.compose.InAppInlineComposeActivity::class.java)
+            startActivity(intent)
+        }
+
         binding.btnGeofencePage.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToGeofence())
         }

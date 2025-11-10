@@ -50,7 +50,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Fcm Messaging Service for handling push messages comes from firebase -->
+        </activity>
+        <activity
+            android:name=".ui.compose.InAppInlineComposeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.DengageAndroid" /> <!-- Fcm Messaging Service for handling push messages comes from firebase -->
         <service
             android:name="com.dengage.sdk.push.FcmMessagingService"
             android:exported="false" >
@@ -105,25 +109,25 @@
 
                                         <meta-data
                                             android:name="den_event_api_url"
-                                            android:value="https://dev-push.dengage.com" />
+                                            android:value="https://push.dengage.com" />
                                         <meta-data
                                             android:name="den_push_api_url"
-                                            android:value="https://dev-push.dengage.com" />
+                                            android:value="https://push.dengage.com" />
                                         <meta-data
                                             android:name="den_device_id_api_url"
                                             android:value="https://magento.232.dengage.shobii.com/rest/" />
 
                                         <meta-data
                                             android:name="den_in_app_api_url"
-                                            android:value="https://dev-push.dengage.com" />
+                                            android:value="https://push.dengage.com" />
 
                                         <meta-data
                                             android:name="den_geofence_api_url"
-                                            android:value="https://dev-push.dengage.com/geoapi/" />
+                                            android:value="https://push.dengage.com/geoapi/" />
 
                                         <meta-data
                                             android:name="fetch_real_time_in_app_api_url"
-                                            android:value="https://dev-inapp.lib.dengage.com/" />
+                                            android:value="https://tr-inapp.lib.dengage.com/" />
 
 
 
