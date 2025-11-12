@@ -54,7 +54,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.83"
+        return "6.0.84"
     }
 
     fun getUserAgent(context: Context): String {
@@ -253,10 +253,13 @@ object DengageUtils {
 
 
     fun isDeeplink(targetUrl: String): Boolean {
-        return targetUrl.startsWith(
-            Prefs.inAppDeeplink,
-            ignoreCase = true
-        ) && targetUrl.isNotEmpty()
+        val inAppDeeplink = Prefs.inAppDeeplink
+        return inAppDeeplink.isNotEmpty() 
+            && targetUrl.isNotEmpty() 
+            && targetUrl.startsWith(
+                inAppDeeplink,
+                ignoreCase = true
+            )
     }
 
     /*  fun getSdkDefaultObj():SdkParameters
