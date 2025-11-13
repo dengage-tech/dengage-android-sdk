@@ -57,7 +57,7 @@ class App : Application() {
         Dengage.setDevelopmentStatus(true)
 
 
-        Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
+        ////Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
 
         DengageGeofence.startGeofence()
 

@@ -213,10 +213,9 @@ class CircularImageView @JvmOverloads constructor(
 
         loadBitmap()
 
-        if (civImage == null) return
-
         val cornerRadius = cornerRadiusRatio * height // Köşe yuvarlama yarıçapını hesaplar
 
+        // Draw shadow if enabled
         if (shadowEnable) {
             drawShadow()
             canvas.drawRoundRect(
@@ -229,33 +228,62 @@ class CircularImageView @JvmOverloads constructor(
                 paintShadow
             )
         }
-        canvas.drawRoundRect(
-            0f,
-            0f,
-            width.toFloat(),
-            height.toFloat(),
-            cornerRadius,
-            cornerRadius,
-            paintBorder
-        )
-        canvas.drawRoundRect(
-            borderWidth,
-            borderWidth,
-            width.toFloat() - borderWidth,
-            height.toFloat() - borderWidth,
-            cornerRadius,
-            cornerRadius,
-            paintBackground
-        )
-        canvas.drawRoundRect(
-            borderWidth,
-            borderWidth,
-            width.toFloat() - borderWidth,
-            height.toFloat() - borderWidth,
-            cornerRadius,
-            cornerRadius,
-            paint
-        )
+        
+        // Draw border - always show border color even if image is not loaded
+        if (borderWidth > 0f) {
+            // Draw outer border (full size with border color)
+            canvas.drawRoundRect(
+                0f,
+                0f,
+                width.toFloat(),
+                height.toFloat(),
+                cornerRadius,
+                cornerRadius,
+                paintBorder
+            )
+        }
+        
+        // Draw background - white when image not loaded, or gradient when image loaded
+        if (civImage != null) {
+            // Image is loaded - restore background shader and draw background gradient and image
+            manageCircleColor() // Restore background gradient shader
+            canvas.drawRoundRect(
+                borderWidth,
+                borderWidth,
+                width.toFloat() - borderWidth,
+                height.toFloat() - borderWidth,
+                cornerRadius,
+                cornerRadius,
+                paintBackground
+            )
+            canvas.drawRoundRect(
+                borderWidth,
+                borderWidth,
+                width.toFloat() - borderWidth,
+                height.toFloat() - borderWidth,
+                cornerRadius,
+                cornerRadius,
+                paint
+            )
+        } else {
+            // Image not loaded - draw white background inside border (not border color)
+            val previousShader = paintBackground.shader
+            val previousColor = paintBackground.color
+            paintBackground.color = Color.WHITE
+            paintBackground.shader = null // Remove gradient shader temporarily
+            canvas.drawRoundRect(
+                borderWidth,
+                borderWidth,
+                width.toFloat() - borderWidth,
+                height.toFloat() - borderWidth,
+                cornerRadius,
+                cornerRadius,
+                paintBackground
+            )
+            // Restore previous state (for next draw cycle)
+            paintBackground.shader = previousShader
+            paintBackground.color = previousColor
+        }
     }
 
     private fun update() {
