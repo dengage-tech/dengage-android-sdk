@@ -19,10 +19,10 @@ class DengageTestPushActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Enable edge-to-edge display for Android 15
         EdgeToEdgeUtils.enableEdgeToEdge(this)
-        
+
         setContentView(R.layout.activity_dengage_test_push)
 
         findViewById<Button>(R.id.btnCarousel).setOnClickListener(this)
@@ -75,46 +75,46 @@ class DengageTestPushActivity : Activity(), View.OnClickListener {
     private fun generateCarouselMessage(): Message {
         return GsonHolder.gson.fromJson(
             "{\n" +
-                "    \"badge\": false,\n" +
-                "    \"messageId\": \"${(0..10000).random()}\",\n" +
-                "    \"sound\": \"\",\n" +
-                "    \"enabled\": true,\n" +
-                "    \"mediaUrl\": \"\",\n" +
-                "    \"messageSource\": \"DENGAGE\",\n" +
-                "    \"subTitle\": \"Test Subtitle\",\n" +
-                "    \"title\": \"Test Title\",\n" +
-                "    \"targetUrl\": \"\",\n" +
-                "    \"badgeCount\": 0,\n" +
-                "    \"codeSnippet\": null,\n" +
-                "    \"actionButtons\": [],\n" +
-                "    \"carouselContent\": [\n" +
-                "        {\n" +
-                "            \"desc\": \"\",\n" +
-                "            \"title\": \"Carousel 1\",\n" +
-                "            \"mediaUrl\": \"https://cdn.dengage.com/78dfbbb0-91fc-0127-3ab9-80f5f48ef662/202105/PutinsRevenge_android-push.jpg\",\n" +
-                "            \"targetUrl\": \"https://www.blutv.com/filmler/yabanci/putins-revenge-part-1\"\n" +
-                "        },\n" +
+                    "    \"badge\": false,\n" +
+                    "    \"messageId\": \"${(0..10000).random()}\",\n" +
+                    "    \"sound\": \"\",\n" +
+                    "    \"enabled\": true,\n" +
+                    "    \"mediaUrl\": \"\",\n" +
+                    "    \"messageSource\": \"DENGAGE\",\n" +
+                    "    \"subTitle\": \"Test Subtitle\",\n" +
+                    "    \"title\": \"Test Title\",\n" +
+                    "    \"targetUrl\": \"\",\n" +
+                    "    \"badgeCount\": 0,\n" +
+                    "    \"codeSnippet\": null,\n" +
+                    "    \"actionButtons\": [],\n" +
+                    "    \"carouselContent\": [\n" +
+                    "        {\n" +
+                    "            \"desc\": \"\",\n" +
+                    "            \"title\": \"Carousel 1\",\n" +
+                    "            \"mediaUrl\": \"https://thumbs.dreamstime.com/b/financial-growth-graph--sales-increase-marketing-strategy-concept-abstract-cover-design-vertical-format-financial-growth-graph-130410421.jpg\",\n" +
+                    "                 \"targetUrl\": \"https://www.google.com" +
+        "        },\n" +
                 "        {\n" +
                 "            \"desc\": \"\",\n" +
                 "            \"title\": \"Carousel 2\",\n" +
-                "            \"mediaUrl\": \"https://cdn.dengage.com/78dfbbb0-91fc-0127-3ab9-80f5f48ef662/202105/PutinsRevenge_android-push2.jpg\",\n" +
-                "            \"targetUrl\": \"https://www.blutv.com/filmler/yabanci/putins-revenge-part-2\"\n" +
-                "        },\n" +
+                "            \"mediaUrl\": \"https://thumbs.dreamstime.com/b/financial-growth-graph--sales-increase-marketing-strategy-concept-abstract-cover-design-vertical-format-financial-growth-graph-130410421.jpg\",\n" +
+                "             \"targetUrl\": \"https://www.google.com" +
+        "        },\n" +
                 "        {\n" +
                 "            \"desc\": \"\",\n" +
                 "            \"title\": \"Carousel 3\",\n" +
-                "            \"mediaUrl\": \"https://www.rudaw.net/contentfiles/621238Image1.jpg?version=2875295\",\n" +
-                "            \"targetUrl\": \"https://www.blutv.com/filmler/yabanci/putins-revenge-part-3\"\n" +
+                "            \"mediaUrl\": \"https://thumbs.dreamstime.com/b/financial-growth-graph--sales-increase-marketing-strategy-concept-abstract-cover-design-vertical-format-financial-growth-graph-130410421.jpg\",\n"+
+                "             \"targetUrl\": \"https://www.google.com" +
                 "        }\n" +
                 "    ],\n" +
                 "    \"actionButtonType\": \"NO_ACTION\",\n" +
                 "    \"notificationType\": \"CAROUSEL\",\n" +
                 "    \"carouselContentType\": \"ARRAY\",\n" +
-                "    \"message\": \"Aldığı radikal politik kararlar ve yaşam tarzıyla gündemden düşmeyen Vladimir Putin'e derinlemesine bir bakış.\",\n" +
+                "    \"message\": \"Hi\",\n" +
                 "\"customParams\": [\n" +
                 "    {\n" +
                 "        \"key\": \"target\",\n" +
-                "        \"value\": \"https://www.blutv.com/filmler/yabanci/putins-revenge-part-1\"\n" +
+                "        \"value\": \"https://www.google.com" +
                 "    }\n" +
                 "]\n" +
                 "}", Message::class.java
@@ -124,52 +124,52 @@ class DengageTestPushActivity : Activity(), View.OnClickListener {
     private fun generateRichMessage(): Message {
         return GsonHolder.gson.fromJson(
             "{\n" +
-                "    \"badge\": false,\n" +
-                "    \"messageId\": \"${(0..10000).random()}\",\n" +
-                "    \"sound\": \"\",\n" +
-                "    \"enabled\": true,\n" +
-                "    \"mediaUrl\": \"https://cdn.dengage.com/78dfbbb0-91fc-0127-3ab9-80f5f48ef662/202105/PutinsRevenge_android-push.jpg\",\n" +
-                "    \"messageSource\": \"DENGAGE\",\n" +
-                "    \"subTitle\": \"Test Subtitle\",\n" +
-                "    \"title\": \"Test Title\",\n" +
-                "    \"targetUrl\": \"\",\n" +
-                "    \"badgeCount\": 0,\n" +
-                "    \"codeSnippet\": null,\n" +
-                "    \"notificationType\": \"RICH\",\n" +
-                "    \"message\": \"Aldığı radikal politik kararlar ve yaşam tarzıyla gündemden düşmeyen Vladimir Putin'e derinlemesine bir bakış.\",\n" +
-                "\"customParams\": [\n" +
-                "    {\n" +
-                "        \"key\": \"target\",\n" +
-                "        \"value\": \"https://www.blutv.com/filmler/yabanci/putins-revenge-part-1\"\n" +
-                "    }\n" +
-                "]\n" +
-                "}", Message::class.java
+                    "    \"badge\": false,\n" +
+                    "    \"messageId\": \"${(0..10000).random()}\",\n" +
+                    "    \"sound\": \"\",\n" +
+                    "    \"enabled\": true,\n" +
+                    "    \"mediaUrl\": \"https://thumbs.dreamstime.com/b/financial-growth-graph--sales-increase-marketing-strategy-concept-abstract-cover-design-vertical-format-financial-growth-graph-130410421.jpg\",\n" +
+                    "    \"messageSource\": \"DENGAGE\",\n" +
+                    "    \"subTitle\": \"Test Subtitle\",\n" +
+                    "    \"title\": \"Test Title\",\n" +
+                    "    \"targetUrl\": \"\",\n" +
+                    "    \"badgeCount\": 0,\n" +
+                    "    \"codeSnippet\": null,\n" +
+                    "    \"notificationType\": \"RICH\",\n" +
+                    "    \"message\": \"Hi\",\n" +
+                    "\"customParams\": [\n" +
+                    "    {\n" +
+                    "        \"key\": \"target\",\n" +
+                    "        \"value\": \"https://thumbs.dreamstime.com/b/financial-growth-graph--sales-increase-marketing-strategy-concept-abstract-cover-design-vertical-format-financial-growth-graph-130410421.jpg\"\n" +
+                    "    }\n" +
+                    "]\n" +
+                    "}", Message::class.java
         )
     }
 
     private fun generateNormalMessage(): Message {
         return GsonHolder.gson.fromJson(
             "{\n" +
-                "    \"badge\": false,\n" +
-                "    \"messageId\": \"${(0..10000).random()}\",\n" +
-                "    \"sound\": \"\",\n" +
-                "    \"enabled\": true,\n" +
-                "    \"mediaUrl\": \"https://cdn.dengage.com/78dfbbb0-91fc-0127-3ab9-80f5f48ef662/202105/PutinsRevenge_android-push.jpg\",\n" +
-                "    \"messageSource\": \"DENGAGE\",\n" +
-                "    \"subTitle\": \"Test Subtitle\",\n" +
-                "    \"title\": \"Test Title\",\n" +
-                "    \"targetUrl\": \"\",\n" +
-                "    \"badgeCount\": 0,\n" +
-                "    \"codeSnippet\": null,\n" +
-                "    \"notificationType\": \"TEXT\",\n" +
-                "    \"message\": \"Aldığı radikal politik kararlar ve yaşam tarzıyla gündemden düşmeyen Vladimir Putin'e derinlemesine bir bakış.\",\n" +
-                "\"customParams\": [\n" +
-                "    {\n" +
-                "        \"key\": \"target\",\n" +
-                "        \"value\": \"https://www.blutv.com/filmler/yabanci/putins-revenge-part-1\"\n" +
-                "    }\n" +
-                "]\n" +
-                "}", Message::class.java
+                    "    \"badge\": false,\n" +
+                    "    \"messageId\": \"${(0..10000).random()}\",\n" +
+                    "    \"sound\": \"\",\n" +
+                    "    \"enabled\": true,\n" +
+                    "    \"mediaUrl\": \"https://thumbs.dreamstime.com/b/financial-growth-graph--sales-increase-marketing-strategy-concept-abstract-cover-design-vertical-format-financial-growth-graph-130410421.jpg\",\n" +
+                    "    \"messageSource\": \"DENGAGE\",\n" +
+                    "    \"subTitle\": \"Test Subtitle\",\n" +
+                    "    \"title\": \"Test Title\",\n" +
+                    "    \"targetUrl\": \"\",\n" +
+                    "    \"badgeCount\": 0,\n" +
+                    "    \"codeSnippet\": null,\n" +
+                    "    \"notificationType\": \"TEXT\",\n" +
+                    "    \"message\": \"https://thumbs.dreamstime.com/b/financial-growth-graph--sales-increase-marketing-strategy-concept-abstract-cover-design-vertical-format-financial-growth-graph-130410421.jpg\",\n" +
+                    "\"customParams\": [\n" +
+                    "    {\n" +
+                    "        \"key\": \"target\",\n" +
+                    "        \"value\": \"https://thumbs.dreamstime.com/b/financial-growth-graph--sales-increase-marketing-strategy-concept-abstract-cover-design-vertical-format-financial-growth-graph-130410421.jpg\"\n" +
+                    "    }\n" +
+                    "]\n" +
+                    "}", Message::class.java
         )
     }
 }
