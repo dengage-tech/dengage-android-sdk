@@ -93,7 +93,7 @@ Latest SDK version: `6.0.84`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.84'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.85'
 }
 ```
 

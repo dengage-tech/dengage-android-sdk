@@ -23,7 +23,7 @@ object VisitCountManager {
                 )
             )
             if (visitCountItems.size == 61) {
-                visitCountItems.removeFirst()
+                visitCountItems.removeAt(0)
             }
         } else {
             foundVisitCountItem.visitCount++

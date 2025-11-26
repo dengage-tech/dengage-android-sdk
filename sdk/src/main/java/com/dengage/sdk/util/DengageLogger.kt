@@ -100,7 +100,7 @@ object DengageLogger {
                 if (message.isNullOrEmpty()) return
 
                 if (dengageLogs.size >= 200) {
-                    dengageLogs.removeLast()
+                    dengageLogs.removeAt(dengageLogs.size - 1)
                 }
                 dengageLogs.add(0, "$type: $message")
             } catch (e: Exception) {
