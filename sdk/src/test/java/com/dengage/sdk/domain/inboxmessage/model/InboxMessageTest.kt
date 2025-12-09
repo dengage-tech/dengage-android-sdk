@@ -31,7 +31,8 @@ class InboxMessageTest {
                 targetUrl = targetUrl,
                 androidTargetUrl = androidTargetUrl,
                 receiveDate = receiveDate,
-                carouselItems = carouselItems
+                carouselItems = carouselItems,
+                customParameters = null
             )
         )
 

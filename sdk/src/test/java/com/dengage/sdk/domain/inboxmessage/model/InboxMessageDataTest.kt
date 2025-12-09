@@ -24,7 +24,8 @@ class InboxMessageDataTest {
             targetUrl = targetUrl,
             androidTargetUrl = androidTargetUrl,
             receiveDate = receiveDate,
-            carouselItems = carouselItems
+            carouselItems = carouselItems,
+            customParameters = null
         )
 
         Assert.assertEquals(title, inboxMessageData.title)

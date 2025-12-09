@@ -1,6 +1,7 @@
 package com.dengage.sdk.domain.inboxmessage.model
 
 import com.dengage.sdk.domain.push.model.CarouselItem
+import com.dengage.sdk.domain.push.model.CustomParam
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,35 +18,64 @@ object InboxMessageParser {
                 val hasMessageJsonObject = inboxMessageJsonObject.has("message_json")
                 var messageJsonObject: JSONObject? = null
                 val androidCarouselItems = ArrayList<CarouselItem>()
+                val customParametersList = ArrayList<CustomParam>()
                 if (hasMessageJsonObject) {
                     messageJsonObject = JSONObject(inboxMessageJsonObject.getString("message_json"))
-                    for (j in 0 until messageJsonObject.getJSONArray("androidCarouselContent")
-                        .length()) {
-                        val carouselContent =
-                            messageJsonObject.getJSONArray("androidCarouselContent")
-                                .getJSONObject(j)
+                    
+                    // Parse carousel items
+                    if (messageJsonObject.has("androidCarouselContent") && 
+                        messageJsonObject.getJSONArray("androidCarouselContent").length() > 0) {
+                        for (j in 0 until messageJsonObject.getJSONArray("androidCarouselContent")
+                            .length()) {
+                            val carouselContent =
+                                messageJsonObject.getJSONArray("androidCarouselContent")
+                                    .getJSONObject(j)
 
 
-                        var idFromObject = ""
-                        var titleFromObject = ""
-                        var descriptionFromObject = ""
-                        var mediaUrlFromObject = ""
-                        var targetUrlFromObject = ""
+                            var idFromObject = ""
+                            var titleFromObject = ""
+                            var descriptionFromObject = ""
+                            var mediaUrlFromObject = ""
+                            var targetUrlFromObject = ""
 
-                        if(carouselContent.has("id")) idFromObject = carouselContent.getString("id")
-                        if(carouselContent.has("title")) titleFromObject = carouselContent.getString("title")
-                        if(carouselContent.has("desc")) descriptionFromObject = carouselContent.getString("desc")
-                        if(carouselContent.has("mediaUrl")) mediaUrlFromObject = carouselContent.getString("mediaUrl")
-                        if(carouselContent.has("targetUrl")) targetUrlFromObject = carouselContent.getString("targetUrl")
+                            if(carouselContent.has("id")) idFromObject = carouselContent.getString("id")
+                            if(carouselContent.has("title")) titleFromObject = carouselContent.getString("title")
+                            if(carouselContent.has("desc")) descriptionFromObject = carouselContent.getString("desc")
+                            if(carouselContent.has("mediaUrl")) mediaUrlFromObject = carouselContent.getString("mediaUrl")
+                            if(carouselContent.has("targetUrl")) targetUrlFromObject = carouselContent.getString("targetUrl")
 
-                        val carouselItem = CarouselItem().apply {
-                            id = idFromObject
-                            title = titleFromObject
-                            description = descriptionFromObject
-                            mediaUrl = mediaUrlFromObject
-                            targetUrl = targetUrlFromObject
+                            val carouselItem = CarouselItem().apply {
+                                id = idFromObject
+                                title = titleFromObject
+                                description = descriptionFromObject
+                                mediaUrl = mediaUrlFromObject
+                                targetUrl = targetUrlFromObject
+                            }
+                            androidCarouselItems.add(carouselItem)
                         }
-                        androidCarouselItems.add(carouselItem)
+                    }
+                    
+                    // Parse custom parameters
+                    if (messageJsonObject.has("customParameters") && 
+                        messageJsonObject.getJSONArray("customParameters").length() > 0) {
+                        for (k in 0 until messageJsonObject.getJSONArray("customParameters")
+                            .length()) {
+                            val customParamObject =
+                                messageJsonObject.getJSONArray("customParameters")
+                                    .getJSONObject(k)
+
+                            var keyFromObject = ""
+                            var valueFromObject = ""
+
+                            if(customParamObject.has("key")) keyFromObject = customParamObject.getString("key")
+                            if(customParamObject.has("value")) valueFromObject = customParamObject.getString("value")
+
+                            val customParam = CustomParam(
+                                key = keyFromObject,
+                                value = valueFromObject
+                            )
+                            customParametersList.add(customParam)
+                        }
                     }
 
                 }
@@ -70,7 +100,8 @@ object InboxMessageParser {
                         targetUrl = targetUrl,
                         androidTargetUrl = androidTargetUrl,
                         receiveDate = receiveDate,
-                        carouselItems = androidCarouselItems))
+                        carouselItems = androidCarouselItems,
+                        customParameters = customParametersList))
                 inboxMessageList.add(inboxMessageObject)
             }
 
