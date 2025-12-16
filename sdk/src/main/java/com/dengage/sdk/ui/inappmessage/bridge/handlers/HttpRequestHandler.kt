@@ -1,0 +1,111 @@
+package com.dengage.sdk.ui.inappmessage.bridge.handlers
+
+import com.dengage.sdk.ui.inappmessage.bridge.core.BridgeCallback
+import com.dengage.sdk.ui.inappmessage.bridge.core.BridgeMessage
+import com.dengage.sdk.ui.inappmessage.bridge.handler.AsyncBridgeHandler
+import com.dengage.sdk.ui.inappmessage.bridge.util.BridgeErrorCodes
+import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.GsonHolder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.TimeUnit
+
+/**
+ * Handler for HTTP requests from WebView
+ */
+class HttpRequestHandler : AsyncBridgeHandler {
+
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    data class HttpRequestPayload(
+        val url: String,
+        val method: String = "GET",
+        val headers: Map<String, String>? = null,
+        val body: String? = null,
+        val contentType: String? = null
+    )
+
+    data class HttpResponse(
+        val statusCode: Int,
+        val body: String?,
+        val headers: Map<String, String>
+    )
+
+    override fun supportedActions(): List<String> = listOf("httpRequest")
+
+    override fun handle(message: BridgeMessage, callback: BridgeCallback<Any?>) {
+        val payload = GsonHolder.fromJson<HttpRequestPayload>(message.payload)
+
+        if (payload == null) {
+            callback.onError(BridgeErrorCodes.INVALID_PAYLOAD, "Invalid HTTP request payload")
+            return
+        }
+
+        scope.launch {
+            try {
+                val requestBuilder = Request.Builder().url(payload.url)
+
+                // Add headers
+                payload.headers?.forEach { (key, value) ->
+                    requestBuilder.addHeader(key, value)
+                }
+
+                // Set method and body
+                when (payload.method.uppercase()) {
+                    "GET" -> requestBuilder.get()
+                    "POST" -> {
+                        val mediaType = (payload.contentType ?: "application/json").toMediaType()
+                        requestBuilder.post((payload.body ?: "").toRequestBody(mediaType))
+                    }
+                    "PUT" -> {
+                        val mediaType = (payload.contentType ?: "application/json").toMediaType()
+                        requestBuilder.put((payload.body ?: "").toRequestBody(mediaType))
+                    }
+                    "PATCH" -> {
+                        val mediaType = (payload.contentType ?: "application/json").toMediaType()
+                        requestBuilder.patch((payload.body ?: "").toRequestBody(mediaType))
+                    }
+                    "DELETE" -> requestBuilder.delete()
+                    else -> {
+                        withContext(Dispatchers.Main) {
+                            callback.onError(BridgeErrorCodes.INVALID_PAYLOAD, "Unsupported HTTP method: ${payload.method}")
+                        }
+                        return@launch
+                    }
+                }
+
+                val response = client.newCall(requestBuilder.build()).execute()
+                val responseHeaders = response.headers.toMultimap()
+                    .mapValues { it.value.firstOrNull() ?: "" }
+
+                val httpResponse = HttpResponse(
+                    statusCode = response.code,
+                    body = response.body?.string(),
+                    headers = responseHeaders
+                )
+
+                withContext(Dispatchers.Main) {
+                    callback.onSuccess(httpResponse)
+                }
+            } catch (e: Exception) {
+                DengageLogger.error("HttpRequestHandler error: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    callback.onError(BridgeErrorCodes.HTTP_ERROR, e.message ?: "HTTP request failed")
+                }
+            }
+        }
+    }
+}

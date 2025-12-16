@@ -101,6 +101,7 @@ public class InAppBrowserActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         // back to previous page
+        super.onBackPressed();
         if (mWebview.canGoBack()) {
             // check list title and url have 1 data minimum
             if (mTitles.size() > 0 && mUrls.size() > 0) {
@@ -273,24 +274,24 @@ public class InAppBrowserActivity extends AppCompatActivity implements
      * Builder Object Creation Pattern
      */
 
-    static class Builder {
+    public static class Builder {
 
-        private Bundle mExtras;
+        Bundle mExtras;
 
-        private Builder() {
+        Builder() {
             mExtras = new Bundle();
         }
 
-        static Builder getBuilder() {
+        public static Builder getBuilder() {
             return new Builder();
         }
 
-        Builder withUrl(String url) {
+        public Builder withUrl(String url) {
             mExtras.putString(INTENT_EXTRA_URL, url);
             return this;
         }
 
-        Intent build(Context ctx) {
+        public Intent build(Context ctx) {
             Intent i = new Intent(ctx, InAppBrowserActivity.class);
             i.putExtras(mExtras);
             return i;

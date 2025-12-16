@@ -13,6 +13,7 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.cardview.widget.CardView
@@ -20,6 +21,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import kotlin.math.roundToInt
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.R
+import com.dengage.sdk.ui.inappmessage.bridge.core.DengageBridge
+import com.dengage.sdk.ui.inappmessage.bridge.handler.BridgeHandlerRegistry
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.DeviceInfoHandler
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.HttpRequestHandler
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.LegacyDnHandler
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.StorageHandler
+import com.dengage.sdk.ui.inappmessage.bridge.js.BridgeJavaScript
 import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
@@ -30,7 +38,6 @@ import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
-import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchApplicationSettingsActivity
 import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
@@ -41,10 +48,11 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     private var isAndroidUrlNPresent: Boolean? = false
     private var isRatingDialog: Boolean? = false
     private var isClicked = false
+    private var dengageBridge: DengageBridge? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as? InAppMessage ?: run {
             finish()
             return
@@ -53,7 +61,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         val contentParams = inAppMessage.data.content.params
         setThemeAccordingToContentParams(contentParams)
         setContentView(R.layout.activity_in_app_message)
-        
+
         // Enable edge-to-edge display for Android 15 with proper insets handling
         //EdgeToEdgeUtils.enableEdgeToEdgeWithInsets(this)
 
@@ -133,31 +141,60 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         isAndroidUrlNPresent = contentParams.html?.contains("Dn.androidUrlN")
         isRatingDialog = contentParams.html?.contains("Dn.showRating")
 
-        with(webView.settings) {
-            loadWithOverviewMode = true
-            useWideViewPort = true
-            displayZoomControls = false
-            builtInZoomControls = true
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            javaScriptCanOpenWindowsAutomatically = true
-        }
+        webView.apply {
+            settings.loadWithOverviewMode = true
+            settings.useWideViewPort = true
+            settings.displayZoomControls = false
+            settings.builtInZoomControls = true
+            setBackgroundColor(Color.TRANSPARENT)
+            settings.domStorageEnabled = true
+            settings.javaScriptEnabled = true
+            settings.javaScriptCanOpenWindowsAutomatically = true
 
-        webView.setBackgroundColor(Color.TRANSPARENT)
-        webView.addJavascriptInterface(JavaScriptInterface(), "Dn")
+            // Setup new bridge with handlers
+            val legacyHandler = LegacyDnHandler(
+                context = this@InAppMessageActivity,
+                activity = this@InAppMessageActivity,
+                inAppMessage = inAppMessage,
+                inAppMessageCallback = inAppMessageCallback,
+                isAndroidUrlNPresent = isAndroidUrlNPresent,
+                isRatingDialog = isRatingDialog,
+                onClicked = { isClicked = true },
+                onFinish = { finish() }
+            )
 
-        contentParams.html?.let { html ->
-            var processedHtml = html
-
-            val couponCode = intent.getStringExtra(EXTRA_COUPON_CODE)
-            if (!couponCode.isNullOrEmpty() && Mustache.hasCouponSection(processedHtml)) {
-                processedHtml = Mustache.replaceCouponSections(processedHtml, couponCode)
+            val registry = BridgeHandlerRegistry().apply {
+                register(legacyHandler)
+                register(HttpRequestHandler())
+                register(DeviceInfoHandler())
+                register(StorageHandler())
             }
 
-            val dataMap = mapOf("dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo())
-            val renderedHtml = Mustache.render(processedHtml, dataMap)
+            dengageBridge = DengageBridge.attach(this, registry)
 
-            webView.loadDataWithBaseURL(null, renderedHtml, "text/html", "UTF-8", null)
+            // Keep legacy interface for backwards compatibility
+            addJavascriptInterface(JavaScriptInterface(), "Dn")
+
+            // Inject bridge JavaScript after page loads
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    BridgeJavaScript.inject(webView)
+                }
+            }
+
+            // Load HTML content
+            contentParams.html?.let { html ->
+                var processedHtml = html
+                val couponCode = intent.getStringExtra(EXTRA_COUPON_CODE)
+                if (!couponCode.isNullOrEmpty() && Mustache.hasCouponSection(processedHtml)) {
+                    processedHtml = Mustache.replaceCouponSections(processedHtml, couponCode)
+                }
+                val dataMap = mapOf("dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo())
+                val renderedHtml = Mustache.render(processedHtml, dataMap)
+
+                loadDataWithBaseURL(null, renderedHtml, "text/html", "UTF-8", null)
+            }
         }
 
     }
