@@ -42,6 +42,7 @@ class App : Application() {
 
         Dengage.init(
             context = context,
+            initForGeofence = true,
             firebaseIntegrationKey = Constants.FIREBASE_APP_INTEGRATION_KEY,
             dengageHmsManager = dengageHmsManager,
             deviceConfigurationPreference = DeviceConfigurationPreference.Google,

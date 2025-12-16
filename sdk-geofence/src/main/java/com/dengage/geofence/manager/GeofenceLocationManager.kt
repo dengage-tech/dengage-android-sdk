@@ -343,7 +343,9 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
             DL.debug("Replaying location | location = $location; stopped = $stopped")
         }
         val lastSentAt = GState.lastSentAt
-        val ignoreSync = lastSentAt == 0L || justStopped || replayed
+        // Geofence events should bypass rate limiting as they are important events
+        val isGeofenceEvent = source == GLS.GEOFENCE_ENTER || source == GLS.GEOFENCE_EXIT || source == GLS.GEOFENCE_DWELL
+        val ignoreSync = lastSentAt == 0L || justStopped || replayed || isGeofenceEvent
         val now = System.currentTimeMillis()
         val lastSyncInterval = (now - lastSentAt) / 1000L
         if (!ignoreSync) {
@@ -355,6 +357,8 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                 DL.debug("Skipping sync: rate limit | justStopped = $justStopped; lastSyncInterval = $lastSyncInterval")
                 return
             }
+        } else if (isGeofenceEvent) {
+            DL.debug("Bypassing rate limit for geofence event | source = $source")
         }
         GState.lastSentAt = System.currentTimeMillis()
         if (source == GLS.FOREGROUND_LOCATION) return
@@ -441,30 +445,45 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
         replayed: Boolean,
         geofenceRequestId: String?
     ) {
-        if (sending) return
+        if (sending) {
+            DL.debug("Sending location: Already sending, skipping")
+            return
+        }
         sending = true
-        DL.debug("Sending location | source = $source; location = $location; stopped = $stopped; replayed = $replayed")
+        DL.debug("Sending location | source = $source; location = $location; stopped = $stopped; replayed = $replayed; geofenceRequestId = $geofenceRequestId")
 
         if (source == GLS.GEOFENCE_ENTER || source == GLS.GEOFENCE_EXIT) {
+            DL.debug("Geofence event detected | source = $source")
             if (geofenceRequestId?.startsWith(SYNCED_GEOFENCES_REQUEST_ID_PREFIX) == true) {
+                DL.debug("Geofence requestId is valid | requestId = $geofenceRequestId")
                 val geofenceRequestIdArr = geofenceRequestId.split("_").toTypedArray()
+                DL.debug("Geofence requestId split | parts = ${geofenceRequestIdArr.joinToString()}")
                 if (geofenceRequestIdArr.count() >= 4) {
                     val clusterId = geofenceRequestIdArr[2].toIntOrNull()
                     val geofenceId = geofenceRequestIdArr[3].toIntOrNull()
+                    DL.debug("Extracted IDs | clusterId = $clusterId; geofenceId = $geofenceId")
                     val lastFetchedClusters =
                         gHistory.fetchHistory[gHistory.fetchHistory.keys.sortedByDescending { it }
                             .firstOrNull()]
+                    DL.debug("Last fetched clusters | available = ${lastFetchedClusters != null}; fetchHistory keys = ${gHistory.fetchHistory.keys.size}")
                     if (clusterId != null && geofenceId != null && lastFetchedClusters != null) {
                         val cluster = lastFetchedClusters.firstOrNull { it.id == clusterId }
+                        DL.debug("Cluster lookup | clusterId = $clusterId; found = ${cluster != null}")
                         val fetchedGeofence =
                             cluster?.geofences?.firstOrNull { it.id == geofenceId }
+                        DL.debug("Geofence lookup | geofenceId = $geofenceId; found = ${fetchedGeofence != null}")
                         val events = gHistory.eventHistory[geofenceRequestId]
+                        DL.debug("Event history | requestId = $geofenceRequestId; hasHistory = ${events != null}; historySize = ${events?.size ?: 0}")
                         if (fetchedGeofence != null) {
                             val type = if (source == GLS.GEOFENCE_ENTER) "enter" else "exit"
                             if (events != null) {
                                 val lastEvent =
                                     events[events.keys.sortedByDescending { it }.firstOrNull()]
-                                if (lastEvent == null || (Date().time - GMESIM) > lastEvent.et ) {
+                                val currentTime = Date().time
+                                val timeSinceLastEvent = if (lastEvent != null) (currentTime - lastEvent.et) else Long.MAX_VALUE
+                                DL.debug("Event time check | lastEvent = $lastEvent; currentTime = $currentTime; timeSinceLastEvent = $timeSinceLastEvent; requiredInterval = $GMESIM")
+                                if (lastEvent == null || (currentTime - GMESIM) > lastEvent.et ) {
+                                    DL.debug("Sending geofence event signal | type = $type; clusterId = $clusterId; geofenceId = $geofenceId")
                                     sendGeofenceEventSignal(
                                         geofenceRequestId,
                                         clusterId,
@@ -474,8 +493,11 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                                         location.longitude
                                     )
                                     return
+                                } else {
+                                    DL.debug("Skipping geofence event signal: Rate limit | timeSinceLastEvent = $timeSinceLastEvent; requiredInterval = $GMESIM")
                                 }
                             } else {
+                                DL.debug("Sending geofence event signal (first event) | type = $type; clusterId = $clusterId; geofenceId = $geofenceId")
                                 sendGeofenceEventSignal(
                                     geofenceRequestId,
                                     clusterId,
@@ -486,15 +508,27 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                                 )
                                 return
                             }
+                        } else {
+                            DL.debug("Skipping geofence event signal: Geofence not found in fetched clusters | geofenceId = $geofenceId; clusterId = $clusterId")
                         }
+                    } else {
+                        DL.debug("Skipping geofence event signal: Missing data | clusterId = $clusterId; geofenceId = $geofenceId; lastFetchedClusters = ${lastFetchedClusters != null}")
                     }
+                } else {
+                    DL.debug("Skipping geofence event signal: Invalid requestId format | parts count = ${geofenceRequestIdArr.count()}; required = 4")
                 }
+            } else {
+                DL.debug("Skipping geofence event signal: RequestId doesn't start with prefix | requestId = $geofenceRequestId; prefix = $SYNCED_GEOFENCES_REQUEST_ID_PREFIX")
             }
             sending = false
         } else {
+            DL.debug("Not a geofence event | source = $source")
             if ((Date().time - GMFIM) > gHistory.lastFetchTime){
+                DL.debug("Fetching geofence clusters | lastFetchTime = ${gHistory.lastFetchTime}")
                 fetchGeofenceClusters(location)
                 return
+            } else {
+                DL.debug("Skipping geofence fetch: Rate limit | lastFetchTime = ${gHistory.lastFetchTime}")
             }
         }
         sending = false
