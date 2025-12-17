@@ -8,9 +8,17 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.RelativeLayout
 import android.widget.Toast
 import com.dengage.sdk.Dengage
+import com.dengage.sdk.ui.inappmessage.bridge.core.DengageBridge
+import com.dengage.sdk.ui.inappmessage.bridge.handler.BridgeHandlerRegistry
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.DeviceInfoHandler
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.HttpRequestHandler
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.LegacyDnHandler
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.StorageHandler
+import com.dengage.sdk.ui.inappmessage.bridge.js.BridgeJavaScript
 import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.ContentPosition
@@ -28,6 +36,7 @@ open class InAppInlineElement : WebView {
     private var isRatingDialog: Boolean? = false
     private var isClicked: Boolean = false
     var activityContext: Activity? = null
+    private var dengageBridge: DengageBridge? = null
 
     constructor(context: Context?) : super(context!!) {
         contextWebView = context
@@ -73,7 +82,6 @@ open class InAppInlineElement : WebView {
         activityContext = activityParam
         val contentParams = inAppMessage.data.content.params
         setHtmlContent(contentParams)
-
     }
 
 
@@ -101,13 +109,6 @@ open class InAppInlineElement : WebView {
 
 
         this.apply {
-
-            contentParams.html?.let {
-                loadDataWithBaseURL(
-                    null,
-                    it, "text/html", "UTF-8", null
-                )
-            }
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
             settings.displayZoomControls = false
@@ -117,7 +118,47 @@ open class InAppInlineElement : WebView {
             settings.domStorageEnabled = true
             settings.javaScriptEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
+
+            // Setup new bridge with handlers
+            contextWebView?.let { ctx ->
+                val legacyHandler = LegacyDnHandler(
+                    context = ctx,
+                    activity = activityContext,
+                    inAppMessage = inAppMessage,
+                    inAppMessageCallback = InAppMessageActivity.inAppMessageCallback,
+                    isAndroidUrlNPresent = isAndroidUrlNPresent,
+                    isRatingDialog = isRatingDialog,
+                    onClicked = { isClicked = true }
+                )
+
+                val registry = BridgeHandlerRegistry().apply {
+                    register(legacyHandler)
+                    register(HttpRequestHandler(inAppMessage))
+                    register(DeviceInfoHandler())
+                    register(StorageHandler())
+                }
+
+                dengageBridge = DengageBridge.attach(this@InAppInlineElement, registry)
+            }
+
+            // Keep legacy interface for backwards compatibility
             this.addJavascriptInterface(JavaScriptInterface(), "Dn")
+
+            // Inject bridge JavaScript after page loads
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    BridgeJavaScript.inject(this@InAppInlineElement)
+                }
+            }
+
+            // Load HTML content
+            contentParams.html?.let {
+                loadDataWithBaseURL(
+                    null,
+                    it, "text/html", "UTF-8", null
+                )
+            }
         }
     }
 

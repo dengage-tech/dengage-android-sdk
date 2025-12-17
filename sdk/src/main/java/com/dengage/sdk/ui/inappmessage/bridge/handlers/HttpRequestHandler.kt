@@ -1,5 +1,7 @@
 package com.dengage.sdk.ui.inappmessage.bridge.handlers
 
+import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.ui.inappmessage.bridge.core.BridgeCallback
 import com.dengage.sdk.ui.inappmessage.bridge.core.BridgeMessage
 import com.dengage.sdk.ui.inappmessage.bridge.handler.AsyncBridgeHandler
@@ -11,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,7 +23,9 @@ import java.util.concurrent.TimeUnit
 /**
  * Handler for HTTP requests from WebView
  */
-class HttpRequestHandler : AsyncBridgeHandler {
+class HttpRequestHandler(
+    private val inAppMessage: InAppMessage? = null
+) : AsyncBridgeHandler {
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -35,6 +40,7 @@ class HttpRequestHandler : AsyncBridgeHandler {
         val method: String = "GET",
         val headers: Map<String, String>? = null,
         val body: String? = null,
+        val queryParams: Map<String, String>? = null,
         val contentType: String? = null
     )
 
@@ -56,27 +62,44 @@ class HttpRequestHandler : AsyncBridgeHandler {
 
         scope.launch {
             try {
-                val requestBuilder = Request.Builder().url(payload.url)
+                val processedUrl = replaceVariables(payload.url)
+                
+                val httpUrlBuilder = processedUrl.toHttpUrlOrNull()?.newBuilder()
+                    ?: throw IllegalArgumentException("Invalid URL: $processedUrl")
+                
+                payload.queryParams?.forEach { (key, value) ->
+                    val processedValue = replaceVariables(value)
+                    httpUrlBuilder.addQueryParameter(key, processedValue)
+                }
+                
+                val finalUrl = httpUrlBuilder.build().toString()
+                val requestBuilder = Request.Builder().url(finalUrl)
 
-                // Add headers
                 payload.headers?.forEach { (key, value) ->
-                    requestBuilder.addHeader(key, value)
+                    val processedValue = replaceVariables(value)
+                    requestBuilder.addHeader(key, processedValue)
                 }
 
-                // Set method and body
+                val bodyString = when {
+                    payload.body != null -> {
+                        replaceVariables(payload.body)
+                    }
+                    else -> null
+                }
+
                 when (payload.method.uppercase()) {
                     "GET" -> requestBuilder.get()
                     "POST" -> {
                         val mediaType = (payload.contentType ?: "application/json").toMediaType()
-                        requestBuilder.post((payload.body ?: "").toRequestBody(mediaType))
+                        requestBuilder.post((bodyString ?: "").toRequestBody(mediaType))
                     }
                     "PUT" -> {
                         val mediaType = (payload.contentType ?: "application/json").toMediaType()
-                        requestBuilder.put((payload.body ?: "").toRequestBody(mediaType))
+                        requestBuilder.put((bodyString ?: "").toRequestBody(mediaType))
                     }
                     "PATCH" -> {
                         val mediaType = (payload.contentType ?: "application/json").toMediaType()
-                        requestBuilder.patch((payload.body ?: "").toRequestBody(mediaType))
+                        requestBuilder.patch((bodyString ?: "").toRequestBody(mediaType))
                     }
                     "DELETE" -> requestBuilder.delete()
                     else -> {
@@ -107,5 +130,19 @@ class HttpRequestHandler : AsyncBridgeHandler {
                 }
             }
         }
+    }
+
+    private fun replaceVariables(input: String): String {
+        var result = input
+        val subscription = Prefs.subscription
+        val sdkParameters = Prefs.sdkParameters
+        result = result.replace("\${integrationKey}", subscription?.integrationKey ?: "")
+        result = result.replace("\${accountName}", sdkParameters?.accountName ?: "")
+        result = result.replace("\${appId}", sdkParameters?.appId ?: "")
+        result = result.replace("\${campaign.publicId}", inAppMessage?.data?.publicId ?: "")
+        result = result.replace("\${campaign.content.contentId}", inAppMessage?.data?.content?.contentId ?: "")
+        result = result.replace("\${visitor.deviceId}", subscription?.getSafeDeviceId() ?: "")
+        result = result.replace("\${visitor.contactKey}", subscription?.contactKey ?: "")
+        return result
     }
 }

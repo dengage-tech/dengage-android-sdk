@@ -165,7 +165,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
             val registry = BridgeHandlerRegistry().apply {
                 register(legacyHandler)
-                register(HttpRequestHandler())
+                register(HttpRequestHandler(inAppMessage))
                 register(DeviceInfoHandler())
                 register(StorageHandler())
             }
