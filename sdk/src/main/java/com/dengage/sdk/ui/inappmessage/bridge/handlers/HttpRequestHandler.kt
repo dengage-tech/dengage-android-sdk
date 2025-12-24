@@ -143,6 +143,11 @@ class HttpRequestHandler(
         result = result.replace("\${campaign.content.contentId}", inAppMessage?.data?.content?.contentId ?: "")
         result = result.replace("\${visitor.deviceId}", subscription?.getSafeDeviceId() ?: "")
         result = result.replace("\${visitor.contactKey}", subscription?.contactKey ?: "")
+        result = result.replace("\${pushApiBaseUrl}", Prefs.pushApiBaseUrl)
+        result = result.replace("\${eventApiBaseUrl}", Prefs.eventApiBaseUrl)
+        result = result.replace("\${inAppApiBaseUrl}", Prefs.inAppApiBaseUrl)
+        result = result.replace("\${geofenceApiBaseUrl}", Prefs.geofenceApiBaseUrl.removeSuffix("/"))
+        result = result.replace("\${getRealTimeMessagesBaseUrl}", Prefs.getRealTimeMessagesBaseUrl.removeSuffix("/"))
         return result
     }
 }
