@@ -2,6 +2,9 @@ package com.dengage.sdk.ui.inappmessage
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
@@ -435,6 +438,16 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         fun openSettings() {
             DengageLogger.verbose("In app message: open settings event")
             launchApplicationSettingsActivity()
+        }
+
+
+        @JavascriptInterface
+        fun copyToClipboard(value: String?) {
+            DengageLogger.verbose("In app message: copyToClipboard event $value")
+            val clipboard: ClipboardManager =
+                this@InAppMessageActivity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("value", value)
+            clipboard.setPrimaryClip(clip)
         }
     }
 
