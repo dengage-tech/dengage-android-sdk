@@ -53,6 +53,7 @@
   - [Geofence Installation](#geofence-installation)
   - [Geofence Initialization](#geofence-initialization)
   - [Request Location Permission](#request-location-permission)
+  - [Performance Considerations and Best Practices](#performance-considerations-and-best-practices)
 - [Huawei Messaging Service](#huawei-messaging-service)
   - [HMS setup](#hms-setup)
   - [Initialization for Huawei](#initialization-for-huawei)
@@ -1367,6 +1368,69 @@ To request location permissions at runtime, use the `DengageGeofence.requestLoca
 DengageGeofence.requestLocationPermissions(activity)
 ```
 
+### Performance Considerations and Best Practices
+
+Geofence usage can have significant impacts on your application's performance and battery consumption. Here are important considerations:
+
+#### App Launch Behavior
+
+When a geofence is triggered while the app is not running (killed state), Android launches the app in the background and calls the `Application.onCreate()` method. This has important implications:
+
+- **Initialization Order**: All code in `Application.onCreate()` will execute when a geofence triggers, even if the user hasn't explicitly opened the app. Ensure your initialization code handles this scenario gracefully.
+- **Heavy Operations**: Avoid placing heavy synchronous operations (large data loads, complex UI setup, network calls that block the main thread) at the beginning of `Application.onCreate()`. These will delay geofence event processing.
+- **BroadcastReceiver**: Geofence events are received by `GeofenceLocationReceiver`. The SDK automatically initializes Dengage if it hasn't been initialized yet when a geofence event is received.
+
+#### How DengageGeofence SDK Works
+
+DengageGeofence SDK uses Google Play Services Location API with the following characteristics:
+
+- **Region Monitoring**: The SDK uses `FusedLocationProviderClient` and `GeofencingClient` for efficient geofence detection, which is battery-optimized by Google Play Services.
+- **Maximum 50 Regions**: Google Play Services limits apps to monitor up to 50 geofences simultaneously. The SDK automatically manages this limit by selecting the 50 nearest geofences to the user's current location using Haversine distance calculation.
+- **Automatic Region Updates**: When the user moves, the SDK recalculates and updates the monitored regions to always track the nearest 50 geofences from the server.
+- **Balanced Power Accuracy**: The SDK uses `PRIORITY_BALANCED_POWER_ACCURACY` for location updates, providing a good balance between accuracy and battery consumption.
+- **Rate Limiting**: Geofence data is fetched from the server at most every 15 minutes, and event signals for the same geofence are rate-limited to once every 5 minutes.
+- **Boot Persistence**: The SDK automatically re-registers geofences after device reboot via `BOOT_COMPLETED` broadcast receiver.
+- **Accuracy Filtering**: Location updates with accuracy worse than 1000 meters are automatically filtered out.
+
+#### Recommendations
+
+1. **Lazy Initialization**: Defer non-essential service initialization in your Application class:
+
+```kotlin
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        // Register lifecycle callbacks
+        registerActivityLifecycleCallbacks(DengageLifecycleTracker())
+
+        // Always initialize Dengage SDK first
+        Dengage.init(
+            context = applicationContext,
+            firebaseIntegrationKey = "your-firebase-integration-key"
+        )
+
+        // Initialize geofence
+        DengageGeofence.startGeofence()
+
+        // Defer heavy initialization - these will only run when
+        // an Activity is created (user actually opens the app)
+    }
+}
+```
+
+2. **Minimize Background Work**: When the app is launched due to a geofence trigger, minimize the work performed:
+   - Avoid UI-related operations in `Application.onCreate()`
+   - Skip non-essential network requests
+   - Don't load large datasets into memory
+
+3. **Handle Permissions Properly**: Request location permissions at an appropriate time in your app flow:
+   - `ACCESS_FINE_LOCATION` is required for geofence functionality
+   - `ACCESS_BACKGROUND_LOCATION` (Android 10+) is required for geofence triggers when the app is not in foreground
+
+4**Battery Optimization Whitelist**: On some devices, aggressive battery optimization may affect geofence delivery. Consider guiding users to exclude your app from battery optimization if geofence reliability is critical.
+
+> **Note**: If your app doesn't require geofence functionality, avoid including the `sdk-geofence` module to prevent unnecessary location permission requests and battery consumption.
 
 
 ## Huawei Messaging Service
