@@ -44,6 +44,7 @@ class InAppMessageManager :
     companion object {
         private var timer = Timer()
         private var hourlyFetchTimer: Timer? = null
+        internal var isInAppMessageShowing = false
     }
 
     /**
@@ -60,6 +61,11 @@ class InAppMessageManager :
         storyPropertyId: String? = null,
         storiesListView: StoriesListView? = null,
     ) {
+        // Check if an in-app message is already being displayed (skip inline messages)
+        if (isInAppMessageShowing && inAppInlineElement == null && storiesListView == null) {
+            DengageLogger.debug("setNavigation skipped: An in-app message is already being displayed")
+            return
+        }
 
         val sdkParameters = Prefs.sdkParameters
         if (sdkParameters != null) {
@@ -234,6 +240,11 @@ class InAppMessageManager :
         couponCode: String? = null
     ) {
         try {
+            // Mark as showing immediately to prevent duplicate calls
+            if (inAppInlineElement == null) {
+                isInAppMessageShowing = true
+            }
+
             // set delay for showing in app message
             val delay = (inAppMessage.data.displayTiming.delay ?: 0) * 1000L
             timer.schedule(object : TimerTask() {
@@ -423,12 +434,14 @@ class InAppMessageManager :
     override fun inAppMessageSetAsDismissed() = Unit
 
     override fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?, buttonType: String?) {
+        isInAppMessageShowing = false
         setInAppMessageAsClicked(
             inAppMessage = inAppMessage, buttonId = buttonId, buttonType = buttonType
         )
     }
 
     override fun inAppMessageDismissed(inAppMessage: InAppMessage) {
+        isInAppMessageShowing = false
         setInAppMessageAsDismissed(
             inAppMessage = inAppMessage
         )
