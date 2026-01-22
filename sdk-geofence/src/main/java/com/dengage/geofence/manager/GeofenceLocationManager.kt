@@ -58,13 +58,28 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
         } catch (e: Exception) {
             DL.error("Error setting location permission status | error = ${e.message}")
         }
-        if (Prefs.geofenceEnabled) {
+
+        // Check server configuration before starting
+        val sdkParams = Prefs.sdkParameters
+        if (sdkParams != null && !sdkParams.geofenceEnabled) {
+            DL.debug("Geofence is disabled by server configuration on init")
+            Prefs.geofenceEnabled = false
+        } else if (Prefs.geofenceEnabled) {
             startTracking()
         }
     }
 
     fun startTracking() {
         this.stopLocationUpdates()
+
+        // Check if geofence is enabled from server configuration
+        val sdkParams = Prefs.sdkParameters
+        if (sdkParams != null && !sdkParams.geofenceEnabled) {
+            DL.debug("Geofence is disabled by server configuration")
+            stopGeofence()
+            return
+        }
+
         if (!GPH.fineLocationPermission(CH.context) && !GPH.coarseLocationPermission(CH.context)) {
             DL.debug("Geofence permissions missing")
             return
@@ -284,6 +299,15 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
 
     fun handleLocation(location: Location?, source: GLS, geofenceRequestId: String?) {
         DL.debug("Handling location | location = $location")
+
+        // Check if geofence is enabled from server configuration
+        val sdkParams = Prefs.sdkParameters
+        if (sdkParams != null && !sdkParams.geofenceEnabled) {
+            DL.debug("Geofence is disabled by server configuration, stopping geofence")
+            stopGeofence()
+            return
+        }
+
         if (location == null || !GState.valid(location)) {
             DL.debug("Invalid location | source = $source; location = $location")
             return

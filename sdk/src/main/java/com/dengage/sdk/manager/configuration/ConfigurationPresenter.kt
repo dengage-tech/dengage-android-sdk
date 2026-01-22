@@ -15,6 +15,7 @@ class ConfigurationPresenter : BaseAbstractPresenter<ConfigurationContract.View>
             onResponse = {
                 it.lastFetchTimeInMillis = System.currentTimeMillis()
                 Prefs.sdkParameters = it
+                handleGeofenceEnabled(it.geofenceEnabled)
                 view { sdkParametersFetched(it) }
             }
             onError = {
@@ -24,6 +25,13 @@ class ConfigurationPresenter : BaseAbstractPresenter<ConfigurationContract.View>
             params = GetSdkParameters.Params(
                 integrationKey = integrationKey
             )
+        }
+    }
+
+    private fun handleGeofenceEnabled(geofenceEnabled: Boolean) {
+        if (!geofenceEnabled && Prefs.geofenceEnabled) {
+            Prefs.geofenceEnabled = false
+            DengageLogger.debug("Geofence disabled by server configuration")
         }
     }
 }

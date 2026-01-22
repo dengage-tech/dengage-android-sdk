@@ -44,7 +44,7 @@ object Prefs {
         get() = preferences.get(PreferenceKey.IN_APP_API_BASE_URL) ?: Constants.PUSH_API_URI
         set(value) = preferences.set(PreferenceKey.IN_APP_API_BASE_URL, value)
 
-    internal var sdkParameters: SdkParameters?
+    var sdkParameters: SdkParameters?
         get() = preferences.get(PreferenceKey.SDK_PARAMETERS)
         set(value) = preferences.set(PreferenceKey.SDK_PARAMETERS, value)
 

@@ -10,6 +10,7 @@ data class SdkParameters(
     @SerializedName("eventsEnabled") val eventsEnabled: Boolean,
     @SerializedName("inboxEnabled") val inboxEnabled: Boolean?,
     @SerializedName("inAppEnabled") val inAppEnabled: Boolean?,
+    @SerializedName("geofenceEnabled") val geofenceEnabled: Boolean = true,
     @SerializedName("subscriptionEnabled") val subscriptionEnabled: Boolean?,
     @SerializedName("inAppFetchIntervalInMin") val inAppFetchIntervalInMin: Int?,
     @SerializedName("expiredMessagesFetchIntervalInMin") val expiredMessagesFetchIntervalInMin: Int?,
