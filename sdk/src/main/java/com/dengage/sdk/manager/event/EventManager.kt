@@ -20,7 +20,15 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
     private var isSessionStarted = false
 
+    private fun isEventsEnabled(): Boolean {
+        return Prefs.sdkParameters?.eventsEnabled ?: true
+    }
+
     internal fun sessionStart(referer: String) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): sessionStart")
+            return
+        }
         if (isSessionStarted) return
         try {
             val data = HashMap<String, Any>()
@@ -64,15 +72,19 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     }
 
     internal fun pageView(eventDetails: HashMap<String, Any>) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): pageView")
+            return
+        }
         try {
             if (!eventDetails.containsKey(EventKey.PAGE_TYPE.key)) {
                 DengageLogger.error("data must have a valid page_type parameter")
                 return
             }
-            
+
             // Set page parameters for real-time in-app messages
             RealTimeInAppParamHolder.setClientPageInfo(eventDetails)
-            
+
             sendDeviceEvent(EventTable.PAGE_VIEW_EVENTS.tableName, eventDetails)
         } catch (e: Exception) {
             DengageLogger.error(e.message)
@@ -83,6 +95,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         eventDetails: HashMap<String, Any>,
         eventType: String
     ) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): $eventType")
+            return
+        }
         try {
             val copyData: HashMap<String, Any> = HashMap(eventDetails)
             copyData.remove(EventKey.CART_ITEMS.key)
@@ -143,6 +159,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     }
 
     internal fun cancelOrder(eventDetails: HashMap<String, Any>) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): cancelOrder")
+            return
+        }
         try {
             val copyData: HashMap<String, Any> = HashMap(eventDetails)
             copyData.remove(EventKey.CART_ITEMS.key)
@@ -180,6 +200,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     }
 
     internal fun order(eventDetails: HashMap<String, Any>) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): order")
+            return
+        }
         try {
             val copyData: HashMap<String, Any> = HashMap(eventDetails)
             copyData.remove(EventKey.CART_ITEMS.key)
@@ -216,6 +240,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     }
 
     internal fun search(eventDetails: HashMap<String, Any>) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): search")
+            return
+        }
         sendDeviceEvent(
             tableName = EventTable.SEARCH_EVENTS.tableName,
             eventDetails = eventDetails
@@ -226,6 +254,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         eventDetails: HashMap<String, Any>,
         eventType: String
     ) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): $eventType")
+            return
+        }
         try {
             val copyData: HashMap<String, Any> = HashMap(eventDetails)
             copyData.remove(EventKey.ITEMS.key)
@@ -276,15 +308,12 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         key: String,
         eventDetails: HashMap<String, Any>
     ) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): customEvent (tableName: $tableName)")
+            return
+        }
         try {
             DengageLogger.verbose("sendCustomEvent method is called")
-
-            // Check if events are enabled (skip sending if disabled)
-            val sdkParams = Prefs.sdkParameters
-            if (sdkParams != null && !sdkParams.eventsEnabled) {
-                DengageLogger.debug("Event skipped (eventsEnabled=false): $tableName")
-                return
-            }
 
             if(tableName == EventTable.PAGE_VIEW_EVENTS.tableName){
                 RealTimeInAppParamHolder.addPageView()
@@ -337,6 +366,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         messageDetails: String?,
         transactionId: String?
     ) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): transactionalOpenEvent")
+            return
+        }
         presenter.sendTransactionalOpenEvent(
             buttonId = buttonId,
             itemId = itemId,
@@ -353,6 +386,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         messageId: Int?,
         messageDetails: String?
     ) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): openEvent")
+            return
+        }
         presenter.sendOpenEvent(
             buttonId = buttonId,
             itemId = itemId,
@@ -363,14 +400,11 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     }
 
     fun sendLoginEvent() {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): login")
+            return
+        }
         try {
-            // Check if events are enabled (skip sending if disabled)
-            val sdkParams = Prefs.sdkParameters
-            if (sdkParams != null && !sdkParams.eventsEnabled) {
-                DengageLogger.debug("Event skipped (eventsEnabled=false): login")
-                return
-            }
-
             val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
@@ -392,14 +426,11 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     }
 
     fun sendLogoutEvent() {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): logout")
+            return
+        }
         try {
-            // Check if events are enabled (skip sending if disabled)
-            val sdkParams = Prefs.sdkParameters
-            if (sdkParams != null && !sdkParams.eventsEnabled) {
-                DengageLogger.debug("Event skipped (eventsEnabled=false): logout")
-                return
-            }
-
             val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
@@ -421,14 +452,11 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     }
 
     fun sendRegisterEvent() {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (eventsEnabled=false): register")
+            return
+        }
         try {
-            // Check if events are enabled (skip sending if disabled)
-            val sdkParams = Prefs.sdkParameters
-            if (sdkParams != null && !sdkParams.eventsEnabled) {
-                DengageLogger.debug("Event skipped (eventsEnabled=false): register")
-                return
-            }
-
             val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
@@ -453,23 +481,23 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             DengageLogger.debug("cleanupClientEvents has been called")
             val currentTime = System.currentTimeMillis()
             val lastCleanupTime = Prefs.clientEventsLastCleanupTime
-            
+
             // Only cleanup if it's been more than 10 minutes since last cleanup
             val cleanupInterval = 10 * 60 * 1000L // 10 minutes in milliseconds
             if (currentTime - lastCleanupTime < cleanupInterval) {
                 return
             }
-            
+
             val sdkParameters = Prefs.sdkParameters ?: return
             val clientEvents = Prefs.clientEvents
             var hasChanges = false
-            
+
             // Get all valid event types from eventMappings
             val validEventTypes = sdkParameters.eventMappings
                 ?.flatMap { it.eventTypeDefinitions ?: emptyList() }
                 ?.mapNotNull { it.eventType }
                 ?.toSet() ?: emptySet()
-            
+
             // Add missing valid event types with empty lists
             validEventTypes.forEach { eventType ->
                 if (!clientEvents.containsKey(eventType)) {
@@ -478,41 +506,41 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                     DengageLogger.debug("Added missing event type: $eventType with empty list")
                 }
             }
-            
+
             // Remove events that are no longer in eventMappings
             val orphanedEventTypes = clientEvents.keys.filter { eventType ->
                 !validEventTypes.contains(eventType)
             }
-            
+
             orphanedEventTypes.forEach { eventType ->
                 clientEvents.remove(eventType)
                 hasChanges = true
                 DengageLogger.debug("Removed orphaned event type: $eventType (not found in eventMappings)")
             }
-            
+
             // Process remaining valid event types
             clientEvents.forEach { (eventType, eventTypeEvents) ->
                 if (eventTypeEvents.isNotEmpty()) {
                     val matchingEventTypeDefinition = sdkParameters.eventMappings
                         ?.flatMap { it.eventTypeDefinitions ?: emptyList() }
                         ?.find { it.eventType == eventType }
-                    
+
                     if (matchingEventTypeDefinition?.enableClientHistory == true) {
                         val clientHistoryOptions = matchingEventTypeDefinition.clientHistoryOptions
                         if (clientHistoryOptions != null) {
                             val maxEventCount = clientHistoryOptions.maxEventCount ?: Int.MAX_VALUE
                             val timeWindowInMinutes = clientHistoryOptions.timeWindowInMinutes ?: Int.MAX_VALUE
-                            
+
                             val timeThreshold = currentTime - TimeUnit.MINUTES.toMillis(timeWindowInMinutes.toLong())
                             val filteredEvents = eventTypeEvents.filter { it.timestamp >= timeThreshold }.toMutableList()
-                            
+
                             // Keep only the latest maxEventCount events
                             val finalEvents = if (filteredEvents.size > maxEventCount) {
                                 filteredEvents.sortedByDescending { it.timestamp }.take(maxEventCount).toMutableList()
                             } else {
                                 filteredEvents
                             }
-                            
+
                             // Update if there are changes
                             if (finalEvents.size != eventTypeEvents.size) {
                                 clientEvents[eventType] = finalEvents
@@ -528,13 +556,13 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
                     }
                 }
             }
-            
+
             // Save changes and update cleanup time
             if (hasChanges) {
                 Prefs.clientEvents = clientEvents
             }
             Prefs.clientEventsLastCleanupTime = currentTime
-            
+
         } catch (e: Exception) {
             DengageLogger.error("Error cleaning up client events: ${e.message}")
         }
