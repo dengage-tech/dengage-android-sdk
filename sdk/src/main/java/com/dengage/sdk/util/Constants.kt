@@ -19,7 +19,7 @@ object Constants {
     const val DEEPLINK_RETRIEVE_EVENT = "com.dengage.inapp.LINK_RETRIEVAL"
 
 
-    internal const val GEOFENCE_API_URI = "https://dev-push.dengage.com/geoapi/"
+    internal const val GEOFENCE_API_URI = "https://tr-push.dengage.com/geoapi/"
 
 
     const val SYNCED_GEOFENCES_REQUEST_ID_PREFIX = "dengage_sync"

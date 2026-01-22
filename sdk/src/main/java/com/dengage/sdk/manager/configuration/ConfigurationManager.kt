@@ -3,8 +3,6 @@ package com.dengage.sdk.manager.configuration
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.DeadObjectException
-import android.os.Handler
-import android.os.Looper
 import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
@@ -25,7 +23,6 @@ import com.dengage.sdk.util.DengageUtils
 import com.google.firebase.FirebaseApp
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         ConfigurationContract.Presenter>(), ConfigurationContract.View {
@@ -46,9 +43,6 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             ).forEach { (name, setter) ->
                 DengageUtils.getMetaData(name = name)?.let(setter) ?: run {
                     DengageLogger.error("$name not found on application manifest metadata")
-                    if(initForGeofence) {
-                        throw RuntimeException("$name not found on application manifest metadata")
-                    }
                 }
             }
         } else {
