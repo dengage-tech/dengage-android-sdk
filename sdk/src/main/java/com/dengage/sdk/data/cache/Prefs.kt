@@ -21,6 +21,8 @@ import com.dengage.sdk.util.DengageUtils
 
 import com.dengage.sdk.domain.inappmessage.model.Cart
 import com.dengage.sdk.domain.inappmessage.model.ClientPageInfo
+import com.dengage.sdk.domain.inappmessage.model.ShowHistoryEntry
+import com.dengage.sdk.util.DengageLogger
 
 object Prefs {
 
@@ -233,6 +235,29 @@ object Prefs {
     internal var lastSuccessfulRealTimeInAppMessageFetchTime: Long
         get() = preferences.get(PreferenceKey.LAST_SUCCESSFUL_REAL_TIME_IN_APP_MESSAGE_FETCH_TIME, 0L) ?: 0L
         set(value) = preferences.set(PreferenceKey.LAST_SUCCESSFUL_REAL_TIME_IN_APP_MESSAGE_FETCH_TIME, value)
+
+    internal var inAppMessageShowHistory: MutableMap<String, ShowHistoryEntry>
+        get() = preferences.get(PreferenceKey.IN_APP_MESSAGE_SHOW_HISTORY) ?: mutableMapOf()
+        set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGE_SHOW_HISTORY, value)
+
+    private const val TWO_WEEKS_IN_MILLIS = 14 * 24 * 60 * 60 * 1000L
+
+    fun updateInAppMessageShowCount(messageId: String, showCount: Long) {
+        val history = inAppMessageShowHistory
+        history[messageId] = ShowHistoryEntry(showCount, System.currentTimeMillis())
+        inAppMessageShowHistory = history
+    }
+
+    fun cleanupExpiredShowHistory() {
+        val history = inAppMessageShowHistory
+        val currentTime = System.currentTimeMillis()
+        val expiredKeys = history.filter { currentTime - it.value.timestamp > TWO_WEEKS_IN_MILLIS }.keys
+        expiredKeys.forEach { history.remove(it) }
+        if (expiredKeys.isNotEmpty()) {
+            inAppMessageShowHistory = history
+            DengageLogger.debug("Cleaned up ${expiredKeys.size} expired show history entries")
+        }
+    }
 
     fun clear() {
         preferences.edit { clear() }

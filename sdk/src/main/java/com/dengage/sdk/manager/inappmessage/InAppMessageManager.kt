@@ -185,6 +185,8 @@ class InAppMessageManager :
      * Fetch in app messages if enabled and fetch time is available
      */
     internal fun fetchInAppMessages(inAppMessageFetchCallbackParam: InAppMessageFetchCallback?) {
+        // Cleanup expired show history entries (older than 2 weeks)
+        Prefs.cleanupExpiredShowHistory()
         val inappMessage = inAppMessageFetchCallbackParam
         inAppMessageFetchCallback = inappMessage
         presenter.getInAppMessages()
@@ -254,8 +256,6 @@ class InAppMessageManager :
                 override fun run() {
                     activity.runOnUiThread {
 
-
-
                         setInAppMessageAsDisplayed(
                             inAppMessage = inAppMessage
                         )
@@ -265,11 +265,15 @@ class InAppMessageManager :
                                 System.currentTimeMillis() + inAppMessage.data.displayTiming.showEveryXMinutes!! * 60000L
                             inAppMessage.data.showCount += 1
                             updateInAppMessageOnCache(inAppMessage)
+                            Prefs.updateInAppMessageShowCount(inAppMessage.id, inAppMessage.data.showCount)
                         } else {
                             if (inAppMessage.data.isRealTime()) {
                                 inAppMessage.data.showCount += 1
                                 updateInAppMessageOnCache(inAppMessage)
+                                Prefs.updateInAppMessageShowCount(inAppMessage.id, inAppMessage.data.showCount)
                             } else {
+                                inAppMessage.data.showCount += 1
+                                Prefs.updateInAppMessageShowCount(inAppMessage.id, inAppMessage.data.showCount)
                                 removeInAppMessageFromCache(inAppMessageId = inAppMessage.id)
                             }
                         }
@@ -349,6 +353,8 @@ class InAppMessageManager :
                 existingInAppMessages.addAll(inAppMessages)
             } else {
                 if (isRealTime) {
+                    val showHistory = Prefs.inAppMessageShowHistory
+
                     // remove non existing real time in app messages
                     existingInAppMessages.removeAll { existingInAppMessage ->
                         existingInAppMessage.data.isRealTime() && inAppMessages.firstOrNull { inAppMessage ->
@@ -379,20 +385,32 @@ class InAppMessageManager :
                         }
                     }
 
-                    // find new ones and add them
+                    // find new ones and add them, checking history for showCount
                     val newInAppMessages = inAppMessages.filter { inAppMessage ->
                         existingInAppMessages.firstOrNull { existingInAppMessage ->
                             existingInAppMessage.id == inAppMessage.id
                         } == null
                     }
+                    // Restore showCount from history for new messages
+                    newInAppMessages.forEach { newMsg ->
+                        showHistory[newMsg.id]?.let { historyEntry ->
+                            newMsg.data.showCount = historyEntry.showCount
+                        }
+                    }
                     existingInAppMessages.addAll(newInAppMessages)
                 } else {
+                    val showHistory = Prefs.inAppMessageShowHistory
                     val updatedMessages = inAppMessages.map { newMsg ->
                         val oldMsg = existingInAppMessages.firstOrNull { it.id == newMsg.id }
                         if (oldMsg != null) {
                             newMsg.data.nextDisplayTime = oldMsg.data.nextDisplayTime
                             newMsg.data.showCount = oldMsg.data.showCount
                             newMsg.data.dismissCount = oldMsg.data.dismissCount
+                        } else {
+                            // Check show history for messages not in cache
+                            showHistory[newMsg.id]?.let { historyEntry ->
+                                newMsg.data.showCount = historyEntry.showCount
+                            }
                         }
                         newMsg
                     }

@@ -52,6 +52,7 @@ enum class PreferenceKey {
     CLIENT_EVENTS_LAST_CLEANUP_TIME,
     LAST_SUCCESSFUL_IN_APP_MESSAGE_FETCH_TIME,
     LAST_SUCCESSFUL_REAL_TIME_IN_APP_MESSAGE_FETCH_TIME,
+    IN_APP_MESSAGE_SHOW_HISTORY,
     ;
 
     override fun toString(): String = name
