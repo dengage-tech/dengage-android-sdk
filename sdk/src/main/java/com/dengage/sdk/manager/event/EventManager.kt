@@ -279,6 +279,13 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         try {
             DengageLogger.verbose("sendCustomEvent method is called")
 
+            // Check if events are enabled (skip sending if disabled)
+            val sdkParams = Prefs.sdkParameters
+            if (sdkParams != null && !sdkParams.eventsEnabled) {
+                DengageLogger.debug("Event skipped (eventsEnabled=false): $tableName")
+                return
+            }
+
             if(tableName == EventTable.PAGE_VIEW_EVENTS.tableName){
                 RealTimeInAppParamHolder.addPageView()
                 // Set page parameters for page view events
@@ -357,6 +364,13 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
     fun sendLoginEvent() {
         try {
+            // Check if events are enabled (skip sending if disabled)
+            val sdkParams = Prefs.sdkParameters
+            if (sdkParams != null && !sdkParams.eventsEnabled) {
+                DengageLogger.debug("Event skipped (eventsEnabled=false): login")
+                return
+            }
+
             val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
@@ -379,6 +393,13 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
     fun sendLogoutEvent() {
         try {
+            // Check if events are enabled (skip sending if disabled)
+            val sdkParams = Prefs.sdkParameters
+            if (sdkParams != null && !sdkParams.eventsEnabled) {
+                DengageLogger.debug("Event skipped (eventsEnabled=false): logout")
+                return
+            }
+
             val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
@@ -401,6 +422,13 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
 
     fun sendRegisterEvent() {
         try {
+            // Check if events are enabled (skip sending if disabled)
+            val sdkParams = Prefs.sdkParameters
+            if (sdkParams != null && !sdkParams.eventsEnabled) {
+                DengageLogger.debug("Event skipped (eventsEnabled=false): register")
+                return
+            }
+
             val subscription = Prefs.subscription
             val data = HashMap<String, Any>()
             val sessionId = SessionManager.getSessionId()
