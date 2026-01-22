@@ -33,6 +33,13 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
     }
 
     override fun callSubscriptionApi(subscription: Subscription) {
+        // Check if subscription is enabled (skip sending if disabled)
+        val sdkParams = Prefs.sdkParameters
+        if (sdkParams != null && sdkParams.subscriptionEnabled == false) {
+            DengageLogger.debug("Subscription sync skipped (subscriptionEnabled=false)")
+            return
+        }
+
         sendSubscriptionTryCount++
         sendSubscriptionUseCase(this) {
             onResponse = {
