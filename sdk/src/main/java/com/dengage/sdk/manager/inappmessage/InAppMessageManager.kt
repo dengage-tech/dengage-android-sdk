@@ -124,12 +124,14 @@ class InAppMessageManager :
                            return
                         } else {
 
-                            if (priorInAppMessage.data.content.params.html?.let { 
-                                Mustache.hasCouponSection(it) 
+                            if (priorInAppMessage.data.content.params.html?.let {
+                                Mustache.hasCouponSection(it)
                             } == true) {
                                 val couponContent: String? = Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
-                                
+
                                 couponContent?.let { content ->
+                                    // Mark as showing immediately to prevent duplicate calls during async validation
+                                    isInAppMessageShowing = true
                                     presenter.validateCoupon(
                                         couponContent = content,
                                         inAppMessageId = priorInAppMessage.id,
@@ -144,8 +146,9 @@ class InAppMessageManager :
                                             )
                                         },
                                         onInvalidCoupon = { errorMessage ->
+                                            isInAppMessageShowing = false
                                             DengageLogger.error("Coupon validation failed: $errorMessage")
-                                            
+
                                             // Send debug log for invalid coupon if debug device
                                             sendCouponValidationFailureLog(
                                                 couponContent = content,
@@ -304,8 +307,10 @@ class InAppMessageManager :
                 }
             }, delay)
         } catch (e: Exception) {
+            isInAppMessageShowing = false
             e.printStackTrace()
         } catch (e: Throwable) {
+            isInAppMessageShowing = false
             e.printStackTrace()
         }
 
