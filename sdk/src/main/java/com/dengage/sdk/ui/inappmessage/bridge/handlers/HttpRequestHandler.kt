@@ -46,7 +46,7 @@ class HttpRequestHandler(
 
     data class HttpResponse(
         val statusCode: Int,
-        val body: String?,
+        val body: Any?,
         val headers: Map<String, String>
     )
 
@@ -114,9 +114,18 @@ class HttpRequestHandler(
                 val responseHeaders = response.headers.toMultimap()
                     .mapValues { it.value.firstOrNull() ?: "" }
 
+                val rawBody = response.body?.string()
+                val parsedBody: Any? = rawBody?.let { body ->
+                    try {
+                        GsonHolder.fromJson<Any>(body)
+                    } catch (e: Exception) {
+                        body
+                    }
+                }
+
                 val httpResponse = HttpResponse(
                     statusCode = response.code,
-                    body = response.body?.string(),
+                    body = parsedBody,
                     headers = responseHeaders
                 )
 
