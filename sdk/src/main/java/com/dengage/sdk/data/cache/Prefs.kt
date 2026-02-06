@@ -240,6 +240,10 @@ object Prefs {
         get() = preferences.get(PreferenceKey.IN_APP_MESSAGE_SHOW_HISTORY) ?: mutableMapOf()
         set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGE_SHOW_HISTORY, value)
 
+    internal var sentOpenEventMessageDetails: MutableList<String>
+        get() = preferences.get(PreferenceKey.SENT_OPEN_EVENT_MESSAGE_DETAILS) ?: mutableListOf()
+        set(value) = preferences.set(PreferenceKey.SENT_OPEN_EVENT_MESSAGE_DETAILS, value)
+
     private const val TWO_WEEKS_IN_MILLIS = 14 * 24 * 60 * 60 * 1000L
 
     fun updateInAppMessageShowCount(messageId: String, showCount: Long) {

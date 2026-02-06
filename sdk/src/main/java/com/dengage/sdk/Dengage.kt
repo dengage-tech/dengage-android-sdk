@@ -737,6 +737,20 @@ object Dengage {
             val source = message.messageSource
             if (Constants.MESSAGE_SOURCE != source) return
 
+            val messageDetails = message.messageDetails
+            if (!messageDetails.isNullOrEmpty()) {
+                val sentDetails = Prefs.sentOpenEventMessageDetails
+                if (sentDetails.contains(messageDetails)) {
+                    DengageLogger.verbose("Duplicate open event detected for messageDetails: $messageDetails, skipping.")
+                    return
+                }
+                sentDetails.add(messageDetails)
+                if (sentDetails.size > 10) {
+                    sentDetails.removeAt(0)
+                }
+                Prefs.sentOpenEventMessageDetails = sentDetails
+            }
+
             if (!TextUtils.isEmpty(message.transactionId)) {
 
                 eventManager.sendTransactionalOpenEvent(
