@@ -21,7 +21,7 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     private var isSessionStarted = false
 
     private fun isEventsEnabled(): Boolean {
-        return Prefs.sdkParameters?.eventsEnabled ?: true
+        return Prefs.userTrackingPermission
     }
 
     internal fun sessionStart(referer: String) {

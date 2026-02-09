@@ -244,6 +244,11 @@ object Prefs {
         get() = preferences.get(PreferenceKey.SENT_OPEN_EVENT_MESSAGE_DETAILS) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.SENT_OPEN_EVENT_MESSAGE_DETAILS, value)
 
+
+    internal var userTrackingPermission: Boolean
+        get() = preferences.get(PreferenceKey.USER_TRACKING_PERMISSION, true) ?: true
+        set(value) = preferences.set(PreferenceKey.USER_TRACKING_PERMISSION, value)
+
     private const val TWO_WEEKS_IN_MILLIS = 14 * 24 * 60 * 60 * 1000L
 
     fun updateInAppMessageShowCount(messageId: String, showCount: Long) {
