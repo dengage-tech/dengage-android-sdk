@@ -347,6 +347,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         tableName: String,
         eventDetails: HashMap<String, Any>
     ) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (trackingPermission=false): sendDeviceEvent")
+            return
+        }
         try {
             DengageLogger.verbose("sendDeviceEvent method is called")
             sendCustomEvent(
@@ -366,10 +370,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         messageDetails: String?,
         transactionId: String?
     ) {
-        if (!isEventsEnabled()) {
-            DengageLogger.debug("Event skipped (eventsEnabled=false): transactionalOpenEvent")
-            return
-        }
         presenter.sendTransactionalOpenEvent(
             buttonId = buttonId,
             itemId = itemId,
@@ -386,10 +386,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         messageId: Int?,
         messageDetails: String?
     ) {
-        if (!isEventsEnabled()) {
-            DengageLogger.debug("Event skipped (eventsEnabled=false): openEvent")
-            return
-        }
         presenter.sendOpenEvent(
             buttonId = buttonId,
             itemId = itemId,
