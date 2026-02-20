@@ -67,8 +67,7 @@ class SubscriptionManager :
         } else {
             huaweiIntegrationKey.toString()
         }
-        val notificationsEnabled = NotificationManagerCompat.from(ContextHolder.context).areNotificationsEnabled()
-        sub.token = if (notificationsEnabled) token else ""
+        sub.token = token
         saveAndEnqueue(sub)
     }
 

@@ -184,8 +184,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             onTokenResult = {
                 subscription.tokenType = TokenType.FIREBASE.type
                 Prefs.token = it
-                val notificationsEnabled = NotificationManagerCompat.from(ContextHolder.context).areNotificationsEnabled()
-                subscription.token = if (notificationsEnabled) it else ""
+                subscription.token = it
                 if (firebaseIntegrationKey != null) {
                     subscription.integrationKey = firebaseIntegrationKey
                 }
@@ -211,8 +210,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
             onTokenResult = {
                 subscription.tokenType = TokenType.HUAWEI.type
                 Prefs.token = it
-                val notificationsEnabled = NotificationManagerCompat.from(ContextHolder.context).areNotificationsEnabled()
-                subscription.token = if (notificationsEnabled) it else ""
+                subscription.token = it
                 if (huaweiIntegrationKey != null) {
                     subscription.integrationKey = huaweiIntegrationKey
                 }
