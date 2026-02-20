@@ -1,5 +1,14 @@
 # Changelog
 
+##[6.0.88] - 2026-02-20
+
+### Bug Fixes
+
+- Prevent duplicate push open events using messageDetails deduplication
+- Fix HttpRequestHandler response body
+- Remove notifications enabled check in subscription request
+
+
 ## [6.0.87] - 2026-01-22
 
 ### New Features
