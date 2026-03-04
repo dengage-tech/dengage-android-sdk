@@ -41,6 +41,7 @@ import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
+import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchApplicationSettingsActivity
 import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
@@ -55,7 +56,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        EdgeToEdgeUtils.enableEdgeToEdge(this)
         inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as? InAppMessage ?: run {
             finish()
             return
