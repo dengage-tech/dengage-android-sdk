@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".App"
         android:allowBackup="false"
@@ -52,7 +54,7 @@
             </intent-filter>
         </activity> <!-- Fcm Messaging Service for handling push messages comes from firebase -->
         <service
-            android:name="com.dengage.sdk.push.FcmMessagingService"
+            android:name=".push.LiveUpdateFcmService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

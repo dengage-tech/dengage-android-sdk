@@ -49,6 +49,9 @@
         <action
             android:id="@+id/actionHomeToRealTimeInAppFilters"
             app:destination="@id/realTimeInAppFiltersFragment" />
+        <action
+            android:id="@+id/actionHomeToLiveUpdate"
+            app:destination="@id/liveUpdateFragment" />
     </fragment>
     <fragment
         android:id="@+id/deviceInfoFragment"
@@ -124,6 +127,12 @@
             android:id="@+id/action_realTimeInAppFilters_to_cart"
             app:destination="@id/cartFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/liveUpdateFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.LiveUpdateFragment"
+        android:label="Live Update"
+        tools:layout="@layout/fragment_live_update" />
 
     <fragment
         android:id="@+id/eventHistoryFragment"
