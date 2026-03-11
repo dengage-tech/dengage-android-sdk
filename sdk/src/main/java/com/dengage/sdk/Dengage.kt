@@ -40,6 +40,7 @@ import com.dengage.sdk.manager.rfm.RFMManager
 import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
+import com.dengage.sdk.liveupdate.DengageLiveUpdateManager
 import com.dengage.sdk.push.IDengageHmsManager
 import com.dengage.sdk.push.NotificationPermissionActivity
 import com.dengage.sdk.push.NotificationPermissionCallback
@@ -61,6 +62,7 @@ object Dengage {
 
     val configurationManager by lazy { ConfigurationManager() }
     val subscriptionManager by lazy { SubscriptionManager() }
+    val liveUpdateManager get() = DengageLiveUpdateManager
     private val inAppMessageManager by lazy { InAppMessageManager() }
     private val inboxMessageManager by lazy { InboxMessageManager() }
     private val tagManager by lazy { TagManager() }

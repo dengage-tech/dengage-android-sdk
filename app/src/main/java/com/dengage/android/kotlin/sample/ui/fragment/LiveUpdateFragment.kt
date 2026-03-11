@@ -2,8 +2,11 @@ package com.dengage.android.kotlin.sample.ui.fragment
 
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentLiveUpdateBinding
-import com.dengage.android.kotlin.sample.liveupdate.LiveUpdateManager
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
+import com.dengage.sdk.liveupdate.DengageLiveUpdateManager
+import com.dengage.sdk.liveupdate.DengageLiveUpdateManager.DeliveryStatus
+import com.dengage.sdk.liveupdate.DengageLiveUpdateManager.DeliveryUpdate
+import com.dengage.sdk.liveupdate.DengageLiveUpdateManager.SportsUpdate
 
 class LiveUpdateFragment : BaseDataBindingFragment<FragmentLiveUpdateBinding>() {
 
@@ -21,96 +24,69 @@ class LiveUpdateFragment : BaseDataBindingFragment<FragmentLiveUpdateBinding>() 
 
     private fun setupDeliveryTemplate() {
         binding.btnDeliveryStep1.setOnClickListener {
-            LiveUpdateManager.showDeliveryUpdate(
+            DengageLiveUpdateManager.showDeliveryUpdate(
                 requireContext(),
-                LiveUpdateManager.DeliveryUpdate(
-                    orderId = "DNG-8821",
-                    status = LiveUpdateManager.DeliveryStatus.ORDER_RECEIVED,
-                    estimatedTime = "45 dk"
-                )
+                DeliveryUpdate(orderId = "DNG-8821", status = DeliveryStatus.ORDER_RECEIVED, estimatedTime = "45 dk")
             )
         }
 
         binding.btnDeliveryStep2.setOnClickListener {
-            LiveUpdateManager.showDeliveryUpdate(
+            DengageLiveUpdateManager.showDeliveryUpdate(
                 requireContext(),
-                LiveUpdateManager.DeliveryUpdate(
-                    orderId = "DNG-8821",
-                    status = LiveUpdateManager.DeliveryStatus.PREPARING,
-                    estimatedTime = "30 dk"
-                )
+                DeliveryUpdate(orderId = "DNG-8821", status = DeliveryStatus.PREPARING, estimatedTime = "30 dk")
             )
         }
 
         binding.btnDeliveryStep3.setOnClickListener {
-            LiveUpdateManager.showDeliveryUpdate(
+            DengageLiveUpdateManager.showDeliveryUpdate(
                 requireContext(),
-                LiveUpdateManager.DeliveryUpdate(
-                    orderId = "DNG-8821",
-                    status = LiveUpdateManager.DeliveryStatus.ON_THE_WAY,
-                    estimatedTime = "10 dk"
-                )
+                DeliveryUpdate(orderId = "DNG-8821", status = DeliveryStatus.ON_THE_WAY, estimatedTime = "10 dk")
             )
         }
 
         binding.btnDeliveryStep4.setOnClickListener {
-            LiveUpdateManager.showDeliveryUpdate(
+            DengageLiveUpdateManager.showDeliveryUpdate(
                 requireContext(),
-                LiveUpdateManager.DeliveryUpdate(
-                    orderId = "DNG-8821",
-                    status = LiveUpdateManager.DeliveryStatus.DELIVERED,
-                    estimatedTime = ""
-                )
+                DeliveryUpdate(orderId = "DNG-8821", status = DeliveryStatus.DELIVERED, estimatedTime = "")
             )
         }
 
         binding.btnDeliveryDismiss.setOnClickListener {
-            LiveUpdateManager.dismissDeliveryUpdate(requireContext())
+            DengageLiveUpdateManager.dismissDeliveryUpdate(requireContext())
         }
     }
 
     private fun setupSportsTemplate() {
         binding.btnSportsStart.setOnClickListener {
-            score1 = 0
-            score2 = 0
-            matchTime = "1'"
-            period = "1. Yarı"
+            score1 = 0; score2 = 0; matchTime = "1'"; period = "1. Yarı"
             showSportsUpdate()
         }
 
         binding.btnSportsGoal1.setOnClickListener {
-            score1++
-            matchTime = nextTime()
-            showSportsUpdate()
+            score1++; matchTime = nextTime(); showSportsUpdate()
         }
 
         binding.btnSportsGoal2.setOnClickListener {
-            score2++
-            matchTime = nextTime()
-            showSportsUpdate()
+            score2++; matchTime = nextTime(); showSportsUpdate()
         }
 
         binding.btnSportsHalfTime.setOnClickListener {
-            matchTime = "45'"
-            period = "2. Yarı"
-            showSportsUpdate()
+            matchTime = "45'"; period = "2. Yarı"; showSportsUpdate()
         }
 
         binding.btnSportsFullTime.setOnClickListener {
-            matchTime = "90'"
-            period = "Maç Bitti"
-            showSportsUpdate()
+            matchTime = "90'"; period = "Maç Bitti"; showSportsUpdate()
         }
 
         binding.btnSportsDismiss.setOnClickListener {
-            LiveUpdateManager.dismissSportsUpdate(requireContext())
+            DengageLiveUpdateManager.dismissSportsUpdate(requireContext())
         }
     }
 
     private fun showSportsUpdate() {
-        LiveUpdateManager.showSportsUpdate(
+        DengageLiveUpdateManager.showSportsUpdate(
             requireContext(),
-            LiveUpdateManager.SportsUpdate(
+            SportsUpdate(
                 team1 = "Galatasaray",
                 team2 = "Fenerbahçe",
                 score1 = score1,
