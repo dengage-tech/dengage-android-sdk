@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import com.dengage.sdk.R
+import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.data.cache.Prefs
 
@@ -13,6 +14,8 @@ class DengageFetchTimeResetTestActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Ensure ContextHolder is set so Prefs can be read (e.g. when opened before Dengage.init)
+        ContextHolder.resetContext(applicationContext)
         
         // Enable edge-to-edge display for Android 15
         EdgeToEdgeUtils.enableEdgeToEdge(this)

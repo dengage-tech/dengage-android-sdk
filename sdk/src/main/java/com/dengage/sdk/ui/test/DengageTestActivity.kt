@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import com.dengage.sdk.R
+import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.EdgeToEdgeUtils
 
 class DengageTestActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ContextHolder.resetContext(applicationContext)
         
         setContentView(R.layout.activity_dengage_test)
         

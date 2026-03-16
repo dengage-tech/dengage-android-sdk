@@ -12,6 +12,7 @@ import com.dengage.sdk.domain.push.model.CarouselItem
 import com.dengage.sdk.domain.push.model.CustomParam
 import com.dengage.sdk.domain.push.model.Media
 import com.dengage.sdk.domain.push.model.Message
+import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.GsonHolder
 import com.google.gson.reflect.TypeToken
 
@@ -19,6 +20,7 @@ class DengageTestPushActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ContextHolder.resetContext(applicationContext)
 
         // Enable edge-to-edge display for Android 15
         EdgeToEdgeUtils.enableEdgeToEdge(this)

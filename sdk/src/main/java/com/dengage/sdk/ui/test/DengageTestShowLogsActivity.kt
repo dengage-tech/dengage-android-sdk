@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.recyclerview.widget.RecyclerView
 import com.dengage.sdk.R
+import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.EdgeToEdgeUtils
 import com.dengage.sdk.ui.test.adapter.DengageInfoAdapter
 import com.dengage.sdk.util.DengageLogger
@@ -13,6 +14,7 @@ class DengageTestShowLogsActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ContextHolder.resetContext(applicationContext)
         
         // Enable edge-to-edge display for Android 15
         EdgeToEdgeUtils.enableEdgeToEdge(this)
