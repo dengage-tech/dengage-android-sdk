@@ -83,6 +83,7 @@ class InAppMessageManager :
             // If both fetches are older than the timeout, log warning and return
             if (timeSinceLastInAppFetch > timeoutMilliseconds && timeSinceLastRealTimeFetch > timeoutMilliseconds) {
                 DengageLogger.warning("setNavigation blocked: No successful in-app message fetch in the last $timeoutMinutes minutes")
+                hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
                 return
             }
         }
@@ -92,93 +93,109 @@ class InAppMessageManager :
         }
         // control next in app message show time
         if (Prefs.isDevelopmentStatusDebug == false) {
-            if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) return
+            if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) {
+                hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                return
+            }
         }
 
         val inAppMessages =
             InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
         Prefs.inAppMessages = inAppMessages
-        if (!inAppMessages.isNullOrEmpty()) {
-            val priorInAppMessage =
-                InAppMessageUtils.findPriorInAppMessage(
-                    inAppMessages,
-                    screenName,
-                    params,
-                    propertyId,
-                    storyPropertyId
-                )
+        if (inAppMessages.isNullOrEmpty()) {
+            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+            return
+        }
+        val priorInAppMessage =
+            InAppMessageUtils.findPriorInAppMessage(
+                inAppMessages,
+                screenName,
+                params,
+                propertyId,
+                storyPropertyId
+            )
 
-            if (priorInAppMessage != null) {
-                if (!storyPropertyId.isNullOrEmpty() && storiesListView != null) {
-                    val androidSelector = priorInAppMessage.data.inlineTarget?.androidSelector
-                    if (androidSelector == storyPropertyId && "STORY".equals(
-                            priorInAppMessage.data.content.type,
-                            ignoreCase = true
-                        )
-                    ) {
-                        showAppStory(priorInAppMessage, storiesListView)
-                    }
-                } else {
-                    if(storiesListView == null) {
-                        if (!"INLINE".equals(priorInAppMessage.data.content.type, ignoreCase = true) && inAppInlineElement != null) {
-                           return
-                        } else {
-
-                            if (priorInAppMessage.data.content.params.html?.let {
+        if (priorInAppMessage != null) {
+            if (!storyPropertyId.isNullOrEmpty() && storiesListView != null) {
+                val androidSelector = priorInAppMessage.data.inlineTarget?.androidSelector
+                if (androidSelector == storyPropertyId && "STORY".equals(
+                        priorInAppMessage.data.content.type,
+                        ignoreCase = true
+                    )
+                ) {
+                    showAppStory(priorInAppMessage, storiesListView)
+                }
+            } else {
+                if (storiesListView == null) {
+                    if (!"INLINE".equals(priorInAppMessage.data.content.type, ignoreCase = true) && inAppInlineElement != null) {
+                        hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                        return
+                    } else {
+                        if (priorInAppMessage.data.content.params.html?.let {
                                 Mustache.hasCouponSection(it)
                             } == true) {
-                                val couponContent: String? = Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
+                            val couponContent: String? =
+                                Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
 
-                                couponContent?.let { content ->
-                                    // Mark as showing immediately to prevent duplicate calls during async validation
-                                    isInAppMessageShowing = true
-                                    presenter.validateCoupon(
-                                        couponContent = content,
-                                        inAppMessageId = priorInAppMessage.id,
-                                        onValidCoupon = { couponCode ->
-                                            showInAppMessage(
-                                                activity,
-                                                priorInAppMessage,
-                                                resultCode,
-                                                inAppInlineElement = inAppInlineElement,
-                                                propertyId = propertyId,
-                                                couponCode = couponCode
-                                            )
-                                        },
-                                        onInvalidCoupon = { errorMessage ->
-                                            isInAppMessageShowing = false
-                                            DengageLogger.error("Coupon validation failed: $errorMessage")
+                            couponContent?.let { content ->
+                                // Mark as showing immediately to prevent duplicate calls during async validation
+                                isInAppMessageShowing = true
+                                presenter.validateCoupon(
+                                    couponContent = content,
+                                    inAppMessageId = priorInAppMessage.id,
+                                    onValidCoupon = { couponCode ->
+                                        showInAppMessage(
+                                            activity,
+                                            priorInAppMessage,
+                                            resultCode,
+                                            inAppInlineElement = inAppInlineElement,
+                                            propertyId = propertyId,
+                                            couponCode = couponCode,
+                                            hideIfNotFound = hideIfNotFound
+                                        )
+                                    },
+                                    onInvalidCoupon = { errorMessage ->
+                                        isInAppMessageShowing = false
+                                        DengageLogger.error("Coupon validation failed: $errorMessage")
 
-                                            // Send debug log for invalid coupon if debug device
-                                            sendCouponValidationFailureLog(
-                                                couponContent = content,
-                                                errorMessage = errorMessage,
-                                                inAppMessage = priorInAppMessage,
-                                                screenName = screenName
-                                            )
-                                        }
-                                    )
-                                }
-                            } else {
-                                showInAppMessage(
-                                    activity,
-                                    priorInAppMessage,
-                                    resultCode,
-                                    inAppInlineElement = inAppInlineElement,
-                                    propertyId = propertyId,
-                                    couponCode = null
+                                        // Send debug log for invalid coupon if debug device
+                                        sendCouponValidationFailureLog(
+                                            couponContent = content,
+                                            errorMessage = errorMessage,
+                                            inAppMessage = priorInAppMessage,
+                                            screenName = screenName
+                                        )
+                                        hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                                    }
                                 )
-                            }
+                            } ?: hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                        } else {
+                            showInAppMessage(
+                                activity,
+                                priorInAppMessage,
+                                resultCode,
+                                inAppInlineElement = inAppInlineElement,
+                                propertyId = propertyId,
+                                couponCode = null,
+                                hideIfNotFound = hideIfNotFound
+                            )
                         }
-
-
                     }
                 }
-
-            } else if (!propertyId.isNullOrEmpty() && hideIfNotFound == true) {
-                inAppInlineElement?.visibility = View.GONE
             }
+        } else {
+            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
         }
+    }
+
+    private fun hideInlineIfNeeded(
+        inAppInlineElement: InAppInlineElement?,
+        propertyId: String?,
+        hideIfNotFound: Boolean?,
+    ) {
+        if (hideIfNotFound != true) return
+        if (propertyId.isNullOrEmpty()) return
+        inAppInlineElement?.visibility = View.GONE
     }
 
     /**
@@ -242,7 +259,8 @@ class InAppMessageManager :
         resultCode: Int = -1,
         propertyId: String? = "",
         inAppInlineElement: InAppInlineElement?,
-        couponCode: String? = null
+        couponCode: String? = null,
+        hideIfNotFound: Boolean? = false,
     ) {
         try {
             // Mark as showing immediately to prevent duplicate calls
@@ -283,11 +301,14 @@ class InAppMessageManager :
                             System.currentTimeMillis() + ((Prefs.sdkParameters?.inAppMinSecBetweenMessages
                                 ?: 0) * 1000)
                         if (inAppMessage.data.inlineTarget?.androidSelector == propertyId) {
-
+                            inAppInlineElement?.visibility = View.VISIBLE
                             inAppInlineElement?.populateInLineInApp(inAppMessage, activity)
                             InAppInlineElement.inAppMessageCallback = this@InAppMessageManager
 
                         } else {
+                            if (inAppInlineElement != null && hideIfNotFound == true && !propertyId.isNullOrEmpty()) {
+                                inAppInlineElement.visibility = View.GONE
+                            }
                             activity.startActivityForResult(
                                 if (couponCode != null) {
                                     InAppMessageActivity.newIntent(
