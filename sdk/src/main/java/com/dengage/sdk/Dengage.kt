@@ -245,6 +245,27 @@ object Dengage {
     }
 
     /**
+     * Set event tracking permission (user-controlled).
+     * When true, events are sent when [SdkParameters.eventsEnabled] is also true.
+     * When false, no events are sent. Stored in preferences; default is true.
+     * This is independent of advertising ID / limit ad tracking.
+     *
+     * @param permission true to allow sending events, false to disable
+     */
+    fun setTrackingPermission(permission: Boolean) {
+        DengageLogger.verbose("setTrackingPermission method is called: $permission")
+        Prefs.userTrackingPermission = permission
+    }
+
+    /**
+     * Get current event tracking permission.
+     * Default is true if never set.
+     */
+    fun getTrackingPermission(): Boolean {
+        return Prefs.userTrackingPermission
+    }
+
+    /**
      * Set Token method
      * Use to set token of current subscription
      */

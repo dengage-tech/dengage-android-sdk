@@ -319,6 +319,29 @@ public class DengageManager {
     }
 
     /**
+     * Set event tracking permission (user-controlled).
+     * When true, events are sent when server also has events enabled. When false, no events are sent.
+     * Stored in preferences; default is true. Independent of advertising ID.
+     *
+     * @param permission true to allow sending events, false to disable
+     */
+    public void setTrackingPermission(boolean permission) {
+        DengageLogger.INSTANCE.verbose("setTrackingPermission method is called: " + permission);
+        try {
+            Dengage.INSTANCE.setTrackingPermission(permission);
+        } catch (Exception e) {
+            DengageLogger.INSTANCE.error("setTrackingPermission: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Get current event tracking permission. Default is true if never set.
+     */
+    public boolean getTrackingPermission() {
+        return Dengage.INSTANCE.getTrackingPermission();
+    }
+
+    /**
      * Set Token method
      * <p>
      * Use to set token of current subscription

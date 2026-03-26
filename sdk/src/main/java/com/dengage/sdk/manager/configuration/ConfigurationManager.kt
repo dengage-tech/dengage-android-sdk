@@ -197,7 +197,7 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
                 subscription.integrationKey = firebaseIntegrationKey
             }
             subscription.advertisingId = adId ?: ""
-            subscription.trackingPermission = !adId.isNullOrEmpty()
+            subscription.trackingPermission = Prefs.userTrackingPermission
             configurationCallback?.sendSubscription(subscription)
         }
     }

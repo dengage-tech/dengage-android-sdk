@@ -51,7 +51,15 @@ class SubscriptionManager :
     }
 
     internal fun sendSubscription() {
-        presenter.enqueueSubscription(Prefs.subscription ?: Subscription())
+        try {
+            val subscription = Prefs.subscription ?: Subscription()
+            subscription.trackingPermission = Prefs.userTrackingPermission
+            presenter.enqueueSubscription(subscription)
+        } catch (e: Exception) {
+            DengageLogger.error("sendSubscription: ${e.message}")
+        } catch (t: Throwable) {
+            DengageLogger.error("sendSubscription: ${t.message}")
+        }
     }
 
     internal fun setToken(token: String?) {
@@ -210,8 +218,15 @@ class SubscriptionManager :
     }
 
     private fun saveAndEnqueue(subscription: Subscription) {
-        saveSubscription(subscription)
-        presenter.enqueueSubscription(subscription)
+        try {
+            subscription.trackingPermission = Prefs.userTrackingPermission
+            saveSubscription(subscription)
+            presenter.enqueueSubscription(subscription)
+        } catch (e: Exception) {
+            DengageLogger.error("saveAndEnqueue: ${e.message}")
+        } catch (t: Throwable) {
+            DengageLogger.error("saveAndEnqueue: ${t.message}")
+        }
     }
 
     override fun subscriptionSent() = Unit

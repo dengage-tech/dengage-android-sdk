@@ -21,7 +21,11 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
     private var isSessionStarted = false
 
     private fun isEventsEnabled(): Boolean {
-        return Prefs.sdkParameters?.eventsEnabled ?: true
+        val areEventsEnabledFromServer: Boolean= Prefs.sdkParameters?.eventsEnabled ?: true
+
+        val areEventsEnabledFromSdk: Boolean =Prefs.userTrackingPermission
+
+        return areEventsEnabledFromSdk&&areEventsEnabledFromServer
     }
 
     internal fun sessionStart(referer: String) {
@@ -347,6 +351,10 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         tableName: String,
         eventDetails: HashMap<String, Any>
     ) {
+        if (!isEventsEnabled()) {
+            DengageLogger.debug("Event skipped (trackingPermission=false): sendDeviceEvent")
+            return
+        }
         try {
             DengageLogger.verbose("sendDeviceEvent method is called")
             sendCustomEvent(
@@ -366,10 +374,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         messageDetails: String?,
         transactionId: String?
     ) {
-        if (!isEventsEnabled()) {
-            DengageLogger.debug("Event skipped (eventsEnabled=false): transactionalOpenEvent")
-            return
-        }
         presenter.sendTransactionalOpenEvent(
             buttonId = buttonId,
             itemId = itemId,
@@ -386,10 +390,6 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         messageId: Int?,
         messageDetails: String?
     ) {
-        if (!isEventsEnabled()) {
-            DengageLogger.debug("Event skipped (eventsEnabled=false): openEvent")
-            return
-        }
         presenter.sendOpenEvent(
             buttonId = buttonId,
             itemId = itemId,
