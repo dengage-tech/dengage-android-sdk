@@ -1157,6 +1157,44 @@ object InAppMessageUtils {
         return true
     }
 
+    /**
+     * Checks whether a COUNTDOWN_TO_WIN in-app message has expired by reading the
+     * dn-countdown-settings script block embedded in the HTML.
+     *
+     * Returns true (expired → do not show) when:
+     *  - isRelative is false, AND
+     *  - the current UTC time is past absoluteEndDate
+     *
+     * Returns false (not expired → show normally) in all other cases,
+     * including parse errors, when isRelative is true, or when the script is absent.
+     */
+    fun isCountdownToWinExpired(html: String?): Boolean {
+        if (html == null) return false
+        try {
+            val scriptRegex = Regex(
+                """<script[^>]*class="dn-countdown-settings"[^>]*>([\s\S]*?)</script>""",
+                RegexOption.IGNORE_CASE
+            )
+            val jsonContent = scriptRegex.find(html)?.groupValues?.get(1)?.trim()
+                ?: return false
+
+            val jsonObject = org.json.JSONObject(jsonContent)
+            if (jsonObject.optBoolean("isRelative", true)) return false
+
+            val absoluteEndDateStr = jsonObject.optString("absoluteEndDate", "")
+            if (absoluteEndDateStr.isBlank()) return false
+
+            val dateFormat = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.getDefault())
+            dateFormat.timeZone = TimeZone.getTimeZone("UTC")
+            val endDate = dateFormat.parse(absoluteEndDateStr) ?: return false
+
+            return Date().after(endDate)
+        } catch (e: Exception) {
+            DengageLogger.error("isCountdownToWinExpired error: ${e.message}")
+            return false
+        }
+    }
+
     fun pxToDp(px: Int?, context: Context): Float {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,

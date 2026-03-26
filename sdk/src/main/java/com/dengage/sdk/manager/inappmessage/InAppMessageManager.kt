@@ -131,6 +131,13 @@ class InAppMessageManager :
                         hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
                         return
                     } else {
+                        if ("COUNTDOWN_TO_WIN".equals(priorInAppMessage.data.content.type, ignoreCase = true) &&
+                            InAppMessageUtils.isCountdownToWinExpired(priorInAppMessage.data.content.params.html)
+                        ) {
+                            DengageLogger.debug("COUNTDOWN_TO_WIN in-app message is expired, skipping display")
+                            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                            return
+                        }
                         if (priorInAppMessage.data.content.params.html?.let {
                                 Mustache.hasCouponSection(it)
                             } == true) {
