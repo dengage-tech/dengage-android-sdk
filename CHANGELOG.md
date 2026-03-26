@@ -1,5 +1,16 @@
 # Changelog
 
+
+##[6.0.89] - 2026-03-27
+
+### Bug Fixes
+
+- Add user-controlled event tracking permission
+- Add absoluteEndDate control for COUNTDOWN_TO_WIN inapp notifications
+- Enable edge-to-edge in InAppMessageActivity
+- Hide inline element when in-app not found
+
+
 ##[6.0.88] - 2026-02-20
 
 ### Bug Fixes
