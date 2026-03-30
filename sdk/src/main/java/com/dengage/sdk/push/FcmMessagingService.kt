@@ -21,7 +21,7 @@ open class FcmMessagingService : FirebaseMessagingService() {
 
         val data = remoteMessage.data
 
-        if (data.containsKey("live_update_type")) {
+        if (data.containsKey("live_notification")) {
             ContextHolder.resetContext(context = this)
             DengageLiveUpdateManager.handleFromFcmData(applicationContext, data)
             return
