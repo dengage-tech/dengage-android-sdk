@@ -1,17 +1,26 @@
 # Changelog
 
 
-##[6.0.89] - 2026-03-27
+## [6.0.90] - 2026-03-31
 
 ### Bug Fixes
+
+- Hide story CTA button when isEnabled is false
+
+## [6.0.89] - 2026-03-27
+
+### New Features
 
 - Add user-controlled event tracking permission
 - Add absoluteEndDate control for COUNTDOWN_TO_WIN inapp notifications
 - Enable edge-to-edge in InAppMessageActivity
+
+### Bug Fixes
+
 - Hide inline element when in-app not found
 
 
-##[6.0.88] - 2026-02-20
+## [6.0.88] - 2026-02-20
 
 ### Bug Fixes
 
