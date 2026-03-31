@@ -171,7 +171,7 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
             }
         }
 
-        btnStory.visibility = if (currentStory.cta?.label.isNullOrEmpty()) View.GONE else View.VISIBLE
+        btnStory.visibility = if (currentStory.cta?.isEnabled == true && currentStory.cta.label.isNotEmpty()) View.VISIBLE else View.GONE
         currentStory.cta?.let {
             btnStory.apply {
                 background = GradientDrawable().apply {
