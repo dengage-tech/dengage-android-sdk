@@ -1,15 +1,13 @@
-package com.dengage.sdk.ui.inappmessage
+package com.dengage.sdk.ui.recommendation
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
-import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.RelativeLayout
 import android.widget.Toast
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.ui.inappmessage.bridge.core.DengageBridge
@@ -22,7 +20,6 @@ import com.dengage.sdk.ui.inappmessage.bridge.handlers.StorageHandler
 import com.dengage.sdk.ui.inappmessage.bridge.js.BridgeJavaScript
 import com.dengage.sdk.callback.ReviewDialogCallback
 import com.dengage.sdk.domain.inappmessage.model.ContentParams
-import com.dengage.sdk.domain.inappmessage.model.ContentPosition
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.push.areNotificationsEnabled
@@ -30,11 +27,9 @@ import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
 
-open class InAppInlineElement : WebView {
+open class RecommendationView : WebView {
     private lateinit var inAppMessage: InAppMessage
     private var contextWebView: Context? = null
-    private var isAndroidUrlNPresent: Boolean? = false
-    private var isRatingDialog: Boolean? = false
     private var isClicked: Boolean = false
     var activityContext: Activity? = null
     private var dengageBridge: DengageBridge? = null
@@ -43,72 +38,29 @@ open class InAppInlineElement : WebView {
         contextWebView = context
     }
 
-    constructor(context: Context?, attrs: AttributeSet?) : super(
-        context!!, attrs) {
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs) {
         contextWebView = context
     }
 
     companion object {
-        /**
-        Set Inapp inlinee callback for handling Inapp inlinee actions
-         */
         var inAppMessageCallback: InAppMessageCallback? = null
-
-
-        const val EXTRA_IN_APP_MESSAGE = "EXTRA_IN_APP_MESSAGE"
-        const val RESULT_CODE = "RESULT_CODE"
-
-
     }
 
     interface InAppMessageCallback {
-        /**
-        Clicked Inapp inlinee
-         */
         fun inAppMessageClicked(inAppMessage: InAppMessage, buttonId: String?, buttonType: String?)
-
-        /**
-        Dismissed Inapp inlinee
-         */
         fun inAppMessageDismissed(inAppMessage: InAppMessage)
-
-        /**
-        Send tags method for using from webview javascript interface
-         */
         fun sendTags(tags: List<TagItem>?)
     }
 
-    fun populateInLineInApp(inAppMessageParam: InAppMessage, activityParam: Activity) {
+    internal fun populateRecommendation(inAppMessageParam: InAppMessage, activityParam: Activity) {
         inAppMessage = inAppMessageParam
         activityContext = activityParam
         val contentParams = inAppMessage.data.content.params
         setHtmlContent(contentParams)
     }
 
-
     @SuppressLint("SetJavaScriptEnabled")
     private fun setHtmlContent(contentParams: ContentParams) {
-        if (contentParams.position == ContentPosition.FULL.position) {
-            val params = RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            this.layoutParams = params
-        }
-
-        // set radius of card view
-        //cardInAppMessage.radius = InAppMessageUtils.pxToDp(contentParams.radius, contextWebView!! )
-
-        // set max width for container
-        /* contentParams.maxWidth?.let {
-             val params = vHtmlWidthContainer.layoutParams as ConstraintLayout.LayoutParams
-             params.matchConstraintMaxWidth = InAppMessageUtils.pxToDp(it, contextWebView!! ).roundToInt()
-             vHtmlWidthContainer.layoutParams = params
-         }*/
-
-        // vHtmlContent.visibility = View.VISIBLE
-
-
         this.apply {
             settings.loadWithOverviewMode = true
             settings.useWideViewPort = true
@@ -120,15 +72,14 @@ open class InAppInlineElement : WebView {
             settings.javaScriptEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
 
-            // Setup new bridge with handlers
             contextWebView?.let { ctx ->
                 val legacyHandler = LegacyDnHandler(
                     context = ctx,
                     activity = activityContext,
                     inAppMessage = inAppMessage,
-                    inAppMessageCallback = InAppMessageActivity.inAppMessageCallback,
-                    isAndroidUrlNPresent = isAndroidUrlNPresent,
-                    isRatingDialog = isRatingDialog,
+                    inAppMessageCallback = null,
+                    isAndroidUrlNPresent = false,
+                    isRatingDialog = false,
                     onClicked = { isClicked = true }
                 )
 
@@ -140,26 +91,20 @@ open class InAppInlineElement : WebView {
                     register(RecommendationHandler())
                 }
 
-                dengageBridge = DengageBridge.attach(this@InAppInlineElement, registry)
+                dengageBridge = DengageBridge.attach(this@RecommendationView, registry)
             }
 
-            // Keep legacy interface for backwards compatibility
             this.addJavascriptInterface(JavaScriptInterface(), "Dn")
 
-            // Inject bridge JavaScript after page loads
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    BridgeJavaScript.inject(this@InAppInlineElement)
+                    BridgeJavaScript.inject(this@RecommendationView)
                 }
             }
 
-            // Load HTML content
             contentParams.html?.let {
-                loadDataWithBaseURL(
-                    null,
-                    it, "text/html", "UTF-8", null
-                )
+                loadDataWithBaseURL(null, it, "text/html", "UTF-8", null)
             }
         }
     }
@@ -167,16 +112,16 @@ open class InAppInlineElement : WebView {
     private inner class JavaScriptInterface {
         @JavascriptInterface
         fun dismiss() {
-            DengageLogger.verbose("Inapp inlinee: dismiss event")
+            DengageLogger.verbose("RecommendationView: dismiss event")
         }
 
         @JavascriptInterface
         fun androidUrl(targetUrl: String) {
-            DengageLogger.verbose("Inapp inlinee: android target url event $targetUrl")
+            DengageLogger.verbose("RecommendationView: android target url event $targetUrl")
             if (targetUrl == "Dn.promptPushPermission()") {
                 if (!context.areNotificationsEnabled()) {
                     Toast.makeText(context, "You need to enable push permission", Toast.LENGTH_LONG).show()
-                    context.launchNotificationSettingsActivity ()
+                    context.launchNotificationSettingsActivity()
                 }
             } else {
                 try {
@@ -190,22 +135,22 @@ open class InAppInlineElement : WebView {
         @JavascriptInterface
         fun sendClick(buttonId: String?, buttonType: String?) {
             isClicked = true
-            DengageLogger.verbose ("Inapp inlinee: clicked button $buttonId $buttonType")
+            DengageLogger.verbose("RecommendationView: clicked button $buttonId $buttonType")
             inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId, buttonType)
         }
 
         @JavascriptInterface
         fun sendClick(buttonId: String?) {
             isClicked = true
-            DengageLogger.verbose ("Inapp inlinee: clicked button $buttonId")
-            inAppMessageCallback?.inAppMessageClicked (inAppMessage, buttonId, null)
+            DengageLogger.verbose("RecommendationView: clicked button $buttonId")
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, buttonId, null)
         }
 
         @JavascriptInterface
         fun sendClick() {
             isClicked = true
-            DengageLogger.verbose ("Inapp inlinee: clicked body/button with no Id")
-            inAppMessageCallback?.inAppMessageClicked (inAppMessage, null, null)
+            DengageLogger.verbose("RecommendationView: clicked body/button with no Id")
+            inAppMessageCallback?.inAppMessageClicked(inAppMessage, null, null)
         }
 
         @JavascriptInterface
@@ -214,20 +159,20 @@ open class InAppInlineElement : WebView {
 
         @JavascriptInterface
         fun setTags() {
-            DengageLogger.verbose("Inapp inlinee: set tags event")
+            DengageLogger.verbose("RecommendationView: set tags event")
         }
 
         @JavascriptInterface
         fun iosUrl(targetUrl: String) {
-            DengageLogger.verbose("Inapp inlinee: ios target url event $targetUrl")
+            DengageLogger.verbose("RecommendationView: ios target url event $targetUrl")
         }
 
         @JavascriptInterface
         fun promptPushPermission() {
-            DengageLogger.verbose("Inapp inlinee: prompt push permission event")
+            DengageLogger.verbose("RecommendationView: prompt push permission event")
             if (!context.areNotificationsEnabled()) {
                 Toast.makeText(context, "You need to enable push permission", Toast.LENGTH_LONG).show()
-                context.launchNotificationSettingsActivity ()
+                context.launchNotificationSettingsActivity()
             }
         }
     }
@@ -236,15 +181,9 @@ open class InAppInlineElement : WebView {
         activityContext?.let {
             Dengage.showRatingDialog(activity = it,
                 reviewDialogCallback = object : ReviewDialogCallback {
-                    override fun onCompletion() {
-                    }
-
-                    override fun onError() {
-
-                    }
-
+                    override fun onCompletion() {}
+                    override fun onError() {}
                 })
         }
-
     }
 }

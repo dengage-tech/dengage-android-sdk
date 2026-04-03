@@ -16,6 +16,7 @@ import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
 import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
 import com.dengage.sdk.ui.inappmessage.Mustache
+import com.dengage.sdk.ui.recommendation.RecommendationView
 import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
@@ -33,7 +34,8 @@ import java.util.UUID
 class InAppMessageManager :
     BaseMvpManager<InAppMessageContract.View, InAppMessageContract.Presenter>(),
     InAppMessageContract.View, InAppMessageActivity.InAppMessageCallback,
-    InAppInlineElement.InAppMessageCallback, StoriesListView.InAppMessageCallback {
+    InAppInlineElement.InAppMessageCallback, StoriesListView.InAppMessageCallback,
+    RecommendationView.InAppMessageCallback {
 
     override fun providePresenter() = InAppMessagePresenter()
 
@@ -526,6 +528,47 @@ class InAppMessageManager :
                 StoryEventType.DISPLAY,
                 inAppMessage
             )
+        }
+    }
+
+    internal fun getRecommendation(
+        activity: Activity,
+        recommendationView: RecommendationView,
+        recommendationPropertyId: String,
+        screenName: String? = null,
+        params: HashMap<String, String>? = null
+    ) {
+        val inAppMessages =
+            InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
+        Prefs.inAppMessages = inAppMessages
+        if (inAppMessages.isNullOrEmpty()) {
+            DengageLogger.debug("getRecommendation: No in-app messages available")
+            return
+        }
+
+        val priorMessage = InAppMessageUtils.findPriorRecommendationMessage(
+            inAppMessages,
+            recommendationPropertyId,
+            screenName,
+            params
+        )
+
+        if (priorMessage != null) {
+            DengageLogger.debug("getRecommendation: Found matching recommendation message: ${priorMessage.id}")
+            recommendationView.visibility = View.VISIBLE
+            recommendationView.populateRecommendation(priorMessage, activity)
+            RecommendationView.inAppMessageCallback = this@InAppMessageManager
+            setInAppMessageAsDisplayed(priorMessage)
+
+            priorMessage.data.showCount += 1
+            if (priorMessage.data.displayTiming.showEveryXMinutes != null && priorMessage.data.displayTiming.showEveryXMinutes != 0) {
+                priorMessage.data.nextDisplayTime =
+                    System.currentTimeMillis() + priorMessage.data.displayTiming.showEveryXMinutes!! * 60000L
+                updateInAppMessageOnCache(priorMessage)
+            }
+            Prefs.updateInAppMessageShowCount(priorMessage.id, priorMessage.data.showCount)
+        } else {
+            DengageLogger.debug("getRecommendation: No matching recommendation message found")
         }
     }
 

@@ -14,6 +14,13 @@ object RealTimeInAppParamHolder {
     var city: String? = null
     var pageViewVisitCount: Int = 0
 
+    var currentSearchWord: String? = null
+    var lastViewedProducts: List<String> = emptyList()
+    var lastViewedCategories: List<String> = emptyList()
+    var lastPurchasedProducts: List<String> = emptyList()
+    var lastPurchasedCategories: List<String> = emptyList()
+    var lastSearchWords: List<String> = emptyList()
+
     fun addPageView() {
         pageViewVisitCount++
     }

@@ -213,7 +213,19 @@ object InAppMessageUtils {
     }
 
 
+    internal fun isRecommendationInApp(inAppMessage: InAppMessage, recommendationPropertyId: String?): Boolean {
+        if (!"RECOMMENDATION".equals(inAppMessage.data.content.type, ignoreCase = true)) return false
+        val isPropertyEmpty = recommendationPropertyId.isNullOrEmpty()
+        val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
+        return if (isPropertyEmpty || isSelectorEmpty) {
+            false
+        } else {
+            inAppMessage.data.inlineTarget?.androidSelector == recommendationPropertyId
+        }
+    }
+
     private fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?, storyPropertyId: String?): Boolean {
+        if ("RECOMMENDATION".equals(inAppMessage.data.content.type, ignoreCase = true)) return false
         if ("STORY".equals(inAppMessage.data.content.type, ignoreCase = true)) {
             val isPropertyEmpty = storyPropertyId.isNullOrEmpty()
             val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
@@ -1241,5 +1253,34 @@ object InAppMessageUtils {
 
         // Convert decimal to percentage and return
         return (decimal / 255.0) * 100
+    }
+
+    fun findPriorRecommendationMessage(
+        inAppMessages: List<InAppMessage>,
+        recommendationPropertyId: String,
+        screenName: String? = null,
+        params: HashMap<String, String>? = null
+    ): InAppMessage? {
+        val sortedMessages = inAppMessages.sortedWith(InAppMessageComparator())
+
+        val matchedWithoutScreenFilters = sortedMessages.firstOrNull { inAppMessage ->
+            inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
+                    isRecommendationInApp(inAppMessage, recommendationPropertyId) &&
+                    inAppMessage.data.isDisplayTimeAvailable() &&
+                    operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
+        }
+
+        return if (screenName.isNullOrEmpty()) {
+            matchedWithoutScreenFilters
+        } else {
+            val matchedWithScreenFilters = sortedMessages.firstOrNull { inAppMessage ->
+                !inAppMessage.data.displayCondition.screenNameFilters.isNullOrEmpty() &&
+                        isRecommendationInApp(inAppMessage, recommendationPropertyId) &&
+                        inAppMessage.data.isDisplayTimeAvailable() &&
+                        isScreenNameFound(inAppMessage, screenName) &&
+                        operateRealTimeValues(inAppMessage.data.displayCondition.displayRuleSet, params)
+            }
+            matchedWithScreenFilters ?: matchedWithoutScreenFilters
+        }
     }
 }

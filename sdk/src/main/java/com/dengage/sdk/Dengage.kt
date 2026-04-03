@@ -45,6 +45,7 @@ import com.dengage.sdk.push.NotificationPermissionActivity
 import com.dengage.sdk.push.NotificationPermissionCallback
 import com.dengage.sdk.push.clearNotification
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
+import com.dengage.sdk.ui.recommendation.RecommendationView
 import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
@@ -422,6 +423,48 @@ object Dengage {
      */
     fun setCity(name: String?) {
         RealTimeInAppParamHolder.city = name
+    }
+
+    /**
+     * Set current search word
+     */
+    fun setCurrentSearchWord(word: String?) {
+        RealTimeInAppParamHolder.currentSearchWord = word
+    }
+
+    /**
+     * Set last viewed product IDs
+     */
+    fun setLastViewedProducts(productIds: List<String>) {
+        RealTimeInAppParamHolder.lastViewedProducts = productIds
+    }
+
+    /**
+     * Set last viewed category IDs
+     */
+    fun setLastViewedCategories(categoryIds: List<String>) {
+        RealTimeInAppParamHolder.lastViewedCategories = categoryIds
+    }
+
+    /**
+     * Set last purchased product IDs
+     */
+    fun setLastPurchasedProducts(productIds: List<String>) {
+        RealTimeInAppParamHolder.lastPurchasedProducts = productIds
+    }
+
+    /**
+     * Set last purchased category IDs
+     */
+    fun setLastPurchasedCategories(categoryIds: List<String>) {
+        RealTimeInAppParamHolder.lastPurchasedCategories = categoryIds
+    }
+
+    /**
+     * Set last search words
+     */
+    fun setLastSearchWords(words: List<String>) {
+        RealTimeInAppParamHolder.lastSearchWords = words
     }
 
     internal fun setLastSessionStartTime() {
@@ -946,6 +989,21 @@ object Dengage {
 
     }
 
+    fun getRecommendation(
+        recommendationPropertyId: String,
+        recommendationView: RecommendationView,
+        activity: Activity,
+        screenName: String? = null,
+        customParams: HashMap<String, String>? = null
+    ) {
+        inAppMessageManager.getRecommendation(
+            activity = activity,
+            recommendationView = recommendationView,
+            recommendationPropertyId = recommendationPropertyId,
+            screenName = screenName,
+            params = customParams
+        )
+    }
 
     /**
      * Set language
