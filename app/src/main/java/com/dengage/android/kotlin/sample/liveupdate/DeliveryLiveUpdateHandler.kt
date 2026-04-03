@@ -37,9 +37,10 @@ class DeliveryLiveUpdateHandler : LiveUpdateHandler {
 
     override fun onUpdate(context: Context, payload: LiveUpdatePayload) {
         val notificationId = payload.activityId.hashCode()
+        val dismissal = payload.dismissalDate
 
-        if (payload.event == LiveUpdateEvent.END) {
-            val dismissal = payload.dismissalDate
+        if (payload.event == LiveUpdateEvent.END && payload.contentState.isEmpty()) {
+            // İçerik yoksa sadece kapat
             if (dismissal != null) {
                 scheduleCancel(context, notificationId, dismissal)
             } else {
@@ -57,12 +58,21 @@ class DeliveryLiveUpdateHandler : LiveUpdateHandler {
         ensureChannel(context)
 
         val notification = if (Build.VERSION.SDK_INT >= 36) {
-            buildApi36(context, orderId, status, eta, notificationId, payload.dismissalDate)
+            buildApi36(context, orderId, status, eta, notificationId, dismissal)
         } else {
-            buildLegacy(context, orderId, status, eta, notificationId, payload.dismissalDate)
+            buildLegacy(context, orderId, status, eta, notificationId, dismissal)
         }
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.notify(notificationId, notification)
+
+        // END event + içerik varsa: bildirimi güncelle, sonra dismissalDate'te kapat
+        if (payload.event == LiveUpdateEvent.END) {
+            if (dismissal != null) {
+                scheduleCancel(context, notificationId, dismissal)
+            } else {
+                cancel(context, notificationId)
+            }
+        }
     }
 
     fun cancel(context: Context, notificationId: Int) {

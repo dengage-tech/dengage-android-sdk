@@ -2,6 +2,7 @@ package com.dengage.sdk.liveupdate
 
 import android.content.Context
 import com.dengage.sdk.util.DengageLogger
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -18,35 +19,29 @@ import java.util.concurrent.ConcurrentHashMap
  *                                         ↓
  *                                  parse "live_notification" JSON → LiveUpdatePayload
  *                                         ↓
+ *                                  validate event vs active state
+ *                                         ↓
  *                                  handler registry lookup by activity_type
  *                                         ↓
  *                                  LiveUpdateHandler.onUpdate(context, payload)
- *                                         ↓
- *                                  App builds & posts its own notification
  * ```
  *
- * ### Usage
- * ```kotlin
- * // 1. Create a handler (in your app)
- * class MyDeliveryHandler : LiveUpdateHandler { ... }
- *
- * // 2. Register at app startup (Application.onCreate)
- * DengageLiveUpdateManager.register("delivery", MyDeliveryHandler())
- *
- * // 3. FCM messages with live_notification containing activity_type="delivery"
- * //    are automatically routed
- * ```
+ * ### Event lifecycle
+ * - **START** → registers activityId as active, dispatches to handler
+ * - **UPDATE** → only dispatches if activityId is already active (ignores otherwise)
+ * - **END** → only dispatches if activityId is already active, then removes it
  *
  * ### Expected FCM data payload
  * ```json
  * {
- *   "live_notification": "{\"activity_type\":\"delivery\",\"event\":\"update\",\"activityId\":\"uuid\",\"content_state\":{...}}"
+ *   "live_notification": "{\"activity_type\":\"delivery\",\"event\":\"start\",\"activityId\":\"uuid\",\"content_state\":{...}}"
  * }
  * ```
  */
 object DengageLiveUpdateManager {
 
     private val handlers = ConcurrentHashMap<String, LiveUpdateHandler>()
+    private val activeActivities = Collections.synchronizedSet(mutableSetOf<String>())
 
     // -------------------------------------------------------------------------
     // Public API
@@ -74,13 +69,18 @@ object DengageLiveUpdateManager {
      */
     fun isRegistered(type: String): Boolean = handlers.containsKey(type)
 
+    /**
+     * Returns `true` if the given activityId has an active live update session.
+     */
+    fun isActive(activityId: String): Boolean = activeActivities.contains(activityId)
+
     // -------------------------------------------------------------------------
     // FCM routing (called by FcmMessagingService)
     // -------------------------------------------------------------------------
 
     /**
      * Entry point for FCM messages that carry a `live_notification` key.
-     * Parses the JSON, resolves the handler by activity_type, and dispatches.
+     * Parses the JSON, validates event lifecycle, resolves the handler, and dispatches.
      */
     internal fun handleFromFcmData(context: Context, data: Map<String, String>) {
         val json = data["live_notification"]
@@ -96,11 +96,36 @@ object DengageLiveUpdateManager {
         }
 
         val handler = handlers[payload.activityType]
-        if (handler != null) {
-            DengageLogger.verbose("LiveUpdate ${payload.event} → ${payload.activityType} [${payload.activityId}]")
-            handler.onUpdate(context, payload)
-        } else {
+        if (handler == null) {
             DengageLogger.verbose("LiveUpdate ignored — no handler for type: ${payload.activityType}")
+            return
+        }
+
+        when (payload.event) {
+            LiveUpdateEvent.START -> {
+                activeActivities.add(payload.activityId)
+                DengageLogger.verbose("LiveUpdate START → ${payload.activityType} [${payload.activityId}]")
+                handler.onUpdate(context, payload)
+            }
+
+            LiveUpdateEvent.UPDATE -> {
+                if (!activeActivities.contains(payload.activityId)) {
+                    DengageLogger.verbose("LiveUpdate UPDATE ignored — not active: [${payload.activityId}]")
+                    return
+                }
+                DengageLogger.verbose("LiveUpdate UPDATE → ${payload.activityType} [${payload.activityId}]")
+                handler.onUpdate(context, payload)
+            }
+
+            LiveUpdateEvent.END -> {
+                if (!activeActivities.contains(payload.activityId)) {
+                    DengageLogger.verbose("LiveUpdate END ignored — not active: [${payload.activityId}]")
+                    return
+                }
+                activeActivities.remove(payload.activityId)
+                DengageLogger.verbose("LiveUpdate END → ${payload.activityType} [${payload.activityId}]")
+                handler.onUpdate(context, payload)
+            }
         }
     }
 }
