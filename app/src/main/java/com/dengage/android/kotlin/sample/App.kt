@@ -37,7 +37,8 @@ class App : Application() {
             denPushApiUrl = "https://dev-push.dengage.com",
             denInAppApiUrl = "https://dev-push.dengage.com",
             denGeofenceApiUrl = "https://dev-push.dengage.com/geoapi/",
-            fetchRealTimeInAppApiUrl = "https://dev-inapp.lib.dengage.com/"
+            fetchRealTimeInAppApiUrl = "https://dev-push.dengage.com/api/realtime-inapp/",
+            //fetchRealTimeInAppApiUrl = "https://dev-inapp.lib.dengage.com/"
         )
 
         Dengage.init(
@@ -46,7 +47,8 @@ class App : Application() {
             dengageHmsManager = dengageHmsManager,
             deviceConfigurationPreference = DeviceConfigurationPreference.Google,
             disableOpenWebUrl = false,
-            notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY
+            notificationDisplayPriorityConfiguration = NotificationDisplayPriorityConfiguration.SHOW_WITH_HIGH_PRIORITY,
+            apiUrlConfiguration = apiUrlConfiguration
         )
 
       /*  Dengage.setContactKey("dasdasd")

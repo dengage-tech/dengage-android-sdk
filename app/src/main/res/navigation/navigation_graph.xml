@@ -49,6 +49,9 @@
         <action
             android:id="@+id/actionHomeToRealTimeInAppFilters"
             app:destination="@id/realTimeInAppFiltersFragment" />
+        <action
+            android:id="@+id/actionHomeToRecommendation"
+            app:destination="@id/recommendationFragment" />
     </fragment>
     <fragment
         android:id="@+id/deviceInfoFragment"
@@ -136,4 +139,10 @@
         android:name="com.dengage.android.kotlin.sample.ui.fragment.CartFragment"
         android:label="Cart"
         tools:layout="@layout/fragment_cart" />
+
+    <fragment
+        android:id="@+id/recommendationFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.RecommendationFragment"
+        android:label="fragment_recommendation"
+        tools:layout="@layout/fragment_recommendation" />
 </navigation>
