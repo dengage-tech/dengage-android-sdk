@@ -56,12 +56,18 @@ object BridgeJavaScript {
                  * @param {object} payload - The payload object
                  * @returns {Promise} - Resolves with response data
                  */
-                callAsync: function(action, payload) {
+                callAsync: function(action, payloadOrKey, extraPayload) {
+                    var payload;
+                    if (typeof payloadOrKey === 'string') {
+                        payload = Object.assign({ containerKey: payloadOrKey }, extraPayload || {});
+                    } else {
+                        payload = payloadOrKey;
+                    }
                     var self = this;
                     return new Promise(function(resolve, reject) {
                         self.call(action, payload, function(response) {
                             if (response.success) {
-                                resolve(response.data);
+                                resolve(response);
                             } else {
                                 reject({
                                     code: response.errorCode,
@@ -171,5 +177,15 @@ object BridgeJavaScript {
      */
     fun inject(webView: WebView) {
         webView.evaluateJavascript(BRIDGE_CODE, null)
+    }
+
+    /**
+     * Inject bridge JavaScript into HTML content so it's available before page scripts run.
+     * Inserts a <script> tag right after <head>, or prepends it if no <head> tag is found.
+     */
+    fun injectIntoHtml(html: String): String {
+        val bridgeScript = "<script>$BRIDGE_CODE</script>"
+        val result = html.replaceFirst("<head>", "<head>$bridgeScript")
+        return if (result == html) "$bridgeScript$html" else result
     }
 }

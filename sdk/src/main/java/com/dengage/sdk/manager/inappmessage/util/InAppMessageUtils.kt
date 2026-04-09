@@ -214,7 +214,7 @@ object InAppMessageUtils {
 
 
     internal fun isRecommendationInApp(inAppMessage: InAppMessage, recommendationPropertyId: String?): Boolean {
-        if (!"RECOMMENDATION".equals(inAppMessage.data.content.type, ignoreCase = true)) return false
+        if (!"INLINE_CAROUSEL".equals(inAppMessage.data.content.type, ignoreCase = true)) return false
         val isPropertyEmpty = recommendationPropertyId.isNullOrEmpty()
         val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
         return if (isPropertyEmpty || isSelectorEmpty) {
@@ -225,7 +225,7 @@ object InAppMessageUtils {
     }
 
     private fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?, storyPropertyId: String?): Boolean {
-        if ("RECOMMENDATION".equals(inAppMessage.data.content.type, ignoreCase = true)) return false
+        if ("INLINE_CAROUSEL".equals(inAppMessage.data.content.type, ignoreCase = true)) return false
         if ("STORY".equals(inAppMessage.data.content.type, ignoreCase = true)) {
             val isPropertyEmpty = storyPropertyId.isNullOrEmpty()
             val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()

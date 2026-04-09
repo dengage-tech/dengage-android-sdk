@@ -14,12 +14,10 @@ object RealTimeInAppParamHolder {
     var city: String? = null
     var pageViewVisitCount: Int = 0
 
-    var currentSearchWord: String? = null
-    var lastViewedProducts: List<String> = emptyList()
-    var lastViewedCategories: List<String> = emptyList()
     var lastPurchasedProducts: List<String> = emptyList()
     var lastPurchasedCategories: List<String> = emptyList()
-    var lastSearchWords: List<String> = emptyList()
+
+    private const val MAX_VIEWED_ITEMS = 10
 
     fun addPageView() {
         pageViewVisitCount++
@@ -48,12 +46,26 @@ object RealTimeInAppParamHolder {
                 currentPageType = eventDetails["page_type"]?.toString() ?: currentClientPageInfo.currentPageType
             )
 
-            // If page_type is "product", update last product information
+            // If page_type is "product", update last product information and track viewed product
             if (eventDetails["page_type"]?.toString() == "product") {
+                val productId = eventDetails["product_id"]?.toString()
                 updatedClientPageInfo = updatedClientPageInfo.copy(
-                    lastProductId = eventDetails["product_id"]?.toString() ?: currentClientPageInfo.lastProductId,
+                    lastProductId = productId ?: currentClientPageInfo.lastProductId,
                     lastProductPrice = eventDetails["price"]?.toString() ?: currentClientPageInfo.lastProductPrice,
                     lastCategoryPath = eventDetails["category_path"]?.toString() ?: currentClientPageInfo.lastCategoryPath
+                )
+                if (!productId.isNullOrEmpty()) {
+                    updatedClientPageInfo = updatedClientPageInfo.copy(
+                        lastViewedProducts = addToViewedList(updatedClientPageInfo.lastViewedProducts, productId)
+                    )
+                }
+            }
+
+            // Track viewed category
+            val categoryPath = eventDetails["category_path"]?.toString()
+            if (!categoryPath.isNullOrEmpty()) {
+                updatedClientPageInfo = updatedClientPageInfo.copy(
+                    lastViewedCategories = addToViewedList(updatedClientPageInfo.lastViewedCategories, categoryPath)
                 )
             }
 
@@ -63,6 +75,16 @@ object RealTimeInAppParamHolder {
         } catch (e: Exception) {
             DengageLogger.error("Error setting client page info: ${e.message}")
         }
+    }
+
+    private fun addToViewedList(list: List<String>, item: String): List<String> {
+        val mutableList = list.toMutableList()
+        mutableList.remove(item)
+        mutableList.add(0, item)
+        if (mutableList.size > MAX_VIEWED_ITEMS) {
+            return mutableList.subList(0, MAX_VIEWED_ITEMS)
+        }
+        return mutableList
     }
 
     fun getClientPageInfo(): ClientPageInfo {
@@ -87,6 +109,14 @@ object RealTimeInAppParamHolder {
 
     fun getCurrentPageType(): String? {
         return getClientPageInfo().currentPageType
+    }
+
+    fun getLastViewedProducts(): List<String> {
+        return getClientPageInfo().lastViewedProducts
+    }
+
+    fun getLastViewedCategories(): List<String> {
+        return getClientPageInfo().lastViewedCategories
     }
 
 }

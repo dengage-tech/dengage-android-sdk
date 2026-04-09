@@ -154,12 +154,10 @@ open class InAppInlineElement : WebView {
                 }
             }
 
-            // Load HTML content
-            contentParams.html?.let {
-                loadDataWithBaseURL(
-                    null,
-                    it, "text/html", "UTF-8", null
-                )
+            // Load HTML content with bridge JS pre-injected
+            contentParams.html?.let { html ->
+                val injectedHtml = BridgeJavaScript.injectIntoHtml(html)
+                loadDataWithBaseURL(null, injectedHtml, "text/html", "UTF-8", null)
             }
         }
     }

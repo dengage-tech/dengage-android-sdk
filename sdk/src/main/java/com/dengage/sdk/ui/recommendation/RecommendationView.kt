@@ -3,8 +3,8 @@ package com.dengage.sdk.ui.recommendation
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -67,7 +67,7 @@ open class RecommendationView : WebView {
             settings.displayZoomControls = false
             settings.builtInZoomControls = true
             settings.setSupportZoom(true)
-            setBackgroundColor(Color.TRANSPARENT)
+            //setBackgroundColor(Color.TRANSPARENT)
             settings.domStorageEnabled = true
             settings.javaScriptEnabled = true
             settings.javaScriptCanOpenWindowsAutomatically = true
@@ -95,17 +95,63 @@ open class RecommendationView : WebView {
             }
 
             this.addJavascriptInterface(JavaScriptInterface(), "Dn")
+            this.addJavascriptInterface(HeightInterface(), "DnRecommendationView")
 
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     BridgeJavaScript.inject(this@RecommendationView)
+                    scheduleHeightAdjustment()
                 }
             }
 
-            contentParams.html?.let {
-                loadDataWithBaseURL(null, it, "text/html", "UTF-8", null)
+            contentParams.html?.let { html ->
+                val injectedHtml = BridgeJavaScript.injectIntoHtml(html)
+                loadDataWithBaseURL(null, injectedHtml, "text/html", "UTF-8", null)
             }
+        }
+    }
+
+    private fun scheduleHeightAdjustment() {
+        val observerJs = """
+            (function() {
+                var lastHeight = 0;
+                function reportHeight() {
+                    var h = document.body.scrollHeight;
+                    if (h !== lastHeight && h > 0) {
+                        lastHeight = h;
+                        window.DnRecommendationView.onContentHeightChanged(h);
+                    }
+                }
+                new MutationObserver(function() {
+                    reportHeight();
+                }).observe(document.body, { childList: true, subtree: true, attributes: true });
+                reportHeight();
+            })();
+        """.trimIndent()
+        postDelayed({ evaluateJavascript(observerJs, null) }, 300)
+    }
+
+    private inner class HeightInterface {
+        @JavascriptInterface
+        fun onContentHeightChanged(height: Int) {
+            adjustHeight(height)
+        }
+    }
+
+    private fun adjustHeight(contentHeightPx: Int) {
+        try {
+            if (contentHeightPx <= 0) return
+            val density = context.resources.displayMetrics.density
+            val heightInPx = (contentHeightPx * density).toInt()
+            post {
+                layoutParams = layoutParams.apply {
+                    height = heightInPx
+                }
+                requestLayout()
+            }
+        } catch (e: Exception) {
+            DengageLogger.error("RecommendationView adjustHeight error: ${e.message}")
         }
     }
 

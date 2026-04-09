@@ -426,27 +426,6 @@ object Dengage {
     }
 
     /**
-     * Set current search word
-     */
-    fun setCurrentSearchWord(word: String?) {
-        RealTimeInAppParamHolder.currentSearchWord = word
-    }
-
-    /**
-     * Set last viewed product IDs
-     */
-    fun setLastViewedProducts(productIds: List<String>) {
-        RealTimeInAppParamHolder.lastViewedProducts = productIds
-    }
-
-    /**
-     * Set last viewed category IDs
-     */
-    fun setLastViewedCategories(categoryIds: List<String>) {
-        RealTimeInAppParamHolder.lastViewedCategories = categoryIds
-    }
-
-    /**
      * Set last purchased product IDs
      */
     fun setLastPurchasedProducts(productIds: List<String>) {
@@ -458,13 +437,6 @@ object Dengage {
      */
     fun setLastPurchasedCategories(categoryIds: List<String>) {
         RealTimeInAppParamHolder.lastPurchasedCategories = categoryIds
-    }
-
-    /**
-     * Set last search words
-     */
-    fun setLastSearchWords(words: List<String>) {
-        RealTimeInAppParamHolder.lastSearchWords = words
     }
 
     internal fun setLastSessionStartTime() {

@@ -7,5 +7,7 @@ data class ClientPageInfo(
     val lastProductPrice: String? = null,
     val lastCategoryPath: String? = null,
     val currentPageTitle: String? = null,
-    val currentPageType: String? = null
+    val currentPageType: String? = null,
+    val lastViewedProducts: List<String> = emptyList(),
+    val lastViewedCategories: List<String> = emptyList()
 ) : Serializable

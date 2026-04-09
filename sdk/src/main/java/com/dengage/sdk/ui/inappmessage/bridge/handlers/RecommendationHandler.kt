@@ -61,6 +61,7 @@ class RecommendationHandler : AsyncBridgeHandler {
                     .build()
 
                 DengageLogger.debug("RecommendationHandler request URL: $url")
+                DengageLogger.debug("RecommendationHandler request body: $requestBody")
 
                 val response = client.newCall(request).execute()
                 val rawBody = response.body?.string()
@@ -78,11 +79,18 @@ class RecommendationHandler : AsyncBridgeHandler {
 
                 val parsedBody: Any? = rawBody?.let { body ->
                     try {
-                        GsonHolder.fromJson<Any>(body)
+                        val parsed = GsonHolder.fromJson<MutableMap<String, Any?>>(body)
+                        // Map requestId -> rid for JS compatibility
+                        if (parsed != null && parsed.containsKey("requestId")) {
+                            parsed["rid"] = parsed["requestId"]
+                        }
+                        parsed
                     } catch (e: Exception) {
                         body
                     }
                 }
+
+                DengageLogger.debug("RecommendationHandler response body: $parsedBody")
 
                 withContext(Dispatchers.Main) {
                     callback.onSuccess(parsedBody)
@@ -101,8 +109,8 @@ class RecommendationHandler : AsyncBridgeHandler {
 
     private fun buildUrl(containerKey: String): String {
         val baseUrl = Prefs.pushApiBaseUrl.removeSuffix("/")
-        val accountId = Prefs.sdkParameters?.accountId ?: ""
-        return "$baseUrl/rc/$accountId/recommendations/$containerKey/android"
+        val accountName = Prefs.sdkParameters?.accountName ?: ""
+        return "$baseUrl/rc/$accountName/recommendations/$containerKey/android"
     }
 
     private fun buildRequestBody(payload: Map<String, Any>): String {
@@ -114,29 +122,27 @@ class RecommendationHandler : AsyncBridgeHandler {
         body["ck"] = Prefs.subscription?.contactKey
         body["cp"] = RealTimeInAppParamHolder.getLastProductId()
         body["cid"] = RealTimeInAppParamHolder.categoryPath
-        body["cs"] = RealTimeInAppParamHolder.currentSearchWord
 
         if (cartProductIds.isNotEmpty()) body["crp"] = cartProductIds
-        if (RealTimeInAppParamHolder.lastViewedProducts.isNotEmpty()) {
-            body["lvp"] = RealTimeInAppParamHolder.lastViewedProducts
-        }
-        if (RealTimeInAppParamHolder.lastViewedCategories.isNotEmpty()) {
-            body["lvc"] = RealTimeInAppParamHolder.lastViewedCategories
-        }
+        val lastViewedProducts = RealTimeInAppParamHolder.getLastViewedProducts()
+        if (lastViewedProducts.isNotEmpty()) body["lvp"] = lastViewedProducts
+        val lastViewedCategories = RealTimeInAppParamHolder.getLastViewedCategories()
+        if (lastViewedCategories.isNotEmpty()) body["lvc"] = lastViewedCategories
         if (RealTimeInAppParamHolder.lastPurchasedProducts.isNotEmpty()) {
             body["lpp"] = RealTimeInAppParamHolder.lastPurchasedProducts
         }
         if (RealTimeInAppParamHolder.lastPurchasedCategories.isNotEmpty()) {
             body["lpc"] = RealTimeInAppParamHolder.lastPurchasedCategories
         }
-        if (RealTimeInAppParamHolder.lastSearchWords.isNotEmpty()) {
-            body["ls"] = RealTimeInAppParamHolder.lastSearchWords
-        }
 
-        // Add extra fields from payload (excluding containerKey)
+        // Add extra fields from payload (excluding containerKey, mapping known aliases)
+        val keyMapping = mapOf("maxRecommendationCount" to "mrc")
         payload.forEach { (key, value) ->
             if (key != "containerKey") {
-                body[key] = value
+                val mappedKey = keyMapping[key] ?: key
+                // Gson deserializes all numbers as Double; convert whole numbers to Int
+                val mappedValue = if (value is Double && value % 1.0 == 0.0) value.toInt() else value
+                body[mappedKey] = mappedValue
             }
         }
 

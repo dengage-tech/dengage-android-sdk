@@ -199,7 +199,8 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                 val dataMap = mapOf("dnInAppDeviceInfo" to Dengage.getInAppDeviceInfo())
                 val renderedHtml = Mustache.render(processedHtml, dataMap)
 
-                loadDataWithBaseURL(null, renderedHtml, "text/html", "UTF-8", null)
+                val injectedHtml = BridgeJavaScript.injectIntoHtml(renderedHtml)
+                loadDataWithBaseURL(null, injectedHtml, "text/html", "UTF-8", null)
             }
         }
 
