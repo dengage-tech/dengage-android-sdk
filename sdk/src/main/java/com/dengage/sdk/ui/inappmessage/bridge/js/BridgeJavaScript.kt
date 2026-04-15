@@ -56,12 +56,21 @@ object BridgeJavaScript {
                  * @param {object} payload - The payload object
                  * @returns {Promise} - Resolves with response data
                  */
-                callAsync: function(action, payloadOrKey, extraPayload) {
+                callAsync: function(action) {
+                    var restArgs = Array.prototype.slice.call(arguments, 1);
                     var payload;
-                    if (typeof payloadOrKey === 'string') {
-                        payload = Object.assign({ containerKey: payloadOrKey }, extraPayload || {});
+                    if (restArgs.length === 0) {
+                        payload = null;
+                    } else if (restArgs.length === 1 && restArgs[0] !== null && typeof restArgs[0] === 'object' && !Array.isArray(restArgs[0])) {
+                        payload = restArgs[0];
+                    } else if (
+                        restArgs.length === 2 &&
+                        typeof restArgs[0] === 'string' &&
+                        (restArgs[1] == null || (typeof restArgs[1] === 'object' && !Array.isArray(restArgs[1])))
+                    ) {
+                        payload = Object.assign({ containerKey: restArgs[0] }, restArgs[1] || {});
                     } else {
-                        payload = payloadOrKey;
+                        payload = { args: restArgs };
                     }
                     var self = this;
                     return new Promise(function(resolve, reject) {

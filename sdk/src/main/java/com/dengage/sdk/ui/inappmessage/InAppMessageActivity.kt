@@ -27,6 +27,7 @@ import com.dengage.sdk.R
 import com.dengage.sdk.ui.inappmessage.bridge.core.DengageBridge
 import com.dengage.sdk.ui.inappmessage.bridge.handler.BridgeHandlerRegistry
 import com.dengage.sdk.ui.inappmessage.bridge.handlers.DeviceInfoHandler
+import com.dengage.sdk.ui.inappmessage.bridge.handlers.RecommendationEventHandler
 import com.dengage.sdk.ui.inappmessage.bridge.handlers.RecommendationHandler
 import com.dengage.sdk.ui.inappmessage.bridge.handlers.HttpRequestHandler
 import com.dengage.sdk.ui.inappmessage.bridge.handlers.LegacyDnHandler
@@ -174,6 +175,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                 register(DeviceInfoHandler())
                 register(StorageHandler())
                 register(RecommendationHandler())
+                register(RecommendationEventHandler())
             }
 
             dengageBridge = DengageBridge.attach(this, registry)
