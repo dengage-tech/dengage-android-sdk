@@ -444,6 +444,13 @@ object Dengage {
         inAppSessionManager.sendAppForegroundEvent()
     }
 
+    internal fun syncSubscription() {
+        if (!initialized) return
+        val current = Prefs.subscription ?: return
+        if (current.integrationKey.isEmpty() || current.token.isNullOrEmpty()) return
+        subscriptionManager.sendSubscription()
+    }
+
     fun getInAppExpiredMessageIds() {
         inAppMessageManager.fetchInAppExpiredMessageIds()
     }
@@ -909,6 +916,7 @@ object Dengage {
                         } else {
                             setToken("")
                         }
+                        syncSubscription()
                     }
                 }
                 NotificationPermissionActivity.callback = callback
