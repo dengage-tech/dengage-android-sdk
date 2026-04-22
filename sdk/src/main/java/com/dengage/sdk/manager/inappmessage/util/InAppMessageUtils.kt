@@ -1184,7 +1184,7 @@ object InAppMessageUtils {
             val absoluteEndDateStr = jsonObject.optString("absoluteEndDate", "")
             if (absoluteEndDateStr.isBlank()) return false
 
-            val dateFormat = SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
             dateFormat.timeZone = TimeZone.getTimeZone("UTC")
             val endDate = dateFormat.parse(absoluteEndDateStr) ?: return false
 
