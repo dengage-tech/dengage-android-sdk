@@ -76,7 +76,7 @@ object BridgeJavaScript {
                     return new Promise(function(resolve, reject) {
                         self.call(action, payload, function(response) {
                             if (response.success) {
-                                resolve(response);
+                                resolve(response.data);
                             } else {
                                 reject({
                                     code: response.errorCode,
