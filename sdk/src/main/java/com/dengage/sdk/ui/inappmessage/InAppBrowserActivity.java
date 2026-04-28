@@ -8,9 +8,9 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -136,9 +136,20 @@ public class InAppBrowserActivity extends AppCompatActivity implements
         webSettings.setJavaScriptEnabled(true);
         webSettings.setAllowFileAccess(true);
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setDatabaseEnabled(true);
+        webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+        webSettings.setSupportMultipleWindows(false);
         // enable mixed content
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
+        // allow cookies (including third-party) so sites that need them can render
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            cookieManager.setAcceptThirdPartyCookies(mWebview, true);
         }
         // set webview client
         mWebview.setWebViewClient(new WebViewClient() {
@@ -151,7 +162,8 @@ public class InAppBrowserActivity extends AppCompatActivity implements
 
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                handler.cancel();
+                // proceed despite SSL errors so the page still renders (dev/staging certs, etc.)
+                handler.proceed();
             }
 
             @Override

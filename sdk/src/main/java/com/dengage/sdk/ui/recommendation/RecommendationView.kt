@@ -3,6 +3,8 @@ package com.dengage.sdk.ui.recommendation
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
@@ -10,6 +12,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import com.dengage.sdk.Dengage
+import com.dengage.sdk.ui.inappmessage.InAppBrowserActivity
 import com.dengage.sdk.ui.inappmessage.bridge.core.DengageBridge
 import com.dengage.sdk.ui.inappmessage.bridge.handler.BridgeHandlerRegistry
 import com.dengage.sdk.ui.inappmessage.bridge.handlers.DeviceInfoHandler
@@ -24,7 +27,9 @@ import com.dengage.sdk.domain.inappmessage.model.ContentParams
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.push.areNotificationsEnabled
+import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
+import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
 import com.dengage.sdk.util.extension.launchNotificationSettingsActivity
 
@@ -177,6 +182,59 @@ open class RecommendationView : WebView {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+            }
+        }
+
+        @JavascriptInterface
+        fun androidUrlN(targetUrl: String, inAppBrowser: Boolean, retrieveOnSameLink: Boolean) {
+            DengageLogger.verbose("RecommendationView: android target url n event $targetUrl")
+            when {
+                targetUrl.equals("DN.SHOWRATING()", ignoreCase = true) -> showRating()
+                targetUrl == "Dn.promptPushPermission()" -> {
+                    if (!context.areNotificationsEnabled()) {
+                        Toast.makeText(
+                            context,
+                            "You need to enable push permission",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        context.launchNotificationSettingsActivity()
+                    }
+                }
+                DengageUtils.isDeeplink(targetUrl) -> {
+                    try {
+                        if (retrieveOnSameLink) {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                            intent.putExtra("targetUrl", targetUrl)
+                            DengageUtils.sendBroadCast(intent.apply {
+                                action = Constants.DEEPLINK_RETRIEVE_EVENT
+                            }, context.applicationContext)
+                        } else {
+                            context.launchActivity(null, targetUrl)
+                        }
+                    } catch (e: Exception) {
+                        DengageLogger.error(e.message)
+                    }
+                }
+                retrieveOnSameLink && !inAppBrowser -> {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                    intent.putExtra("targetUrl", targetUrl)
+                    DengageUtils.sendBroadCast(intent.apply {
+                        action = Constants.DEEPLINK_RETRIEVE_EVENT
+                    }, context.applicationContext)
+                }
+                inAppBrowser -> {
+                    if (targetUrl.isEmpty()) {
+                        DengageLogger.error("RecommendationView: target URL is empty")
+                        return
+                    }
+                    val activity = activityContext ?: return
+                    val intent = InAppBrowserActivity.Builder
+                        .getBuilder()
+                        .withUrl(targetUrl)
+                        .build(activity)
+                    activity.startActivity(intent)
+                }
+                else -> context.launchActivity(null, targetUrl)
             }
         }
 
