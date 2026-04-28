@@ -29,6 +29,7 @@
   - [FCM Setup](#fcm-setup)
   - [Subscription](#subscription)
   - [User Permission Management](#user-permission-management-optional)
+  - [Event Tracking Permission](#event-tracking-permission-optional)
   - [Notification Channels](#notification-channels)
   - [getToken](#gettoken)
   - [Action Buttons](#action-buttons)
@@ -90,11 +91,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Latest SDK version: `6.0.90`
+Latest SDK version: `6.0.90.1`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.90'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.90.1'
 }
 ```
 
@@ -530,6 +531,24 @@ Dengage.setUserPermission(permission = true)
 
 // Use to get permission of current subscription
 Dengage.getUserPermission() // Boolean?
+```
+
+### Event Tracking Permission (optional)
+
+If you need to let the user enable/disable **event tracking** (analytics events sent by the SDK), you can control it using `setTrackingPermission`.
+
+- **Default**: `true` (events are allowed unless you disable it)
+- **Behavior**: when `false`, the SDK will skip sending events even if the backend `eventsEnabled` parameter is `true`
+- **Scope**: stored locally (persists across app launches)
+
+```kotlin
+// Disable event tracking (user opted out)
+Dengage.setTrackingPermission(permission = false)
+
+// Enable event tracking (user opted in)
+Dengage.setTrackingPermission(permission = true)
+
+
 ```
 
 ### Notification Channels
@@ -1151,6 +1170,14 @@ Dengage.setNavigation(
 )
 ```
 
+#### removeInAppMessageDisplay
+
+If you want to immediately dismiss / stop the current in-app message display cycle (for example when you open a full-screen flow or you don’t want the current in-app to keep showing), call:
+
+```kotlin
+Dengage.removeInAppMessageDisplay()
+```
+
 ### Real Time In-App Messaging
 
 You can use the real time in-app functionality by using the function.
@@ -1347,8 +1374,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.90'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.90'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.90.1'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.90.1'
 }
 ```
 
@@ -1465,8 +1492,8 @@ class App : Application() {
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.90'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.90'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.90.1'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.90.1'
 }
 ```
 
