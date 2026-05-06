@@ -3,6 +3,7 @@ package com.dengage.sdk
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -45,6 +46,7 @@ import com.dengage.sdk.push.NotificationPermissionActivity
 import com.dengage.sdk.push.NotificationPermissionCallback
 import com.dengage.sdk.push.clearNotification
 import com.dengage.sdk.ui.inappmessage.InAppInlineElement
+import com.dengage.sdk.ui.inappmessage.InAppMessageActivity
 import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.ui.test.DengageTestActivity
 import com.dengage.sdk.util.*
@@ -55,6 +57,7 @@ import com.google.android.play.core.review.ReviewManager
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.android.gms.tasks.Task
 import com.google.firebase.FirebaseApp
+import java.util.concurrent.atomic.AtomicBoolean
 
 @SuppressLint("StaticFieldLeak")
 object Dengage {
@@ -889,18 +892,167 @@ object Dengage {
     }
 
     fun showRatingDialog(activity: Activity, reviewDialogCallback: ReviewDialogCallback) {
-        val reviewManager: ReviewManager = ReviewManagerFactory.create(activity)
-        val request: Task<ReviewInfo> = reviewManager.requestReviewFlow()
-        request.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val reviewInfo: ReviewInfo = task.result
-                val flow: Task<Void> = reviewManager.launchReviewFlow(activity, reviewInfo)
-                flow.addOnCompleteListener {
-
-                    reviewDialogCallback.onCompletion()
-                }
-            } else {
+        if (activity.isFinishing || activity.isDestroyed) {
+            try {
                 reviewDialogCallback.onError()
+            } catch (_: Throwable) {
+            }
+            return
+        }
+        val reviewManager: ReviewManager = try {
+            ReviewManagerFactory.create(activity)
+        } catch (t: Throwable) {
+            DengageLogger.error("showRatingDialog: ReviewManagerFactory.create failed: ${t.message}")
+            try {
+                reviewDialogCallback.onError()
+            } catch (_: Throwable) {
+            }
+            return
+        }
+        // Play Task listeners may run on a background thread; finish() / launchReviewFlow must run on main.
+        val mainHandler = Handler(Looper.getMainLooper())
+        reviewManager.requestReviewFlow().addOnCompleteListener { task ->
+            mainHandler.post {
+                if (!task.isSuccessful) {
+                    try {
+                        reviewDialogCallback.onError()
+                    } catch (_: Throwable) {
+                    }
+                    return@post
+                }
+                val reviewInfo: ReviewInfo = try {
+                    task.result
+                } catch (t: Throwable) {
+                    DengageLogger.error("showRatingDialog: task.result failed: ${t.message}")
+                    try {
+                        reviewDialogCallback.onError()
+                    } catch (_: Throwable) {
+                    }
+                    return@post
+                }
+                if (activity.isFinishing || activity.isDestroyed) {
+                    try {
+                        reviewDialogCallback.onError()
+                    } catch (_: Throwable) {
+                    }
+                    return@post
+                }
+                if (activity is InAppMessageActivity) {
+                    handoffInAppMessageThenLaunchReview(
+                        inAppActivity = activity,
+                        reviewManager = reviewManager,
+                        reviewInfo = reviewInfo,
+                        reviewDialogCallback = reviewDialogCallback
+                    )
+                    return@post
+                }
+                launchReviewFlowOnActivity(activity, reviewManager, reviewInfo, reviewDialogCallback)
+            }
+        }
+    }
+
+    /**
+     * Finishes [InAppMessageActivity] so the in-app UI is gone, then runs Play In-App Review on the
+     * next resumed activity (the screen underneath). Required because [ReviewManager.launchReviewFlow]
+     * needs a live Activity and the overlay must be destroyed when the review sheet appears.
+     */
+    private fun handoffInAppMessageThenLaunchReview(
+        inAppActivity: InAppMessageActivity,
+        reviewManager: ReviewManager,
+        reviewInfo: ReviewInfo,
+        reviewDialogCallback: ReviewDialogCallback
+    ) {
+        val app = inAppActivity.application
+        val mainHandler = Handler(Looper.getMainLooper())
+        val completed = AtomicBoolean(false)
+        val timeoutMs = 3000L
+        val callbacksHolder = arrayOfNulls<Application.ActivityLifecycleCallbacks>(1)
+
+        val timeoutRunnable = Runnable {
+            if (completed.compareAndSet(false, true)) {
+                try {
+                    callbacksHolder[0]?.let { app.unregisterActivityLifecycleCallbacks(it) }
+                } catch (_: Exception) {
+                }
+                DengageLogger.error(
+                    "showRatingDialog: handoff timed out after InAppMessageActivity.finish()"
+                )
+                try {
+                    reviewDialogCallback.onError()
+                } catch (_: Throwable) {
+                }
+            }
+        }
+
+        val callbacks = object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityResumed(a: Activity) {
+                if (completed.get()) return
+                if (a === inAppActivity) return
+                if (a.isFinishing || a.isDestroyed) return
+                if (!completed.compareAndSet(false, true)) return
+
+                mainHandler.removeCallbacks(timeoutRunnable)
+                try {
+                    app.unregisterActivityLifecycleCallbacks(this)
+                } catch (_: Exception) {
+                }
+                DengageLogger.verbose(
+                    "showRatingDialog: launching review on ${a.javaClass.simpleName} after in-app close"
+                )
+                launchReviewFlowOnActivity(a, reviewManager, reviewInfo, reviewDialogCallback)
+            }
+
+            override fun onActivityCreated(activity: Activity, savedInstanceState: android.os.Bundle?) {}
+            override fun onActivityStarted(activity: Activity) {}
+            override fun onActivityPaused(activity: Activity) {}
+            override fun onActivityStopped(activity: Activity) {}
+            override fun onActivitySaveInstanceState(activity: Activity, outState: android.os.Bundle) {}
+            override fun onActivityDestroyed(activity: Activity) {}
+        }
+
+        callbacksHolder[0] = callbacks
+        app.registerActivityLifecycleCallbacks(callbacks)
+        mainHandler.postDelayed(timeoutRunnable, timeoutMs)
+        inAppActivity.finish()
+    }
+
+    private fun launchReviewFlowOnActivity(
+        activity: Activity,
+        reviewManager: ReviewManager,
+        reviewInfo: ReviewInfo,
+        reviewDialogCallback: ReviewDialogCallback
+    ) {
+        if (activity.isFinishing || activity.isDestroyed) {
+            try {
+                reviewDialogCallback.onError()
+            } catch (_: Throwable) {
+            }
+            return
+        }
+        val flow: Task<Void> = try {
+            reviewManager.launchReviewFlow(activity, reviewInfo)
+        } catch (t: Throwable) {
+            DengageLogger.error("showRatingDialog: launchReviewFlow threw: ${t.message}")
+            try {
+                reviewDialogCallback.onError()
+            } catch (_: Throwable) {
+            }
+            return
+        }
+        val mainHandler = Handler(Looper.getMainLooper())
+        flow.addOnCompleteListener { launchTask ->
+            mainHandler.post {
+                if (launchTask.isSuccessful) {
+                    try {
+                        reviewDialogCallback.onCompletion()
+                    } catch (_: Throwable) {
+                    }
+                } else {
+                    try {
+                        reviewDialogCallback.onError()
+                    } catch (_: Throwable) {
+                    }
+                }
             }
         }
     }

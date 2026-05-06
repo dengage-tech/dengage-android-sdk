@@ -54,6 +54,21 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     private var isClicked = false
     private var dengageBridge: DengageBridge? = null
 
+    /** While true, ignore close/dismiss/outside-tap [finish] so Play In-App Review keeps a live Activity. */
+    private var ratingFlowPending = false
+
+    private fun requestFinishInApp() {
+        if (ratingFlowPending) return
+        if (isFinishing || isDestroyed) return
+        finish()
+    }
+
+    private fun endRatingFlowAndFinishInApp() {
+        ratingFlowPending = false
+        if (isFinishing || isDestroyed) return
+        finish()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         EdgeToEdgeUtils.enableEdgeToEdge(this)
@@ -164,7 +179,8 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                 isAndroidUrlNPresent = isAndroidUrlNPresent,
                 isRatingDialog = isRatingDialog,
                 onClicked = { isClicked = true },
-                onFinish = { finish() }
+                onFinish = { requestFinishInApp() },
+                onRatingFlowStarted = { ratingFlowPending = true }
             )
 
             val registry = BridgeHandlerRegistry().apply {
@@ -207,7 +223,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         when (v?.id) {
             R.id.vInAppMessageContainer -> {
                 if (inAppMessage.data.content.params.dismissOnTouchOutside != false) {
-                    finish()
+                    requestFinishInApp()
                 }
             }
             R.id.cardInAppMessage -> {
@@ -221,6 +237,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     }
 
     override fun onDestroy() {
+        ratingFlowPending = false
         if (!isClicked) inAppMessageDismissed()
         inAppMessageCallback = null
         super.onDestroy()
@@ -271,7 +288,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         @JavascriptInterface
         fun dismiss() {
             DengageLogger.verbose("In app message: dismiss event")
-            finish()
+            requestFinishInApp()
         }
 
         @JavascriptInterface
@@ -377,7 +394,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         fun close() {
             if (isAndroidUrlNPresent == false && isRatingDialog == false) {
                 DengageLogger.verbose("In app message: close event")
-                finish()
+                requestFinishInApp()
             }
         }
 
@@ -385,7 +402,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         fun closeN() {
             DengageLogger.verbose("In app message: close event n")
             if (isRatingDialog == false) {
-                finish()
+                requestFinishInApp()
             }
         }
 
@@ -453,14 +470,19 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     }
 
     private fun showRating() {
+        ratingFlowPending = true
         Dengage.showRatingDialog(
             activity = this@InAppMessageActivity,
             reviewDialogCallback = object : ReviewDialogCallback {
-                override fun onCompletion() {}
-                override fun onError() {}
+                override fun onCompletion() {
+                    endRatingFlowAndFinishInApp()
+                }
+
+                override fun onError() {
+                    endRatingFlowAndFinishInApp()
+                }
             }
         )
-        finish()
     }
 }
 

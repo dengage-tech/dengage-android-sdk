@@ -32,7 +32,9 @@ class LegacyDnHandler(
     private val isAndroidUrlNPresent: Boolean? = false,
     private val isRatingDialog: Boolean? = false,
     private val onClicked: (() -> Unit)? = null,
-    private val onFinish: (() -> Unit)? = null
+    private val onFinish: (() -> Unit)? = null,
+    /** Invoked when Play In-App Review is starting so the host can defer finishing (e.g. [InAppMessageActivity]). */
+    private val onRatingFlowStarted: (() -> Unit)? = null
 ) : FireAndForgetHandler {
 
     override fun supportedActions(): List<String> = listOf(
@@ -194,15 +196,19 @@ class LegacyDnHandler(
     }
 
     private fun handleShowRating() {
-        activity?.let {
-            Dengage.showRatingDialog(
-                activity = it,
-                reviewDialogCallback = object : ReviewDialogCallback {
-                    override fun onCompletion() {}
-                    override fun onError() {}
+        val host = activity ?: return
+        onRatingFlowStarted?.invoke()
+        Dengage.showRatingDialog(
+            activity = host,
+            reviewDialogCallback = object : ReviewDialogCallback {
+                override fun onCompletion() {
+                    onFinish?.invoke()
                 }
-            )
-            onFinish?.invoke()
-        }
+
+                override fun onError() {
+                    onFinish?.invoke()
+                }
+            }
+        )
     }
 }
