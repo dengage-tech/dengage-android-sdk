@@ -39,6 +39,7 @@ import com.dengage.sdk.domain.tag.model.TagItem
 import com.dengage.sdk.manager.inappmessage.util.InAppMessageUtils
 import com.dengage.sdk.push.areNotificationsEnabled
 import com.dengage.sdk.util.Constants
+import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.EdgeToEdgeUtils
@@ -71,6 +72,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ContextHolder.resetContext(this)
         EdgeToEdgeUtils.enableEdgeToEdge(this)
         inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as? InAppMessage ?: run {
             finish()
