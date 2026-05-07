@@ -15,6 +15,9 @@ object DengageGeofence {
 
     private val geofenceManager by lazy { GeofenceLocationManager() }
 
+    @JvmStatic
+    var geofenceInterceptor: GeofenceInterceptor? = null
+
     fun handleLocation(
         context: Context,
         location: Location,

@@ -3,6 +3,7 @@ package com.dengage.geofence.manager
 import java.util.*
 import android.annotation.SuppressLint as SL
 import android.location.Location
+import com.dengage.geofence.DengageGeofence
 import com.dengage.sdk.Dengage
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationRequest
@@ -24,6 +25,10 @@ import com.dengage.sdk.util.Constants.GEOFENCE_MAX_MONITOR_COUNT
 import com.dengage.sdk.util.Constants.GEOFENCE_MAX_EVENT_SIGNAL_INTERVAL_MILISECONDS as GMESIM
 import com.dengage.sdk.util.Constants.GEOFENCE_MAX_FETCH_INTERVAL_MILISECONDS as GMFIM
 import com.dengage.sdk.util.Constants.SYNCED_GEOFENCES_REQUEST_ID_PREFIX
+import com.dengage.sdk.util.Constants.BUBBLE_STOPPED_GEOFENCE_REQUEST_ID
+import com.dengage.sdk.util.Constants.BUBBLE_MOVING_GEOFENCE_REQUEST_ID
+import com.dengage.sdk.util.Constants.STOPPED_GEOFENCE_RADIUS
+import com.dengage.sdk.util.Constants.MOVING_GEOFENCE_RADIUS
 import com.dengage.sdk.util.Constants.DESIRED_MOVING_UPDATE_INTERVAL as DMUI
 import com.dengage.sdk.util.Constants.FASTEST_MOVING_UPDATE_INTERVAL as FMUI
 import com.dengage.sdk.util.Constants.DESIRED_SYNC_INTERVAL as DSI
@@ -165,8 +170,8 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
         if (location == null) {
             return
         }
-     //   this.removeBubbleGeofences()
-     /*   if (stopped) {
+        this.removeBubbleGeofences()
+        if (stopped) {
             val identifier = BUBBLE_STOPPED_GEOFENCE_REQUEST_ID
             val radius = STOPPED_GEOFENCE_RADIUS.toFloat()
             val geofence = Geofence.Builder()
@@ -181,7 +186,7 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
 
             DL.debug("Adding stopped bubble geofence | latitude = ${location.latitude}; longitude = ${location.longitude}; radius = $radius; identifier = $identifier")
 
-            gClient.addGeofences(request, GLR.getBubbleGeofencePendingIntent(CH.context))
+            gClient.addGeofences(request, GeofenceLocationReceiver.getBubbleGeofencePendingIntent(CH.context))
                 .run {
                     addOnSuccessListener {
                         DL.debug("Successfully added stopped bubble geofence")
@@ -190,7 +195,7 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                         DL.debug("Error adding stopped bubble geofence | message = ${it.message}")
                     }
                 }
-        } else if (!stopped) {
+        } else {
             val identifier = BUBBLE_MOVING_GEOFENCE_REQUEST_ID
             val radius = MOVING_GEOFENCE_RADIUS.toFloat()
 
@@ -208,7 +213,7 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                 .build()
 
             DL.debug("Adding moving bubble geofence | latitude = ${location.latitude}; longitude = ${location.longitude}; radius = $radius; identifier = $identifier")
-            gClient.addGeofences(request, GLR.getBubbleGeofencePendingIntent(CH.context))
+            gClient.addGeofences(request, GeofenceLocationReceiver.getBubbleGeofencePendingIntent(CH.context))
                 .run {
                     addOnSuccessListener {
                         DL.debug("Successfully added moving bubble geofence")
@@ -217,7 +222,7 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                         DL.debug("Error adding moving bubble geofence | message = ${it.message}")
                     }
                 }
-        }*/
+        }
     }
 
     private fun replaceSyncedGeofences(geofenceClusters: Array<Cluster>?) {
@@ -508,6 +513,21 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                                 DL.debug("Event time check | lastEvent = $lastEvent; currentTime = $currentTime; timeSinceLastEvent = $timeSinceLastEvent; requiredInterval = $GMESIM")
                                 if (lastEvent == null || (currentTime - GMESIM) > lastEvent.et ) {
                                     DL.debug("Sending geofence event signal | type = $type; clusterId = $clusterId; geofenceId = $geofenceId")
+                                    if (source == GLS.GEOFENCE_ENTER) {
+                                        try {
+                                            DengageGeofence.geofenceInterceptor?.onGeofenceEnter(
+                                                latitude = fetchedGeofence.latitude,
+                                                longitude = fetchedGeofence.longitude,
+                                                radius = fetchedGeofence.radius,
+                                                clusterId = clusterId,
+                                                clusterName = cluster.name,
+                                                geofenceItemId = geofenceId,
+                                                geofenceItemName = fetchedGeofence.name
+                                            )
+                                        } catch (e: Exception) {
+                                            DL.error("GeofenceInterceptor.onGeofenceEnter threw | error = ${e.message}")
+                                        }
+                                    }
                                     sendGeofenceEventSignal(
                                         geofenceRequestId,
                                         clusterId,
@@ -522,6 +542,21 @@ internal class GeofenceLocationManager : BaseMvpManager<GLC.View, GLC.Presenter>
                                 }
                             } else {
                                 DL.debug("Sending geofence event signal (first event) | type = $type; clusterId = $clusterId; geofenceId = $geofenceId")
+                                if (source == GLS.GEOFENCE_ENTER) {
+                                    try {
+                                        DengageGeofence.geofenceInterceptor?.onGeofenceEnter(
+                                            latitude = fetchedGeofence.latitude,
+                                            longitude = fetchedGeofence.longitude,
+                                            radius = fetchedGeofence.radius,
+                                            clusterId = clusterId,
+                                            clusterName = cluster.name,
+                                            geofenceItemId = geofenceId,
+                                            geofenceItemName = fetchedGeofence.name
+                                        )
+                                    } catch (e: Exception) {
+                                        DL.error("GeofenceInterceptor.onGeofenceEnter threw | error = ${e.message}")
+                                    }
+                                }
                                 sendGeofenceEventSignal(
                                     geofenceRequestId,
                                     clusterId,
