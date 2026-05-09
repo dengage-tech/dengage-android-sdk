@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [6.0.91] - 2026-05-09
+
+### New Features
+
+- Implement GeofenceInterceptor
+- Include system push authorization status in subscription permission
+
 ## [6.0.90] - 2026-03-31
 
 ### Bug Fixes
