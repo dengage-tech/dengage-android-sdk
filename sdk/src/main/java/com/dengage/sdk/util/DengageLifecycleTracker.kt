@@ -20,6 +20,7 @@ open class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
             Dengage.sendAppForegroundEvent()
             Dengage.getInAppExpiredMessageIds()
             Dengage.cleanupClientEvents()
+            Dengage.syncSubscription()
         }
         startedActivityCount++
     }

@@ -6,6 +6,8 @@ import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.subscription.usecase.SendSubscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
+import com.dengage.sdk.push.areNotificationsEnabled
+import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 
@@ -40,11 +42,13 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
             return
         }
 
+        val effectiveSubscription = computeEffectiveSubscription(subscription)
+
         sendSubscriptionTryCount++
         sendSubscriptionUseCase(this) {
             onResponse = {
                 view {
-                    Prefs.previousSubscription = Prefs.subscription
+                    Prefs.previousSubscription = effectiveSubscription
                     Prefs.subscriptionCallTime = System.currentTimeMillis() + (TWENTY_MINUTES)
                     subscriptionSent()
                 }
@@ -57,7 +61,7 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
                     sendSubscriptionTryCount = 0
                 }
             }
-            params = SendSubscription.Params(subscription)
+            params = SendSubscription.Params(effectiveSubscription)
         }
     }
 
@@ -66,9 +70,21 @@ class SubscriptionPresenter : BaseAbstractPresenter<SubscriptionContract.View>()
         val now = System.currentTimeMillis()
         val nextAllowedTime = Prefs.subscriptionCallTime
         val prevSubscription = Prefs.previousSubscription
-        val subscriptionChanged = (subscription != prevSubscription)
+        val effectiveSubscription = computeEffectiveSubscription(subscription)
+        val subscriptionChanged = (effectiveSubscription != prevSubscription)
         val timePassed = now >= nextAllowedTime
         return (subscriptionChanged || timePassed)
+    }
+
+    private fun computeEffectiveSubscription(subscription: Subscription): Subscription {
+        val pushPermission = try {
+            ContextHolder.context.areNotificationsEnabled()
+        } catch (_: Throwable) {
+            true
+        }
+        return subscription.copy(
+            permission = (subscription.permission == true) && pushPermission
+        )
     }
 
     companion object {
