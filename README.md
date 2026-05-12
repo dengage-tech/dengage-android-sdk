@@ -53,6 +53,7 @@
   - [Geofence Installation](#geofence-installation)
   - [Geofence Initialization](#geofence-initialization)
   - [Request Location Permission](#request-location-permission)
+  - [Geofence Interceptor](#geofence-interceptor)
   - [Performance Considerations and Best Practices](#performance-considerations-and-best-practices)
 - [Huawei Messaging Service](#huawei-messaging-service)
   - [HMS setup](#hms-setup)
@@ -1367,6 +1368,50 @@ To request location permissions at runtime, use the `DengageGeofence.requestLoca
 ```kotlin
 DengageGeofence.requestLocationPermissions(activity)
 ```
+
+### Geofence Interceptor
+
+If you want to be notified inside your application whenever the user enters a monitored geofence region, you can register a `GeofenceInterceptor`. The interceptor's `onGeofenceEnter` callback is invoked alongside the SDK's default handling, giving you the chance to react to the event — for example, to log analytics, trigger custom UI, or show a local notification with information about the entered region.
+
+Assign the interceptor to `DengageGeofence.geofenceInterceptor` **before** calling `DengageGeofence.startGeofence()` so that no events are missed when the app is launched in the background by a geofence trigger.
+
+```kotlin
+DengageGeofence.geofenceInterceptor = object : GeofenceInterceptor {
+    override fun onGeofenceEnter(
+        latitude: Double,
+        longitude: Double,
+        radius: Double,
+        clusterId: Int,
+        clusterName: String?,
+        geofenceItemId: Int,
+        geofenceItemName: String?
+    ) {
+        // Handle the geofence enter event, e.g. log it or show a local notification.
+        Log.d(
+            "GeofenceInterceptor",
+            "enter | lat=$latitude, lon=$longitude, radius=$radius, " +
+                "clusterId=$clusterId, clusterName=$clusterName, " +
+                "itemId=$geofenceItemId, itemName=$geofenceItemName"
+        )
+    }
+}
+
+DengageGeofence.startGeofence()
+```
+
+#### Callback Parameters
+
+| Parameter           | Type      | Description                                                                       |
+|---------------------|-----------|-----------------------------------------------------------------------------------|
+| `latitude`          | `Double`  | Latitude of the geofence region's center.                                         |
+| `longitude`         | `Double`  | Longitude of the geofence region's center.                                        |
+| `radius`            | `Double`  | Radius of the geofence region, in meters.                                         |
+| `clusterId`         | `Int`     | Identifier of the geofence cluster the region belongs to.                         |
+| `clusterName`       | `String?` | Human-readable name of the cluster, if provided on the server side.               |
+| `geofenceItemId`    | `Int`     | Identifier of the specific geofence item that was entered.                        |
+| `geofenceItemName`  | `String?` | Human-readable name of the geofence item, if provided on the server side.        |
+
+> **Note**: The interceptor only adds your custom behavior; it does **not** replace the SDK's built-in geofence event reporting. The SDK will continue to send geofence events to Dengage regardless of whether an interceptor is registered.
 
 ### Performance Considerations and Best Practices
 
