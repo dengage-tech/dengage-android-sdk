@@ -40,7 +40,11 @@ open class LazyFactory<T : Any> {
 
     open fun create(clazz: Class<T>): T {
         try {
-            return clazz.newInstance()
+            // Avoid deprecated Class#newInstance() and be resilient to R8 changing
+            // constructor visibility in release builds.
+            val ctor = clazz.getDeclaredConstructor()
+            ctor.isAccessible = true
+            return ctor.newInstance()
         } catch (e: ReflectiveOperationException) {
             throw RuntimeException("Cannot create an instance of $clazz", e)
         }
