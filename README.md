@@ -29,6 +29,7 @@
   - [FCM Setup](#fcm-setup)
   - [Subscription](#subscription)
   - [User Permission Management](#user-permission-management-optional)
+  - [Event Tracking Permission](#event-tracking-permission-optional)
   - [Notification Channels](#notification-channels)
   - [getToken](#gettoken)
   - [Action Buttons](#action-buttons)
@@ -531,6 +532,22 @@ Dengage.setUserPermission(permission = true)
 
 // Use to get permission of current subscription
 Dengage.getUserPermission() // Boolean?
+```
+
+### Event Tracking Permission (optional)
+
+If you need to let the user enable/disable **event tracking** (analytics events sent by the SDK), you can control it using `setTrackingPermission`.
+
+- **Default**: `true` (events are allowed unless you disable it)
+- **Behavior**: when `false`, the SDK will skip sending events even if the backend `eventsEnabled` parameter is `true`
+- **Scope**: stored locally (persists across app launches)
+
+```kotlin
+// Disable event tracking (user opted out)
+Dengage.setTrackingPermission(permission = false)
+
+// Enable event tracking (user opted in)
+Dengage.setTrackingPermission(permission = true)
 ```
 
 ### Notification Channels
@@ -1150,6 +1167,14 @@ Dengage.setNavigation(
   activity = activity as AppCompatActivity, // For showing ui of in app message
   screenName = "screen-name" // For filtering in app messages with respect to current screen in your app
 )
+```
+
+#### removeInAppMessageDisplay
+
+If you want to immediately dismiss / stop the current in-app message display cycle (for example when you open a full-screen flow or you don’t want the current in-app to keep showing), call:
+
+```kotlin
+Dengage.removeInAppMessageDisplay()
 ```
 
 ### Real Time In-App Messaging
