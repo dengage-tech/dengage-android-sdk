@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.dengage.sdk.R
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.StorySet
+import com.dengage.sdk.domain.inappmessage.model.StorySetImagePositioning
 import com.dengage.sdk.util.Constants
 
 class StoriesListAdapter(
@@ -52,11 +53,14 @@ class StoriesListAdapter(
         storyHolder.tvStoryName.textSize = storySet.styling.headerCover.fontSize.toFloat()
         if (cover.mediaUrl != "") {
             storyHolder.civStory.cornerRadiusRatio = storySet.styling.headerCover.borderRadiusDouble.toFloat()
-            if(storySet.styling.headerCover.borderRadiusDouble == 0.5) {
-                Glide.with(context).load(cover.mediaUrl).circleCrop().into(storyHolder.civStory)
-            } else {
-                Glide.with(context).load(cover.mediaUrl).centerInside().into(storyHolder.civStory)
+            val isCircle = storySet.styling.headerCover.borderRadiusDouble == 0.5
+            val request = Glide.with(context).load(cover.mediaUrl)
+            val transformed = when (cover.imagePositioningEnum) {
+                StorySetImagePositioning.FIT -> request.centerInside()
+                StorySetImagePositioning.FILL -> if (isCircle) request.circleCrop() else request.centerCrop()
+                null -> if (isCircle) request.circleCrop() else request.centerInside()
             }
+            transformed.into(storyHolder.civStory)
         }
         storyHolder.civStory.setOnClickListener { clickEvent(storyCoverPosition) }
         storyHolder.setCircleViewProperties(shown)

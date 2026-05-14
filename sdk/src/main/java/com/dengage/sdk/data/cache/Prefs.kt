@@ -196,6 +196,18 @@ object Prefs {
         get() = preferences.get(PreferenceKey.SHOWN_STORY_COVER_DIC) ?: mutableMapOf()
         set(value) = preferences.set(PreferenceKey.SHOWN_STORY_COVER_DIC, value)
 
+    // Tracks individual story IDs that have been viewed (started) per cover.
+    // Cover-level "shown" escalates when every story under the cover is present here.
+    internal var shownStoryDic: MutableMap<String, MutableList<String>> ?
+        get() = preferences.get(PreferenceKey.SHOWN_STORY_DIC) ?: mutableMapOf()
+        set(value) = preferences.set(PreferenceKey.SHOWN_STORY_DIC, value)
+
+    // Index of the last story the user was on when they left the cover.
+    // Used to resume the cover at lastViewedIndex + 1 on the next open.
+    internal var lastViewedStoryIndexDic: MutableMap<String, Int> ?
+        get() = preferences.get(PreferenceKey.LAST_VIEWED_STORY_INDEX_DIC) ?: mutableMapOf()
+        set(value) = preferences.set(PreferenceKey.LAST_VIEWED_STORY_INDEX_DIC, value)
+
     internal var inboxMessages: MutableList<InboxMessage>?
         get() = preferences.get(PreferenceKey.INBOX_MESSAGES) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.INBOX_MESSAGES, value)

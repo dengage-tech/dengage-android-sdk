@@ -68,8 +68,9 @@ class StoryActivity : AppCompatActivity(),
                 DengageLogger.error(e.message)
             }
         } else {
-            //there is no next story
-            //Toast.makeText(this, "All stories displayed.", Toast.LENGTH_LONG).show()
+            // No more covers — close the activity so the final story doesn't linger on screen
+            // past its duration.
+            finish()
         }
     }
 
@@ -80,7 +81,7 @@ class StoryActivity : AppCompatActivity(),
             finish()
             return
         }
-        
+
         val storyCovers = inAppMessage?.data?.content?.params?.storySet?.covers ?: emptyList()
         preLoadStories(storyCovers)
 
@@ -91,9 +92,16 @@ class StoryActivity : AppCompatActivity(),
             true,
             StoryCubeOutTransformer()
         )
+        viewPager.onEdgeSwipeOut = { finish() }
+        var previousSelectedPosition = storyCoverPosition
         viewPager.addOnPageChangeListener(object : StoryPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
+                if (position < previousSelectedPosition) {
+                    // Backward navigation to an earlier cover — restart it from the first story.
+                    progressState.put(position, 0)
+                }
+                previousSelectedPosition = position
                 storyCoverPosition = position
             }
 

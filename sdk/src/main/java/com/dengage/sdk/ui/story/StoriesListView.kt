@@ -109,6 +109,36 @@ class StoriesListView : LinearLayout {
         )
 
         fun setStoryCoverShown(storyCoverId: String, storySetId: String)
+
+        /**
+         * Records that an individual story (identified by [storyId]) under [storyCoverId] has been viewed.
+         * Once every story id in [allStoryIdsInCover] has been viewed, the cover itself is marked as shown.
+         */
+        fun setStoryViewed(
+            storyId: String,
+            storyCoverId: String,
+            storySetId: String,
+            allStoryIdsInCover: List<String>
+        )
+
+        /**
+         * Returns the persisted set of story ids that have been viewed under [storyCoverId].
+         * Used to resume partially-viewed covers from the first unviewed story.
+         */
+        fun getViewedStoryIds(storyCoverId: String): List<String>
+
+        /**
+         * Persists the index of the story the user was last on under [storyCoverId].
+         * Used to resume the cover at `lastViewedIndex + 1` on the next open.
+         */
+        fun setLastViewedStoryIndex(storyCoverId: String, index: Int)
+
+        /**
+         * Returns the persisted last-viewed story index for [storyCoverId], or -1 if
+         * the cover has never been opened.
+         */
+        fun getLastViewedStoryIndex(storyCoverId: String): Int
+
         fun sortStoryCovers(storyCovers: List<StoryCover>, storySetId: String): List<StoryCover>
     }
 }

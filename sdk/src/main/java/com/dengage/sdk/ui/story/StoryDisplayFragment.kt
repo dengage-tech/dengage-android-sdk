@@ -2,17 +2,23 @@ package com.dengage.sdk.ui.story
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.OptIn
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
@@ -20,7 +26,15 @@ import com.bumptech.glide.Glide
 import com.dengage.sdk.R
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.MimeType
+import com.dengage.sdk.domain.inappmessage.model.Story
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
+import com.dengage.sdk.domain.inappmessage.model.StorySet
+import com.dengage.sdk.domain.inappmessage.model.StorySetButton
+import com.dengage.sdk.domain.inappmessage.model.StorySetButtonTitle
+import com.dengage.sdk.domain.inappmessage.model.StorySetFontWeight
+import com.dengage.sdk.domain.inappmessage.model.StorySetImagePositioning
+import com.dengage.sdk.domain.inappmessage.model.StorySetStyling
+import com.dengage.sdk.domain.inappmessage.model.parseColor
 import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.EdgeToEdgeUtils
@@ -28,6 +42,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import java.util.ArrayList
 
@@ -99,6 +115,8 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     override fun onStart() {
         super.onStart()
         counter = restorePosition()
+        // Persist immediately so onResume's progressState lookup doesn't reset counter to 0.
+        savePosition(counter)
     }
 
     override fun onPause() {
@@ -122,8 +140,17 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
                 ,storyCover.id, storyCover.name, currentStory.id, currentStory.name)
         val storySetId = inAppMessage.data.content.params.storySet?.id
         if (storySetId != null) {
-            StoriesListView.inAppMessageCallback?.setStoryCoverShown(storyCover.id, storySetId)
+            // Record this individual story as viewed. The cover escalates to "shown"
+            // when every story id under it has been recorded.
+            StoriesListView.inAppMessageCallback?.setStoryViewed(
+                storyId = currentStory.id,
+                storyCoverId = storyCover.id,
+                storySetId = storySetId,
+                allStoryIdsInCover = stories.map { it.id }
+            )
         }
+        // Always remember the last index the user was on so the cover resumes at lastIndex + 1.
+        StoriesListView.inAppMessageCallback?.setLastViewedStoryIndex(storyCover.id, currentIndex)
         DengageLogger.verbose("StoryDisplayFragment onStartProgress: ${currentStory.name} : ${currentStory.id}")
     }
 
@@ -161,32 +188,110 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
         storyDisplayImage.visibility = if (isVideo) View.GONE else View.VISIBLE
         storyDisplayVideoProgress.visibility = if (isVideo) View.VISIBLE else View.GONE
 
+        applyMediaPositioning(currentStory)
+
         if (isVideo) {
-            setGradientBackground(null, storyDisplayVideo, counter)
+            setStoryBackground(null, storyDisplayVideo, currentStory)
             initializePlayer()
         } else {
-            setGradientBackground(storyDisplayImage, null, counter)
+            setStoryBackground(storyDisplayImage, null, currentStory)
             currentStory.mediaUrl?.let { mediaUrl ->
                 Glide.with(this).load(mediaUrl).into(storyDisplayImage)
             }
         }
 
-        btnStory.visibility = if (currentStory.cta?.isEnabled == true && currentStory.cta.label.isNotEmpty()) View.VISIBLE else View.GONE
-        currentStory.cta?.let {
-            btnStory.apply {
-                background = GradientDrawable().apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = 10f * resources.displayMetrics.density
-                    setColor(it.bgColorInt)
-                }
-                text = it.label
-                setTextColor(it.textColorInt)
-                btnStory.setOnClickListener {
-                    StoriesListView.inAppMessageCallback?.storyEvent(StoryEventType.STORY_CLICK, inAppMessage
-                            ,storyCover.id, storyCover.name, currentStory.id, currentStory.name, currentStory.cta.androidLink)
-                    DengageLogger.verbose("StoryDisplayFragment STORY_CLICK: ${currentStory.name} : ${currentStory.id}")
-                    activity?.finish()
-                }
+        applyCtaButton(currentStory)
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun applyMediaPositioning(currentStory: Story) {
+        val positioning = currentStory.imagePositioningEnum
+        storyDisplayImage.scaleType = when (positioning) {
+            StorySetImagePositioning.FILL -> ImageView.ScaleType.CENTER_CROP
+            StorySetImagePositioning.FIT -> ImageView.ScaleType.FIT_CENTER
+            null -> ImageView.ScaleType.FIT_CENTER
+        }
+        storyDisplayVideo.resizeMode = when (positioning) {
+            StorySetImagePositioning.FILL -> AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+            else -> AspectRatioFrameLayout.RESIZE_MODE_FIT
+        }
+    }
+
+    private fun applyCtaButton(currentStory: Story) {
+        val cta = currentStory.cta
+        val visible = cta?.isEnabled == true && cta.label.isNotEmpty()
+        btnStory.visibility = if (visible) View.VISIBLE else View.GONE
+        if (!visible || cta == null) return
+
+        val styling = storySet.styling
+        val dark = isDarkMode(styling)
+        val titleStyle = styling.resolvedButtonTitle(dark)
+        val boxStyle = styling.resolvedButton(dark)
+        val density = resources.displayMetrics.density
+
+        val bgColor = styling.resolvedButtonBackgroundColor(cta, dark)?.let { parseColor(it) }
+            ?: cta.bgColorInt
+        val borderColor = styling.resolvedButtonBorderColor(dark)?.let { parseColor(it) }
+        val textColor = styling.resolvedButtonTextColor(cta, dark)?.let { parseColor(it) }
+            ?: cta.textColorInt
+        val cornerRadiusPx = (boxStyle?.borderRadius?.toFloat() ?: 10f) * density
+
+        val background = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = cornerRadiusPx
+            setColor(bgColor)
+            if (borderColor != null) {
+                setStroke((1 * density).toInt().coerceAtLeast(1), borderColor)
+            }
+        }
+
+        btnStory.apply {
+            this.background = background
+            text = cta.label
+            setTextColor(textColor)
+
+            titleStyle?.fontSize?.let {
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
+            }
+
+            val typefaceStyle = if (titleStyle?.fontWeight == StorySetFontWeight.BOLD) Typeface.BOLD else Typeface.NORMAL
+            val familyName = titleStyle?.fontFamily?.takeIf { it.isNotBlank() }
+                ?: styling.effectiveFontFamily
+            typeface = StoryFontResolver.resolve(requireContext(), familyName, typefaceStyle)
+
+            gravity = when (titleStyle?.textAlign?.lowercase()) {
+                "right" -> Gravity.END or Gravity.CENTER_VERTICAL
+                "left" -> Gravity.START or Gravity.CENTER_VERTICAL
+                else -> Gravity.CENTER
+            }
+
+            val padding = boxStyle?.padding
+            if (padding != null && boxStyle.fitContent != true) {
+                setPadding(
+                    (padding.left * density).toInt(),
+                    (padding.top * density).toInt(),
+                    (padding.right * density).toInt(),
+                    (padding.bottom * density).toInt()
+                )
+            } else if (boxStyle?.fitContent == true) {
+                setPadding(0, 0, 0, 0)
+            }
+
+            val lp = layoutParams
+            // height is treated as minimum so that padding can still grow the button.
+            val minH = boxStyle?.height?.let { (it * density).toInt() } ?: 0
+            minimumHeight = minH
+            minHeight = minH
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT
+            lp.width = if (boxStyle?.fitContent == true) ViewGroup.LayoutParams.WRAP_CONTENT
+            else ViewGroup.LayoutParams.MATCH_PARENT
+            layoutParams = lp
+
+            setOnClickListener {
+                StoriesListView.inAppMessageCallback?.storyEvent(StoryEventType.STORY_CLICK, inAppMessage,
+                    storyCover.id, storyCover.name, currentStory.id, currentStory.name, cta.androidLink)
+                DengageLogger.verbose("StoryDisplayFragment STORY_CLICK: ${currentStory.name} : ${currentStory.id}")
+                activity?.finish()
             }
         }
     }
@@ -237,29 +342,41 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
         }
     }
 
-    private fun setGradientBackground(storyDisplayImage: AppCompatImageView? = null, storyDisplayVideo: PlayerView? = null, counter: Int) {
-        var colors = intArrayOf(Color.WHITE, Color.WHITE)
+    private fun setStoryBackground(
+        storyDisplayImage: AppCompatImageView? = null,
+        storyDisplayVideo: PlayerView? = null,
+        currentStory: Story
+    ) {
+        val styling = storySet.styling
+        val dark = isDarkMode(styling)
 
-        if (counter >= stories.size) {
-            DengageLogger.error("StoryDisplayFragment setGradientBackground: Counter $counter is out of bounds for stories size ${stories.size}")
-            return
+        // Per migration guide fallback chain:
+        // dark.storyBackgroundColor -> styling.storyBackgroundColor -> story.bgColors[0].
+        val resolved = styling.resolvedStoryBackgroundColor(currentStory, dark)?.let { parseColor(it) }
+        val background = if (resolved != null) {
+            GradientDrawable().apply { setColor(resolved) }
+        } else {
+            val grad = currentStory.gradColors
+            val colors = when (grad.size) {
+                0 -> intArrayOf(Color.WHITE, Color.WHITE)
+                1 -> intArrayOf(grad[0], grad[0])
+                else -> grad.take(2).toIntArray()
+            }
+            GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors)
         }
-
-        if (stories[counter].gradColors.size == 1) {
-            colors = intArrayOf(
-                stories[counter].gradColors[0],
-                stories[counter].gradColors[0]
-            )
-        } else if  (stories[counter].gradColors.size > 1) {
-            colors = stories[counter].gradColors.take(2).toIntArray()
-        }
-
-        val gradientDrawable = GradientDrawable(
-            GradientDrawable.Orientation.TOP_BOTTOM, colors
-        )
-        storyDisplayImage?.background = gradientDrawable
-        storyDisplayVideo?.background = gradientDrawable
+        storyDisplayImage?.background = background
+        storyDisplayVideo?.background = background
     }
+
+    private fun isDarkMode(styling: StorySetStyling): Boolean {
+        // Per migration guide: presence of styling.dark signals dark mode is configured.
+        if (styling.dark == null) return false
+        val nightFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return nightFlags == Configuration.UI_MODE_NIGHT_YES
+    }
+
+    private val storySet: StorySet
+        get() = inAppMessage.data.content.params.storySet ?: StorySet()
 
 
     private fun setUpUi() {
@@ -321,12 +438,23 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
             stories.size, position = arguments?.getInt(EXTRA_POSITION) ?: -1
         )
         storiesProgressView.setAllStoryDuration(STORY_DURATION)
+        // Per-story duration overrides the default; story.duration is in seconds.
+        stories.forEachIndexed { index, story ->
+            val durationMs = story.duration?.takeIf { it > 0 }?.times(1000L)
+            if (durationMs != null) {
+                storiesProgressView.getProgressWithIndex(index).setDuration(durationMs)
+            }
+        }
         storiesProgressView.setStoriesListener(this)
 
         storyCover.mediaUrl?.let { mediaUrl ->
             Glide.with(this).load(mediaUrl).circleCrop().into(storyDisplayProfilePicture)
         }
         storyDisplayNick.text = storyCover.name ?: ""
+        storySet.styling.effectiveFontFamily?.let { family ->
+            val weight = if (storySet.styling.headerTitle.fontWeight == StorySetFontWeight.BOLD) Typeface.BOLD else Typeface.NORMAL
+            storyDisplayNick.typeface = StoryFontResolver.resolve(requireContext(), family, weight)
+        }
     }
 
     private fun showStoryOverlay() {
@@ -376,7 +504,15 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     }
 
     private fun restorePosition(): Int {
-        return StoryActivity.progressState.get(storyPosition)
+        // Within-session state wins: if we already have a position for this cover
+        // from a previous fragment lifecycle in the same activity, use it.
+        val stored = StoryActivity.progressState.get(storyPosition, -1)
+        if (stored >= 0) return stored
+        // Fresh open: resume at lastViewedIndex + 1. If past the end, replay from 0.
+        val lastIdx = StoriesListView.inAppMessageCallback?.getLastViewedStoryIndex(storyCover.id) ?: -1
+        if (lastIdx < 0) return 0
+        val nextIdx = lastIdx + 1
+        return if (nextIdx >= stories.size) 0 else nextIdx
     }
 
     fun pauseCurrentStory() {

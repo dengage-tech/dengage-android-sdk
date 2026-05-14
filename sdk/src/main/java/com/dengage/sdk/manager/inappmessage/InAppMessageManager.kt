@@ -583,6 +583,39 @@ class InAppMessageManager :
         Prefs.shownStoryCoverDic = shownStoryCoverDic
     }
 
+    override fun getViewedStoryIds(storyCoverId: String): List<String> {
+        return Prefs.shownStoryDic?.get(storyCoverId)?.toList() ?: emptyList()
+    }
+
+    override fun setLastViewedStoryIndex(storyCoverId: String, index: Int) {
+        val dic = Prefs.lastViewedStoryIndexDic ?: mutableMapOf()
+        dic[storyCoverId] = index
+        Prefs.lastViewedStoryIndexDic = dic
+    }
+
+    override fun getLastViewedStoryIndex(storyCoverId: String): Int {
+        return Prefs.lastViewedStoryIndexDic?.get(storyCoverId) ?: -1
+    }
+
+    override fun setStoryViewed(
+        storyId: String,
+        storyCoverId: String,
+        storySetId: String,
+        allStoryIdsInCover: List<String>
+    ) {
+        val shownStoryDic: MutableMap<String, MutableList<String>> =
+            Prefs.shownStoryDic ?: mutableMapOf()
+        val seenStoryIds = shownStoryDic.getOrPut(storyCoverId) { mutableListOf() }
+        if (storyId !in seenStoryIds) {
+            seenStoryIds.add(storyId)
+        }
+        Prefs.shownStoryDic = shownStoryDic
+
+        if (allStoryIdsInCover.isNotEmpty() && seenStoryIds.containsAll(allStoryIdsInCover)) {
+            setStoryCoverShown(storyCoverId, storySetId)
+        }
+    }
+
     override fun sortStoryCovers(storyCovers: List<StoryCover>, storySetId: String): List<StoryCover>{
         val shownStoryCoverDic: MutableMap<String, MutableList<String>> =
             Prefs.shownStoryCoverDic ?: mutableMapOf()

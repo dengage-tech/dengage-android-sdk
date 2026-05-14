@@ -19,7 +19,7 @@ class AppStoryFragment : BaseDataBindingFragment<FragmentAppStoryBinding>() {
     override fun init() {
         sendPageView("app-story")
         Dengage.setCategoryPath("23")
-        binding.etPropertyId.setText("4")
+        binding.etPropertyId.setText("1")
         binding.etScreenName.setText("ego")
         binding.etBackgroundColor.setText("#FF0000")
         binding.btnRefreshStory.setOnClickListener {
