@@ -12,6 +12,7 @@ import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
@@ -25,7 +26,7 @@ import com.dengage.sdk.liveupdate.LiveUpdatePayload
 class SportsLiveUpdateHandler : LiveUpdateHandler {
 
     companion object {
-        const val CHANNEL_ID = "den_live_update_sports"
+        const val CHANNEL_ID = "den_live_update_sports_v2"
     }
 
     override fun onUpdate(context: Context, payload: LiveUpdatePayload) {
@@ -92,6 +93,14 @@ class SportsLiveUpdateHandler : LiveUpdateHandler {
         val statusText = "$matchTime · $period"
 
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val canPost = nm.canPostPromotedNotifications()
+        val permState = context.checkSelfPermission("android.permission.POST_PROMOTED_NOTIFICATIONS")
+        Log.d(
+            "LiveUpdateDiag",
+            "Sports: SDK_INT=${Build.VERSION.SDK_INT}, canPostPromoted=$canPost, " +
+                "POST_PROMOTED_NOTIFICATIONS=$permState (0=granted,-1=denied), " +
+                "isFinished=$isFinished"
+        )
 
         return Notification.Builder(context, CHANNEL_ID)
             .setSmallIcon(Icon.createWithResource(context, context.applicationInfo.icon))
@@ -100,6 +109,8 @@ class SportsLiveUpdateHandler : LiveUpdateHandler {
             .setStyle(Notification.BigTextStyle().bigText("$scoreText\n$statusText"))
             .setOngoing(!isFinished)
             .setOnlyAlertOnce(true)
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
+            .setCategory(Notification.CATEGORY_PROGRESS)
             .setContentIntent(mainIntent(context, notificationId))
             .apply {
                 if (!isFinished && nm.canPostPromotedNotifications()) {
@@ -150,6 +161,8 @@ class SportsLiveUpdateHandler : LiveUpdateHandler {
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setOngoing(!isFinished)
             .setOnlyAlertOnce(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setContentIntent(mainIntent(context, notificationId))
             .apply {
                 if (dismissalDate != null) {
@@ -170,6 +183,7 @@ class SportsLiveUpdateHandler : LiveUpdateHandler {
         val channel = NotificationChannel(CHANNEL_ID, "Canlı Skor", NotificationManager.IMPORTANCE_DEFAULT).apply {
             description = "Canlı maç skoru bildirimleri"
             setSound(null, null)
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         nm.createNotificationChannel(channel)
     }

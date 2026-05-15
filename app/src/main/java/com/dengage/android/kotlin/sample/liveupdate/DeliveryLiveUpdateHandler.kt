@@ -12,6 +12,7 @@ import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
@@ -25,7 +26,7 @@ import com.dengage.sdk.liveupdate.LiveUpdatePayload
 class DeliveryLiveUpdateHandler : LiveUpdateHandler {
 
     companion object {
-        const val CHANNEL_ID = "den_live_update_delivery"
+        const val CHANNEL_ID = "den_live_update_delivery_v2"
     }
 
     enum class DeliveryStatus(val label: String, val step: Int) {
@@ -111,6 +112,14 @@ class DeliveryLiveUpdateHandler : LiveUpdateHandler {
         else "${status.label} · Tahmini varış: $eta"
 
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val canPost = nm.canPostPromotedNotifications()
+        val permState = context.checkSelfPermission("android.permission.POST_PROMOTED_NOTIFICATIONS")
+        Log.d(
+            "LiveUpdateDiag",
+            "Delivery: SDK_INT=${Build.VERSION.SDK_INT}, canPostPromoted=$canPost, " +
+                "POST_PROMOTED_NOTIFICATIONS=$permState (0=granted,-1=denied), " +
+                "isDelivered=$isDelivered"
+        )
 
         return Notification.Builder(context, CHANNEL_ID)
             .setSmallIcon(Icon.createWithResource(context, context.applicationInfo.icon))
@@ -119,7 +128,10 @@ class DeliveryLiveUpdateHandler : LiveUpdateHandler {
             .setStyle(progressStyle)
             .setOngoing(!isDelivered)
             .setOnlyAlertOnce(true)
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
+            .setCategory(Notification.CATEGORY_PROGRESS)
             .setContentIntent(mainIntent(context, notificationId))
+            .setShortCriticalText(if (isDelivered) "Teslim edildi" else status.label)
             .apply {
                 if (!isDelivered && nm.canPostPromotedNotifications()) {
                     addExtras(Bundle().apply {
@@ -181,6 +193,8 @@ class DeliveryLiveUpdateHandler : LiveUpdateHandler {
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setOngoing(!isDelivered)
             .setOnlyAlertOnce(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .setContentIntent(mainIntent(context, notificationId))
             .apply {
                 if (dismissalDate != null) {
@@ -201,6 +215,7 @@ class DeliveryLiveUpdateHandler : LiveUpdateHandler {
         val channel = NotificationChannel(CHANNEL_ID, "Teslimat", NotificationManager.IMPORTANCE_DEFAULT).apply {
             description = "Teslimat takibi bildirimleri"
             setSound(null, null)
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         nm.createNotificationChannel(channel)
     }
