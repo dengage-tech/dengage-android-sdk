@@ -103,6 +103,9 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
         super.onViewCreated(view, savedInstanceState)
         storyDisplayVideo.useController = false
         EdgeToEdgeUtils.setupEdgeToEdgeInsets(view)
+        // Restore before updateStory so the correct story (and player, if video) is loaded.
+        counter = restorePosition()
+        savePosition(counter)
         updateStory()
         setUpUi()
     }
@@ -110,13 +113,6 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         this.pageViewOperator = context as StoryPageViewOperator
-    }
-
-    override fun onStart() {
-        super.onStart()
-        counter = restorePosition()
-        // Persist immediately so onResume's progressState lookup doesn't reset counter to 0.
-        savePosition(counter)
     }
 
     override fun onPause() {
@@ -247,6 +243,7 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
 
         btnStory.apply {
             this.background = background
+            isAllCaps = false
             text = cta.label
             setTextColor(textColor)
 
@@ -337,7 +334,20 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
                 storyDisplayVideoProgress.hide()
                 storiesProgressView.getProgressWithIndex(counter).setDuration(simpleExoPlayer?.duration ?: 8000L)
                 onVideoPrepared = true
-                resumeCurrentStory()
+                // If progress was never started (we early-returned in onResume because the
+                // resumed-to story is a video that wasn't yet prepared), initialize it now
+                // at the correct counter index. Otherwise just resume the paused animation.
+                if (storiesProgressView.currentIndex < 0) {
+                    simpleExoPlayer?.playWhenReady = true
+                    showStoryOverlay()
+                    if (counter == 0) {
+                        storiesProgressView.startStories()
+                    } else {
+                        storiesProgressView.startStories(counter)
+                    }
+                } else {
+                    resumeCurrentStory()
+                }
             }
         }
     }
@@ -494,7 +504,6 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
         if (counter == 0) {
             storiesProgressView.startStories()
         } else {
-            counter = StoryActivity.progressState.get(arguments?.getInt(EXTRA_POSITION) ?: 0)
             storiesProgressView.startStories(counter)
         }
     }

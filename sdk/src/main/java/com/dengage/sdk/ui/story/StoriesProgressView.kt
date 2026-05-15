@@ -17,6 +17,8 @@ class StoriesProgressView @JvmOverloads constructor(
     private var storiesListener: StoriesListener? = null
     private var storiesCount = -1
     private var current = -1
+    /** Index of the currently active progress bar, or -1 if startStories has not yet been called. */
+    val currentIndex: Int get() = current
     private var isSkipStart = false
     private var isReverseStart = false
     private var position = -1
