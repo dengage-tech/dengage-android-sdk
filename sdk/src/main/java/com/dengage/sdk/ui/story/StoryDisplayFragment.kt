@@ -134,7 +134,7 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
         val currentStory = stories[currentIndex]
         StoriesListView.inAppMessageCallback?.storyEvent(StoryEventType.STORY_DISPLAY, inAppMessage
                 ,storyCover.id, storyCover.name, currentStory.id, currentStory.name)
-        val storySetId = inAppMessage.data.content.params.storySet?.id
+        val storySetId = inAppMessage.data.content?.params?.storySet?.id
         if (storySetId != null) {
             // Record this individual story as viewed. The cover escalates to "shown"
             // when every story id under it has been recorded.
@@ -386,7 +386,7 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
     }
 
     private val storySet: StorySet
-        get() = inAppMessage.data.content.params.storySet ?: StorySet()
+        get() = inAppMessage.data.content?.params?.storySet ?: StorySet()
 
 
     private fun setUpUi() {

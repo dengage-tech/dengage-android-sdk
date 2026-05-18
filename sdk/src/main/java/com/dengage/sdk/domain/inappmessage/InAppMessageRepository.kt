@@ -4,6 +4,7 @@ import com.dengage.sdk.data.remote.api.ApiType.PUSH
 import com.dengage.sdk.data.remote.api.service
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.subscription.model.Subscription
+import com.dengage.sdk.domain.inappmessage.model.AbTestAssignment
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.InAppRemovalId
 import com.dengage.sdk.util.extension.getAppId
@@ -121,6 +122,18 @@ class InAppMessageRepository {
             appId = appId,
             sessionId = sessionId,
             duration = duration
+        )
+    }
+
+    suspend fun assignAbTestVariant(
+        accountId: String,
+        appId: String?,
+        campaignId: String
+    ): AbTestAssignment? {
+        return service.assignAbTestVariant(
+            accountId = accountId,
+            appId = appId,
+            campaignId = campaignId
         )
     }
 

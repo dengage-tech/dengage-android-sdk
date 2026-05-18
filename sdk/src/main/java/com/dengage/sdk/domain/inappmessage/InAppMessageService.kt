@@ -1,5 +1,6 @@
 package com.dengage.sdk.domain.inappmessage
 
+import com.dengage.sdk.domain.inappmessage.model.AbTestAssignment
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.InAppRemovalId
 import com.dengage.sdk.domain.inappmessage.model.InAppMessageData
@@ -70,6 +71,14 @@ interface InAppMessageService {
         @Path("accountId") accountId: String,
         @Path("appId") appId: String?,
     ): MutableList<InAppMessageData>?
+
+    @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
+    @GET("/api/realtime-inapp/{accountId}/{appId}/ab/assign")
+    suspend fun assignAbTestVariant(
+        @Path("accountId") accountId: String,
+        @Path("appId") appId: String?,
+        @Query("cid") campaignId: String
+    ): AbTestAssignment?
 
     @Headers("CONNECT_TIMEOUT:5000", "READ_TIMEOUT:5000", "WRITE_TIMEOUT:5000")
     @GET("/realtime-inapp/event")
