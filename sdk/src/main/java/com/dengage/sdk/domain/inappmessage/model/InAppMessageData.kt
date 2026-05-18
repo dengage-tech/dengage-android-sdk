@@ -7,20 +7,17 @@ class InAppMessageData(
     @SerializedName("messageDetails") val messageDetails: String?,
     @SerializedName("expireDate") val expireDate: String,
     @SerializedName("priority") val priority: Int,
-    @SerializedName("content") var content: Content?,
+    @SerializedName("content") val content: Content,
     @SerializedName("displayCondition") val displayCondition: DisplayCondition,
     @SerializedName("displayTiming") val displayTiming: DisplayTiming,
     @SerializedName("inlineTarget") val inlineTarget: InlineTarget?,
     @SerializedName("publicId") val publicId: String?,
-    @SerializedName("abTest") val abTest: AbTest? = null,
     @SerializedName("nextDisplayTime") var nextDisplayTime: Long = 0,
     @SerializedName("showCount") var showCount: Long = 0,
     @SerializedName("dismissCount") var dismissCount: Long = 0
 ) : Serializable {
 
     fun isRealTime(): Boolean = !publicId.isNullOrEmpty()
-
-    fun isAbTest(): Boolean = abTest?.variants?.isNotEmpty() == true
 
     fun isDisplayTimeAvailable(): Boolean {
 

@@ -116,191 +116,82 @@ class InAppMessageManager :
             )
 
         if (priorInAppMessage != null) {
-            resolveAbTestVariantIfNeeded(priorInAppMessage) { resolved ->
-                if (resolved == null) {
-                    // Control group / failed assign / unknown contentId — silently skip
-                    hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
-                    return@resolveAbTestVariantIfNeeded
+            if (!storyPropertyId.isNullOrEmpty() && storiesListView != null) {
+                val androidSelector = priorInAppMessage.data.inlineTarget?.androidSelector
+                if (androidSelector == storyPropertyId && "STORY".equals(
+                        priorInAppMessage.data.content.type,
+                        ignoreCase = true
+                    )
+                ) {
+                    showAppStory(priorInAppMessage, storiesListView)
                 }
-                proceedWithPriorMessage(
-                    activity = activity,
-                    priorInAppMessage = resolved,
-                    screenName = screenName,
-                    resultCode = resultCode,
-                    inAppInlineElement = inAppInlineElement,
-                    propertyId = propertyId,
-                    hideIfNotFound = hideIfNotFound,
-                    storyPropertyId = storyPropertyId,
-                    storiesListView = storiesListView
-                )
-            }
-        } else {
-            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
-        }
-    }
-
-    /**
-     * For non-A/B campaigns: returns the message unchanged.
-     * For A/B campaigns with a deterministic single 100% variant (winner faz or single-bucket
-     * config): resolves synchronously. If that single variant is control group, returns null.
-     * For active A/B (multiple variants): asynchronously calls /ab/assign, applies the chosen
-     * variant onto content, and returns the message via callback. Returns null for control group,
-     * unknown contentId, or assign failures.
-     */
-    private fun resolveAbTestVariantIfNeeded(
-        inAppMessage: com.dengage.sdk.domain.inappmessage.model.InAppMessage,
-        onResolved: (inAppMessage: com.dengage.sdk.domain.inappmessage.model.InAppMessage?) -> Unit
-    ) {
-        val data = inAppMessage.data
-        if (!data.isAbTest()) {
-            onResolved(inAppMessage)
-            return
-        }
-
-        val abTest = data.abTest!!
-        val deterministic = abTest.getDeterministicVariant()
-        if (deterministic != null) {
-            if (deterministic.isControl()) {
-                onResolved(null)
-                return
-            }
-            val content = deterministic.toContent()
-            if (content == null) {
-                onResolved(null)
-                return
-            }
-            data.content = content
-            onResolved(inAppMessage)
-            return
-        }
-
-        // Active A/B test — call /ab/assign for runtime variant selection
-        val campaignId = data.publicId
-        if (campaignId.isNullOrEmpty()) {
-            onResolved(null)
-            return
-        }
-        presenter.assignAbTestVariant(
-            campaignId = campaignId,
-            onAssigned = { assignment ->
-                if (assignment == null || assignment.isControl()) {
-                    onResolved(null)
-                    return@assignAbTestVariant
-                }
-                val variant = abTest.findVariantByContentId(assignment.contentId)
-                if (variant == null) {
-                    DengageLogger.debug("A/B assign returned unknown contentId, skipping impression")
-                    onResolved(null)
-                    return@assignAbTestVariant
-                }
-                if (variant.isControl()) {
-                    onResolved(null)
-                    return@assignAbTestVariant
-                }
-                val content = variant.toContent()
-                if (content == null) {
-                    onResolved(null)
-                    return@assignAbTestVariant
-                }
-                data.content = content
-                onResolved(inAppMessage)
-            },
-            onFailed = { errorMessage ->
-                DengageLogger.error("A/B assign failed, skipping impression: $errorMessage")
-                onResolved(null)
-            }
-        )
-    }
-
-    private fun proceedWithPriorMessage(
-        activity: Activity,
-        priorInAppMessage: com.dengage.sdk.domain.inappmessage.model.InAppMessage,
-        screenName: String?,
-        resultCode: Int,
-        inAppInlineElement: InAppInlineElement?,
-        propertyId: String?,
-        hideIfNotFound: Boolean?,
-        storyPropertyId: String?,
-        storiesListView: StoriesListView?,
-    ) {
-        val content = priorInAppMessage.data.content
-        if (content == null) {
-            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
-            return
-        }
-        if (!storyPropertyId.isNullOrEmpty() && storiesListView != null) {
-            val androidSelector = priorInAppMessage.data.inlineTarget?.androidSelector
-            if (androidSelector == storyPropertyId && "STORY".equals(
-                    content.type,
-                    ignoreCase = true
-                )
-            ) {
-                showAppStory(priorInAppMessage, storiesListView)
-            }
-        } else {
-            if (storiesListView == null) {
-                if (!"INLINE".equals(content.type, ignoreCase = true) && inAppInlineElement != null) {
-                    hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
-                    return
-                } else {
-                    if ("COUNTDOWN_TO_WIN".equals(content.type, ignoreCase = true) &&
-                        InAppMessageUtils.isCountdownToWinExpired(content.params.html)
-                    ) {
-                        DengageLogger.debug("COUNTDOWN_TO_WIN in-app message is expired, skipping display")
+            } else {
+                if (storiesListView == null) {
+                    if (!"INLINE".equals(priorInAppMessage.data.content.type, ignoreCase = true) && inAppInlineElement != null) {
                         hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
                         return
-                    }
-                    if (content.params.html?.let {
-                            Mustache.hasCouponSection(it)
-                        } == true) {
-                        val couponContent: String? =
-                            Mustache.getCouponContent(content.params.html!!)
-
-                        couponContent?.let { couponHtmlContent ->
-                            // Mark as showing immediately to prevent duplicate calls during async validation
-                            isInAppMessageShowing = true
-                            presenter.validateCoupon(
-                                couponContent = couponHtmlContent,
-                                inAppMessageId = priorInAppMessage.id,
-                                onValidCoupon = { couponCode ->
-                                    showInAppMessage(
-                                        activity,
-                                        priorInAppMessage,
-                                        resultCode,
-                                        inAppInlineElement = inAppInlineElement,
-                                        propertyId = propertyId,
-                                        couponCode = couponCode,
-                                        hideIfNotFound = hideIfNotFound
-                                    )
-                                },
-                                onInvalidCoupon = { errorMessage ->
-                                    isInAppMessageShowing = false
-                                    DengageLogger.error("Coupon validation failed: $errorMessage")
-
-                                    // Send debug log for invalid coupon if debug device
-                                    sendCouponValidationFailureLog(
-                                        couponContent = couponHtmlContent,
-                                        errorMessage = errorMessage,
-                                        inAppMessage = priorInAppMessage,
-                                        screenName = screenName
-                                    )
-                                    hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
-                                }
-                            )
-                        } ?: hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
                     } else {
-                        showInAppMessage(
-                            activity,
-                            priorInAppMessage,
-                            resultCode,
-                            inAppInlineElement = inAppInlineElement,
-                            propertyId = propertyId,
-                            couponCode = null,
-                            hideIfNotFound = hideIfNotFound
-                        )
+                        if ("COUNTDOWN_TO_WIN".equals(priorInAppMessage.data.content.type, ignoreCase = true) &&
+                            InAppMessageUtils.isCountdownToWinExpired(priorInAppMessage.data.content.params.html)
+                        ) {
+                            DengageLogger.debug("COUNTDOWN_TO_WIN in-app message is expired, skipping display")
+                            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                            return
+                        }
+                        if (priorInAppMessage.data.content.params.html?.let {
+                                Mustache.hasCouponSection(it)
+                            } == true) {
+                            val couponContent: String? =
+                                Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
+
+                            couponContent?.let { content ->
+                                // Mark as showing immediately to prevent duplicate calls during async validation
+                                isInAppMessageShowing = true
+                                presenter.validateCoupon(
+                                    couponContent = content,
+                                    inAppMessageId = priorInAppMessage.id,
+                                    onValidCoupon = { couponCode ->
+                                        showInAppMessage(
+                                            activity,
+                                            priorInAppMessage,
+                                            resultCode,
+                                            inAppInlineElement = inAppInlineElement,
+                                            propertyId = propertyId,
+                                            couponCode = couponCode,
+                                            hideIfNotFound = hideIfNotFound
+                                        )
+                                    },
+                                    onInvalidCoupon = { errorMessage ->
+                                        isInAppMessageShowing = false
+                                        DengageLogger.error("Coupon validation failed: $errorMessage")
+
+                                        // Send debug log for invalid coupon if debug device
+                                        sendCouponValidationFailureLog(
+                                            couponContent = content,
+                                            errorMessage = errorMessage,
+                                            inAppMessage = priorInAppMessage,
+                                            screenName = screenName
+                                        )
+                                        hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                                    }
+                                )
+                            } ?: hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                        } else {
+                            showInAppMessage(
+                                activity,
+                                priorInAppMessage,
+                                resultCode,
+                                inAppInlineElement = inAppInlineElement,
+                                propertyId = propertyId,
+                                couponCode = null,
+                                hideIfNotFound = hideIfNotFound
+                            )
+                        }
                     }
                 }
             }
+        } else {
+            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
         }
     }
 
@@ -437,7 +328,7 @@ class InAppMessageManager :
                                 }, resultCode
                             )
 
-                            if (inAppMessage.data.content?.params?.shouldAnimate == false) {
+                            if (!inAppMessage.data.content.params.shouldAnimate) {
                                 @Suppress("DEPRECATION")
                                 activity.overridePendingTransition(0, 0)
                             }
@@ -628,10 +519,9 @@ class InAppMessageManager :
 
     private fun showAppStory(inAppMessage: InAppMessage, storiesListView: StoriesListView) {
         val data = inAppMessage.data
-        val contentId = data.content?.contentId
-        if(!data.publicId.isNullOrEmpty() && !contentId.isNullOrEmpty()) {
+        if(!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
             StoriesListView.inAppMessageCallback = this@InAppMessageManager
-            storiesListView.loadInAppMessage(inAppMessage, data.publicId, contentId)
+            storiesListView.loadInAppMessage(inAppMessage, data.publicId, data.content.contentId)
             presenter.sendStoryEvent(
                 StoryEventType.DISPLAY,
                 inAppMessage
@@ -649,7 +539,7 @@ class InAppMessageManager :
         buttonUrl: String
     ) {
         val data = inAppMessage.data
-        if (!data.publicId.isNullOrEmpty() && !data.content?.contentId.isNullOrEmpty()) {
+        if (!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
             presenter.sendStoryEvent(
                 eventType,
                 inAppMessage,

@@ -60,8 +60,8 @@ class StoriesListView : LinearLayout {
 
     @SuppressLint("UnsafeOptInUsageError")
     internal fun loadInAppMessage(inAppMessage: InAppMessage, publicId: String, contentId: String) {
-        val title = inAppMessage.data.content?.params?.storySet?.title
-        val styling = inAppMessage.data.content?.params?.storySet?.styling
+        val title = inAppMessage.data.content.params.storySet?.title
+        val styling = inAppMessage.data.content.params.storySet?.styling
         if (!title.isNullOrEmpty()) {
             titleView?.text = title
             titleView?.visibility = VISIBLE

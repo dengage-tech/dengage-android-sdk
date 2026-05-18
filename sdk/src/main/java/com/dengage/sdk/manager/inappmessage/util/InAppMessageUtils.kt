@@ -214,8 +214,7 @@ object InAppMessageUtils {
 
 
     private fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?, storyPropertyId: String?): Boolean {
-        val contentType = inAppMessage.data.content?.type
-        if ("STORY".equals(contentType, ignoreCase = true)) {
+        if ("STORY".equals(inAppMessage.data.content.type, ignoreCase = true)) {
             val isPropertyEmpty = storyPropertyId.isNullOrEmpty()
             val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
             return if (isPropertyEmpty || isSelectorEmpty) {
@@ -223,7 +222,7 @@ object InAppMessageUtils {
             } else {
                 inAppMessage.data.inlineTarget?.androidSelector == storyPropertyId
             }
-        } else if ("INLINE".equals(contentType, ignoreCase = true)) {
+        } else if ("INLINE".equals(inAppMessage.data.content.type, ignoreCase = true)) {
             val isPropertyEmpty = propertyId.isNullOrEmpty()
             val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
             return if (isPropertyEmpty || isSelectorEmpty) {
