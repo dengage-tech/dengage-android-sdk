@@ -252,8 +252,7 @@ class StoryDisplayFragment : Fragment(), StoriesProgressView.StoriesListener {
             }
 
             val typefaceStyle = if (titleStyle?.fontWeight == StorySetFontWeight.BOLD) Typeface.BOLD else Typeface.NORMAL
-            val familyName = titleStyle?.fontFamily?.takeIf { it.isNotBlank() }
-                ?: styling.effectiveFontFamily
+            val familyName = storySet.styling.effectiveFontFamily
             typeface = StoryFontResolver.resolve(requireContext(), familyName, typefaceStyle)
 
             gravity = when (titleStyle?.textAlign?.lowercase()) {
