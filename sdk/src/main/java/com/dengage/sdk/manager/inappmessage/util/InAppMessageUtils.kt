@@ -214,7 +214,13 @@ object InAppMessageUtils {
 
 
     private fun isInlineInApp(inAppMessage: InAppMessage, propertyId: String?, storyPropertyId: String?): Boolean {
-        if ("STORY".equals(inAppMessage.data.content.type, ignoreCase = true)) {
+        // A/B test campaigns don't have a top-level content; treat them as non-inline/non-story.
+        // They render through the standard overlay flow only when no inline/story selectors are requested.
+        if (inAppMessage.data.content == null) {
+            return propertyId.isNullOrEmpty() && storyPropertyId.isNullOrEmpty()
+        }
+        val contentType = inAppMessage.data.content?.type
+        if ("STORY".equals(contentType, ignoreCase = true)) {
             val isPropertyEmpty = storyPropertyId.isNullOrEmpty()
             val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
             return if (isPropertyEmpty || isSelectorEmpty) {
@@ -222,7 +228,7 @@ object InAppMessageUtils {
             } else {
                 inAppMessage.data.inlineTarget?.androidSelector == storyPropertyId
             }
-        } else if ("INLINE".equals(inAppMessage.data.content.type, ignoreCase = true)) {
+        } else if ("INLINE".equals(contentType, ignoreCase = true)) {
             val isPropertyEmpty = propertyId.isNullOrEmpty()
             val isSelectorEmpty = inAppMessage.data.inlineTarget?.androidSelector.isNullOrEmpty()
             return if (isPropertyEmpty || isSelectorEmpty) {

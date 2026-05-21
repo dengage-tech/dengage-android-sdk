@@ -7,6 +7,8 @@ import android.view.View
 import androidx.core.net.toUri
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.domain.inappmessage.model.AbTestAssignmentResponse
+import com.dengage.sdk.domain.inappmessage.model.Content
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
@@ -45,6 +47,12 @@ class InAppMessageManager :
         private var timer = Timer()
         private var hourlyFetchTimer: Timer? = null
         internal var isInAppMessageShowing = false
+
+        /**
+         * Marker value stored in the sticky A/B assignment cache when the user was bucketed
+         * into the control group. Kept distinct from any valid contentId GUID.
+         */
+        private const val CONTROL_GROUP_MARKER = "__CONTROL__"
     }
 
     /**
@@ -116,10 +124,65 @@ class InAppMessageManager :
             )
 
         if (priorInAppMessage != null) {
-            if (!storyPropertyId.isNullOrEmpty() && storiesListView != null) {
+            // A/B test campaigns need their variant materialized into `content` before the
+            // normal type-based routing can run. Deterministic (single variant @ 100%) is
+            // resolved locally; multi-variant campaigns require a fresh /ab/assign call.
+            // Once resolved, the dispatcher (`dispatchPriorInAppMessage`) is invoked directly
+            // — re-entering setNavigation would lose the in-memory `content` mutation, since
+            // setNavigation re-reads Prefs.inAppMessages (fresh deserialization).
+            if (priorInAppMessage.data.isAbTest() && priorInAppMessage.data.content == null) {
+                resolveAbVariant(
+                    activity = activity,
+                    inAppMessage = priorInAppMessage,
+                    resultCode = resultCode,
+                    inAppInlineElement = inAppInlineElement,
+                    propertyId = propertyId,
+                    hideIfNotFound = hideIfNotFound,
+                    screenName = screenName,
+                    params = params,
+                    storyPropertyId = storyPropertyId,
+                    storiesListView = storiesListView
+                )
+                return
+            }
+            dispatchPriorInAppMessage(
+                activity = activity,
+                priorInAppMessage = priorInAppMessage,
+                resultCode = resultCode,
+                inAppInlineElement = inAppInlineElement,
+                propertyId = propertyId,
+                hideIfNotFound = hideIfNotFound,
+                screenName = screenName,
+                storyPropertyId = storyPropertyId,
+                storiesListView = storiesListView
+            )
+        } else {
+            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+        }
+    }
+
+    /**
+     * Routes a resolved campaign through the appropriate display path: story, inline, or
+     * full-screen with coupon/countdown handling. Extracted so that A/B-test campaigns can
+     * skip [setNavigation]'s up-front fetch/filter pipeline (which would clobber the
+     * in-memory variant we just materialized) and dispatch straight from the resolution
+     * callback.
+     */
+    private fun dispatchPriorInAppMessage(
+        activity: Activity,
+        priorInAppMessage: InAppMessage,
+        resultCode: Int,
+        inAppInlineElement: InAppInlineElement?,
+        propertyId: String?,
+        hideIfNotFound: Boolean?,
+        screenName: String?,
+        storyPropertyId: String?,
+        storiesListView: StoriesListView?,
+    ) {
+        if (!storyPropertyId.isNullOrEmpty() && storiesListView != null) {
                 val androidSelector = priorInAppMessage.data.inlineTarget?.androidSelector
                 if (androidSelector == storyPropertyId && "STORY".equals(
-                        priorInAppMessage.data.content.type,
+                        priorInAppMessage.data.content?.type,
                         ignoreCase = true
                     )
                 ) {
@@ -127,22 +190,22 @@ class InAppMessageManager :
                 }
             } else {
                 if (storiesListView == null) {
-                    if (!"INLINE".equals(priorInAppMessage.data.content.type, ignoreCase = true) && inAppInlineElement != null) {
+                    if (!"INLINE".equals(priorInAppMessage.data.content?.type, ignoreCase = true) && inAppInlineElement != null) {
                         hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
                         return
                     } else {
-                        if ("COUNTDOWN_TO_WIN".equals(priorInAppMessage.data.content.type, ignoreCase = true) &&
-                            InAppMessageUtils.isCountdownToWinExpired(priorInAppMessage.data.content.params.html)
+                        if ("COUNTDOWN_TO_WIN".equals(priorInAppMessage.data.content?.type, ignoreCase = true) &&
+                            InAppMessageUtils.isCountdownToWinExpired(priorInAppMessage.data.content?.params?.html)
                         ) {
                             DengageLogger.debug("COUNTDOWN_TO_WIN in-app message is expired, skipping display")
                             hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
                             return
                         }
-                        if (priorInAppMessage.data.content.params.html?.let {
+                        if (priorInAppMessage.data.content?.params?.html?.let {
                                 Mustache.hasCouponSection(it)
                             } == true) {
                             val couponContent: String? =
-                                Mustache.getCouponContent(priorInAppMessage.data.content.params.html!!)
+                                Mustache.getCouponContent(priorInAppMessage.data.content!!.params.html!!)
 
                             couponContent?.let { content ->
                                 // Mark as showing immediately to prevent duplicate calls during async validation
@@ -190,9 +253,191 @@ class InAppMessageManager :
                     }
                 }
             }
-        } else {
+    }
+
+    /**
+     * Resolve the A/B variant for an A/B campaign and dispatch the materialized content.
+     *
+     * - Single variant at 100% (winner phase or single-bucket config) is deterministic:
+     *   no /ab/assign call is needed, the lone variant is rendered.
+     * - Control-group buckets render nothing.
+     * - Active phase (>1 variants) requires /ab/assign to pick the variant.
+     */
+    private fun resolveAbVariant(
+        activity: Activity,
+        inAppMessage: InAppMessage,
+        resultCode: Int,
+        inAppInlineElement: InAppInlineElement?,
+        propertyId: String?,
+        hideIfNotFound: Boolean?,
+        screenName: String?,
+        params: HashMap<String, String>?,
+        storyPropertyId: String?,
+        storiesListView: StoriesListView?,
+    ) {
+        val abTest = inAppMessage.data.abTest
+        val variants = abTest?.variants
+        if (abTest == null || variants.isNullOrEmpty()) {
             hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+            return
         }
+
+        // Deterministic path: single variant at 100% (winner phase or single-bucket config).
+        if (abTest.isDeterministic()) {
+            val only = variants[0]
+            if (only.isControlGroup) {
+                // Control bucket — render nothing.
+                hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                return
+            }
+            val materialized = Content.fromVariant(only)
+            if (materialized == null) {
+                DengageLogger.warning("A/B deterministic variant has no renderable content")
+                hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                return
+            }
+            inAppMessage.data.content = materialized
+            dispatchPriorInAppMessage(
+                activity = activity,
+                priorInAppMessage = inAppMessage,
+                resultCode = resultCode,
+                inAppInlineElement = inAppInlineElement,
+                propertyId = propertyId,
+                hideIfNotFound = hideIfNotFound,
+                screenName = screenName,
+                storyPropertyId = storyPropertyId,
+                storiesListView = storiesListView
+            )
+            return
+        }
+
+        // Active phase: ask the backend which variant to render for this impression.
+        val campaignId = inAppMessage.data.publicId
+        if (campaignId.isNullOrEmpty()) {
+            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+            return
+        }
+
+        // Sticky cache: backend doesn't guarantee user-level stickiness (counts are aggregate,
+        // deficit-weighted random can return different variants for back-to-back calls). To
+        // keep the same user on the same variant for the lifetime of an active A/B test, we
+        // persist the first assignment and reuse it on every subsequent impression. Once the
+        // campaign reaches the winner phase, isDeterministic() short-circuits above and the
+        // cache is bypassed entirely.
+        cachedAbAssignment(campaignId)?.let { cachedContentId ->
+            if (cachedContentId == CONTROL_GROUP_MARKER) {
+                hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                return
+            }
+            applyAssignedVariant(
+                inAppMessage = inAppMessage,
+                variants = variants,
+                assignedContentId = cachedContentId,
+                activity = activity,
+                resultCode = resultCode,
+                inAppInlineElement = inAppInlineElement,
+                propertyId = propertyId,
+                hideIfNotFound = hideIfNotFound,
+                screenName = screenName,
+                storyPropertyId = storyPropertyId,
+                storiesListView = storiesListView
+            )
+            return
+        }
+
+        presenter.assignAbVariant(
+            campaignId = campaignId,
+            onAssigned = { response ->
+                if (response.isControlBucket()) {
+                    rememberAbAssignment(campaignId, CONTROL_GROUP_MARKER)
+                    hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                    return@assignAbVariant
+                }
+                val assignedId = response.contentId
+                if (assignedId.isNullOrEmpty()) {
+                    hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                    return@assignAbVariant
+                }
+                rememberAbAssignment(campaignId, assignedId)
+                applyAssignedVariant(
+                    inAppMessage = inAppMessage,
+                    variants = variants,
+                    assignedContentId = assignedId,
+                    activity = activity,
+                    resultCode = resultCode,
+                    inAppInlineElement = inAppInlineElement,
+                    propertyId = propertyId,
+                    hideIfNotFound = hideIfNotFound,
+                    screenName = screenName,
+                    storyPropertyId = storyPropertyId,
+                    storiesListView = storiesListView
+                )
+            },
+            onError = {
+                // /ab/assign failed (network / 404). Skip this impression — backend already
+                // skipped event logging for it. Don't poison the sticky cache on failure.
+                hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+            }
+        )
+    }
+
+    private fun applyAssignedVariant(
+        inAppMessage: InAppMessage,
+        variants: List<com.dengage.sdk.domain.inappmessage.model.AbTestVariant>,
+        assignedContentId: String,
+        activity: Activity,
+        resultCode: Int,
+        inAppInlineElement: InAppInlineElement?,
+        propertyId: String?,
+        hideIfNotFound: Boolean?,
+        screenName: String?,
+        storyPropertyId: String?,
+        storiesListView: StoriesListView?,
+    ) {
+        val variant = variants.firstOrNull {
+            !it.isControlGroup && it.contentId != null && it.contentId.equals(assignedContentId, ignoreCase = true)
+        }
+        if (variant == null) {
+            // Defensive: payload and assignment can briefly disagree across cache refreshes.
+            DengageLogger.warning("A/B assignment contentId not found among local variants; skipping impression")
+            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+            return
+        }
+        val materialized = Content.fromVariant(variant)
+        if (materialized == null) {
+            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+            return
+        }
+        inAppMessage.data.content = materialized
+        dispatchPriorInAppMessage(
+            activity = activity,
+            priorInAppMessage = inAppMessage,
+            resultCode = resultCode,
+            inAppInlineElement = inAppInlineElement,
+            propertyId = propertyId,
+            hideIfNotFound = hideIfNotFound,
+            screenName = screenName,
+            storyPropertyId = storyPropertyId,
+            storiesListView = storiesListView
+        )
+    }
+
+    /**
+     * Returns the sticky variant assignment persisted for this campaign, or null if there
+     * is no cache entry. Entries survive across sessions and app restarts; they are only
+     * superseded when the campaign reaches the deterministic winner phase (which skips the
+     * cache entirely).
+     */
+    @Synchronized
+    private fun cachedAbAssignment(campaignId: String): String? {
+        return Prefs.abTestAssignments[campaignId]
+    }
+
+    @Synchronized
+    private fun rememberAbAssignment(campaignId: String, contentId: String) {
+        val assignments = Prefs.abTestAssignments
+        assignments[campaignId] = contentId
+        Prefs.abTestAssignments = assignments
     }
 
     private fun hideInlineIfNeeded(
@@ -328,11 +573,23 @@ class InAppMessageManager :
                                 }, resultCode
                             )
 
-                            if (!inAppMessage.data.content.params.shouldAnimate) {
+                            if (inAppMessage.data.content?.params?.shouldAnimate != true) {
                                 @Suppress("DEPRECATION")
                                 activity.overridePendingTransition(0, 0)
                             }
                             InAppMessageActivity.inAppMessageCallback = this@InAppMessageManager
+                        }
+
+                        // For A/B campaigns the `content` we set on this object was just a
+                        // per-impression resolution of one variant; the canonical payload has
+                        // `content == null` and carries variants under `abTest`. Strip the
+                        // materialized content out before persisting so the next impression
+                        // re-enters /ab/assign instead of replaying the previous variant.
+                        if (inAppMessage.data.isAbTest() && inAppMessage.data.content != null) {
+                            inAppMessage.data.content = null
+                            if (inAppMessage.data.isRealTime()) {
+                                updateInAppMessageOnCache(inAppMessage)
+                            }
                         }
 
                     }
@@ -519,9 +776,10 @@ class InAppMessageManager :
 
     private fun showAppStory(inAppMessage: InAppMessage, storiesListView: StoriesListView) {
         val data = inAppMessage.data
-        if(!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
+        val storyContentId = data.content?.contentId
+        if(!data.publicId.isNullOrEmpty() && !storyContentId.isNullOrEmpty()) {
             StoriesListView.inAppMessageCallback = this@InAppMessageManager
-            storiesListView.loadInAppMessage(inAppMessage, data.publicId, data.content.contentId)
+            storiesListView.loadInAppMessage(inAppMessage, data.publicId, storyContentId)
             presenter.sendStoryEvent(
                 StoryEventType.DISPLAY,
                 inAppMessage
@@ -539,7 +797,7 @@ class InAppMessageManager :
         buttonUrl: String
     ) {
         val data = inAppMessage.data
-        if (!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
+        if (!data.publicId.isNullOrEmpty() && !data.content?.contentId.isNullOrEmpty()) {
             presenter.sendStoryEvent(
                 eventType,
                 inAppMessage,

@@ -4,6 +4,7 @@ import org.json.JSONObject
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.configuration.usecase.GetVisitorInfo
+import com.dengage.sdk.domain.inappmessage.model.AbTestAssignmentResponse
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.*
@@ -19,6 +20,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val getInAppMessages by lazy { GetInAppMessages() }
     private val getRealTimeInAppMessages by lazy { GetRealTimeInAppMessages() }
     private val getRealTimeInAppMessagesV2 by lazy { GetRealTimeInAppMessagesV2() }
+    private val getRealTimeInAppMessagesV3 by lazy { GetRealTimeInAppMessagesV3() }
+    private val assignAbTestVariantUseCase by lazy { AssignAbTestVariant() }
     private val setInAppMessageAsClicked by lazy { SetInAppMessageAsClicked() }
     private val setRealTimeInAppMessageAsClicked by lazy { SetRealTimeInAppMessageAsClicked() }
     private val setInAppMessageAsDismissed by lazy { SetInAppMessageAsDismissed() }
@@ -80,7 +83,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
                 }
 
-                getRealTimeInAppMessagesV2(this) {
+                getRealTimeInAppMessagesV3(this) {
                     onResponse = {
                         view {
                             fetchedInAppMessages(it, true)
@@ -90,7 +93,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
                         view {
                             showError(it)
-                            getRealTimeInAppMessages(this@InAppMessagePresenter) {
+                            getRealTimeInAppMessagesV2(this@InAppMessagePresenter) {
                                 onResponse = {
                                     view {
                                         fetchedInAppMessages(it, true)
@@ -100,16 +103,33 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                                     Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
                                     view {
                                         showError(it)
+                                        getRealTimeInAppMessages(this@InAppMessagePresenter) {
+                                            onResponse = {
+                                                view {
+                                                    fetchedInAppMessages(it, true)
+                                                }
+                                            }
+                                            onError = {
+                                                Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
+                                                view {
+                                                    showError(it)
+                                                }
+                                            }
+                                            params = GetRealTimeInAppMessages.Params(
+                                                accountId = sdkParameters?.accountName!!,
+                                                appId = sdkParameters.appId!!
+                                            )
+                                        }
                                     }
                                 }
-                                params = GetRealTimeInAppMessages.Params(
+                                params = GetRealTimeInAppMessagesV2.Params(
                                     accountId = sdkParameters?.accountName!!,
                                     appId = sdkParameters.appId!!
                                 )
                             }
                         }
                     }
-                    params = GetRealTimeInAppMessagesV2.Params(
+                    params = GetRealTimeInAppMessagesV3.Params(
                         accountId = sdkParameters?.accountName!!,
                         appId = sdkParameters.appId!!
                     )
@@ -138,7 +158,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         sessionId = SessionManager.getSessionId(),
                         campaignId = inAppMessage.data.publicId!!,
                         messageDetails = inAppMessage.data.messageDetails,
-                        contentId = inAppMessage.data.content.contentId
+                        contentId = inAppMessage.data.content?.contentId
                     )
                 }
             }
@@ -152,7 +172,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         account = sdkParameters?.accountName!!,
                         subscription = Prefs.subscription!!,
                         messageDetails = inAppMessage.data.messageDetails,
-                        contentId = inAppMessage.data.content.contentId
+                        contentId = inAppMessage.data.content?.contentId
                     )
                 }
             }
@@ -184,7 +204,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         campaignId = inAppMessage.data.publicId!!,
                         messageDetails = inAppMessage.data.messageDetails,
                         buttonId = buttonId,
-                        contentId = inAppMessage.data.content.contentId
+                        contentId = inAppMessage.data.content?.contentId
                     )
                 }
             }
@@ -215,7 +235,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         subscription = Prefs.subscription!!,
                         messageDetails = inAppMessage.data.messageDetails,
                         buttonId = buttonId,
-                        contentId = inAppMessage.data.content.contentId
+                        contentId = inAppMessage.data.content?.contentId
                     )
                 }
             }
@@ -252,6 +272,41 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         }
         catch (_:Exception){}
         catch (_:Throwable){}
+    }
+
+    override fun assignAbVariant(
+        campaignId: String,
+        onAssigned: (response: AbTestAssignmentResponse) -> Unit,
+        onError: (throwable: Throwable) -> Unit
+    ) {
+        try {
+            val sdkParameters = Prefs.sdkParameters
+            if (sdkParameters?.accountName == null || sdkParameters.appId == null) {
+                onError(IllegalStateException("Missing SDK parameters for A/B assignment"))
+                return
+            }
+
+            assignAbTestVariantUseCase.execute(this, callback(
+                onStart = null,
+                onResponse = { response ->
+                    if (response != null) {
+                        onAssigned(response)
+                    } else {
+                        onError(IllegalStateException("Empty A/B assignment response"))
+                    }
+                },
+                onError = { throwable -> onError(throwable) },
+                onComplete = null
+            ), AssignAbTestVariant.Params(
+                accountId = sdkParameters.accountName!!,
+                appId = sdkParameters.appId!!,
+                campaignId = campaignId
+            ))
+        } catch (e: Exception) {
+            onError(e)
+        } catch (t: Throwable) {
+            onError(t)
+        }
     }
 
     override fun validateCoupon(
@@ -327,7 +382,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         sessionId = SessionManager.getSessionId(),
                         campaignId = inAppMessage.data.publicId!!,
                         messageDetails = inAppMessage.data.messageDetails,
-                        contentId = inAppMessage.data.content.contentId
+                        contentId = inAppMessage.data.content?.contentId
                     )
                 }
             }
@@ -350,7 +405,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                         account = sdkParameters?.accountName!!,
                         subscription = Prefs.subscription!!,
                         messageDetails = inAppMessage.data.messageDetails,
-                        contentId = inAppMessage.data.content.contentId
+                        contentId = inAppMessage.data.content?.contentId
                     )
                 }
             }
@@ -376,7 +431,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 sessionId = SessionManager.getSessionId(),
                 campaignId = inAppMessage.data.publicId!!,
                 messageDetails = inAppMessage.data.messageDetails,
-                contentId = inAppMessage.data.content.contentId,
+                contentId = inAppMessage.data.content?.contentId,
                 storyProfileId = storyProfileId,
                 storyProfileName = storyProfileName,
                 storyId = storyId,

@@ -13,7 +13,7 @@ class StoryPagerAdapter(
 ) : FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     private val storySet: StorySet
-        get() = inAppMessage.data.content.params.storySet ?: StorySet()
+        get() = inAppMessage.data.content?.params?.storySet ?: StorySet()
 
     override fun getItem(position: Int): Fragment {
         val covers = storySet.covers

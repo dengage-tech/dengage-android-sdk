@@ -57,6 +57,7 @@ enum class PreferenceKey {
     IN_APP_MESSAGE_SHOW_HISTORY,
     SENT_OPEN_EVENT_MESSAGE_DETAILS,
     USER_TRACKING_PERMISSION,
+    AB_TEST_ASSIGNMENTS,
     ;
 
     override fun toString(): String = name

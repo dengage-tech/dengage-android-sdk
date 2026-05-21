@@ -8,4 +8,18 @@ class Content(
     @SerializedName("targetUrl") val targetUrl: String?,
     @SerializedName("props") val params: ContentParams,
     @SerializedName("contentId") val contentId: String? = null
-) : Serializable
+) : Serializable {
+
+    companion object {
+        fun fromVariant(variant: AbTestVariant): Content? {
+            val params = variant.params ?: return null
+            val type = variant.type ?: return null
+            return Content(
+                type = type,
+                targetUrl = null,
+                params = params,
+                contentId = variant.contentId
+            )
+        }
+    }
+}

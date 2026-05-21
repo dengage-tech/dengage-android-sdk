@@ -257,6 +257,17 @@ object Prefs {
         set(value) = preferences.set(PreferenceKey.SENT_OPEN_EVENT_MESSAGE_DETAILS, value)
 
 
+    /**
+     * Per-campaign sticky A/B variant assignments, keyed by campaign publicId. The value is
+     * the resolved variant `contentId`, or the literal string "__CONTROL__" if the user was
+     * bucketed into the control group. The backend does not guarantee user-level stickiness,
+     * so the SDK remembers the first assignment and reuses it until the campaign becomes
+     * deterministic (winner phase) — at which point the cache is bypassed entirely.
+     */
+    internal var abTestAssignments: MutableMap<String, String>
+        get() = preferences.get(PreferenceKey.AB_TEST_ASSIGNMENTS) ?: mutableMapOf()
+        set(value) = preferences.set(PreferenceKey.AB_TEST_ASSIGNMENTS, value)
+
     internal var userTrackingPermission: Boolean
         get() = preferences.get(PreferenceKey.USER_TRACKING_PERMISSION, true) ?: true
         set(value) = preferences.set(PreferenceKey.USER_TRACKING_PERMISSION, value)

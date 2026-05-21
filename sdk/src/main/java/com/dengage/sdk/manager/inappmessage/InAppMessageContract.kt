@@ -1,5 +1,6 @@
 package com.dengage.sdk.manager.inappmessage
 
+import com.dengage.sdk.domain.inappmessage.model.AbTestAssignmentResponse
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
 import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.StoryEventType
@@ -43,6 +44,12 @@ interface InAppMessageContract {
             inAppMessageId: String,
             onValidCoupon: (couponCode: String) -> Unit,
             onInvalidCoupon: (errorMessage: String) -> Unit
+        )
+
+        fun assignAbVariant(
+            campaignId: String,
+            onAssigned: (response: AbTestAssignmentResponse) -> Unit,
+            onError: (throwable: Throwable) -> Unit
         )
     }
 }

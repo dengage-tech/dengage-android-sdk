@@ -80,7 +80,7 @@ open class InAppInlineElement : WebView {
     fun populateInLineInApp(inAppMessageParam: InAppMessage, activityParam: Activity) {
         inAppMessage = inAppMessageParam
         activityContext = activityParam
-        val contentParams = inAppMessage.data.content.params
+        val contentParams = inAppMessage.data.content?.params ?: return
         setHtmlContent(contentParams)
     }
 

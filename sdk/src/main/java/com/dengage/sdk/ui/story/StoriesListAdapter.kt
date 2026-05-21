@@ -27,7 +27,7 @@ class StoriesListAdapter(
     private var isFirstRun = true
 
     val storySet: StorySet
-        get() = inAppMessage.data.content.params.storySet ?: StorySet()
+        get() = inAppMessage.data.content?.params?.storySet ?: StorySet()
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryHolder {
@@ -83,13 +83,13 @@ class StoriesListAdapter(
     override fun getItemCount(): Int = storySet.covers.size
 
     fun setStoryList() {
-        val storySet = inAppMessage.data.content.params.storySet
+        val storySet = inAppMessage.data.content?.params?.storySet
         val storySetId = storySet?.id
 
         if (storySet != null && storySetId != null) {
             val sortedStoryCovers = StoriesListView.inAppMessageCallback?.sortStoryCovers(storySet.covers, storySetId)
             if (sortedStoryCovers != null) {
-                inAppMessage.data.content.params.storySet?.covers = sortedStoryCovers
+                inAppMessage.data.content?.params?.storySet?.covers = sortedStoryCovers
             }
         }
     }

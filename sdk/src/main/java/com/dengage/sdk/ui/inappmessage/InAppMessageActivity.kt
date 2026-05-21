@@ -79,7 +79,10 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
             return
         }
 
-        val contentParams = inAppMessage.data.content.params
+        val contentParams = inAppMessage.data.content?.params ?: run {
+            finish()
+            return
+        }
         setThemeAccordingToContentParams(contentParams)
         setContentView(R.layout.activity_in_app_message)
 
@@ -224,7 +227,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.vInAppMessageContainer -> {
-                if (inAppMessage.data.content.params.dismissOnTouchOutside != false) {
+                if (inAppMessage.data.content?.params?.dismissOnTouchOutside != false) {
                     requestFinishInApp()
                 }
             }
@@ -247,7 +250,7 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
 
     override fun onPause() {
         super.onPause()
-        if (!inAppMessage.data.content.params.shouldAnimate) {
+        if (inAppMessage.data.content?.params?.shouldAnimate != true) {
             overridePendingTransition(0, 0)
         }
     }
