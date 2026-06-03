@@ -1,6 +1,21 @@
 # Changelog
 
 
+## [6.0.92] - 2026-06-03
+
+### New Features
+
+- Implement Live Updates for ongoing-activity notifications (delivery tracking, live scores, etc.)
+- Route `live_notification` FCM data messages through `DengageLiveUpdateManager` with START / UPDATE / END lifecycle validation
+- Register per-activity-type notification handlers via `DengageLiveUpdateManager.register`
+- Manage the full notification lifecycle inside the SDK (channel creation, posting, cancellation, and `dismissalDate` auto-dismissal); handlers only implement `buildNotification`
+- Add new features to App Story
+
+### Documentation
+
+- Add Live Updates section to readme
+
+
 ## [6.0.91] - 2026-05-09
 
 ### New Features

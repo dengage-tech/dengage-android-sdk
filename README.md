@@ -37,6 +37,11 @@
     - [Defining Custom Receiver](#defining-custom-receiver)
     - [Preparing Custom Layouts](#preparing-custom-layouts)
     - [Building Carousel Notification](#building-carousel-notification)
+- [Live Updates](#live-updates)
+  - [How It Works](#how-it-works)
+  - [Implementing a Handler](#implementing-a-handler)
+  - [Registering a Handler](#registering-a-handler)
+  - [Payload Reference](#payload-reference)
 - [App Inbox](#app-inbox)
   - [Methods](#methods)
     - [Getting Inbox Messages](#getting-inbox-messages)
@@ -92,11 +97,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Latest SDK version: `6.0.91`
+Latest SDK version: `6.0.92`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.91'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.92'
 }
 ```
 
@@ -1059,6 +1064,224 @@ class PushNotificationReceiver : NotificationReceiver() {
 }
 ```
 
+## Live Updates
+
+Live Updates let you show a single, continuously updating notification for an ongoing activity — such as a delivery in progress, a live match score, or a ride status. Updates are delivered as silent FCM data messages carrying a `live_notification` payload, and the SDK routes each event to a handler you register for that activity type.
+
+### How It Works
+
+The SDK provides the **framework**; your app provides the **notification design**. No FCM wiring is required on your side — the SDK's messaging service automatically detects `live_notification` data messages and dispatches them.
+
+```
+FCM data message (live_notification)
+        │
+        ▼
+DengageLiveUpdateManager   ──►  parse payload + validate lifecycle (START / UPDATE / END)
+        │
+        ▼
+your LiveUpdateHandler.buildNotification(context, payload)
+        │
+        ▼
+SDK posts / updates / dismisses the notification
+```
+
+The SDK owns the full notification lifecycle — channel creation, posting, cancellation, and auto-dismissal (including `dismissalDate` scheduling). Your handler only builds the notification's visual content.
+
+The event lifecycle is validated automatically:
+
+- **START** — registers the activity and shows the notification.
+- **UPDATE** — refreshes the notification, but only if the activity was already started.
+- **END** — shows the final state (if any content is provided), then dismisses the notification.
+
+### Implementing a Handler
+
+Implement `LiveUpdateHandler` and override `buildNotification`, plus the channel id/name to post on. Return `null` from `buildNotification` if there is nothing to display for a given payload.
+
+`buildNotification` is the single entry point the SDK calls. Inside it you parse the `content_state` and build the notification however you like. A common pattern is to branch on the platform version — using the native progress notification API on Android 16 (API 36) and above, and a custom `RemoteViews` layout on older devices.
+
+The full example below tracks a delivery order through four steps:
+
+```kotlin
+class DeliveryLiveUpdateHandler : LiveUpdateHandler {
+
+    override val channelId = "den_live_update_delivery"
+    override val channelName = "Delivery"
+    override val channelDescription = "Delivery tracking notifications"
+
+    enum class DeliveryStatus(val label: String, val step: Int) {
+        ORDER_RECEIVED("Order received", 1),
+        PREPARING("Preparing", 2),
+        ON_THE_WAY("On the way", 3),
+        DELIVERED("Delivered", 4)
+    }
+
+    // The SDK calls this for every START / UPDATE / END event.
+    override fun buildNotification(context: Context, payload: LiveUpdatePayload): Notification? {
+        val cs = payload.contentState
+        val statusName = cs["delivery_status"] ?: return null
+        val status = runCatching { DeliveryStatus.valueOf(statusName) }.getOrNull() ?: return null
+        val orderId = cs["order_id"] ?: ""
+        val eta = cs["estimated_time"] ?: ""
+
+        val notificationId = payload.activityId.hashCode()
+
+        return if (Build.VERSION.SDK_INT >= 36) {
+            buildApi36(context, orderId, status, eta, notificationId)
+        } else {
+            buildLegacy(context, orderId, status, eta, notificationId)
+        }
+    }
+
+    // Android 16+ (API 36): native ProgressStyle with segments and points.
+    @RequiresApi(36)
+    private fun buildApi36(
+        context: Context, orderId: String, status: DeliveryStatus,
+        eta: String, notificationId: Int
+    ): Notification {
+        val step = status.step
+        val isDelivered = status == DeliveryStatus.DELIVERED
+
+        val segments = (1..4).map { i ->
+            Notification.ProgressStyle.Segment(1).apply {
+                setColor(if (i <= step) 0xFF6200EE.toInt() else 0xFFDDDDDD.toInt())
+            }
+        }
+        val points = (1..3).map { i ->
+            Notification.ProgressStyle.Point(i).apply {
+                setColor(if (i < step) 0xFF6200EE.toInt() else 0xFFDDDDDD.toInt())
+            }
+        }
+        val progressStyle = Notification.ProgressStyle()
+            .setProgress(step)
+            .setProgressSegments(segments)
+            .setProgressPoints(points)
+
+        val subtitle = if (isDelivered) "Order delivered"
+        else "${status.label} · ETA: $eta"
+
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        return Notification.Builder(context, channelId)
+            .setSmallIcon(Icon.createWithResource(context, context.applicationInfo.icon))
+            .setContentTitle("Order #$orderId")
+            .setContentText(subtitle)
+            .setStyle(progressStyle)
+            .setOngoing(!isDelivered)
+            .setOnlyAlertOnce(true)
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
+            .setCategory(Notification.CATEGORY_PROGRESS)
+            .setContentIntent(mainIntent(context, notificationId))
+            .setShortCriticalText(if (isDelivered) "Delivered" else status.label)
+            .apply {
+                // Promote to an ongoing live notification when permitted.
+                if (!isDelivered && nm.canPostPromotedNotifications()) {
+                    addExtras(Bundle().apply {
+                        putBoolean("android.requestPromotedOngoing", true)
+                    })
+                }
+            }
+            .build()
+    }
+
+    // Android < 16: custom RemoteViews layout for the expanded notification.
+    private fun buildLegacy(
+        context: Context, orderId: String, status: DeliveryStatus,
+        eta: String, notificationId: Int
+    ): Notification {
+        val isDelivered = status == DeliveryStatus.DELIVERED
+
+        val expandedView = RemoteViews(context.packageName, R.layout.notification_live_delivery).apply {
+            setTextViewText(R.id.tvLiveDeliveryOrderId, "#$orderId")
+            setTextViewText(R.id.tvLiveDeliveryStatus, status.label)
+            setTextViewText(R.id.tvLiveDeliveryEta, eta)
+            setProgressBar(R.id.progressLiveDelivery, 4, status.step, false)
+            setViewVisibility(R.id.pbLiveDeliverySpinner, if (isDelivered) View.GONE else View.VISIBLE)
+        }
+
+        return NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("Order Tracking")
+            .setContentText(status.label)
+            .setCustomBigContentView(expandedView)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setOngoing(!isDelivered)
+            .setOnlyAlertOnce(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .setContentIntent(mainIntent(context, notificationId))
+            .build()
+    }
+
+    private fun mainIntent(context: Context, requestCode: Int): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java)
+        return PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE)
+    }
+}
+```
+
+**What the handler does:**
+
+- **`buildNotification`** — parses `content_state` into a typed `DeliveryStatus`, returns `null` for unknown/missing status (the SDK then skips posting), and dispatches to the right builder based on the platform version. The `notificationId` is derived from `activityId` so that every update targets the same notification.
+- **`buildApi36`** — uses the native `Notification.ProgressStyle` (Android 16+) to render the four delivery steps as colored segments and points, and requests promotion to an ongoing live notification via `requestPromotedOngoing` when `canPostPromotedNotifications()` allows it.
+- **`buildLegacy`** — renders a custom `RemoteViews` layout with a progress bar for devices below Android 16.
+
+> **Note**: You only build the visual content. Do **not** call `notify`, `cancel`, create channels, or schedule dismissals — the SDK handles all of that, including auto-dismissal via `dismissalDate`. Advanced hosts that need full control may override `onUpdate` directly instead of implementing `buildNotification`.
+
+### Registering a Handler
+
+Register one handler per activity type — typically in your `Application.onCreate()`, after initializing the SDK. The type string must match the `activity_type` sent in the payload.
+
+```kotlin
+override fun onCreate() {
+    super.onCreate()
+
+    Dengage.init(
+        context = applicationContext,
+        firebaseIntegrationKey = "your-firebase-integration-key"
+    )
+
+    DengageLiveUpdateManager.register("delivery", DeliveryLiveUpdateHandler())
+    DengageLiveUpdateManager.register("sports", SportsLiveUpdateHandler())
+}
+```
+
+Additional manager methods:
+
+| Method                          | Description                                                        |
+|---------------------------------|--------------------------------------------------------------------|
+| `register(type, handler)`       | Registers a handler for an activity type (replaces any existing).  |
+| `unregister(type)`              | Removes the handler for the given type.                            |
+| `isRegistered(type): Boolean`   | Whether a handler is registered for the type.                     |
+| `isActive(activityId): Boolean` | Whether the given activity currently has an active session.       |
+
+### Payload Reference
+
+Each event is delivered as a JSON object in the `live_notification` data key:
+
+```json
+{
+  "activity_type": "delivery",
+  "event": "update",
+  "activityId": "90db7e2a-5839-53cd-605f-9d3ffc328e21",
+  "dismissal_date": 1774888005,
+  "content_state": {
+    "order_id": "DNG-8821",
+    "delivery_status": "ON_THE_WAY",
+    "estimated_time": "10 min"
+  }
+}
+```
+
+The SDK parses this into a `LiveUpdatePayload` passed to your handler:
+
+| Field           | Type                  | Description                                                                                  |
+|-----------------|-----------------------|----------------------------------------------------------------------------------------------|
+| `activityType`  | `String`              | Activity type used to resolve the handler (`activity_type`).                                  |
+| `event`         | `LiveUpdateEvent`     | Lifecycle event: `START`, `UPDATE`, or `END`.                                                |
+| `activityId`    | `String`              | Unique id of the activity; the same id updates the same notification.                        |
+| `contentState`  | `Map<String, String>` | Key-value content from `content_state`, used to render the notification.                     |
+| `dismissalDate` | `Long?`               | Optional epoch-seconds timestamp; when set, the SDK auto-dismisses the notification at that time. |
+
 ## App Inbox
 
 App Inbox is a screen within a mobile app that stores persistent messages. It's kind of like an email inbox, but it lives inside the app itself. App Inbox differs from other mobile channels such as push notifications or in-app messages. For both push and in-app messages, they're gone once you open them.
@@ -1373,8 +1596,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.91'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.91'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.92'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.92'
 }
 ```
 
@@ -1535,8 +1758,8 @@ class App : Application() {
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.91'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.91'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.92'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.92'
 }
 ```
 
