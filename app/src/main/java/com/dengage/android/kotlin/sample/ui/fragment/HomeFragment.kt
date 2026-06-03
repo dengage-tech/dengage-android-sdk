@@ -80,6 +80,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         binding.btnRealTimeInAppFilters.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToRealTimeInAppFilters())
         }
+
+        binding.btnLiveUpdate.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToLiveUpdate())
+        }
     }
 
 }

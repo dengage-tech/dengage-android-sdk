@@ -18,6 +18,7 @@ import com.dengage.sdk.domain.rfm.model.RFMItem;
 import com.dengage.sdk.domain.rfm.model.RFMScore;
 import com.dengage.sdk.domain.subscription.model.Subscription;
 import com.dengage.sdk.domain.tag.model.TagItem;
+import com.dengage.sdk.liveupdate.DengageLiveUpdateManager;
 import com.dengage.sdk.util.ContextHolder;
 import com.dengage.sdk.util.DengageLogger;
 import com.google.firebase.FirebaseApp;
@@ -178,6 +179,13 @@ public class DengageManager {
         } catch (Exception e) {
             DengageLogger.INSTANCE.error("saveSubscription: " + e.getMessage());
         }
+    }
+
+    /**
+     * Returns the SDK Live Update manager for displaying and dismissing live notification templates.
+     */
+    public DengageLiveUpdateManager getLiveUpdateManager() {
+        return DengageLiveUpdateManager.INSTANCE;
     }
 
 

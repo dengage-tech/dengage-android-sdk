@@ -9,6 +9,9 @@ import com.dengage.android.kotlin.sample.utils.Constants
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
+import com.dengage.sdk.liveupdate.DengageLiveUpdateManager
+import com.dengage.android.kotlin.sample.liveupdate.DeliveryLiveUpdateHandler
+import com.dengage.android.kotlin.sample.liveupdate.SportsLiveUpdateHandler
 import com.dengage.sdk.util.DengageLifecycleTracker
 import com.dengage.hms.DengageHmsManager
 import com.dengage.geofence.DengageGeofence
@@ -100,6 +103,10 @@ class App : Application() {
         }
 
         DengageGeofence.startGeofence()
+
+        // Register Live Update handlers
+        DengageLiveUpdateManager.register("ExampleAppFirstWidgetAttributes", DeliveryLiveUpdateHandler())
+        DengageLiveUpdateManager.register("ExampleAppSecondWidgetAttributes", SportsLiveUpdateHandler())
 
 
         /*  val filter = IntentFilter(com.dengage.sdk.util.Constants.PUSH_ACTION_CLICK_EVENT)

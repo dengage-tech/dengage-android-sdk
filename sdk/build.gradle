@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace 'com.dengage.sdk'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         minSdk 19
-        targetSdk 35
+        targetSdk 36
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -49,7 +49,7 @@ afterEvaluate {
     }
 }
 dependencies {
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.16.0'
     api 'androidx.multidex:multidex:2.0.1'
 
     // android dependencies

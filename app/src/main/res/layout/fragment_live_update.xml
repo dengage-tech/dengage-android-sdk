@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Template 1: Delivery -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🚚 Template 1: Sipariş Takibi"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#FF222222" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDeliveryStep1"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Sipariş Alındı (Adım 1)" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDeliveryStep2"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Hazırlanıyor (Adım 2)" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDeliveryStep3"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Yolda (Adım 3)" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDeliveryStep4"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Teslim Edildi (Adım 4)" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDeliveryDismiss"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Kapat" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="12dp"
+                android:background="#FFDDDDDD" />
+
+            <!-- Template 2: Sports -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚽ Template 2: Canlı Skor"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#FF222222" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSportsStart"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Maç Başlat (0-0)" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSportsGoal1"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Galatasaray Gol! ⚽" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSportsGoal2"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Fenerbahçe Gol! ⚽" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSportsHalfTime"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Devre Arası" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSportsFullTime"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Maç Bitti" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSportsDismiss"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:text="Kapat" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</layout>
