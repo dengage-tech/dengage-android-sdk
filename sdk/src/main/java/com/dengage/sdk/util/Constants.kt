@@ -22,6 +22,10 @@ object Constants {
     internal const val GEOFENCE_API_URI = "https://tr-push.dengage.com/geoapi/"
 
 
+    // Geofence Engine v2 (contract). ISO 8601, offset'li: 2026-05-18T10:00:00+03:00
+    const val GEOFENCE_ISO_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX"
+    const val GEOFENCE_SYNC_PREFIX = "dengage_v2"
+
     const val SYNCED_GEOFENCES_REQUEST_ID_PREFIX = "dengage_sync"
     const val BUBBLE_STOPPED_GEOFENCE_REQUEST_ID = "dengage_stopped"
     const val BUBBLE_MOVING_GEOFENCE_REQUEST_ID = "dengage_moving"
