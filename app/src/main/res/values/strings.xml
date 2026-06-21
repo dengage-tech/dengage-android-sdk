@@ -66,6 +66,7 @@
     <string name="event_history">Event History</string>
     <string name="cart">Cart</string>
     <string name="app_story">App Story</string>
+    <string name="app_story_size_test_hint">Testing size: this line should sit directly below the story container when hideIfNotFound hides the slot (wrong property id / no match). If you still see a big gap above this text, the story view did not release layout space.</string>
     <string name="real_time_inapp_filters">Real Time InApp Filters</string>
     <string name="live_update">Live Update</string>
     <string name="inapp_inline">InApp Inline</string>

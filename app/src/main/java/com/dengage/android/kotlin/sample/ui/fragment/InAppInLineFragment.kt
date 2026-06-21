@@ -33,6 +33,7 @@ class InAppInLineFragment : BaseDataBindingFragment<FragmentInappInlineBinding>(
                 inAppInlineElement = binding.webview,
                 propertyId = propertyId,
                 activity = requireActivity(),
+                hideIfNotFound = true,
                 customParams = customParams.ifEmpty { null }
             )
         }

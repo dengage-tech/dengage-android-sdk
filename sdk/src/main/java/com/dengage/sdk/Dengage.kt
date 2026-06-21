@@ -1095,14 +1095,16 @@ object Dengage {
         storiesListView: StoriesListView,
         activity: Activity,
         customParams: HashMap<String, String>? = null,
-        screenName: String?
+        screenName: String?,
+        hideIfNotFound: Boolean? = false,
     ) {
         inAppMessageManager.setNavigation(
             storyPropertyId = storyPropertyId,
             storiesListView = storiesListView,
             activity = activity,
             params = customParams,
-            screenName = screenName
+            screenName = screenName,
+            hideIfNotFound = hideIfNotFound,
         )
 
     }

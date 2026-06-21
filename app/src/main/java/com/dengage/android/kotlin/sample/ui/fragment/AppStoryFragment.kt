@@ -32,6 +32,7 @@ class AppStoryFragment : BaseDataBindingFragment<FragmentAppStoryBinding>() {
                 storiesListView = binding.storiesListView,
                 storyPropertyId = storyPropertyId,
                 activity = requireActivity(),
+                hideIfNotFound = true,
                 customParams = customParams.ifEmpty { null }
             )
 
