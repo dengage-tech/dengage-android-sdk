@@ -11,35 +11,24 @@
         android:theme="@style/Theme.DengageAndroid">
         <activity
             android:name=".ui.activity.MainActivity2"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop">
 
+            <!--
+                Deeplink for the sample app. Any URL that starts with
+                "dengagesample://" is routed here. Configure links inside the
+                RecommendationView (or any Dengage content) with targets like:
+                    dengagesample://recommendation?productId=42&name=Shoes
+                The SDK recognizes them as deeplinks because the same prefix is
+                registered via Dengage.inAppLinkConfiguration("dengagesample://").
+            -->
             <intent-filter>
-
-                <!-- below line is to set the action to our intent to view -->
                 <action android:name="android.intent.action.VIEW" />
-                <!-- on below line we are adding a default category to our intent -->
-                <category android:name="android.intent.category.DEFAULT" />
-                <!-- on below line we are adding a category to make our app browsable -->
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!--
-                    on below line we are specifying the host name and
-                    the scheme type from which we will be calling our app
-                -->
-                <data
-                    android:host="www.chaitanyamunje.com"
-                    android:scheme="https" />
-            </intent-filter>
-
-            <!-- below is the same filter as above just the scheme is changed to http -->
-            <!-- so we can open our app with the url starting with https and http as well -->
-            <intent-filter>
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="www.chaitanyamunje.com"
-                    android:scheme="http" />
+                <data android:scheme="dengagesample" />
             </intent-filter>
         </activity>
         <activity

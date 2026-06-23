@@ -88,6 +88,13 @@
             android:layout_marginTop="12dp"
             android:text="Show Recommendation" />
 
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnTestDeeplink"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:layout_marginTop="8dp"
+            android:text="Test Deeplink" />
+
         <com.dengage.sdk.ui.recommendation.RecommendationView
             android:id="@+id/recommendationView"
             android:layout_width="match_parent"

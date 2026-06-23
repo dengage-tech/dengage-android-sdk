@@ -59,7 +59,10 @@ class App : Application() {
         Dengage.setDevelopmentStatus(true)
 
 
-        ////Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")
+        // Register the sample app's deeplink prefix so the SDK treats any URL
+        // starting with it (e.g. links inside a RecommendationView) as a deeplink
+        // and opens it through an ACTION_VIEW intent that MainActivity2 handles.
+        Dengage.inAppLinkConfiguration("dengagesample://")
 
         DengageGeofence.startGeofence()
 

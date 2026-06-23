@@ -1,6 +1,7 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
-import android.graphics.Color
+import android.content.Intent
+import android.net.Uri
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentRecommendationBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
@@ -38,6 +39,15 @@ class RecommendationFragment : BaseDataBindingFragment<FragmentRecommendationBin
                 screenName = screenName.ifEmpty { null },
                 customParams = customParams.ifEmpty { null }
             )
+        }
+
+        // Verifies the sample app's deeplink structure end-to-end without needing
+        // a panel-configured recommendation. Links inside the RecommendationView
+        // should point to the same "dengagesample://" prefix; the SDK then opens
+        // them the same way this button does (ACTION_VIEW -> MainActivity2).
+        binding.btnTestDeeplink.setOnClickListener {
+            val deeplink = Uri.parse("dengagesample://recommendationOrder?productId=42")
+            startActivity(Intent(Intent.ACTION_VIEW, deeplink))
         }
     }
 }
