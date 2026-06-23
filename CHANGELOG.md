@@ -1,5 +1,10 @@
 # Changelog
 
+## [6.0.93] - 2026-06-22
+
+### New Features
+
+- Implement getCancelledSendIds
 
 ## [6.0.92] - 2026-06-03
 

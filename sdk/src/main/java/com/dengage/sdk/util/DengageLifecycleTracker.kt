@@ -18,7 +18,7 @@ open class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
             Dengage.getInAppMessages()
             Dengage.setLastSessionStartTime()
             Dengage.sendAppForegroundEvent()
-            Dengage.getInAppExpiredMessageIds()
+            Dengage.getCancelledInAppMessageIds()
             Dengage.cleanupClientEvents()
             Dengage.syncSubscription()
         }

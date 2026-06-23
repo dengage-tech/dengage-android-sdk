@@ -131,8 +131,8 @@ object Dengage {
                 configurationManager.configurationCallback = null
             }
 
-            override fun fetchInAppExpiredMessageIds() {
-                inAppMessageManager.fetchInAppExpiredMessageIds()
+            override fun fetchCancelledInAppMessageIds() {
+                inAppMessageManager.fetchCancelledInAppMessageIds()
             }
 
             override fun sendSubscription(subscription: Subscription) {
@@ -455,8 +455,8 @@ object Dengage {
         if (current.integrationKey.isEmpty() || current.token.isNullOrEmpty()) return
         subscriptionManager.sendSubscription()
     }
-    fun getInAppExpiredMessageIds() {
-        inAppMessageManager.fetchInAppExpiredMessageIds()
+    fun getCancelledInAppMessageIds() {
+        inAppMessageManager.fetchCancelledInAppMessageIds()
     }
 
     /**

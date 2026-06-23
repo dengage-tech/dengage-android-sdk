@@ -5,7 +5,7 @@ import com.dengage.sdk.data.remote.api.service
 import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
-import com.dengage.sdk.domain.inappmessage.model.InAppRemovalId
+import com.dengage.sdk.domain.inappmessage.model.InAppCancelledSendId
 import com.dengage.sdk.util.extension.getAppId
 import com.dengage.sdk.util.extension.getCdKey
 import com.dengage.sdk.util.extension.getType
@@ -81,15 +81,11 @@ class InAppMessageRepository {
     }
 
 
-    suspend fun getInAppExpiredMessageIds(
-        account: String,
-        subscription: Subscription,
-        sdkParameters: SdkParameters
-    ): MutableList<InAppRemovalId>? {
-        return service.getInAppExpiredMessageIds(
-            account = account,
-            cdKey = subscription.getCdKey(),
-            appId = sdkParameters.getAppId()
+    suspend fun getInAppCancelledSendIds(
+        account: String
+    ): MutableList<InAppCancelledSendId>? {
+        return service.getInAppCancelledSendIds(
+            account = account
         )
     }
     suspend fun sendFirstLaunchEvent(

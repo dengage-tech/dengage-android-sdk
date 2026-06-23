@@ -62,9 +62,6 @@ object Prefs {
         get() = preferences.get(PreferenceKey.IN_APP_MESSAGE_FETCH_TIME, 0) ?: 0
         set(value) = preferences.set(PreferenceKey.IN_APP_MESSAGE_FETCH_TIME, value)
 
-    internal var inAppRemoveFetchTime: Long
-        get() = preferences.get(PreferenceKey.IN_APP_REMOVE_MESSAGE_FETCH_TIME, 0) ?: 0
-        set(value) = preferences.set(PreferenceKey.IN_APP_REMOVE_MESSAGE_FETCH_TIME, value)
 
 
     internal var realTimeInAppMessageFetchTime: Long

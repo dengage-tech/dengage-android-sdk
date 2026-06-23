@@ -24,7 +24,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val setInAppMessageAsDismissed by lazy { SetInAppMessageAsDismissed() }
     private val setRealTimeInAppMessageAsDismissed by lazy { SetRealTimeInAppMessageAsDismissed() }
     private val setInAppMessageAsDisplayed by lazy { SetInAppMessageAsDisplayed() }
-    private val getInAppExpiredMessageIds by lazy { GetInAppExpiredMessageIds() }
+    private val getInAppCancelledSendIds by lazy { GetInAppCancelledSendIds() }
     private val setRealTimeInAppMessageAsDisplayed by lazy { SetRealTimeInAppMessageAsDisplayed() }
     private val sendStoryEvent by lazy { SendStoryEvent() }
     private val getVisitorInfo by lazy { GetVisitorInfo() }
@@ -51,7 +51,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                     onResponse = {
                         view {
                             fetchedInAppMessages(it, false)
-                            fetchInAppExpiredMessageIds()
+                            fetchCancelledInAppMessageIds()
                         }
                     }
                     onError = {
@@ -394,34 +394,28 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         return storyCovers
     }
 
-    override fun fetchInAppExpiredMessageIds() {
+    override fun fetchCancelledInAppMessageIds() {
         val sdkParameters = Prefs.sdkParameters
+        if (!isInAppAvailableInCache()) return
 
-        if (isInAppAvailableInCache()) {
-
-            // control next in app message fetch time
-            if (System.currentTimeMillis() < Prefs.inAppRemoveFetchTime) return
-
-            val nextFetchTimePlus = (sdkParameters?.expiredMessagesFetchIntervalInMin ?: 0) * 60000
-            Prefs.inAppRemoveFetchTime = System.currentTimeMillis() + nextFetchTimePlus
-
-            getInAppExpiredMessageIds(this) {
-                onResponse = {
-                    it?.let {
-                        it.forEach { removeInAppMessageFromCache(it.id) }
+        getInAppCancelledSendIds(this) {
+            onResponse = {
+                it?.let { cancelledList ->
+                    val cancelledIds = cancelledList.map { item -> item.sendId }.toSet()
+                    val inAppMessages = Prefs.inAppMessages
+                    inAppMessages?.removeAll { message ->
+                        val parts = message.id.split("-")
+                        parts.size >= 2 && parts[1].toIntOrNull()?.let { id -> cancelledIds.contains(id) } == true
                     }
+                    Prefs.inAppMessages = inAppMessages
                 }
-                onError = {
-                    Prefs.inAppRemoveFetchTime = System.currentTimeMillis()
-                    view { showError(it) }
-                }
-                params = GetInAppExpiredMessageIds.Params(
-                    account = sdkParameters?.accountName!!,
-                    subscription = Prefs.subscription!!,
-                    sdkParameters = sdkParameters
-
-                )
             }
+            onError = {
+                view { showError(it) }
+            }
+            params = GetInAppCancelledSendIds.Params(
+                account = sdkParameters?.accountName!!
+            )
         }
     }
 

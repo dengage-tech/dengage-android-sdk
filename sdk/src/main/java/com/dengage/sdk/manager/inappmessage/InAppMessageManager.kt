@@ -224,8 +224,8 @@ class InAppMessageManager :
     /**
      * Fetch in app messages if enabled and fetch time is available
      */
-    internal fun fetchInAppExpiredMessageIds() {
-        presenter.fetchInAppExpiredMessageIds()
+    internal fun fetchCancelledInAppMessageIds() {
+        presenter.fetchCancelledInAppMessageIds()
     }
 
     /**

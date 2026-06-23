@@ -36,7 +36,7 @@ interface InAppMessageContract {
 
         fun setStoryCoverShown(storyCoverId: String, storySetId: String)
         fun sortStoryCovers(storyCovers: List<StoryCover>, storySetId: String): List<StoryCover>
-        fun fetchInAppExpiredMessageIds()
+        fun fetchCancelledInAppMessageIds()
         fun getVisitorInfo()
         fun validateCoupon(
             couponContent: String,
