@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.0.95] - 2026-06-29
+
+### New Features
+
+- Add `hideIfNotFound` support to `Dengage.showStoriesList` and `Dengage.showInAppInline` to automatically hide placements when no matching campaign is found
+- Sync cancelled in-app campaigns via the `getCancelledSendIds` API and remove them from the local cache after each in-app fetch
+
+### Bug Fixes
+
+- Clear `StoriesListView` content (title and story list) when the targeted story campaign is unavailable
+- Hide App Story and In-App Inline containers when `hideIfNotFound` is `true` and property id / targeting does not match
+
+### Improvements
+
+- Replace the deprecated `ExpiredInAppMessageRequest` flow with `getCancelledSendIds` for more reliable in-app message cache cleanup
+
 ## [6.0.93] - 2026-06-22
 
 ### New Features
