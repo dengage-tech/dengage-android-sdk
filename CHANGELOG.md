@@ -6,6 +6,18 @@
 
 - Implement getCancelledSendIds
 
+## [6.0.94] - 2026-06-22
+
+### New Features
+
+- Add `hideIfNotFound` support for App Story via `Dengage.showStoriesList`
+- Clear embedded `StoriesListView` content when no matching story campaign is found
+
+### Bug Fixes
+
+- Hide the story placement when `hideIfNotFound` is `true` and property id / targeting does not match
+
+
 ## [6.0.92] - 2026-06-03
 
 ### New Features

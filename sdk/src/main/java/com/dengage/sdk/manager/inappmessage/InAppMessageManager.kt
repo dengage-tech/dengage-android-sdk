@@ -83,7 +83,9 @@ class InAppMessageManager :
             // If both fetches are older than the timeout, log warning and return
             if (timeSinceLastInAppFetch > timeoutMilliseconds && timeSinceLastRealTimeFetch > timeoutMilliseconds) {
                 DengageLogger.warning("setNavigation blocked: No successful in-app message fetch in the last $timeoutMinutes minutes")
-                hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                hidePlacementIfNeeded(
+                    inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
+                )
                 return
             }
         }
@@ -94,7 +96,9 @@ class InAppMessageManager :
         // control next in app message show time
         if (Prefs.isDevelopmentStatusDebug == false) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) {
-                hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                hidePlacementIfNeeded(
+                    inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
+                )
                 return
             }
         }
@@ -103,7 +107,9 @@ class InAppMessageManager :
             InAppMessageUtils.findNotExpiredInAppMessages(Date(), Prefs.inAppMessages)
         Prefs.inAppMessages = inAppMessages
         if (inAppMessages.isNullOrEmpty()) {
-            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+            hidePlacementIfNeeded(
+                inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
+            )
             return
         }
         val priorInAppMessage =
@@ -123,19 +129,32 @@ class InAppMessageManager :
                         ignoreCase = true
                     )
                 ) {
-                    showAppStory(priorInAppMessage, storiesListView)
+                    showAppStory(
+                        priorInAppMessage,
+                        storiesListView,
+                        storyPropertyId,
+                        hideIfNotFound
+                    )
+                } else {
+                    hidePlacementIfNeeded(
+                        null, null, storiesListView, storyPropertyId, hideIfNotFound
+                    )
                 }
             } else {
                 if (storiesListView == null) {
                     if (!"INLINE".equals(priorInAppMessage.data.content.type, ignoreCase = true) && inAppInlineElement != null) {
-                        hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                        hidePlacementIfNeeded(
+                            inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
+                        )
                         return
                     } else {
                         if ("COUNTDOWN_TO_WIN".equals(priorInAppMessage.data.content.type, ignoreCase = true) &&
                             InAppMessageUtils.isCountdownToWinExpired(priorInAppMessage.data.content.params.html)
                         ) {
                             DengageLogger.debug("COUNTDOWN_TO_WIN in-app message is expired, skipping display")
-                            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                            hidePlacementIfNeeded(
+                                inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
+                            )
                             return
                         }
                         if (priorInAppMessage.data.content.params.html?.let {
@@ -172,10 +191,14 @@ class InAppMessageManager :
                                             inAppMessage = priorInAppMessage,
                                             screenName = screenName
                                         )
-                                        hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                                        hidePlacementIfNeeded(
+                                            inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
+                                        )
                                     }
                                 )
-                            } ?: hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+                            } ?: hidePlacementIfNeeded(
+                                inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
+                            )
                         } else {
                             showInAppMessage(
                                 activity,
@@ -191,18 +214,36 @@ class InAppMessageManager :
                 }
             }
         } else {
-            hideInlineIfNeeded(inAppInlineElement, propertyId, hideIfNotFound)
+            hidePlacementIfNeeded(
+                inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
+            )
         }
     }
 
-    private fun hideInlineIfNeeded(
-        inAppInlineElement: InAppInlineElement?,
-        propertyId: String?,
+    private fun handleStoryNotFound(
+        storiesListView: StoriesListView?,
+        storyPropertyId: String?,
         hideIfNotFound: Boolean?,
     ) {
+        if (storyPropertyId.isNullOrEmpty() || storiesListView == null) return
+        storiesListView.clearContent()
+        if (hideIfNotFound == true) {
+            storiesListView.visibility = View.GONE
+        }
+    }
+
+    private fun hidePlacementIfNeeded(
+        inAppInlineElement: InAppInlineElement?,
+        propertyId: String?,
+        storiesListView: StoriesListView?,
+        storyPropertyId: String?,
+        hideIfNotFound: Boolean?,
+    ) {
+        handleStoryNotFound(storiesListView, storyPropertyId, hideIfNotFound)
         if (hideIfNotFound != true) return
-        if (propertyId.isNullOrEmpty()) return
-        inAppInlineElement?.visibility = View.GONE
+        if (!propertyId.isNullOrEmpty()) {
+            inAppInlineElement?.visibility = View.GONE
+        }
     }
 
     /**
@@ -517,15 +558,23 @@ class InAppMessageManager :
         }
     }
 
-    private fun showAppStory(inAppMessage: InAppMessage, storiesListView: StoriesListView) {
+    private fun showAppStory(
+        inAppMessage: InAppMessage,
+        storiesListView: StoriesListView,
+        storyPropertyId: String? = null,
+        hideIfNotFound: Boolean? = false,
+    ) {
         val data = inAppMessage.data
-        if(!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
+        if (!data.publicId.isNullOrEmpty() && !data.content.contentId.isNullOrEmpty()) {
+            storiesListView.visibility = View.VISIBLE
             StoriesListView.inAppMessageCallback = this@InAppMessageManager
             storiesListView.loadInAppMessage(inAppMessage, data.publicId, data.content.contentId)
             presenter.sendStoryEvent(
                 StoryEventType.DISPLAY,
                 inAppMessage
             )
+        } else {
+            hidePlacementIfNeeded(null, null, storiesListView, storyPropertyId, hideIfNotFound)
         }
     }
 

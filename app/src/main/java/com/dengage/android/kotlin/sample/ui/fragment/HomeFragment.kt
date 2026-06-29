@@ -25,8 +25,8 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
         }
 
         binding.btnUserPermission.setOnClickListener {
-        //  findNavController().navigate(HomeFragmentDirections.actionHomeToUserPermission())
-            activity?.let { it1 -> Dengage.setNavigation(it1,"hasnain123") }
+          findNavController().navigate(HomeFragmentDirections.actionHomeToUserPermission())
+           // activity?.let { it1 -> Dengage.setNavigation(it1,"hasnain123") }
         }
 
         binding.btnContactKey.setOnClickListener {

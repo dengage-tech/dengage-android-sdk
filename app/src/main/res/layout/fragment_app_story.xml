@@ -45,9 +45,20 @@
 
         <com.dengage.sdk.ui.story.StoriesListView
             android:id="@+id/storiesListView"
+            android:backgroundTint="@android:color/holo_red_dark"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvStorySizeTestHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:lineSpacingExtra="4dp"
+            android:text="@string/app_story_size_test_hint"
+            android:textColor="#444444"
+            android:textSize="13sp" />
 
     </LinearLayout>
 

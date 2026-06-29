@@ -22,6 +22,7 @@ import androidx.media3.datasource.cache.SimpleCache
 
 class StoriesListView : LinearLayout {
     private var titleView: TextView? = null
+    private var storyRecyclerView: RecyclerView? = null
 
     constructor(context: Context?) : super(context!!) {
         init()
@@ -48,14 +49,21 @@ class StoriesListView : LinearLayout {
                 setMargins(8, 8, 8, 8)
             }
         }
-        recyclerView = RecyclerView(context).apply {
+        storyRecyclerView = RecyclerView(context).apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
                 setMargins(0, 8, 0, 8)
             }
         }
+        recyclerView = storyRecyclerView
         addView(titleView)
-        addView(recyclerView)
+        addView(storyRecyclerView)
+    }
+
+    internal fun clearContent() {
+        titleView?.text = ""
+        titleView?.visibility = GONE
+        storyRecyclerView?.adapter = null
     }
 
     @SuppressLint("UnsafeOptInUsageError")
@@ -80,7 +88,8 @@ class StoriesListView : LinearLayout {
         }
         val storiesListAdapter = StoriesListAdapter(context, inAppMessage, publicId, contentId)
         storiesListAdapter.setStoryList()
-        recyclerView?.adapter = storiesListAdapter
+        storyRecyclerView?.adapter = storiesListAdapter
+        recyclerView = storyRecyclerView
     }
 
     @SuppressLint("UnsafeOptInUsageError")
