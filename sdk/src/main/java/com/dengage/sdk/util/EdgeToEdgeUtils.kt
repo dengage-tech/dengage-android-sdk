@@ -6,6 +6,7 @@ import android.os.Build
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.view.WindowManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -23,10 +24,10 @@ object EdgeToEdgeUtils {
     fun enableEdgeToEdge(activity: Activity) {
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(activity.window, false)
-        
+
         // Set status bar color to primary color
         setStatusBarColor(activity)
-        
+
         // Keep system bars visible but allow content to extend behind them
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // Use a post to ensure the window is fully created
@@ -40,10 +41,10 @@ object EdgeToEdgeUtils {
         } else {
             @Suppress("DEPRECATION")
             activity.window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            )
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    )
         }
     }
 
@@ -54,13 +55,13 @@ object EdgeToEdgeUtils {
     fun enableEdgeToEdgeWithInsets(activity: Activity) {
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(activity.window, false)
-        
+
         // Set status bar color to primary color
         setStatusBarColor(activity)
-        
+
         // Setup insets handling for the activity
         setupActivityEdgeToEdgeInsets(activity)
-        
+
         // Keep system bars visible but allow content to extend behind them
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // Use a post to ensure the window is fully created
@@ -74,10 +75,10 @@ object EdgeToEdgeUtils {
         } else {
             @Suppress("DEPRECATION")
             activity.window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            )
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    )
         }
     }
 
@@ -88,7 +89,22 @@ object EdgeToEdgeUtils {
     fun enableImmersiveEdgeToEdge(activity: Activity) {
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(activity.window, false)
-        
+
+        // Let the window content extend past the system bars (status/navigation) so a
+        // translucent full-screen in-app actually covers the whole screen, including the
+        // area the status bar used to occupy. Without this, the (translucent) window keeps
+        // being laid out below the status bar and a white strip remains at the top.
+        activity.window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+        // Allow content to draw into the display cutout (notch) area so it truly
+        // fills the whole screen, including the top in portrait mode.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            activity.window.attributes = activity.window.attributes.apply {
+                layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        }
+
         // Hide system bars for immersive experience
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // Use a post to ensure the window is fully created
@@ -101,13 +117,13 @@ object EdgeToEdgeUtils {
         } else {
             @Suppress("DEPRECATION")
             activity.window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            )
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    )
         }
     }
 
@@ -167,10 +183,10 @@ object EdgeToEdgeUtils {
         ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val displayCutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
-            
+
             val padding = customPadding(systemBars, displayCutout)
             v.setPadding(padding.left, padding.top, padding.right, padding.bottom)
-            
+
             insets
         }
     }
@@ -186,10 +202,10 @@ object EdgeToEdgeUtils {
         } else {
             @Suppress("DEPRECATION")
             activity.window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            )
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    )
         }
     }
 
@@ -204,13 +220,13 @@ object EdgeToEdgeUtils {
         } else {
             @Suppress("DEPRECATION")
             activity.window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            )
+                    View.SYSTEM_UI_FLAG_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    )
         }
     }
 
@@ -242,10 +258,10 @@ object EdgeToEdgeUtils {
             val typedArray = activity.theme.obtainStyledAttributes(intArrayOf(android.R.attr.colorPrimary))
             val primaryColor = typedArray.getColor(0, Color.BLUE) // Default to blue if not found
             typedArray.recycle()
-            
+
             // Set status bar color
             activity.window.statusBarColor = primaryColor
-            
+
             // Set status bar content to light if primary color is dark
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val isLightColor = isColorLight(primaryColor)
@@ -293,7 +309,7 @@ object EdgeToEdgeUtils {
             } else {
                 // Use deprecated API for older versions
                 @Suppress("DEPRECATION")
-                activity.window.decorView.systemUiVisibility = 
+                activity.window.decorView.systemUiVisibility =
                     activity.window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
             }
         }

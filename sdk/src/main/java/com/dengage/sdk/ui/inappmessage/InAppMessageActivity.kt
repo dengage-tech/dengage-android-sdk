@@ -73,13 +73,19 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ContextHolder.resetContext(this)
-        EdgeToEdgeUtils.enableEdgeToEdge(this)
         inAppMessage = intent.getSerializableExtra(EXTRA_IN_APP_MESSAGE) as? InAppMessage ?: run {
             finish()
             return
         }
 
         val contentParams = inAppMessage.data.content.params
+        // FULL in-app messages should cover the entire screen including the status bar,
+        // so hide the system bars instead of only drawing behind them.
+        if (contentParams.position == ContentPosition.FULL.position) {
+            EdgeToEdgeUtils.enableImmersiveEdgeToEdge(this)
+        } else {
+            EdgeToEdgeUtils.enableEdgeToEdge(this)
+        }
         setThemeAccordingToContentParams(contentParams)
         setContentView(R.layout.activity_in_app_message)
 
@@ -487,9 +493,3 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
         finish()
     }
 }
-
-
-
-
-
-

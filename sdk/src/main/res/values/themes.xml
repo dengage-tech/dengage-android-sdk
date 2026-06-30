@@ -36,7 +36,7 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:backgroundDimEnabled">false</item>
-         <item name="android:windowMinWidthMajor">100%</item>
+        <item name="android:windowMinWidthMajor">100%</item>
         <item name="android:windowMinWidthMinor">100%</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowAnimationStyle">@null</item>
@@ -53,5 +53,8 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:backgroundDimEnabled">false</item>
+        <!-- FULL in-app messages cover the whole screen; hide the status bar from the start
+             so it doesn't reserve space before immersive mode is applied at runtime. -->
+        <item name="android:windowFullscreen">true</item>
     </style>
 </resources>
