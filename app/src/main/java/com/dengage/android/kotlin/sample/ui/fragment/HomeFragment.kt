@@ -49,6 +49,10 @@ class HomeFragment : BaseDataBindingFragment<FragmentHomeBinding>() {
             findNavController().navigate(HomeFragmentDirections.actionHomeToCustomEvent())
         }
 
+        binding.btnInboxChannel.setOnClickListener {
+            findNavController().navigate(HomeFragmentDirections.actionHomeToInboxChannel())
+        }
+
         binding.btnInAppMessage.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeToInAppMessage())
         }
