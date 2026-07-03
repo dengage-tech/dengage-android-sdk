@@ -27,7 +27,7 @@ internal class SqliteFenceRepository(private val dbHelper: GeofenceDbHelper) : F
             if (hasRTree) runCatching { db.delete(TABLE_FENCES_RTREE, null, null) }
             for (f in fences) {
                 val cv = ContentValues().apply {
-                    put("fence_id", f.fenceId)
+                    put("fence_id", f.geofenceId)
                     put("cluster_id", f.clusterId)
                     put("latitude", f.latitude)
                     put("longitude", f.longitude)
@@ -43,7 +43,7 @@ internal class SqliteFenceRepository(private val dbHelper: GeofenceDbHelper) : F
                 if (hasRTree) {
                     runCatching {
                         val rcv = ContentValues().apply {
-                            put("id", f.fenceId)
+                            put("id", f.geofenceId)
                             put("min_lat", f.latitude)
                             put("max_lat", f.latitude)
                             put("min_lon", f.longitude)
@@ -68,8 +68,8 @@ internal class SqliteFenceRepository(private val dbHelper: GeofenceDbHelper) : F
             .take(limit)
     }
 
-    override fun findById(fenceId: Int): Fence? =
-        query("fence_id = ?", arrayOf(fenceId.toString())).firstOrNull()
+    override fun findById(geofenceId: Int): Fence? =
+        query("fence_id = ?", arrayOf(geofenceId.toString())).firstOrNull()
 
     override fun clear() {
         val db = dbHelper.writableDatabase
@@ -95,7 +95,7 @@ internal class SqliteFenceRepository(private val dbHelper: GeofenceDbHelper) : F
             while (c.moveToNext()) {
                 out.add(
                     Fence(
-                        fenceId = c.getInt(iId),
+                        geofenceId = c.getInt(iId),
                         clusterId = c.getInt(iCluster),
                         latitude = c.getDouble(iLat),
                         longitude = c.getDouble(iLon),

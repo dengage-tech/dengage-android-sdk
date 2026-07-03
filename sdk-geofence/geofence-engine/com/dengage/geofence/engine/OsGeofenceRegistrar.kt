@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import com.dengage.geofence.engine.receiver.GeofenceBroadcastReceiver
 import com.dengage.geofence.engine.storage.model.Fence
+import com.dengage.geofence.manager.GeofenceLocationReceiver
 import com.dengage.sdk.domain.geofence.model.sync.GeofenceTriggerType
 import com.dengage.sdk.util.DengageLogger
 import com.google.android.gms.location.Geofence
@@ -49,8 +50,22 @@ class OsGeofenceRegistrar(private val context: Context) {
     }
 
     fun removeAll(onComplete: () -> Unit = {}) {
+        // Eski modül (v1) ile oluşturulmuş leftover geofence'leri de temizle (migration cleanup).
+        // v1, geofence'lerini kendi PendingIntent'leriyle kaydettiği için v2'nin removeGeofences'ı
+        // onları silmez; ayrı ayrı v1 PendingIntent'leriyle silinir.
+        removeLegacyV1Geofences()
         client.removeGeofences(pendingIntent())
             .addOnCompleteListener { onComplete() }
+    }
+
+    private fun removeLegacyV1Geofences() {
+        try {
+            client.removeGeofences(GeofenceLocationReceiver.getSyncedGeofencesPendingIntent(context))
+            client.removeGeofences(GeofenceLocationReceiver.getBubbleGeofencePendingIntent(context))
+            DengageLogger.debug("OsGeofenceRegistrar -> removed legacy v1 geofences")
+        } catch (e: Exception) {
+            DengageLogger.error("OsGeofenceRegistrar -> legacy v1 cleanup failed: ${e.message}")
+        }
     }
 
     private fun buildGeofence(fence: Fence): Geofence? {

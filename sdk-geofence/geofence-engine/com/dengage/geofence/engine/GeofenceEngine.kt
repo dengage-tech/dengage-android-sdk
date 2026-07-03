@@ -102,6 +102,18 @@ internal class GeofenceEngine(private val context: Context) {
         }
     }
 
+    /**
+     * Silent push (sourceType=geofence) ile force resync. Son silent-push zamanını kaydeder ve
+     * sunucudan fence'leri yeniden çeker (contract: ad-hoc/garanti senkronizasyon kanalı).
+     */
+    fun onSilentPush() {
+        storage.syncMetadataRepository.lastSilentPushAt = System.currentTimeMillis()
+        DengageLogger.debug("GeofenceEngine -> silent push resync")
+        forceResync()
+    }
+
+    fun lastSilentPushAt(): Long? = storage.syncMetadataRepository.lastSilentPushAt
+
     fun requestOrganicSync(reason: OrganicSyncTrigger.Reason) {
         if (!remoteConfig.geofenceEnabled()) return
         wakeupCap.attemptResume()

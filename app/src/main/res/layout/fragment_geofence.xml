@@ -21,6 +21,20 @@
             android:layout_marginTop="12dp"
             android:text="@string/button_stop_geofencing" />
 
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLastSilentPushSync"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/base_component_height"
+            android:layout_marginTop="12dp"
+            android:text="@string/button_last_silent_push_sync" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txtLastSilentPushSync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/label_last_silent_push_sync_none" />
+
     </LinearLayout>
 
 </layout>

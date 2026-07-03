@@ -8,7 +8,7 @@ import com.dengage.sdk.domain.geofence.model.sync.SyncFence
  * SQLite + R*Tree storage'a persist edilir. Kampanyalar JSON blob olarak saklanır.
  */
 data class Fence(
-    val fenceId: Int,
+    val geofenceId: Int,
     val clusterId: Int,
     val latitude: Double,
     val longitude: Double,
@@ -21,11 +21,11 @@ data class Fence(
 ) {
     /** OS register'da kullanılacak benzersiz requestId. */
     val requestId: String
-        get() = requestId(clusterId, fenceId)
+        get() = requestId(clusterId, geofenceId)
 
     companion object {
         fun from(sync: SyncFence): Fence = Fence(
-            fenceId = sync.fenceId,
+            geofenceId = sync.geofenceId,
             clusterId = sync.clusterId,
             latitude = sync.latitude,
             longitude = sync.longitude,
@@ -37,18 +37,18 @@ data class Fence(
             campaigns = sync.campaigns
         )
 
-        fun requestId(clusterId: Int, fenceId: Int): String =
-            "${com.dengage.sdk.util.Constants.GEOFENCE_SYNC_PREFIX}_${clusterId}_${fenceId}"
+        fun requestId(clusterId: Int, geofenceId: Int): String =
+            "${com.dengage.sdk.util.Constants.GEOFENCE_SYNC_PREFIX}_${clusterId}_${geofenceId}"
 
-        /** requestId'den (clusterId, fenceId) çıkarır; geçersizse null. */
+        /** requestId'den (clusterId, geofenceId) çıkarır; geçersizse null. */
         fun parseRequestId(requestId: String?): Pair<Int, Int>? {
             if (requestId == null) return null
             if (!requestId.startsWith(com.dengage.sdk.util.Constants.GEOFENCE_SYNC_PREFIX)) return null
             val parts = requestId.split("_")
             if (parts.size < 3) return null
             val clusterId = parts[parts.size - 2].toIntOrNull() ?: return null
-            val fenceId = parts[parts.size - 1].toIntOrNull() ?: return null
-            return clusterId to fenceId
+            val geofenceId = parts[parts.size - 1].toIntOrNull() ?: return null
+            return clusterId to geofenceId
         }
     }
 }

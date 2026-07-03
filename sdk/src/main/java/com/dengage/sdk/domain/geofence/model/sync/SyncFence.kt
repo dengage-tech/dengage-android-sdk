@@ -8,7 +8,7 @@ import java.io.Serializable
  * `activeNow` / `nextStateChangeAt` server-side hesaplanır (K7); cihaz bunları gate olarak kullanır.
  */
 data class SyncFence(
-    @SerializedName("fenceId") val fenceId: Int,
+    @SerializedName("geofenceId") val geofenceId: Int,
     @SerializedName("clusterId") val clusterId: Int,
     @SerializedName("latitude") val latitude: Double,
     @SerializedName("longitude") val longitude: Double,

@@ -11,7 +11,7 @@ internal class SqliteDeviceStateRepository(private val dbHelper: GeofenceDbHelpe
     DeviceStateRepository {
 
     override fun setState(
-        fenceId: Int,
+        geofenceId: Int,
         clusterId: Int,
         state: FenceState,
         enteredAt: Long?,
@@ -19,7 +19,7 @@ internal class SqliteDeviceStateRepository(private val dbHelper: GeofenceDbHelpe
         exitedAt: Long?
     ) {
         val cv = ContentValues().apply {
-            put("fence_id", fenceId)
+            put("fence_id", geofenceId)
             put("cluster_id", clusterId)
             put("state", state.wireValue)
             put("entered_at", enteredAt)
@@ -31,14 +31,14 @@ internal class SqliteDeviceStateRepository(private val dbHelper: GeofenceDbHelpe
         )
     }
 
-    override fun getState(fenceId: Int): DeviceFenceState? {
+    override fun getState(geofenceId: Int): DeviceFenceState? {
         dbHelper.readableDatabase.query(
-            TABLE_DEVICE_STATE, null, "fence_id = ?", arrayOf(fenceId.toString()),
+            TABLE_DEVICE_STATE, null, "fence_id = ?", arrayOf(geofenceId.toString()),
             null, null, null
         ).use { c ->
             if (!c.moveToFirst()) return null
             return DeviceFenceState(
-                fenceId = c.getInt(c.getColumnIndexOrThrow("fence_id")),
+                geofenceId = c.getInt(c.getColumnIndexOrThrow("fence_id")),
                 clusterId = c.getInt(c.getColumnIndexOrThrow("cluster_id")),
                 state = FenceState.fromWire(c.getString(c.getColumnIndexOrThrow("state"))),
                 enteredAt = c.getColumnIndexOrThrow("entered_at").let { if (c.isNull(it)) null else c.getLong(it) },

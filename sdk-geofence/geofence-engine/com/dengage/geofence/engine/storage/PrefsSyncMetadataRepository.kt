@@ -30,10 +30,17 @@ internal class PrefsSyncMetadataRepository : SyncMetadataRepository {
             prefs.edit().putLong(KEY_HEARTBEAT_AT, value ?: 0L).apply()
         }
 
+    override var lastSilentPushAt: Long?
+        get() = prefs.getLong(KEY_SILENT_PUSH_AT, 0L).takeIf { it > 0 }
+        set(value) {
+            prefs.edit().putLong(KEY_SILENT_PUSH_AT, value ?: 0L).apply()
+        }
+
     companion object {
         private const val PREFS_FILE = "dengage_geofence_engine_prefs"
         private const val KEY_ETAG = "etag"
         private const val KEY_SYNCED_AT = "synced_at"
         private const val KEY_HEARTBEAT_AT = "heartbeat_at"
+        private const val KEY_SILENT_PUSH_AT = "silent_push_at"
     }
 }

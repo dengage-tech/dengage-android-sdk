@@ -15,4 +15,7 @@ data class QueuedEvent(
     val latitude: Double,
     val longitude: Double,
     val occurredAtMillis: Long
-)
+) {
+    /** geofenceId <= 0 (ör. eski alan uyumsuzluğundan kalan bayat event'ler) geçersiz sayılır. */
+    val isValid: Boolean get() = geofenceId > 0
+}

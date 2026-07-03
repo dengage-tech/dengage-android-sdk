@@ -24,7 +24,7 @@ enum class FenceState {
 
 /** Cihaz başına fence state kaydı. */
 data class DeviceFenceState(
-    val fenceId: Int,
+    val geofenceId: Int,
     val clusterId: Int,
     val state: FenceState,
     val enteredAt: Long?,

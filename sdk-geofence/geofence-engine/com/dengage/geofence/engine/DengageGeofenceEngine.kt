@@ -64,6 +64,25 @@ class DengageGeofenceEngine private constructor(context: Context) {
         engine.onAppForeground()
     }
 
+    /**
+     * Silent push hook. `sourceType == geofence` olan data-only push geldiğinde fence'leri sunucudan
+     * yeniden çeker (force resync) ve son silent-push senkronizasyon zamanını kaydeder.
+     * @return işlendi (sourceType=geofence) ise true.
+     */
+    fun handleSilentPush(data: Map<String, String?>?): Boolean {
+        val sourceType = data?.get(KEY_SOURCE_TYPE)
+        if (!SOURCE_TYPE_GEOFENCE.equals(sourceType, ignoreCase = true)) {
+            return false
+        }
+        ensureInitialized()
+        DengageLogger.debug("DengageGeofenceEngine -> silent push (sourceType=geofence) received")
+        engine.onSilentPush()
+        return true
+    }
+
+    /** Silent push ile yapılan son resync zamanı (epoch millis) veya henüz yoksa null. */
+    fun lastSilentPushSyncAt(): Long? = engine.lastSilentPushAt()
+
     /** OS'tan gelen geofence transition'ı işler (receiver tarafından çağrılır). */
     internal fun handleGeofenceTransition(transitionType: Int, requestIds: List<String>, location: Location?) {
         engine.handleGeofenceTransition(transitionType, requestIds, location)
@@ -94,6 +113,9 @@ class DengageGeofenceEngine private constructor(context: Context) {
     }
 
     companion object {
+        private const val KEY_SOURCE_TYPE = "sourceType"
+        private const val SOURCE_TYPE_GEOFENCE = "geofence"
+
         @Volatile
         private var instance: DengageGeofenceEngine? = null
 

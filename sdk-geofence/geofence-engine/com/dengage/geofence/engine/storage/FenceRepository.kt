@@ -12,6 +12,6 @@ interface FenceRepository {
      * [activeOnly] = true ise sadece `activeNow` fence'ler döner (K7 gate).
      */
     fun nearest(lat: Double, lon: Double, limit: Int, activeOnly: Boolean): List<Fence>
-    fun findById(fenceId: Int): Fence?
+    fun findById(geofenceId: Int): Fence?
     fun clear()
 }

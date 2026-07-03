@@ -55,6 +55,9 @@
     <string name="remove_time">Remove Time</string>
     <string name="button_request_location_permission">Request Location Permission</string>
     <string name="button_stop_geofencing">Stop Geofencing</string>
+    <string name="button_last_silent_push_sync">Show Last Silent Push Sync</string>
+    <string name="label_last_silent_push_sync_none">Last silent push sync: none yet</string>
+    <string name="label_last_silent_push_sync">Last silent push sync: %1$s</string>
     <string name="button_geofence">Geofence</string>
     <string name="clear_device_info">Clear Device Info</string>
     <string name="add_new_device_info">Add New Device Info</string>

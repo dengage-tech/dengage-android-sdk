@@ -45,13 +45,43 @@ class TriggerHandler(
         for (requestId in requestIds) {
             val ids = Fence.parseRequestId(requestId) ?: continue
             val fence = fenceRepository.findById(ids.second) ?: continue
+            if (fence.geofenceId <= 0) {
+                DengageLogger.debug("TriggerHandler -> skipping invalid fence (geofenceId<=0)")
+                continue
+            }
+
+            // Edge-detection / dedup: OS aynı fiziksel geçiş için birden fazla callback verebilir
+            // (initialTrigger + normal ENTER, tekrar register sonrası, vb.).
+            // Sadece gerçek durum değişikliğinde tetikle; aksi halde çift event-signal gider.
+            val previous = deviceStateRepository.getState(fence.geofenceId)
+            if (isDuplicateTransition(eventType, previous?.state)) {
+                DengageLogger.debug("TriggerHandler -> duplicate ${eventType.wireValue} for fence ${fence.geofenceId}, skipping")
+                continue
+            }
 
             updateDeviceState(fence, eventType, now)
+
+            // Davranış paritesi: enter'da host interceptor'ı tetikle (v1 ile aynı hook)
+            if (eventType == GeofenceEventType.ENTER) {
+                try {
+                    com.dengage.geofence.DengageGeofence.geofenceInterceptor?.onGeofenceEnter(
+                        latitude = fence.latitude,
+                        longitude = fence.longitude,
+                        radius = fence.radiusM,
+                        clusterId = fence.clusterId,
+                        clusterName = null,
+                        geofenceItemId = fence.geofenceId,
+                        geofenceItemName = fence.title
+                    )
+                } catch (e: Exception) {
+                    DengageLogger.error("TriggerHandler -> interceptor threw: ${e.message}")
+                }
+            }
 
             val matchingTrigger = eventTypeToTrigger(eventType)
             val matchingCampaigns = fence.campaigns.filter { it.triggerType == matchingTrigger }
             if (matchingCampaigns.isEmpty()) {
-                DengageLogger.debug("TriggerHandler -> no ${matchingTrigger.wireValue} campaign for fence ${fence.fenceId}")
+                DengageLogger.debug("TriggerHandler -> no ${matchingTrigger.wireValue} campaign for fence ${fence.geofenceId}")
                 continue
             }
 
@@ -80,7 +110,7 @@ class TriggerHandler(
     ) {
         val event = QueuedEvent(
             idempotencyKey = UUID.randomUUID().toString(),
-            geofenceId = fence.fenceId,
+            geofenceId = fence.geofenceId,
             clusterId = fence.clusterId,
             campaignId = campaign.campaignId,
             eventType = eventType,
@@ -98,7 +128,7 @@ class TriggerHandler(
         } else {
             // Offline: local notification anında (K10) + event kuyruğa (online olunca flush)
             campaign.offlinePushContent?.let {
-                notificationFirer.fire(it, fence.fenceId, campaign.campaignId)
+                notificationFirer.fire(it, fence.geofenceId, campaign.campaignId)
             }
             eventQueue.enqueue(event, configProvider())
             DengageLogger.debug("TriggerHandler -> offline trigger queued ${event.idempotencyKey}")
@@ -108,25 +138,36 @@ class TriggerHandler(
     private fun updateDeviceState(fence: Fence, eventType: GeofenceEventType, now: Long) {
         when (eventType) {
             GeofenceEventType.ENTER -> deviceStateRepository.setState(
-                fence.fenceId, fence.clusterId, FenceState.INSIDE,
+                fence.geofenceId, fence.clusterId, FenceState.INSIDE,
                 enteredAt = now, lastSeenAt = now, exitedAt = null
             )
             GeofenceEventType.DWELL -> {
-                val existing = deviceStateRepository.getState(fence.fenceId)
+                val existing = deviceStateRepository.getState(fence.geofenceId)
                 deviceStateRepository.setState(
-                    fence.fenceId, fence.clusterId, FenceState.INSIDE,
+                    fence.geofenceId, fence.clusterId, FenceState.INSIDE,
                     enteredAt = existing?.enteredAt ?: now, lastSeenAt = now, exitedAt = null
                 )
             }
             GeofenceEventType.EXIT -> {
-                val existing = deviceStateRepository.getState(fence.fenceId)
+                val existing = deviceStateRepository.getState(fence.geofenceId)
                 deviceStateRepository.setState(
-                    fence.fenceId, fence.clusterId, FenceState.OUTSIDE,
+                    fence.geofenceId, fence.clusterId, FenceState.OUTSIDE,
                     enteredAt = existing?.enteredAt, lastSeenAt = now, exitedAt = now
                 )
             }
         }
     }
+
+    /**
+     * Aynı geçiş için tekrarlanan OS callback'lerini ele: enter yalnızca cihaz INSIDE değilken,
+     * exit yalnızca INSIDE'ken gerçek geçiştir. Dwell explicit zamanlandığı için hariç.
+     */
+    private fun isDuplicateTransition(eventType: GeofenceEventType, previous: FenceState?): Boolean =
+        when (eventType) {
+            GeofenceEventType.ENTER -> previous == FenceState.INSIDE
+            GeofenceEventType.EXIT -> previous == null || previous == FenceState.OUTSIDE
+            GeofenceEventType.DWELL -> false
+        }
 
     private fun transitionToEventType(transition: Int): GeofenceEventType? = when (transition) {
         Geofence.GEOFENCE_TRANSITION_ENTER -> GeofenceEventType.ENTER

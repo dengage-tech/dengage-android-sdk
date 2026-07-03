@@ -25,8 +25,18 @@ class EventQueueFlusher(
         val batch = eventQueue.dequeueBatch(batchSize)
         if (batch.isEmpty()) return
 
+        // Geçersiz (geofenceId <= 0) event'leri gönderme; kuyruktan temizle.
+        // (Eski geofenceId alan uyumsuzluğundan kalan bayat replay event'leri buraya düşer.)
+        val invalid = batch.filter { !it.isValid }
+        if (invalid.isNotEmpty()) {
+            eventQueue.ack(invalid.map { it.idempotencyKey })
+            DengageLogger.debug("EventQueueFlusher -> purged ${invalid.size} invalid (geofenceId<=0) events")
+        }
+        val valid = batch.filter { it.isValid }
+        if (valid.isEmpty()) return
+
         val acked = mutableListOf<String>()
-        for (event in batch) {
+        for (event in valid) {
             val sent = send(integrationKey, subscription.deviceId, subscription.contactKey, event, GeofenceEventSource.REPLAY)
             if (sent) acked.add(event.idempotencyKey) else break // network düştüyse dur, kalanı sonraki flush'a bırak
         }
@@ -38,6 +48,11 @@ class EventQueueFlusher(
 
     /** Online tek event gönderimi; başarısızsa kuyruğa bırakılması çağırana aittir. */
     suspend fun sendOnline(event: QueuedEvent): Boolean {
+        // Geçersiz event kuyruğa bırakılmasın (true dön ki çağıran enqueue etmesin).
+        if (!event.isValid) {
+            DengageLogger.debug("EventQueueFlusher -> dropping invalid event (geofenceId<=0)")
+            return true
+        }
         val subscription = Prefs.subscription ?: return false
         val integrationKey = subscription.integrationKey
         if (integrationKey.isBlank()) return false

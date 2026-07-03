@@ -19,7 +19,7 @@ import com.dengage.sdk.util.DengageLogger
  */
 class LocalNotificationFirer(private val context: Context) {
 
-    fun fire(content: OfflinePushContent, fenceId: Int, campaignId: Int?) {
+    fun fire(content: OfflinePushContent, geofenceId: Int, campaignId: Int?) {
         val title = content.title
         val body = content.body
         if (title.isNullOrBlank() && body.isNullOrBlank()) {
@@ -37,19 +37,19 @@ class LocalNotificationFirer(private val context: Context) {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
-        deepLinkIntent(content.deepLink, fenceId)?.let { builder.setContentIntent(it) }
+        deepLinkIntent(content.deepLink, geofenceId)?.let { builder.setContentIntent(it) }
 
-        val notificationId = campaignId ?: fenceId
+        val notificationId = campaignId ?: geofenceId
         try {
             NotificationManagerCompat.from(context).notify(notificationId, builder.build())
-            DengageLogger.debug("LocalNotificationFirer -> fired notification id=$notificationId (fence=$fenceId)")
+            DengageLogger.debug("LocalNotificationFirer -> fired notification id=$notificationId (fence=$geofenceId)")
         } catch (e: SecurityException) {
             // POST_NOTIFICATIONS izni yoksa (Android 13+)
             DengageLogger.error("LocalNotificationFirer -> notify failed: ${e.message}")
         }
     }
 
-    private fun deepLinkIntent(deepLink: String?, fenceId: Int): PendingIntent? {
+    private fun deepLinkIntent(deepLink: String?, geofenceId: Int): PendingIntent? {
         if (deepLink.isNullOrBlank()) return null
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink)).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -59,7 +59,7 @@ class LocalNotificationFirer(private val context: Context) {
             flags = flags or PendingIntent.FLAG_IMMUTABLE
         }
         return try {
-            PendingIntent.getActivity(context, fenceId, intent, flags)
+            PendingIntent.getActivity(context, geofenceId, intent, flags)
         } catch (e: Exception) {
             null
         }
