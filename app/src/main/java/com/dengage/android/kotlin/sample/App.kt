@@ -90,6 +90,7 @@ class App : Application() {
                     "GeofenceInterceptor",
                     "enter | lat=$latitude, lon=$longitude, radius=$radius, clusterId=$clusterId, clusterName=$clusterName, itemId=$geofenceItemId, itemName=$geofenceItemName"
                 )
+                /*
                 showGeofenceEnterNotification(
                     latitude = latitude,
                     longitude = longitude,
@@ -99,6 +100,7 @@ class App : Application() {
                     geofenceItemId = geofenceItemId,
                     geofenceItemName = geofenceItemName
                 )
+                */
             }
         }
 

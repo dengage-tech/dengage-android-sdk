@@ -6,6 +6,7 @@ import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 /**
  * `POST /event-signal/{integrationKey}` v2 body (contract §3).
@@ -28,10 +29,14 @@ data class GeofenceEventSignalRequestV2(
 ) : Serializable {
 
     companion object {
-        fun isoNow(): String =
-            SimpleDateFormat(Constants.GEOFENCE_ISO_DATE_FORMAT, Locale.US).format(Date())
+        // UTC + `XXX` pattern → sıfır offset `Z` olarak render edilir (iOS ile birebir: `2026-07-03T12:43:15Z`).
+        private fun isoFormatter(): SimpleDateFormat =
+            SimpleDateFormat(Constants.GEOFENCE_ISO_DATE_FORMAT, Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
 
-        fun iso(millis: Long): String =
-            SimpleDateFormat(Constants.GEOFENCE_ISO_DATE_FORMAT, Locale.US).format(Date(millis))
+        fun isoNow(): String = isoFormatter().format(Date())
+
+        fun iso(millis: Long): String = isoFormatter().format(Date(millis))
     }
 }

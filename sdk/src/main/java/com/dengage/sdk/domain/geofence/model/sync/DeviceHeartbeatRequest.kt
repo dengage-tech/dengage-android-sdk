@@ -6,6 +6,7 @@ import java.io.Serializable
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 /**
  * `POST /devices/heartbeat/{integrationKey}` body (contract §2). `device_last_location` UPSERT besler.
@@ -33,6 +34,8 @@ data class DeviceHeartbeatRequest(
         longitude = longitude,
         accuracyM = accuracyM,
         capturedAt = SimpleDateFormat(Constants.GEOFENCE_ISO_DATE_FORMAT, Locale.US)
+            // UTC → sıfır offset `Z` olarak render edilir (iOS ile birebir: `2026-07-03T12:43:15Z`).
+            .apply { timeZone = TimeZone.getTimeZone("UTC") }
             .format(Date(capturedAtMillis))
     )
 }
