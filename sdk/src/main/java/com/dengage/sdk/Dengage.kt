@@ -21,6 +21,8 @@ import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
 import com.dengage.sdk.domain.inappmessage.model.Cart
 import com.dengage.sdk.domain.configuration.model.AppTracking
 import com.dengage.sdk.domain.configuration.model.SdkParameters
+import com.dengage.sdk.domain.inboxchannel.model.InboxChannelEvent
+import com.dengage.sdk.domain.inboxchannel.model.InboxChannelMessage
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.rfm.model.RFMGender
@@ -36,6 +38,7 @@ import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
 import com.dengage.sdk.manager.inappmessage.session.InAppSessionManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
+import com.dengage.sdk.manager.inboxchannel.InboxChannelManager
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
 import com.dengage.sdk.manager.session.SessionManager
@@ -68,6 +71,7 @@ object Dengage {
     val liveUpdateManager get() = DengageLiveUpdateManager
     private val inAppMessageManager by lazy { InAppMessageManager() }
     private val inboxMessageManager by lazy { InboxMessageManager() }
+    private val inboxChannelManager by lazy { InboxChannelManager() }
     private val tagManager by lazy { TagManager() }
     private val eventManager by lazy { EventManager() }
     private val rfmManager by lazy { RFMManager() }
@@ -364,6 +368,33 @@ object Dengage {
      */
     fun setAllInboxMessagesAsClicked() {
         inboxMessageManager.setAllInboxMessagesAsClicked()
+    }
+
+    /**
+     * Get Inbox Channel messages (new /api/inbox/getMessages endpoint).
+     *
+     * @param limit max number of messages to fetch (min: 1, max: 100, default: 20).
+     * @param dengageCallback callback delivering the fetched messages.
+     */
+    fun getInboxChannelMessages(
+        limit: Int = 20,
+        dengageCallback: DengageCallback<MutableList<InboxChannelMessage>>
+    ) {
+        inboxChannelManager.getInboxChannelMessages(
+            limit = limit,
+            dengageCallback = dengageCallback
+        )
+    }
+
+    /**
+     * Send one or more Inbox Channel events (IM/OP/CL/DT) in a single bulk
+     * request to the /api/inbox/events endpoint. The event date is stamped as
+     * UTC now by the SDK.
+     *
+     * @param events the interactions to report.
+     */
+    fun sendInboxChannelEvents(events: List<InboxChannelEvent>) {
+        inboxChannelManager.sendInboxChannelEvents(events)
     }
 
     fun getInAppMessages() {

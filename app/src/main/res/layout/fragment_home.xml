@@ -48,6 +48,13 @@
                 android:text="@string/button_inbox_messages" />
 
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnInboxChannel"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="8dp"
+                android:text="@string/button_inbox_channel" />
+
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnCustomEvents"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/base_component_height"

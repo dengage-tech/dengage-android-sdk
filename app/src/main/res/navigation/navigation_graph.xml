@@ -26,6 +26,9 @@
             android:id="@+id/actionHomeToInboxMessages"
             app:destination="@id/inboxMessagesFragment" />
         <action
+            android:id="@+id/actionHomeToInboxChannel"
+            app:destination="@id/inboxChannelFragment" />
+        <action
             android:id="@+id/actionHomeToCustomEvent"
             app:destination="@id/customEventFragment" />
         <action
@@ -78,6 +81,12 @@
         android:name="com.dengage.android.kotlin.sample.ui.fragment.InboxMessagesFragment"
         android:label="fragment_inbox_messages"
         tools:layout="@layout/fragment_inbox_messages" />
+
+    <fragment
+        android:id="@+id/inboxChannelFragment"
+        android:name="com.dengage.android.kotlin.sample.ui.fragment.InboxChannelFragment"
+        android:label="fragment_inbox_channel"
+        tools:layout="@layout/fragment_inbox_channel" />
     <fragment
         android:id="@+id/customEventFragment"
         android:name="com.dengage.android.kotlin.sample.ui.fragment.CustomEventFragment"
