@@ -3,7 +3,7 @@ package com.dengage.geofence
 import android.app.Activity
 import android.content.Context
 import android.location.Location
-import com.dengage.geofence.engine.DengageGeofenceEngine
+import com.dengage.geofenceengine.DengageGeofenceEngine
 import com.dengage.geofence.manager.GeofencePermissionsHelper
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.domain.geofence.model.GeofenceLocationSource

@@ -5,7 +5,7 @@ import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentGeofenceBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
 import com.dengage.geofence.DengageGeofence
-import com.dengage.geofence.engine.DengageGeofenceEngine
+import com.dengage.geofenceengine.DengageGeofenceEngine
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

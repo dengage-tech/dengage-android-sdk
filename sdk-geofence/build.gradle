@@ -36,13 +36,6 @@ android {
         buildConfig = true
     }
 
-    // Geofence Engine v2 — yeni modül açmadan, ayrı "geofence-engine" klasörü kaynak kökü olarak eklenir.
-    sourceSets {
-        main {
-            java.srcDirs += 'geofence-engine'
-        }
-    }
-
 }
 afterEvaluate {
     publishing {

@@ -12,7 +12,7 @@ import com.dengage.sdk.util.DengageLogger
  */
 object GeofenceSilentPushDispatcher {
 
-    private const val ENGINE_CLASS = "com.dengage.geofence.engine.DengageGeofenceEngine"
+    private const val ENGINE_CLASS = "com.dengage.geofenceengine.DengageGeofenceEngine"
     private const val SOURCE_TYPE_KEY = "sourceType"
     private const val SOURCE_TYPE_GEOFENCE = "geofence"
 

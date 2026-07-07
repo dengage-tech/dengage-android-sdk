@@ -33,7 +33,7 @@
 
     <!-- Geofence Engine v2 (doc 21 §6.6) -->
     <receiver
-        android:name=".engine.receiver.GeofenceBroadcastReceiver"
+        android:name="com.dengage.geofenceengine.receiver.GeofenceBroadcastReceiver"
         android:enabled="true"
         android:exported="false">
         <intent-filter>
