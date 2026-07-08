@@ -9,6 +9,9 @@
         android:layout_height="wrap_content"
         android:layout_toStartOf="@+id/ll_action_buttons"
         android:layout_marginEnd="10dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
         android:orientation="vertical">
 
         <TextView
@@ -42,6 +45,14 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:textColor="@color/dengage_color_black"
+            android:textSize="@dimen/small_text_size" />
+
+        <TextView
+            android:id="@+id/tv_links"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:textColor="#1565C0"
             android:textSize="@dimen/small_text_size" />
 
     </LinearLayout>

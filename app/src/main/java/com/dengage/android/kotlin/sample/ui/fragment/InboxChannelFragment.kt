@@ -1,5 +1,7 @@
 package com.dengage.android.kotlin.sample.ui.fragment
 
+import android.content.Intent
+import android.net.Uri
 import android.view.View
 import android.widget.Toast
 import com.dengage.android.kotlin.sample.R
@@ -60,7 +62,30 @@ class InboxChannelFragment : BaseDataBindingFragment<FragmentInboxChannelBinding
 
     override fun onClick(message: InboxChannelMessage) {
         Dengage.sendInboxChannelEvents(listOf(message.toEvent(InboxChannelEventType.CLICK)))
-        Toast.makeText(context, "CTA clicked (CL sent)", Toast.LENGTH_SHORT).show()
+        openDeeplink(message)
+    }
+
+    override fun onMessageClicked(message: InboxChannelMessage) {
+        // Report the click (CL) and route to the message's deeplink.
+        Dengage.sendInboxChannelEvents(listOf(message.toEvent(InboxChannelEventType.CLICK)))
+        message.isRead = true
+        adapter.setItems(messages)
+        openDeeplink(message)
+    }
+
+    private fun openDeeplink(message: InboxChannelMessage) {
+        val cta = message.data.ctaButtons?.firstOrNull()
+        val target = cta?.androidDeeplink?.takeIf { it.isNotBlank() }
+            ?: cta?.webUrl?.takeIf { it.isNotBlank() }
+        if (target == null) {
+            Toast.makeText(context, "No deeplink for this message", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(target)))
+        } catch (e: Exception) {
+            Toast.makeText(context, "Cannot open: $target", Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onDelete(message: InboxChannelMessage) {
