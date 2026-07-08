@@ -11,4 +11,7 @@ data class InboxChannelMessage(
     @SerializedName("isRead") var isRead: Boolean = false,
     @SerializedName("priority") val priority: Int = 0,
     @SerializedName("messageJson") val data: InboxChannelMessageData
-) : Serializable
+) : Serializable {
+    /** Local-only flag; not returned by the server. Reflects a pending delete. */
+    var isDeleted: Boolean = false
+}

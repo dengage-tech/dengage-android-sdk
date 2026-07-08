@@ -41,6 +41,22 @@ class InboxChannelAdapter(
             itemView.findViewById<TextView>(R.id.tv_receive_date).text =
                 itemView.context.getString(R.string.receive_date_time, formattedDate)
 
+            val cta = item.data.ctaButtons?.firstOrNull()
+            val linksView = itemView.findViewById<TextView>(R.id.tv_links)
+            val deeplink = cta?.androidDeeplink?.takeIf { it.isNotBlank() }
+            val webUrl = cta?.webUrl?.takeIf { it.isNotBlank() }
+            val linkText = listOfNotNull(
+                deeplink?.let { "androidDeeplink: $it" },
+                webUrl?.let { "webUrl: $it" }
+            ).joinToString("\n")
+            linksView.text = linkText
+            linksView.visibility = if (linkText.isEmpty()) View.GONE else View.VISIBLE
+
+            // Tapping the message body opens its deeplink (falling back to the web url).
+            itemView.findViewById<View>(R.id.ll_content).setOnClickListener {
+                callback.onMessageClicked(item)
+            }
+
             val openButton = itemView.findViewById<AppCompatButton>(R.id.btn_open)
             if (item.isRead) {
                 openButton.visibility = View.GONE
@@ -87,5 +103,6 @@ class InboxChannelAdapter(
         fun onOpen(message: InboxChannelMessage)
         fun onClick(message: InboxChannelMessage)
         fun onDelete(message: InboxChannelMessage)
+        fun onMessageClicked(message: InboxChannelMessage)
     }
 }

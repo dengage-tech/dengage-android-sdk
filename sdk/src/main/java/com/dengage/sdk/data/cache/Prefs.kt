@@ -10,6 +10,7 @@ import com.dengage.sdk.domain.configuration.model.VisitorInfo
 import com.dengage.sdk.domain.event.model.ClientEvent
 import com.dengage.sdk.domain.geofence.model.GeofenceHistory
 import com.dengage.sdk.domain.inappmessage.model.InAppMessage
+import com.dengage.sdk.domain.inboxchannel.model.InboxChannelMessageCache
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.rfm.model.RFMScore
@@ -208,6 +209,10 @@ object Prefs {
     internal var inboxMessages: MutableList<InboxMessage>?
         get() = preferences.get(PreferenceKey.INBOX_MESSAGES) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.INBOX_MESSAGES, value)
+
+    internal var inboxChannelMessageCaches: MutableList<InboxChannelMessageCache>?
+        get() = preferences.get(PreferenceKey.INBOX_CHANNEL_MESSAGES) ?: mutableListOf()
+        set(value) = preferences.set(PreferenceKey.INBOX_CHANNEL_MESSAGES, value)
 
     internal var inAppDeviceInfo: MutableMap<String, String> ?
         get() = preferences.get(PreferenceKey.IN_APP_DEVICE_INFO) ?: mutableMapOf()
