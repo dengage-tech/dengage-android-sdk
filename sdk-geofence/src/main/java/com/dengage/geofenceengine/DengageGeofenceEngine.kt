@@ -84,13 +84,18 @@ class DengageGeofenceEngine private constructor(context: Context) {
     fun lastSilentPushSyncAt(): Long? = engine.lastSilentPushAt()
 
     /** OS'tan gelen geofence transition'ı işler (receiver tarafından çağrılır). */
-    internal fun handleGeofenceTransition(transitionType: Int, requestIds: List<String>, location: Location?) {
-        engine.handleGeofenceTransition(transitionType, requestIds, location)
+    internal fun handleGeofenceTransition(
+        transitionType: Int,
+        requestIds: List<String>,
+        location: Location?,
+        onComplete: () -> Unit = {}
+    ) {
+        engine.handleGeofenceTransition(transitionType, requestIds, location, onComplete)
     }
 
     /** FLP konum güncellemesi (receiver tarafından çağrılır). */
-    internal fun handleMovement(location: Location) {
-        engine.handleMovement(location)
+    internal fun handleMovement(location: Location, onComplete: () -> Unit = {}) {
+        engine.handleMovement(location, onComplete)
     }
 
     /** Wake-up cap resume girişimi (worker/push/foreground/geofence kanallarından). */

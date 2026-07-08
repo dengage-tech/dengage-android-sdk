@@ -45,6 +45,10 @@ class OsGeofenceRegistrar(private val context: Context) {
                 }
                 .addOnFailureListener {
                     DengageLogger.error("OsGeofenceRegistrar -> register failed: ${it.message}")
+                    GeofenceDebugLogger.error(
+                        "Geofence OS register failed",
+                        mapOf("error" to (it.message ?: "unknown"), "count" to osGeofences.size.toString())
+                    )
                 }
         }
     }

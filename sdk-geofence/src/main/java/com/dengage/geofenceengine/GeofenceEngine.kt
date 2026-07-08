@@ -145,33 +145,51 @@ internal class GeofenceEngine(private val context: Context) {
 
     // ---- movement ----
 
-    fun handleMovement(location: Location) {
+    fun handleMovement(location: Location, onComplete: () -> Unit = {}) {
         if (!remoteConfig.geofenceEnabled()) {
-            stop(); return
+            stop(); onComplete(); return
         }
         when (wakeupCap.recordWakeup()) {
-            WakeupAction.SKIP_PAUSED -> return
-            WakeupAction.PAUSE_AND_SKIP -> return
+            WakeupAction.SKIP_PAUSED -> { onComplete(); return }
+            WakeupAction.PAUSE_AND_SKIP -> { onComplete(); return }
             WakeupAction.PROCEED -> Unit
         }
 
         scope.launch {
-            heartbeatSender.maybeSend(location, remoteConfig.config().heartbeatIntervalMinutes)
+            try {
+                heartbeatSender.maybeSend(location, remoteConfig.config().heartbeatIntervalMinutes)
 
-            when (val decision = adaptiveThreshold.shouldReeval(location, lastReevalLocation)) {
-                is ReevalDecision.Reeval -> reeval(location, syncAllowed = decision.syncAllowed, force = false)
-                is ReevalDecision.Skip -> DengageLogger.debug("GeofenceEngine -> reeval skipped (${decision.reason})")
+                when (val decision = adaptiveThreshold.shouldReeval(location, lastReevalLocation)) {
+                    is ReevalDecision.Reeval -> reeval(location, syncAllowed = decision.syncAllowed, force = false)
+                    is ReevalDecision.Skip -> DengageLogger.debug("GeofenceEngine -> reeval skipped (${decision.reason})")
+                }
+            } finally {
+                onComplete()
             }
         }
     }
 
     // ---- trigger ----
 
-    fun handleGeofenceTransition(transitionType: Int, requestIds: List<String>, location: Location?) {
+    /**
+     * OS transition'ını işler. [onComplete] async ağ işi (event-signal POST) bittiğinde çağrılır;
+     * receiver bunu `goAsync().finish()` ile eşler ki arka planda process erken öldürülmesin
+     * (yoksa event-signal Doze bakım penceresine ertelenir → push saatlerce gecikir).
+     */
+    fun handleGeofenceTransition(
+        transitionType: Int,
+        requestIds: List<String>,
+        location: Location?,
+        onComplete: () -> Unit = {}
+    ) {
         // Region monitoring callback'i pause süresini etkilemez; ayrıca resume fırsatı verir (K13)
         wakeupCap.attemptResume()
         scope.launch {
-            triggerHandler.handle(transitionType, requestIds, location)
+            try {
+                triggerHandler.handle(transitionType, requestIds, location)
+            } finally {
+                onComplete()
+            }
         }
     }
 

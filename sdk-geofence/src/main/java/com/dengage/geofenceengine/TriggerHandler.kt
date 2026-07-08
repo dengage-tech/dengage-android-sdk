@@ -142,9 +142,11 @@ class TriggerHandler(
                 enteredAt = now, lastSeenAt = now, exitedAt = null
             )
             GeofenceEventType.DWELL -> {
+                // Dwell atıldı → DWELL_PENDING = "inside ve bu ziyarette dwell zaten fire edildi".
+                // Sonraki dwell callback'leri (OS tekrarı / re-register sonrası loitering) böylece dedup edilir.
                 val existing = deviceStateRepository.getState(fence.geofenceId)
                 deviceStateRepository.setState(
-                    fence.geofenceId, fence.clusterId, FenceState.INSIDE,
+                    fence.geofenceId, fence.clusterId, FenceState.DWELL_PENDING,
                     enteredAt = existing?.enteredAt ?: now, lastSeenAt = now, exitedAt = null
                 )
             }
@@ -159,14 +161,17 @@ class TriggerHandler(
     }
 
     /**
-     * Aynı geçiş için tekrarlanan OS callback'lerini ele: enter yalnızca cihaz INSIDE değilken,
-     * exit yalnızca INSIDE'ken gerçek geçiştir. Dwell explicit zamanlandığı için hariç.
+     * Aynı geçiş için tekrarlanan OS callback'lerini ele; her tetik tipi ziyaret başına en fazla bir kez fire eder.
+     * State makinesi: enter→INSIDE, dwell→DWELL_PENDING (dwell atıldı), exit→OUTSIDE.
+     * - enter: cihaz zaten fence içindeyse (INSIDE veya DWELL_PENDING) yinelenmedir.
+     * - dwell: yalnızca taze INSIDE iken bir kez; DWELL_PENDING (zaten atıldı) veya OUTSIDE/null (bayat) → yinelenmedir.
+     * - exit: cihaz zaten dışarıdaysa (OUTSIDE/null) yinelenmedir.
      */
     private fun isDuplicateTransition(eventType: GeofenceEventType, previous: FenceState?): Boolean =
         when (eventType) {
-            GeofenceEventType.ENTER -> previous == FenceState.INSIDE
+            GeofenceEventType.ENTER -> previous == FenceState.INSIDE || previous == FenceState.DWELL_PENDING
             GeofenceEventType.EXIT -> previous == null || previous == FenceState.OUTSIDE
-            GeofenceEventType.DWELL -> false
+            GeofenceEventType.DWELL -> previous != FenceState.INSIDE
         }
 
     private fun transitionToEventType(transition: Int): GeofenceEventType? = when (transition) {

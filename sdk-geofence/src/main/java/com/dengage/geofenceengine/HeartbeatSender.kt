@@ -43,9 +43,11 @@ class HeartbeatSender(
                 DengageLogger.debug("HeartbeatSender -> sent heartbeat")
             } else {
                 DengageLogger.error("HeartbeatSender -> http ${response.code()}")
+                GeofenceDebugLogger.error("Geofence heartbeat failed", mapOf("httpCode" to response.code().toString()))
             }
         } catch (e: Exception) {
             DengageLogger.error("HeartbeatSender -> error ${e.message}")
+            GeofenceDebugLogger.error("Geofence heartbeat failed", mapOf("error" to (e.message ?: "unknown")))
         }
     }
 }

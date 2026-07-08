@@ -46,6 +46,10 @@ class LocalNotificationFirer(private val context: Context) {
         } catch (e: SecurityException) {
             // POST_NOTIFICATIONS izni yoksa (Android 13+)
             DengageLogger.error("LocalNotificationFirer -> notify failed: ${e.message}")
+            GeofenceDebugLogger.error(
+                "Geofence local notification failed",
+                mapOf("error" to (e.message ?: "unknown"), "geofenceId" to geofenceId.toString())
+            )
         }
     }
 

@@ -65,11 +65,13 @@ class GeofenceSyncer(
 
                 else -> {
                     DengageLogger.error("GeofenceSyncer -> http ${response.code()}")
+                    GeofenceDebugLogger.error("Geofence sync failed", mapOf("httpCode" to response.code().toString()))
                     SyncResult.Error(null)
                 }
             }
         } catch (e: Exception) {
             DengageLogger.error("GeofenceSyncer -> error ${e.message}")
+            GeofenceDebugLogger.error("Geofence sync failed", mapOf("error" to (e.message ?: "unknown")))
             SyncResult.Error(e)
         }
     }

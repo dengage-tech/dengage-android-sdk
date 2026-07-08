@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import com.dengage.geofenceengine.DengageGeofenceEngine
+import com.dengage.geofenceengine.GeofenceDebugLogger
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.util.DengageLogger
@@ -35,6 +36,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         val event = GeofencingEvent.fromIntent(intent) ?: return
         if (event.hasError()) {
             DengageLogger.error("GeofenceBroadcastReceiver -> geofence error ${event.errorCode}")
+            GeofenceDebugLogger.error("Geofence OS transition error", mapOf("errorCode" to event.errorCode.toString()))
             return
         }
         val transition = event.geofenceTransition
@@ -47,14 +49,23 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         if (requestIds.isEmpty()) return
 
         DengageLogger.debug("GeofenceBroadcastReceiver -> transition=$transition fences=$requestIds")
+        // goAsync(): event-signal POST'u bitene kadar process'i canlı tut (arka planda ~10 sn).
+        // Yoksa onReceive dönünce process dondurulup event-signal Doze'a ertelenir → push saatlerce gecikir.
+        val pendingResult = goAsync()
         DengageGeofenceEngine.getInstance(context)
-            .handleGeofenceTransition(transition, requestIds, event.triggeringLocation)
+            .handleGeofenceTransition(transition, requestIds, event.triggeringLocation) {
+                pendingResult.finish()
+            }
     }
 
     private fun handleLocationUpdate(context: Context, intent: Intent) {
         val result = LocationResult.extractResult(intent) ?: return
         val location: Location = result.lastLocation ?: return
-        DengageGeofenceEngine.getInstance(context).handleMovement(location)
+        // goAsync(): heartbeat/sync/flush ağ işi bitene kadar process'i canlı tut.
+        val pendingResult = goAsync()
+        DengageGeofenceEngine.getInstance(context).handleMovement(location) {
+            pendingResult.finish()
+        }
     }
 
     private fun handleBoot(context: Context) {

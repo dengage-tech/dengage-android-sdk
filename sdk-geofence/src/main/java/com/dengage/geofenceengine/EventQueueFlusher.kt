@@ -83,9 +83,31 @@ class EventQueueFlusher(
             )
             val response = apiRepository.sendGeofenceEventSignalV2(integrationKey, request)
             // 2xx ve 409 (idempotent no-op) başarılı sayılır (contract §6)
-            response.isSuccessful || response.code() == 409
+            val success = response.isSuccessful || response.code() == 409
+            if (!success) {
+                DengageLogger.error("EventQueueFlusher -> http ${response.code()}")
+                GeofenceDebugLogger.error(
+                    "Geofence event-signal send failed",
+                    mapOf(
+                        "httpCode" to response.code().toString(),
+                        "geofenceId" to event.geofenceId.toString(),
+                        "eventType" to event.eventType.wireValue,
+                        "source" to source.wireValue
+                    )
+                )
+            }
+            success
         } catch (e: Exception) {
             DengageLogger.error("EventQueueFlusher -> send failed: ${e.message}")
+            GeofenceDebugLogger.error(
+                "Geofence event-signal send failed",
+                mapOf(
+                    "error" to (e.message ?: "unknown"),
+                    "geofenceId" to event.geofenceId.toString(),
+                    "eventType" to event.eventType.wireValue,
+                    "source" to source.wireValue
+                )
+            )
             false
         }
     }
