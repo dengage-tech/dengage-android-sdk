@@ -37,7 +37,7 @@ class LocalNotificationFirer(private val context: Context) {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
-        deepLinkIntent(content.deepLink, geofenceId)?.let { builder.setContentIntent(it) }
+        contentIntent(content.deepLink, geofenceId)?.let { builder.setContentIntent(it) }
 
         val notificationId = campaignId ?: geofenceId
         try {
@@ -53,11 +53,22 @@ class LocalNotificationFirer(private val context: Context) {
         }
     }
 
-    private fun deepLinkIntent(deepLink: String?, geofenceId: Int): PendingIntent? {
-        if (deepLink.isNullOrBlank()) return null
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink)).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+    /**
+     * Bildirime tıklanınca açılacak intent. Deeplink varsa ACTION_VIEW ile ona,
+     * yoksa uygulamanın launcher activity'sine yönlendirir (deeplink boşken de uygulama açılsın).
+     */
+    private fun contentIntent(deepLink: String?, geofenceId: Int): PendingIntent? {
+        val intent = if (!deepLink.isNullOrBlank()) {
+            Intent(Intent.ACTION_VIEW, Uri.parse(deepLink)).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        } else {
+            // Deeplink yok → uygulamayı aç.
+            context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        } ?: return null
+
         var flags = PendingIntent.FLAG_UPDATE_CURRENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             flags = flags or PendingIntent.FLAG_IMMUTABLE
