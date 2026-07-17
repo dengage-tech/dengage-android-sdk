@@ -57,7 +57,8 @@ internal class GeofenceEngine(private val context: Context) {
         configProvider = { remoteConfig.config().wakeupCap },
         onPause = { movementListener.stop() },
         onResume = { movementListener.start(remoteConfig.config().reevaluationDistanceMeters) },
-        scheduleResume = { minutes -> scheduleResume(minutes) }
+        scheduleResume = { minutes -> scheduleResume(minutes) },
+        syncMetadata = storage.syncMetadataRepository
     )
 
     @Volatile
@@ -79,7 +80,17 @@ internal class GeofenceEngine(private val context: Context) {
             return
         }
         running = true
-        movementListener.start(remoteConfig.config().reevaluationDistanceMeters)
+
+        // Persist edilmiş pause durumunu değerlendir. Süre dolduysa `attemptResume` location
+        // update'leri geri açar; dolmadıysa kapalı kalır (ResumeSlcWorker süresi dolunca açacak).
+        // Koşulsuz start etmek pause'u sessizce iptal eder → cap'in saatlik sınırı sızar.
+        wakeupCap.attemptResume()
+        if (wakeupCap.isPaused) {
+            DengageLogger.debug("GeofenceEngine -> wake-up cap still paused, location updates stay off")
+        } else {
+            movementListener.start(remoteConfig.config().reevaluationDistanceMeters)
+        }
+
         scope.launch {
             val location = currentLocation()
             reeval(location, syncAllowed = true, force = true)

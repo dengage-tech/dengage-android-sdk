@@ -8,4 +8,11 @@ interface SyncMetadataRepository {
 
     /** Silent push (sourceType=geofence) ile yapılan son resync zamanı. */
     var lastSilentPushAt: Long?
+
+    /**
+     * Wake-up cap pause başlangıcı (epoch millis); null = pause yok.
+     * Persist edilir ki process ölüp yeniden doğduğunda pause penceresi doğru değerlendirilebilsin
+     * (aksi halde `attemptResume()` taze bellekte `paused=false` görüp erken döner).
+     */
+    var wakeupPausedAt: Long?
 }

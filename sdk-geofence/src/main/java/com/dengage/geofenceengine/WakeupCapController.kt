@@ -1,5 +1,6 @@
 package com.dengage.geofenceengine
 
+import com.dengage.geofenceengine.storage.SyncMetadataRepository
 import com.dengage.sdk.domain.configuration.model.WakeupCapConfig
 import com.dengage.sdk.util.DengageLogger
 import java.util.ArrayDeque
@@ -15,7 +16,8 @@ class WakeupCapController(
     private val configProvider: () -> WakeupCapConfig,
     private val onPause: () -> Unit,
     private val onResume: () -> Unit,
-    private val scheduleResume: (delayMinutes: Long) -> Unit
+    private val scheduleResume: (delayMinutes: Long) -> Unit,
+    private val syncMetadata: SyncMetadataRepository
 ) {
 
     private val timestamps = ArrayDeque<Long>()
@@ -25,6 +27,16 @@ class WakeupCapController(
     private var pausedAt: Long = 0
 
     val isPaused: Boolean get() = paused
+
+    init {
+        // Taze process: pause durumunu diskten hidrate et. Aksi halde `paused=false` sanılır,
+        // ResumeSlcWorker process'i diriltse bile `attemptResume()` erken döner ve
+        // OS seviyesinde kapatılmış location updates bir daha açılmaz.
+        syncMetadata.wakeupPausedAt?.let { persisted ->
+            paused = true
+            pausedAt = persisted
+        }
+    }
 
     /** Her SLC/FLP wake-up'ta çağrılır. Cap aşıldıysa pause başlatır. */
     @Synchronized
@@ -54,6 +66,7 @@ class WakeupCapController(
         }
         paused = false
         timestamps.clear()
+        syncMetadata.wakeupPausedAt = null
         DengageLogger.debug("WakeupCap -> resume")
         onResume()
     }
@@ -63,11 +76,13 @@ class WakeupCapController(
         paused = false
         timestamps.clear()
         pausedAt = 0
+        syncMetadata.wakeupPausedAt = null
     }
 
     private fun pause(now: Long, config: WakeupCapConfig) {
         paused = true
         pausedAt = now
+        syncMetadata.wakeupPausedAt = now
         DengageLogger.debug("WakeupCap -> cap exceeded (${config.hourlyMax}/${config.slidingWindowMinutes}min), pausing for ${config.pauseMinutes}min")
         onPause()
         scheduleResume(config.pauseMinutes.toLong())
