@@ -16,6 +16,8 @@ import com.dengage.sdk.domain.geofence.model.sync.GeofenceTriggerType
 import com.dengage.sdk.domain.geofence.model.sync.SyncCampaign
 import com.dengage.sdk.util.DengageLogger
 import com.google.android.gms.location.Geofence
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 
 /**
@@ -34,11 +36,24 @@ class TriggerHandler(
     private val configProvider: () -> Int // offlineQueueMaxSize
 ) {
 
-    suspend fun handle(transitionType: Int, requestIds: List<String>, location: Location?) {
+    /** Guards the dedup's read-check-write section against concurrent `handle` calls. */
+    private val stateMutex = Mutex()
+
+    /** Maps the OS (GMS) transition constant to an event type and delegates to [handle]. */
+    suspend fun handleTransition(transitionType: Int, requestIds: List<String>, location: Location?) {
         val eventType = transitionToEventType(transitionType) ?: run {
             DengageLogger.debug("TriggerHandler -> unsupported transition $transitionType")
             return
         }
+        handle(eventType, requestIds, location)
+    }
+
+    /**
+     * Event-type based entry point. Besides the OS callback ([handleTransition]), synthetic
+     * transitions (doc 22 §2.1, [ContainmentReconciler]) also come through here — dedup, campaign
+     * matching and event-signal delivery are identical for both.
+     */
+    suspend fun handle(eventType: GeofenceEventType, requestIds: List<String>, location: Location?) {
         val online = isOnline()
         val now = System.currentTimeMillis()
 
@@ -50,16 +65,24 @@ class TriggerHandler(
                 continue
             }
 
-            // Edge-detection / dedup: OS aynı fiziksel geçiş için birden fazla callback verebilir
-            // (initialTrigger + normal ENTER, tekrar register sonrası, vb.).
-            // Sadece gerçek durum değişikliğinde tetikle; aksi halde çift event-signal gider.
-            val previous = deviceStateRepository.getState(fence.geofenceId)
-            if (isDuplicateTransition(eventType, previous?.state)) {
-                DengageLogger.debug("TriggerHandler -> duplicate ${eventType.wireValue} for fence ${fence.geofenceId}, skipping")
-                continue
+            // Edge-detection / dedup: the OS can deliver several callbacks for the same physical
+            // transition (initialTrigger + normal ENTER, after a re-register, ...), and a synthetic
+            // transition can race an OS callback. Only fire on a real state change.
+            //
+            // Keep read-check-write atomic with a mutex: `handle` can be called concurrently from
+            // separate coroutines (OS transition + reconciler); otherwise both read OUTSIDE, both
+            // fire, and the dedup is defeated.
+            val proceed = stateMutex.withLock {
+                val previous = deviceStateRepository.getState(fence.geofenceId)
+                if (isDuplicateTransition(eventType, previous?.state)) {
+                    DengageLogger.debug("TriggerHandler -> duplicate ${eventType.wireValue} for fence ${fence.geofenceId}, skipping")
+                    false
+                } else {
+                    updateDeviceState(fence, eventType, now)
+                    true
+                }
             }
-
-            updateDeviceState(fence, eventType, now)
+            if (!proceed) continue
 
             // Davranış paritesi: enter'da host interceptor'ı tetikle (v1 ile aynı hook)
             if (eventType == GeofenceEventType.ENTER) {

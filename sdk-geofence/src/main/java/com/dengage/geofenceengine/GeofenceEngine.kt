@@ -37,6 +37,10 @@ internal class GeofenceEngine(private val context: Context) {
     private val activeWindowScheduler = ActiveWindowScheduler(context)
     private val notificationFirer = LocalNotificationFirer(context)
 
+    private val containmentReconciler = ContainmentReconciler(
+        storage.fenceRepository,
+        storage.deviceStateRepository
+    )
     private val syncer = GeofenceSyncer(storage.fenceRepository, storage.syncMetadataRepository)
     private val heartbeatSender = HeartbeatSender(storage.syncMetadataRepository)
     private val eventFlusher = EventQueueFlusher(storage.eventQueueRepository)
@@ -197,7 +201,7 @@ internal class GeofenceEngine(private val context: Context) {
         wakeupCap.attemptResume()
         scope.launch {
             try {
-                triggerHandler.handle(transitionType, requestIds, location)
+                triggerHandler.handleTransition(transitionType, requestIds, location)
             } finally {
                 onComplete()
             }
@@ -222,10 +226,27 @@ internal class GeofenceEngine(private val context: Context) {
         // Storage'daki güncel fence'lerden top-N seç + OS register (cache'ten, transit modunda bile)
         if (location != null) {
             registerTopN(location)
+            reconcileContainment(location)
         }
         if (force || location != null) {
             location?.let { heartbeatSender.maybeSend(it, remoteConfig.config().heartbeatIntervalMinutes, force = force) }
         }
+    }
+
+    /**
+     * Synthetic transition check (doc 22 §2.1). Without waiting for the OS callback, closes the
+     * gaps between the location and the state table with our own events (missed exit, enter that
+     * never arrived). Produced transitions go through the normal trigger path, so dedup, campaign
+     * matching and event-signal are identical.
+     */
+    private suspend fun reconcileContainment(location: Location) {
+        val pending = containmentReconciler.reconcile(location)
+        if (pending.isEmpty()) return
+        // One call per event type: `handle` flushes the queue internally.
+        pending.groupBy({ it.second }, { it.first.requestId })
+            .forEach { (eventType, requestIds) ->
+                triggerHandler.handle(eventType, requestIds, location)
+            }
     }
 
     private fun registerTopN(location: Location) {
