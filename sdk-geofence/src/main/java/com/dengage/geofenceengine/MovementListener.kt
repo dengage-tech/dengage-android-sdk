@@ -38,6 +38,11 @@ class MovementListener(private val context: Context) {
         val request = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, intervalMillis)
             .setMinUpdateDistanceMeters(minUpdateDistanceMeters.toFloat())
             .setMinUpdateIntervalMillis(FASTEST_INTERVAL_MS)
+            // Disable location batching (doc 22 §2.2): by default FLP may buffer fixes and deliver
+            // them in bulk. Here a location update is not just a location, it is what triggers a
+            // reeval — if it is late, top-N register, sync and the containment check (§2.1) are too.
+            // Does not beat Doze; only removes batched-delivery latency outside of Doze.
+            .setMaxUpdateDelayMillis(0)
             .build()
         client.requestLocationUpdates(request, pendingIntent())
             .addOnSuccessListener {
