@@ -33,8 +33,19 @@ class ContainmentReconciler(
     /**
      * Compares the location against the state table and returns the transitions that should fire.
      * Pure computation — it neither sends events nor writes state; both are [TriggerHandler]'s job.
+     *
+     * Accuracy-aware: `Location.accuracy` is the fix's uncertainty radius, so it is used as a
+     * confidence margin. The reconciler only acts when the fix is confident enough; the uncertain
+     * band is left to the OS (which has its own buffer and multiple samples). This kills
+     * accuracy-blind false transitions from a coarse fix.
      */
     fun reconcile(location: Location): List<Pair<Fence, GeofenceEventType>> {
+        // Accuracy yok/geçersizse tüm konum belirsiz sayılır → hiçbir fence için karar verme.
+        if (!location.hasAccuracy()) {
+            DengageLogger.debug("ContainmentReconciler -> skipped: location accuracy unknown")
+            return emptyList()
+        }
+        val accuracy = location.accuracy.toDouble()
         val pending = mutableListOf<Pair<Fence, GeofenceEventType>>()
 
         for (fence in fenceRepository.loadAll()) {
@@ -44,15 +55,16 @@ class ContainmentReconciler(
             val state = deviceStateRepository.getState(fence.geofenceId)?.state
             val deviceThinksInside = isInsideState(state)
 
-            if (distance <= fence.radiusM) {
-                // Actually inside but the table does not know — the OS enter is late or never came.
+            if (distance + accuracy <= fence.radiusM) {
+                // Kesin içeride (en kötü uzak nokta bile radius'ta) ama tablo bilmiyor → geç/eksik enter.
                 if (!deviceThinksInside) {
                     pending += fence to GeofenceEventType.ENTER
                 }
-            } else if (deviceThinksInside && distance > fence.radiusM * EXIT_HYSTERESIS_FACTOR) {
-                // The table says inside, yet we are outside even allowing for hysteresis — missed exit.
+            } else if (deviceThinksInside && distance - accuracy > fence.radiusM * EXIT_HYSTERESIS_FACTOR) {
+                // Kesin dışarıda (en kötü yakın nokta bile histerezis sınırının ötesinde) → kaçan exit.
                 pending += fence to GeofenceEventType.EXIT
             }
+            // Aradaki belirsiz band → dokunma, OS'a bırak.
         }
 
         if (pending.isNotEmpty()) {

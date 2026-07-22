@@ -24,6 +24,7 @@ import com.google.android.gms.location.LocationServices
 class OsGeofenceRegistrar(private val context: Context) {
 
     private val client: GeofencingClient = LocationServices.getGeofencingClient(context)
+    private val registeredIdsStore = RegisteredFenceIdsStore(context)
 
     fun register(fences: List<Fence>) {
         removeAll {
@@ -42,9 +43,13 @@ class OsGeofenceRegistrar(private val context: Context) {
             client.addGeofences(request, pendingIntent())
                 .addOnSuccessListener {
                     DengageLogger.debug("OsGeofenceRegistrar -> registered ${osGeofences.size} fences")
+                    // GeofencingClient kayıtlı geofence'leri sorgulama API'si sunmuyor
+                    // (iOS'taki `monitoredRegions` muadili yok) → teşhis için kendimiz tutuyoruz.
+                    registeredIdsStore.save(osGeofences.map { it.requestId })
                 }
                 .addOnFailureListener {
                     DengageLogger.error("OsGeofenceRegistrar -> register failed: ${it.message}")
+                    registeredIdsStore.save(emptyList())
                     GeofenceDebugLogger.error(
                         "Geofence OS register failed",
                         mapOf("error" to (it.message ?: "unknown"), "count" to osGeofences.size.toString())
@@ -53,7 +58,11 @@ class OsGeofenceRegistrar(private val context: Context) {
         }
     }
 
+    /** OS'a en son başarıyla register edilmiş fence requestId'leri (teşhis). */
+    fun registeredFenceRequestIds(): List<String> = registeredIdsStore.load()
+
     fun removeAll(onComplete: () -> Unit = {}) {
+        registeredIdsStore.save(emptyList())
         // Eski modül (v1) ile oluşturulmuş leftover geofence'leri de temizle (migration cleanup).
         // v1, geofence'lerini kendi PendingIntent'leriyle kaydettiği için v2'nin removeGeofences'ı
         // onları silmez; ayrı ayrı v1 PendingIntent'leriyle silinir.
@@ -109,5 +118,32 @@ class OsGeofenceRegistrar(private val context: Context) {
 
     companion object {
         private const val REQUEST_CODE = 0xD6F2
+    }
+}
+
+/**
+ * OS'a register edilmiş fence requestId'lerini kalıcı tutar.
+ *
+ * Android'de `GeofencingClient` kayıtlı geofence'leri sorgulayacak bir API sunmuyor
+ * (iOS'taki `CLLocationManager.monitoredRegions` muadili yok), bu yüzden teşhis amacıyla
+ * ne register ettiğimizi kendimiz kaydediyoruz. Kaynak "OS'un gerçeği" değil, "bizim en son
+ * başarılı register'ımız" — process yeniden başlasa da doğru kalması için persist edilir.
+ */
+private class RegisteredFenceIdsStore(context: Context) {
+
+    private val prefs by lazy {
+        context.applicationContext.getSharedPreferences(PREFS_FILE, Context.MODE_PRIVATE)
+    }
+
+    fun save(requestIds: List<String>) {
+        prefs.edit().putStringSet(KEY_IDS, requestIds.toSet()).apply()
+    }
+
+    fun load(): List<String> =
+        prefs.getStringSet(KEY_IDS, emptySet())?.toList().orEmpty()
+
+    companion object {
+        private const val PREFS_FILE = "dengage_geofence_engine_prefs"
+        private const val KEY_IDS = "registered_fence_request_ids"
     }
 }

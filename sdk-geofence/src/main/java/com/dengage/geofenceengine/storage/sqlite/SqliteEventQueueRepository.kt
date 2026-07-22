@@ -20,6 +20,7 @@ internal class SqliteEventQueueRepository(private val dbHelper: GeofenceDbHelper
             put("event_type", event.eventType.wireValue)
             put("latitude", event.latitude)
             put("longitude", event.longitude)
+            put("accuracy_m", event.accuracyM)
             put("occurred_at", event.occurredAtMillis)
             put("created_at", System.currentTimeMillis())
         }
@@ -44,7 +45,8 @@ internal class SqliteEventQueueRepository(private val dbHelper: GeofenceDbHelper
                         eventType = wireToEventType(c.getString(c.getColumnIndexOrThrow("event_type"))),
                         latitude = c.getDouble(c.getColumnIndexOrThrow("latitude")),
                         longitude = c.getDouble(c.getColumnIndexOrThrow("longitude")),
-                        occurredAtMillis = c.getLong(c.getColumnIndexOrThrow("occurred_at"))
+                        occurredAtMillis = c.getLong(c.getColumnIndexOrThrow("occurred_at")),
+                        accuracyM = c.getColumnIndexOrThrow("accuracy_m").let { if (c.isNull(it)) null else c.getDouble(it) }
                     )
                 )
             }

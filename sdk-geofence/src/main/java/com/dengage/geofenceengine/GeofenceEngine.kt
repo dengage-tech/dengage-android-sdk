@@ -51,6 +51,7 @@ internal class GeofenceEngine(private val context: Context) {
         eventQueue = storage.eventQueueRepository,
         notificationFirer = notificationFirer,
         eventFlusher = eventFlusher,
+        triggerHistory = storage.triggerHistoryRepository,
         configProvider = { remoteConfig.config().offlineQueueMaxSize }
     )
 
@@ -175,7 +176,8 @@ internal class GeofenceEngine(private val context: Context) {
                 heartbeatSender.maybeSend(location, remoteConfig.config().heartbeatIntervalMinutes)
 
                 when (val decision = adaptiveThreshold.shouldReeval(location, lastReevalLocation)) {
-                    is ReevalDecision.Reeval -> reeval(location, syncAllowed = decision.syncAllowed, force = false)
+                    // Movement kaynaklı → sentetik geçiş kampanya tetikleyebilir (occurredAt=now dürüst).
+                    is ReevalDecision.Reeval -> reeval(location, syncAllowed = decision.syncAllowed, force = false, fireCampaigns = true)
                     is ReevalDecision.Skip -> DengageLogger.debug("GeofenceEngine -> reeval skipped (${decision.reason})")
                 }
             } finally {
@@ -208,9 +210,59 @@ internal class GeofenceEngine(private val context: Context) {
         }
     }
 
+    // ---- diagnostics ----
+
+    /**
+     * OS'a en son register edilmiş fence'ler (teşhis). Depodaki listenin tamamı değil — top-N
+     * seçimi sonrası gerçekten register edilmiş olanlar.
+     */
+    fun monitoredGeofences(): List<MonitoredGeofenceInfo> {
+        val fencesById = storage.fenceRepository.loadAll().associateBy { it.geofenceId }
+        return registrar.registeredFenceRequestIds()
+            .mapNotNull { requestId ->
+                val ids = Fence.parseRequestId(requestId) ?: return@mapNotNull null
+                val fence = fencesById[ids.second]
+                val state = storage.deviceStateRepository.getState(ids.second)?.state
+                MonitoredGeofenceInfo(
+                    geofenceId = ids.second,
+                    clusterId = ids.first,
+                    title = fence?.title,
+                    latitude = fence?.latitude ?: 0.0,
+                    longitude = fence?.longitude ?: 0.0,
+                    radiusM = fence?.radiusM ?: 0.0,
+                    state = state?.wireValue ?: "unknown"
+                )
+            }
+            .sortedBy { it.geofenceId }
+    }
+
+    /** Son tetiklenen geçişler (en yeniden eskiye). */
+    fun recentTriggeredEvents(limit: Int): List<TriggeredEventInfo> =
+        storage.triggerHistoryRepository.recent(limit).map {
+            TriggeredEventInfo(
+                geofenceId = it.geofenceId,
+                clusterId = it.clusterId,
+                title = it.title,
+                eventType = it.eventType.wireValue,
+                occurredAtMillis = it.occurredAtMillis,
+                campaignIds = it.campaignIds,
+                accuracyM = it.accuracyM,
+                stateOnly = it.stateOnly
+            )
+        }
+
     // ---- core reeval ----
 
-    private suspend fun reeval(location: Location?, syncAllowed: Boolean, force: Boolean) {
+    /**
+     * [fireCampaigns] yalnızca movement kaynaklı reeval'de true. Diğer (start / organic sync /
+     * silent push / active-window) reeval'lerde sentetik geçiş state-only işlenir, kampanya atmaz.
+     */
+    private suspend fun reeval(
+        location: Location?,
+        syncAllowed: Boolean,
+        force: Boolean,
+        fireCampaigns: Boolean = false
+    ) {
         if (location != null) lastReevalLocation = location
 
         if (syncAllowed) {
@@ -226,7 +278,7 @@ internal class GeofenceEngine(private val context: Context) {
         // Storage'daki güncel fence'lerden top-N seç + OS register (cache'ten, transit modunda bile)
         if (location != null) {
             registerTopN(location)
-            reconcileContainment(location)
+            reconcileContainment(location, fireCampaigns)
         }
         if (force || location != null) {
             location?.let { heartbeatSender.maybeSend(it, remoteConfig.config().heartbeatIntervalMinutes, force = force) }
@@ -236,16 +288,19 @@ internal class GeofenceEngine(private val context: Context) {
     /**
      * Synthetic transition check (doc 22 §2.1). Without waiting for the OS callback, closes the
      * gaps between the location and the state table with our own events (missed exit, enter that
-     * never arrived). Produced transitions go through the normal trigger path, so dedup, campaign
-     * matching and event-signal are identical.
+     * never arrived).
+     *
+     * [fireCampaigns]: movement kaynaklı reeval'de true → kampanya tetiklenebilir. Silent push /
+     * sync-only reeval'de false → yalnızca state reconcile edilir; occurredAt=now bir pasif wake'te
+     * dürüst olmadığından bayat/sahte push üretmemek için kampanya bastırılır.
      */
-    private suspend fun reconcileContainment(location: Location) {
+    private suspend fun reconcileContainment(location: Location, fireCampaigns: Boolean) {
         val pending = containmentReconciler.reconcile(location)
         if (pending.isEmpty()) return
         // One call per event type: `handle` flushes the queue internally.
         pending.groupBy({ it.second }, { it.first.requestId })
             .forEach { (eventType, requestIds) ->
-                triggerHandler.handle(eventType, requestIds, location)
+                triggerHandler.handle(eventType, requestIds, location, fireCampaigns = fireCampaigns)
             }
     }
 

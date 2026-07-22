@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper
  *  - fences_rtree    : R*Tree spatial index (fence_id, min/max lat/lon)
  *  - device_state    : cihaz başına fence state (dwell tracking)
  *  - event_queue     : offline event kuyruğu
+ *  - trigger_history : tetiklenen geçişlerin kısa geçmişi (teşhis/QA)
  */
 internal class GeofenceDbHelper(context: Context) :
     SQLiteOpenHelper(context.applicationContext, DB_NAME, null, DB_VERSION) {
@@ -70,8 +71,25 @@ internal class GeofenceDbHelper(context: Context) :
                 event_type TEXT NOT NULL,
                 latitude REAL NOT NULL,
                 longitude REAL NOT NULL,
+                accuracy_m REAL,
                 occurred_at INTEGER NOT NULL,
                 created_at INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+
+        db.execSQL(
+            """
+            CREATE TABLE $TABLE_TRIGGER_HISTORY (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                geofence_id INTEGER NOT NULL,
+                cluster_id INTEGER NOT NULL,
+                title TEXT,
+                event_type TEXT NOT NULL,
+                occurred_at INTEGER NOT NULL,
+                campaign_ids TEXT,
+                accuracy_m REAL,
+                state_only INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
@@ -82,6 +100,7 @@ internal class GeofenceDbHelper(context: Context) :
         runCatching { db.execSQL("DROP TABLE IF EXISTS $TABLE_FENCES_RTREE") }
         db.execSQL("DROP TABLE IF EXISTS $TABLE_DEVICE_STATE")
         db.execSQL("DROP TABLE IF EXISTS $TABLE_EVENT_QUEUE")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_TRIGGER_HISTORY")
         onCreate(db)
     }
 
@@ -95,11 +114,16 @@ internal class GeofenceDbHelper(context: Context) :
 
     companion object {
         const val DB_NAME = "dengage_geofence_engine.db"
-        const val DB_VERSION = 1
+        // v2: trigger_history tablosu eklendi (teşhis/QA).
+        // v3: event_queue.accuracy_m kolonu eklendi.
+        // v4: trigger_history.accuracy_m kolonu eklendi.
+        // v5: trigger_history.state_only kolonu eklendi.
+        const val DB_VERSION = 5
 
         const val TABLE_FENCES = "fences"
         const val TABLE_FENCES_RTREE = "fences_rtree"
         const val TABLE_DEVICE_STATE = "device_state"
         const val TABLE_EVENT_QUEUE = "event_queue"
+        const val TABLE_TRIGGER_HISTORY = "trigger_history"
     }
 }

@@ -22,6 +22,7 @@ data class GeofenceEventSignalRequestV2(
     @SerializedName("eventType") val eventType: GeofenceEventType,
     @SerializedName("latitude") val latitude: Double,
     @SerializedName("longitude") val longitude: Double,
+    @SerializedName("accuracyM") val accuracyM: Double? = null,
     @SerializedName("occurredAt") val occurredAt: String,
     @SerializedName("ingestedAt") val ingestedAt: String,
     @SerializedName("idempotencyKey") val idempotencyKey: String,

@@ -8,9 +8,11 @@ import android.os.Build
 import com.dengage.geofenceengine.storage.DeviceStateRepository
 import com.dengage.geofenceengine.storage.EventQueueRepository
 import com.dengage.geofenceengine.storage.FenceRepository
+import com.dengage.geofenceengine.storage.TriggerHistoryRepository
 import com.dengage.geofenceengine.storage.model.Fence
 import com.dengage.geofenceengine.storage.model.FenceState
 import com.dengage.geofenceengine.storage.model.QueuedEvent
+import com.dengage.geofenceengine.storage.model.TriggerHistoryEntry
 import com.dengage.sdk.domain.geofence.model.sync.GeofenceEventType
 import com.dengage.sdk.domain.geofence.model.sync.GeofenceTriggerType
 import com.dengage.sdk.domain.geofence.model.sync.SyncCampaign
@@ -33,6 +35,7 @@ class TriggerHandler(
     private val eventQueue: EventQueueRepository,
     private val notificationFirer: LocalNotificationFirer,
     private val eventFlusher: EventQueueFlusher,
+    private val triggerHistory: TriggerHistoryRepository,
     private val configProvider: () -> Int // offlineQueueMaxSize
 ) {
 
@@ -45,17 +48,34 @@ class TriggerHandler(
             DengageLogger.debug("TriggerHandler -> unsupported transition $transitionType")
             return
         }
-        handle(eventType, requestIds, location)
+        // OS transition: occurredAt is derived from the triggering fix time (past time if the OS held
+        // the event back), so the server can tell it is stale (doc 22 §3.1).
+        handle(eventType, requestIds, location, occurredAtMillis(location))
     }
 
     /**
      * Event-type based entry point. Besides the OS callback ([handleTransition]), synthetic
      * transitions (doc 22 §2.1, [ContainmentReconciler]) also come through here — dedup, campaign
      * matching and event-signal delivery are identical for both.
+     *
+     * [occurredAtMillis] null → processing time. OS callbacks pass the fix time; synthetic/dwell
+     * paths leave it null (they really happened "now").
+     *
+     * [fireCampaigns] false → state is updated + recorded in history, but interceptor and event-signal
+     * are skipped (state-only). A synthetic transition only fires campaigns when it comes from a
+     * movement/OS wake; silent push / sync-only reeval stays silent.
      */
-    suspend fun handle(eventType: GeofenceEventType, requestIds: List<String>, location: Location?) {
+    suspend fun handle(
+        eventType: GeofenceEventType,
+        requestIds: List<String>,
+        location: Location?,
+        occurredAtMillis: Long? = null,
+        fireCampaigns: Boolean = true
+    ) {
         val online = isOnline()
         val now = System.currentTimeMillis()
+        // occurredAt: when the transition happened (fix time). createdAt/state/dedup use `now`.
+        val occurred = occurredAtMillis ?: now
 
         for (requestId in requestIds) {
             val ids = Fence.parseRequestId(requestId) ?: continue
@@ -84,8 +104,9 @@ class TriggerHandler(
             }
             if (!proceed) continue
 
-            // Davranış paritesi: enter'da host interceptor'ı tetikle (v1 ile aynı hook)
-            if (eventType == GeofenceEventType.ENTER) {
+            // Davranış paritesi: enter'da host interceptor'ı tetikle (v1 ile aynı hook).
+            // state-only (fireCampaigns=false) modda interceptor da atlanır.
+            if (eventType == GeofenceEventType.ENTER && fireCampaigns) {
                 try {
                     com.dengage.geofence.DengageGeofence.geofenceInterceptor?.onGeofenceEnter(
                         latitude = fence.latitude,
@@ -103,8 +124,34 @@ class TriggerHandler(
 
             val matchingTrigger = eventTypeToTrigger(eventType)
             val matchingCampaigns = fence.campaigns.filter { it.triggerType == matchingTrigger }
+            // Yatay doğruluk (metre); yoksa null (heartbeat ile aynı kural).
+            val accuracyM = location?.takeIf { it.hasAccuracy() }?.accuracy?.toDouble()
+
+            // Diagnostics history: the transition passed dedup, so it really happened. Recorded even
+            // when no campaign matches, so "transition happened but no campaign" can be told apart
+            // from "transition never happened".
+            triggerHistory.record(
+                TriggerHistoryEntry(
+                    geofenceId = fence.geofenceId,
+                    clusterId = fence.clusterId,
+                    title = fence.title,
+                    eventType = eventType,
+                    occurredAtMillis = occurred,
+                    campaignIds = matchingCampaigns.map { it.campaignId },
+                    accuracyM = accuracyM,
+                    stateOnly = !fireCampaigns
+                ),
+                TRIGGER_HISTORY_MAX_SIZE
+            )
+
             if (matchingCampaigns.isEmpty()) {
                 DengageLogger.debug("TriggerHandler -> no ${matchingTrigger.wireValue} campaign for fence ${fence.geofenceId}")
+                continue
+            }
+
+            // state-only: state güncellendi + geçmişe yazıldı; kampanya (interceptor + event-signal) atlanır.
+            if (!fireCampaigns) {
+                DengageLogger.debug("TriggerHandler -> state-only reconcile for fence ${fence.geofenceId}, campaigns suppressed")
                 continue
             }
 
@@ -112,7 +159,7 @@ class TriggerHandler(
             val lon = location?.longitude ?: fence.longitude
 
             for (campaign in matchingCampaigns) {
-                dispatch(fence, campaign, eventType, lat, lon, now, online)
+                dispatch(fence, campaign, eventType, lat, lon, accuracyM, occurred, online)
             }
         }
 
@@ -128,6 +175,7 @@ class TriggerHandler(
         eventType: GeofenceEventType,
         lat: Double,
         lon: Double,
+        accuracyM: Double?,
         occurredAt: Long,
         online: Boolean
     ) {
@@ -139,7 +187,8 @@ class TriggerHandler(
             eventType = eventType,
             latitude = lat,
             longitude = lon,
-            occurredAtMillis = occurredAt
+            occurredAtMillis = occurredAt,
+            accuracyM = accuracyM
         )
 
         if (online) {
@@ -197,6 +246,21 @@ class TriggerHandler(
             GeofenceEventType.DWELL -> previous != FenceState.INSIDE
         }
 
+    /**
+     * Derives occurredAt (epoch millis) from the transition's fix time. If the OS held the event
+     * back, the fix time is older than processing time, so the server can tell it is stale (doc 22 §3.1).
+     * `Location.time` is the fix's wall-clock time. Falls back to processing time when it is missing
+     * or implausible (future / absurdly old = bad clock).
+     */
+    private fun occurredAtMillis(location: Location?): Long {
+        val now = System.currentTimeMillis()
+        val fix = location?.time ?: return now
+        if (fix <= 0L) return now
+        if (fix > now + MAX_FUTURE_SKEW_MS) return now
+        if (fix < now - MAX_FIX_AGE_MS) return now
+        return fix
+    }
+
     private fun transitionToEventType(transition: Int): GeofenceEventType? = when (transition) {
         Geofence.GEOFENCE_TRANSITION_ENTER -> GeofenceEventType.ENTER
         Geofence.GEOFENCE_TRANSITION_EXIT -> GeofenceEventType.EXIT
@@ -224,5 +288,16 @@ class TriggerHandler(
         } catch (e: Exception) {
             false
         }
+    }
+
+    companion object {
+        /** Teşhis geçmişinde tutulan azami kayıt sayısı. */
+        private const val TRIGGER_HISTORY_MAX_SIZE = 50
+
+        /** Saat kayması toleransı: fix zamanı bu kadar gelecekteyse yok say. */
+        private const val MAX_FUTURE_SKEW_MS = 60_000L
+
+        /** Fix zamanı bu kadar eskiyse bozuk kabul edip işlenme anına düş (Doze ~4 saati kapsar). */
+        private const val MAX_FIX_AGE_MS = 48L * 60L * 60L * 1000L
     }
 }

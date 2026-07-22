@@ -5,6 +5,7 @@ import com.dengage.geofenceengine.storage.sqlite.GeofenceDbHelper
 import com.dengage.geofenceengine.storage.sqlite.SqliteDeviceStateRepository
 import com.dengage.geofenceengine.storage.sqlite.SqliteEventQueueRepository
 import com.dengage.geofenceengine.storage.sqlite.SqliteFenceRepository
+import com.dengage.geofenceengine.storage.sqlite.SqliteTriggerHistoryRepository
 
 /**
  * Engine storage erişim noktası. Tek bir [GeofenceDbHelper] üzerinden tüm repo'ları sağlar.
@@ -18,10 +19,12 @@ class GeofenceStorage(context: Context) {
     val deviceStateRepository: DeviceStateRepository = SqliteDeviceStateRepository(dbHelper)
     val eventQueueRepository: EventQueueRepository = SqliteEventQueueRepository(dbHelper)
     val syncMetadataRepository: SyncMetadataRepository = PrefsSyncMetadataRepository()
+    val triggerHistoryRepository: TriggerHistoryRepository = SqliteTriggerHistoryRepository(dbHelper)
 
     fun clearAll() {
         fenceRepository.clear()
         deviceStateRepository.clear()
         eventQueueRepository.clear()
+        triggerHistoryRepository.clear()
     }
 }

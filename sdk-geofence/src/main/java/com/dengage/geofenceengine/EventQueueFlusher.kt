@@ -76,6 +76,7 @@ class EventQueueFlusher(
                 eventType = event.eventType,
                 latitude = event.latitude,
                 longitude = event.longitude,
+                accuracyM = event.accuracyM,
                 occurredAt = GeofenceEventSignalRequestV2.iso(event.occurredAtMillis),
                 ingestedAt = GeofenceEventSignalRequestV2.isoNow(),
                 idempotencyKey = event.idempotencyKey,

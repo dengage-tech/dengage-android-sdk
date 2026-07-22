@@ -83,6 +83,17 @@ class DengageGeofenceEngine private constructor(context: Context) {
     /** Silent push ile yapılan son resync zamanı (epoch millis) veya henüz yoksa null. */
     fun lastSilentPushSyncAt(): Long? = engine.lastSilentPushAt()
 
+    /**
+     * OS'a en son register edilmiş fence'ler. Depodaki listenin tamamı değil — top-N seçimi
+     * sonrası gerçekten register edilmiş olanlar.
+     */
+    fun monitoredGeofences(): List<MonitoredGeofenceInfo> = engine.monitoredGeofences()
+
+    /** Son tetiklenen geçişler (en yeniden eskiye). Kampanya eşleşmeyen geçişler de listelenir. */
+    @JvmOverloads
+    fun recentTriggeredEvents(limit: Int = 50): List<TriggeredEventInfo> =
+        engine.recentTriggeredEvents(limit)
+
     /** OS'tan gelen geofence transition'ı işler (receiver tarafından çağrılır). */
     internal fun handleGeofenceTransition(
         transitionType: Int,
