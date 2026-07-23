@@ -23,6 +23,7 @@ internal class SqliteEventQueueRepository(private val dbHelper: GeofenceDbHelper
             put("accuracy_m", event.accuracyM)
             put("occurred_at", event.occurredAtMillis)
             put("created_at", System.currentTimeMillis())
+            put("synthetic_transition", if (event.syntheticTransition) 1 else 0)
         }
         // idempotency_key PK -> aynı trigger tekrar kuyruğa girmez (CONFLICT_IGNORE)
         db.insertWithOnConflict(TABLE_EVENT_QUEUE, null, cv, SQLiteDatabase.CONFLICT_IGNORE)
@@ -46,7 +47,8 @@ internal class SqliteEventQueueRepository(private val dbHelper: GeofenceDbHelper
                         latitude = c.getDouble(c.getColumnIndexOrThrow("latitude")),
                         longitude = c.getDouble(c.getColumnIndexOrThrow("longitude")),
                         occurredAtMillis = c.getLong(c.getColumnIndexOrThrow("occurred_at")),
-                        accuracyM = c.getColumnIndexOrThrow("accuracy_m").let { if (c.isNull(it)) null else c.getDouble(it) }
+                        accuracyM = c.getColumnIndexOrThrow("accuracy_m").let { if (c.isNull(it)) null else c.getDouble(it) },
+                        syntheticTransition = c.getInt(c.getColumnIndexOrThrow("synthetic_transition")) == 1
                     )
                 )
             }

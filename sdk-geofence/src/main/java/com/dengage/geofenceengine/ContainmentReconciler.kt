@@ -1,6 +1,7 @@
 package com.dengage.geofenceengine
 
 import android.location.Location
+import android.os.SystemClock
 import com.dengage.geofenceengine.storage.DeviceStateRepository
 import com.dengage.geofenceengine.storage.FenceRepository
 import com.dengage.geofenceengine.storage.model.Fence
@@ -34,18 +35,47 @@ class ContainmentReconciler(
      * Compares the location against the state table and returns the transitions that should fire.
      * Pure computation — it neither sends events nor writes state; both are [TriggerHandler]'s job.
      *
-     * Accuracy-aware: `Location.accuracy` is the fix's uncertainty radius, so it is used as a
-     * confidence margin. The reconciler only acts when the fix is confident enough; the uncertain
-     * band is left to the OS (which has its own buffer and multiple samples). This kills
-     * accuracy-blind false transitions from a coarse fix.
+     * Confidence has two dimensions, and both feed the same margin:
+     * - **Spatial:** `Location.accuracy` is the fix's uncertainty radius.
+     * - **Temporal:** a cached fix describes where the device *was*. Every second since then is
+     *   distance the device may have covered unobserved, so the age is converted into extra
+     *   uncertainty via [ASSUMED_SPEED_MPS] and added on top of the accuracy.
+     *
+     * The reconciler only acts outside that combined margin; the uncertain band is left to the OS
+     * (which has its own buffer and multiple samples). This kills both accuracy-blind false
+     * transitions from a coarse fix and staleness-blind ones from a cached fix — the latter matters
+     * because the wake path feeds us `FusedLocationProviderClient.lastLocation`, which carries no
+     * freshness guarantee at all after a long Doze window.
+     *
+     * [nowElapsedNanos] is injectable for tests. It is monotonic (`SystemClock`), unlike
+     * `Location.getTime()`, so a system clock change cannot corrupt the age.
      */
-    fun reconcile(location: Location): List<Pair<Fence, GeofenceEventType>> {
+    fun reconcile(
+        location: Location,
+        nowElapsedNanos: Long = SystemClock.elapsedRealtimeNanos()
+    ): List<Pair<Fence, GeofenceEventType>> {
         // Accuracy yok/geçersizse tüm konum belirsiz sayılır → hiçbir fence için karar verme.
         if (!location.hasAccuracy()) {
             DengageLogger.debug("ContainmentReconciler -> skipped: location accuracy unknown")
             return emptyList()
         }
-        val accuracy = location.accuracy.toDouble()
+        // A fix older than the cap is not worth reasoning about at any margin; leave it to the OS.
+        val ageMs = ((nowElapsedNanos - location.elapsedRealtimeNanos) / 1_000_000L)
+            .coerceAtLeast(0L)
+        if (ageMs > MAX_TRUSTED_FIX_AGE_MS) {
+            DengageLogger.debug("ContainmentReconciler -> skipped: fix is ${ageMs / 1000}s old")
+            return emptyList()
+        }
+
+        // Staleness penalty. A known speed only ever widens the margin (a moving device covers more
+        // ground than the walking assumption); it never shrinks it below the assumed floor, because
+        // the speed at fix time does not promise the device stayed that slow afterwards.
+        val speedMps = if (location.hasSpeed() && location.speed > 0f) {
+            maxOf(location.speed.toDouble(), ASSUMED_SPEED_MPS)
+        } else {
+            ASSUMED_SPEED_MPS
+        }
+        val margin = location.accuracy.toDouble() + (ageMs / 1000.0) * speedMps
         val pending = mutableListOf<Pair<Fence, GeofenceEventType>>()
 
         for (fence in fenceRepository.loadAll()) {
@@ -55,12 +85,12 @@ class ContainmentReconciler(
             val state = deviceStateRepository.getState(fence.geofenceId)?.state
             val deviceThinksInside = isInsideState(state)
 
-            if (distance + accuracy <= fence.radiusM) {
+            if (distance + margin <= fence.radiusM) {
                 // Kesin içeride (en kötü uzak nokta bile radius'ta) ama tablo bilmiyor → geç/eksik enter.
                 if (!deviceThinksInside) {
                     pending += fence to GeofenceEventType.ENTER
                 }
-            } else if (deviceThinksInside && distance - accuracy > fence.radiusM * EXIT_HYSTERESIS_FACTOR) {
+            } else if (deviceThinksInside && distance - margin > fence.radiusM * EXIT_HYSTERESIS_FACTOR) {
                 // Kesin dışarıda (en kötü yakın nokta bile histerezis sınırının ötesinde) → kaçan exit.
                 pending += fence to GeofenceEventType.EXIT
             }
@@ -93,5 +123,17 @@ class ContainmentReconciler(
          * so that location error near the boundary cannot cause enter/exit flapping.
          */
         private const val EXIT_HYSTERESIS_FACTOR = 1.5
+
+        /**
+         * Hard cap on fix age. Past this the staleness penalty would swamp any realistic fence
+         * radius anyway, so we skip outright instead of pretending to compute something.
+         */
+        private const val MAX_TRUSTED_FIX_AGE_MS = 15L * 60L * 1000L
+
+        /**
+         * Distance-per-second charged against an aging fix when the real speed is unknown
+         * (~walking pace). Combined with the cap this tops out at ~1.3km of extra uncertainty.
+         */
+        private const val ASSUMED_SPEED_MPS = 1.5
     }
 }

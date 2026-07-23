@@ -16,7 +16,12 @@ data class QueuedEvent(
     val longitude: Double,
     val occurredAtMillis: Long,
     /** Yatay konum doğruluğu (metre); yoksa null. */
-    val accuracyM: Double? = null
+    val accuracyM: Double? = null,
+    /**
+     * true → geçişi OS bildirmedi, SDK çıkarsadı ([ContainmentReconciler], doc 22 §2.1).
+     * Kuyrukta da tutulur ki offline replay'de bayrak kaybolmasın.
+     */
+    val syntheticTransition: Boolean = false
 ) {
     /** geofenceId <= 0 (ör. eski alan uyumsuzluğundan kalan bayat event'ler) geçersiz sayılır. */
     val isValid: Boolean get() = geofenceId > 0

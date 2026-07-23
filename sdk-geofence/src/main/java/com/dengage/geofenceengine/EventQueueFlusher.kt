@@ -80,7 +80,8 @@ class EventQueueFlusher(
                 occurredAt = GeofenceEventSignalRequestV2.iso(event.occurredAtMillis),
                 ingestedAt = GeofenceEventSignalRequestV2.isoNow(),
                 idempotencyKey = event.idempotencyKey,
-                source = source
+                source = source,
+                syntheticTransition = event.syntheticTransition
             )
             val response = apiRepository.sendGeofenceEventSignalV2(integrationKey, request)
             // 2xx ve 409 (idempotent no-op) başarılı sayılır (contract §6)

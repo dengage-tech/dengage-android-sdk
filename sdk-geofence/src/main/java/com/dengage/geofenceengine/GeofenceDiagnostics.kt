@@ -25,5 +25,7 @@ data class TriggeredEventInfo(
     /** Geçiş anındaki yatay konum doğruluğu (metre); yoksa null. */
     val accuracyM: Double?,
     /** true → state-only reconcile (silent/sync-only reeval): state güncellendi ama kampanya atılmadı. */
-    val stateOnly: Boolean
+    val stateOnly: Boolean,
+    /** true → geçişi OS bildirmedi, SDK çıkarsadı ([ContainmentReconciler]). */
+    val syntheticTransition: Boolean
 )

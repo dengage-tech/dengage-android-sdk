@@ -26,7 +26,9 @@ data class GeofenceEventSignalRequestV2(
     @SerializedName("occurredAt") val occurredAt: String,
     @SerializedName("ingestedAt") val ingestedAt: String,
     @SerializedName("idempotencyKey") val idempotencyKey: String,
-    @SerializedName("source") val source: GeofenceEventSource = GeofenceEventSource.ONLINE
+    @SerializedName("source") val source: GeofenceEventSource = GeofenceEventSource.ONLINE,
+    /** Geçişi OS mu bildirdi (false) yoksa SDK mı çıkarsadı (true) — doc 22 §2.1. */
+    @SerializedName("syntheticTransition") val syntheticTransition: Boolean = false
 ) : Serializable {
 
     companion object {

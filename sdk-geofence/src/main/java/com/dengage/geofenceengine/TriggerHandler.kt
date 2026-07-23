@@ -64,13 +64,17 @@ class TriggerHandler(
      * [fireCampaigns] false → state is updated + recorded in history, but interceptor and event-signal
      * are skipped (state-only). A synthetic transition only fires campaigns when it comes from a
      * movement/OS wake; silent push / sync-only reeval stays silent.
+     *
+     * [syntheticTransition] true → the OS did not report this transition, the SDK inferred it
+     * ([ContainmentReconciler]); reported under the same name in event-signal. False for OS callbacks.
      */
     suspend fun handle(
         eventType: GeofenceEventType,
         requestIds: List<String>,
         location: Location?,
         occurredAtMillis: Long? = null,
-        fireCampaigns: Boolean = true
+        fireCampaigns: Boolean = true,
+        syntheticTransition: Boolean = false
     ) {
         val online = isOnline()
         val now = System.currentTimeMillis()
@@ -139,7 +143,8 @@ class TriggerHandler(
                     occurredAtMillis = occurred,
                     campaignIds = matchingCampaigns.map { it.campaignId },
                     accuracyM = accuracyM,
-                    stateOnly = !fireCampaigns
+                    stateOnly = !fireCampaigns,
+                    syntheticTransition = syntheticTransition
                 ),
                 TRIGGER_HISTORY_MAX_SIZE
             )
@@ -159,7 +164,7 @@ class TriggerHandler(
             val lon = location?.longitude ?: fence.longitude
 
             for (campaign in matchingCampaigns) {
-                dispatch(fence, campaign, eventType, lat, lon, accuracyM, occurred, online)
+                dispatch(fence, campaign, eventType, lat, lon, accuracyM, occurred, syntheticTransition, online)
             }
         }
 
@@ -177,6 +182,7 @@ class TriggerHandler(
         lon: Double,
         accuracyM: Double?,
         occurredAt: Long,
+        syntheticTransition: Boolean,
         online: Boolean
     ) {
         val event = QueuedEvent(
@@ -188,7 +194,8 @@ class TriggerHandler(
             latitude = lat,
             longitude = lon,
             occurredAtMillis = occurredAt,
-            accuracyM = accuracyM
+            accuracyM = accuracyM,
+            syntheticTransition = syntheticTransition
         )
 
         if (online) {

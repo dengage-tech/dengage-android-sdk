@@ -73,7 +73,8 @@ internal class GeofenceDbHelper(context: Context) :
                 longitude REAL NOT NULL,
                 accuracy_m REAL,
                 occurred_at INTEGER NOT NULL,
-                created_at INTEGER NOT NULL
+                created_at INTEGER NOT NULL,
+                synthetic_transition INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
@@ -89,7 +90,8 @@ internal class GeofenceDbHelper(context: Context) :
                 occurred_at INTEGER NOT NULL,
                 campaign_ids TEXT,
                 accuracy_m REAL,
-                state_only INTEGER NOT NULL DEFAULT 0
+                state_only INTEGER NOT NULL DEFAULT 0,
+                synthetic_transition INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
@@ -118,7 +120,9 @@ internal class GeofenceDbHelper(context: Context) :
         // v3: event_queue.accuracy_m kolonu eklendi.
         // v4: trigger_history.accuracy_m kolonu eklendi.
         // v5: trigger_history.state_only kolonu eklendi.
-        const val DB_VERSION = 5
+        // v6: event_queue.synthetic_transition kolonu eklendi.
+        // v7: trigger_history.synthetic_transition kolonu eklendi.
+        const val DB_VERSION = 7
 
         const val TABLE_FENCES = "fences"
         const val TABLE_FENCES_RTREE = "fences_rtree"

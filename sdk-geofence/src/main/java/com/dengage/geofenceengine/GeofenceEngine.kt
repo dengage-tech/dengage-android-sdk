@@ -204,6 +204,19 @@ internal class GeofenceEngine(private val context: Context) {
         scope.launch {
             try {
                 triggerHandler.handleTransition(transitionType, requestIds, location)
+                // Cross-fence reconcile. The OS only tells us about the fence it fired for, so
+                // entering B never repairs a missed exit from A — A stays INSIDE and dedup swallows
+                // every later enter there. This wake is the cheapest repair opportunity we get: the
+                // process is already up and the triggering fix is the freshest location available.
+                //
+                // Must run *after* handleTransition: the reconciler would otherwise synthesize the
+                // very transition that woke us, and the real OS callback would then lose to dedup —
+                // with campaigns suppressed, silently dropping the event.
+                //
+                // fireCampaigns=false: a repaired exit happened at an unknown point in the past, so
+                // occurredAt=now would be a lie and the push would be stale. Same reasoning as the
+                // sync-wake path — fix the state, stay silent.
+                location?.let { reconcileContainment(it, fireCampaigns = false) }
             } finally {
                 onComplete()
             }
@@ -247,7 +260,8 @@ internal class GeofenceEngine(private val context: Context) {
                 occurredAtMillis = it.occurredAtMillis,
                 campaignIds = it.campaignIds,
                 accuracyM = it.accuracyM,
-                stateOnly = it.stateOnly
+                stateOnly = it.stateOnly,
+                syntheticTransition = it.syntheticTransition
             )
         }
 
@@ -300,7 +314,11 @@ internal class GeofenceEngine(private val context: Context) {
         // One call per event type: `handle` flushes the queue internally.
         pending.groupBy({ it.second }, { it.first.requestId })
             .forEach { (eventType, requestIds) ->
-                triggerHandler.handle(eventType, requestIds, location, fireCampaigns = fireCampaigns)
+                triggerHandler.handle(
+                    eventType, requestIds, location,
+                    fireCampaigns = fireCampaigns,
+                    syntheticTransition = true
+                )
             }
     }
 

@@ -17,5 +17,7 @@ data class TriggerHistoryEntry(
     /** Geçiş anındaki yatay konum doğruluğu (metre); yoksa null. */
     val accuracyM: Double? = null,
     /** true → state-only reconcile (silent/sync-only reeval): state güncellendi ama kampanya atılmadı. */
-    val stateOnly: Boolean = false
+    val stateOnly: Boolean = false,
+    /** true → geçişi OS bildirmedi, SDK çıkarsadı ([ContainmentReconciler]). */
+    val syntheticTransition: Boolean = false
 )

@@ -83,9 +83,10 @@ class GeofenceFragment : BaseDataBindingFragment<FragmentGeofenceBinding>() {
                 }
                 val accuracy = event.accuracyM?.let { "accuracy: ${it.roundToInt()}m" } ?: "accuracy: n/a"
                 val campaignsLine = if (event.stateOnly) "state-only (no push) · $campaigns" else campaigns
+                val origin = if (event.syntheticTransition) "synthetic (SDK inferred)" else "OS callback"
                 append("${event.eventType.uppercase()} · #${event.geofenceId} ${event.title ?: "(no title)"}\n")
                 append("  ${dateFormat.format(Date(event.occurredAtMillis))}\n")
-                append("  $accuracy\n")
+                append("  $origin · $accuracy\n")
                 append("  $campaignsLine\n\n")
             }
         }

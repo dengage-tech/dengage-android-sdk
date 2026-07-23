@@ -20,6 +20,7 @@ internal class SqliteTriggerHistoryRepository(private val dbHelper: GeofenceDbHe
             put("campaign_ids", entry.campaignIds.joinToString(","))
             put("accuracy_m", entry.accuracyM)
             put("state_only", if (entry.stateOnly) 1 else 0)
+            put("synthetic_transition", if (entry.syntheticTransition) 1 else 0)
         }
         db.insert(TABLE_TRIGGER_HISTORY, null, cv)
 
@@ -55,7 +56,8 @@ internal class SqliteTriggerHistoryRepository(private val dbHelper: GeofenceDbHe
                         occurredAtMillis = c.getLong(c.getColumnIndexOrThrow("occurred_at")),
                         campaignIds = campaignIds,
                         accuracyM = c.getColumnIndexOrThrow("accuracy_m").let { if (c.isNull(it)) null else c.getDouble(it) },
-                        stateOnly = c.getInt(c.getColumnIndexOrThrow("state_only")) == 1
+                        stateOnly = c.getInt(c.getColumnIndexOrThrow("state_only")) == 1,
+                        syntheticTransition = c.getInt(c.getColumnIndexOrThrow("synthetic_transition")) == 1
                     )
                 )
             }
