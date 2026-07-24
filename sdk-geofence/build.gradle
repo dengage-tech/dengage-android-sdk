@@ -36,7 +36,6 @@ android {
         buildConfig = true
     }
 
-
 }
 afterEvaluate {
     publishing {
@@ -54,6 +53,10 @@ dependencies {
     implementation project(':sdk')
 
     api "com.google.android.gms:play-services-location:21.3.0"
+
+    // Geofence Engine v2: boundary/resume scheduling + offline local notification
+    implementation "androidx.work:work-runtime-ktx:2.9.1"
+    implementation "androidx.core:core-ktx:1.16.0"
 
     // test dependencies
     testImplementation "junit:junit:4.13.2"

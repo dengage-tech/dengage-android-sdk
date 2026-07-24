@@ -1,5 +1,34 @@
 # Changelog
 
+## [6.0.96] - 2026-07-24
+
+### New Features
+
+- Introduce Geofence Engine v2 (`com.dengage.geofenceengine`): server-synced geofences with ETag revalidation, nearest-N monitoring, and enter / exit / dwell reporting through `POST /event-signal` v2
+- Keep `DengageGeofence` as the public entry point; `startGeofence` / `stopGeofence` / `requestLocationPermissions` now drive the new engine
+- Handle geofence silent push (`sourceType=geofence`) automatically in `FcmMessagingService` via `GeofenceSilentPushDispatcher`, with a reflection bridge so the core SDK works without the geofence module
+- Emit synthetic transitions when the OS callback is late or missing, so a dropped exit no longer leaves a fence permanently stuck
+- Repair missed exits on other fences when an OS transition wakes the engine, without firing campaigns for them
+- Gate synthetic transitions on fix confidence: both horizontal accuracy and fix age feed the decision margin, and fixes older than 15 minutes are ignored
+- Send `occurredAt` from the location fix time instead of processing time, and report `accuracyM`, `syntheticTransition` and `token` in event-signal requests
+- Cache campaign content for offline triggers and fire it as a local notification, queueing the event until connectivity returns
+- Add remote tuning through `SdkParameters.geofence` (top-N, re-evaluation distance, adaptive threshold, wake-up cap, heartbeat interval, offline queue size), clamped to safe ranges on read
+- Disable FusedLocationProvider batching so location updates arrive without delay
+
+### Bug Fixes
+
+- Keep the process alive with `goAsync()` while geofence events are being sent, fixing push notifications arriving hours after the trigger
+- Deduplicate OS transitions so a single physical crossing no longer produces multiple events
+- Persist the wake-up cap pause so it survives process restarts instead of silently re-enabling location updates
+- Re-register geofences after a location-provider toggle or app update, which can clear OS-side registrations
+- Send `occurredAt` and `ingestedAt` as UTC ISO-8601 with a `Z` suffix, matching the iOS SDK
+- Fix `LocalNotificationFirer` for empty deep links
+
+### Documentation
+
+- Document Geofence Engine v2 integration, permissions, silent push and radius/accuracy guidance
+
+
 ## [6.0.95] - 2026-06-30
 
 ### New Features

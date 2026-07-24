@@ -1,0 +1,103 @@
+package com.dengage.geofenceengine.receiver
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.location.Location
+import android.location.LocationManager
+import com.dengage.geofenceengine.DengageGeofenceEngine
+import com.dengage.geofenceengine.GeofenceDebugLogger
+import com.dengage.sdk.Dengage
+import com.dengage.sdk.data.cache.Prefs
+import com.dengage.sdk.util.DengageLogger
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingEvent
+import com.google.android.gms.location.LocationResult
+
+/**
+ * Engine v2 OS event handler (doc 21 §6.6).
+ * - ACTION_GEOFENCE_EVENT : `GeofencingClient` transition'ları → TriggerHandler
+ * - ACTION_LOCATION_UPDATE: `FusedLocationProvider` PendingIntent güncellemeleri → MovementListener
+ * - BOOT_COMPLETED        : yeniden başlatma sonrası engine'i ayağa kaldırır
+ */
+class GeofenceBroadcastReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (!ensureEnabled(context)) return
+
+        when (intent.action) {
+            ACTION_GEOFENCE_EVENT -> handleGeofenceEvent(context, intent)
+            ACTION_LOCATION_UPDATE -> handleLocationUpdate(context, intent)
+            Intent.ACTION_BOOT_COMPLETED -> handleBoot(context)
+            LocationManager.PROVIDERS_CHANGED_ACTION,
+            Intent.ACTION_MY_PACKAGE_REPLACED -> handleSystemStateChange(context, intent)
+            else -> DengageLogger.debug("GeofenceBroadcastReceiver -> unhandled action ${intent.action}")
+        }
+    }
+
+    private fun handleGeofenceEvent(context: Context, intent: Intent) {
+        val event = GeofencingEvent.fromIntent(intent) ?: return
+        if (event.hasError()) {
+            DengageLogger.error("GeofenceBroadcastReceiver -> geofence error ${event.errorCode}")
+            GeofenceDebugLogger.error("Geofence OS transition error", mapOf("errorCode" to event.errorCode.toString()))
+            return
+        }
+        val transition = event.geofenceTransition
+        if (transition != Geofence.GEOFENCE_TRANSITION_ENTER &&
+            transition != Geofence.GEOFENCE_TRANSITION_EXIT &&
+            transition != Geofence.GEOFENCE_TRANSITION_DWELL
+        ) return
+
+        val requestIds = event.triggeringGeofences?.mapNotNull { it.requestId } ?: emptyList()
+        if (requestIds.isEmpty()) return
+
+        DengageLogger.debug("GeofenceBroadcastReceiver -> transition=$transition fences=$requestIds")
+        // goAsync(): event-signal POST'u bitene kadar process'i canlı tut (arka planda ~10 sn).
+        // Yoksa onReceive dönünce process dondurulup event-signal Doze'a ertelenir → push saatlerce gecikir.
+        val pendingResult = goAsync()
+        DengageGeofenceEngine.getInstance(context)
+            .handleGeofenceTransition(transition, requestIds, event.triggeringLocation) {
+                pendingResult.finish()
+            }
+    }
+
+    private fun handleLocationUpdate(context: Context, intent: Intent) {
+        val result = LocationResult.extractResult(intent) ?: return
+        val location: Location = result.lastLocation ?: return
+        // goAsync(): heartbeat/sync/flush ağ işi bitene kadar process'i canlı tut.
+        val pendingResult = goAsync()
+        DengageGeofenceEngine.getInstance(context).handleMovement(location) {
+            pendingResult.finish()
+        }
+    }
+
+    private fun handleBoot(context: Context) {
+        DengageLogger.debug("GeofenceBroadcastReceiver -> boot completed, restarting engine")
+        DengageGeofenceEngine.getInstance(context).start()
+    }
+
+    private fun handleSystemStateChange(context: Context, intent: Intent) {
+        // Konum servislerinin aç/kapa'sı ve uygulama güncellemesi OS'taki geofence kayıtlarını
+        // silebilir; store "kayıtlı" derken OS boş kalır ve diff "değişiklik yok" der. forceResync
+        // force=true olduğundan FULL register yapar ve store'u OS gerçeğiyle hizalar (doc 23 İş 1).
+        DengageLogger.debug("GeofenceBroadcastReceiver -> ${intent.action}, full re-register")
+        DengageGeofenceEngine.getInstance(context).forceResync()
+    }
+
+    private fun ensureEnabled(context: Context): Boolean {
+        if (!Dengage.initialized) {
+            Dengage.init(context = context, initForGeofence = true)
+        }
+        val params = Prefs.sdkParameters
+        if (params != null && !params.geofenceEnabled) {
+            DengageLogger.debug("GeofenceBroadcastReceiver -> geofence disabled by server config")
+            return false
+        }
+        return true
+    }
+
+    companion object {
+        const val ACTION_GEOFENCE_EVENT = "com.dengage.geofenceengine.ACTION_GEOFENCE_EVENT"
+        const val ACTION_LOCATION_UPDATE = "com.dengage.geofenceengine.ACTION_LOCATION_UPDATE"
+    }
+}

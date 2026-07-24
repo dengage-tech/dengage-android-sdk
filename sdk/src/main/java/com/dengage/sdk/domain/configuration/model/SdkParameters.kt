@@ -11,6 +11,7 @@ data class SdkParameters(
     @SerializedName("inboxEnabled") val inboxEnabled: Boolean?,
     @SerializedName("inAppEnabled") val inAppEnabled: Boolean?,
     @SerializedName("geofenceEnabled") val geofenceEnabled: Boolean = true,
+    @SerializedName("geofence") val geofence: GeofenceConfiguration? = null,
     @SerializedName("subscriptionEnabled") val subscriptionEnabled: Boolean?,
     @SerializedName("inAppFetchIntervalInMin") val inAppFetchIntervalInMin: Int?,
     @SerializedName("expiredMessagesFetchIntervalInMin") val expiredMessagesFetchIntervalInMin: Int?,
@@ -23,5 +24,6 @@ data class SdkParameters(
     @SerializedName("realTimeInAppSessionTimeoutMinutes") val realTimeInAppSessionTimeoutMinutes: Int?,
     @SerializedName("surveyCheckEndpoint") val surveyCheckEndpoint: String?,
     @SerializedName("eventMappings") val eventMappings: List<EventMapping>?,
-    @SerializedName("debugDeviceIds") val debugDeviceIds: List<String>?
+    @SerializedName("debugDeviceIds") val debugDeviceIds: List<String>?,
+    @SerializedName("sdkErrorLoggingEnabled") val sdkErrorLoggingEnabled: Boolean = false
 ) : Serializable

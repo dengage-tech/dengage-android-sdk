@@ -27,6 +27,13 @@ open class FcmMessagingService : FirebaseMessagingService() {
             return
         }
 
+        // Silent push: sourceType == geofence ise fence'leri sunucudan yeniden çek (resync)
+        if (data["sourceType"].equals("geofence", ignoreCase = true)) {
+            ContextHolder.resetContext(context = this)
+            GeofenceSilentPushDispatcher.dispatch(applicationContext, data)
+            return
+        }
+
         if (DengageUtils.showDengageNotification(data)) {
             ContextHolder.resetContext(context = this)
             Dengage.onMessageReceived(data)

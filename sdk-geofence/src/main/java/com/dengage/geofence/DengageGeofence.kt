@@ -3,21 +3,59 @@ package com.dengage.geofence
 import android.app.Activity
 import android.content.Context
 import android.location.Location
-import android.util.Log
-import com.dengage.geofence.manager.GeofenceLocationManager
+import com.dengage.geofenceengine.DengageGeofenceEngine
 import com.dengage.geofence.manager.GeofencePermissionsHelper
 import com.dengage.sdk.Dengage
-import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.geofence.model.GeofenceLocationSource
+import com.dengage.sdk.util.ContextHolder
 import com.dengage.sdk.util.DengageLogger
 
+/**
+ * Public geofence facade. Artık yeni Geofence Engine (v2) kullanır; eski `GeofenceLocationManager`
+ * (v1) devre dışıdır. `geofenceEnabled` + izin kontrolü engine içinde yapılır.
+ */
 object DengageGeofence {
-
-    private val geofenceManager by lazy { GeofenceLocationManager() }
 
     @JvmStatic
     var geofenceInterceptor: GeofenceInterceptor? = null
 
+    private fun engine(context: Context) = DengageGeofenceEngine.getInstance(context)
+
+    private fun appContext(): Context? = try {
+        ContextHolder.context
+    } catch (e: Exception) {
+        DengageLogger.error("DengageGeofence -> context not available: ${e.message}")
+        null
+    }
+
+    fun startGeofence() {
+        DengageLogger.verbose("DengageGeofence -> startGeofence (v2)")
+        val context = appContext() ?: return
+        engine(context).start()
+    }
+
+    fun stopGeofence() {
+        DengageLogger.verbose("DengageGeofence -> stopGeofence (v2)")
+        val context = appContext() ?: return
+        engine(context).stop()
+    }
+
+    fun requestLocationPermissions(activity: Activity) {
+        GeofencePermissionsHelper.requestLocationPermissions(activity)
+    }
+
+    fun handleBootCompleted(context: Context) {
+        if (!Dengage.initialized) {
+            Dengage.init(context = context, initForGeofence = true)
+        }
+        DengageLogger.debug("DengageGeofence -> handleBootCompleted (v2)")
+        engine(context).start()
+    }
+
+    /**
+     * Geriye dönük uyum: v1 receiver/host'un çağırdığı konum girişi. v2 engine kendi
+     * receiver'ı üzerinden hareketleri işler; buraya gelen konum best-effort engine'e iletilir.
+     */
     fun handleLocation(
         context: Context,
         location: Location,
@@ -27,54 +65,6 @@ object DengageGeofence {
         if (!Dengage.initialized) {
             Dengage.init(context = context, initForGeofence = true)
         }
-
-        // Check if geofence is enabled from server configuration
-        val sdkParams = Prefs.sdkParameters
-        if (sdkParams != null && !sdkParams.geofenceEnabled) {
-            DengageLogger.debug("Geofence is disabled by server configuration, ignoring location")
-            stopGeofence()
-            return
-        }
-
-        geofenceManager.handleLocation(location, source, geofenceRequestId)
-    }
-
-    fun handleBootCompleted(context: Context) {
-        if (!Dengage.initialized) {
-            Dengage.init(context = context, initForGeofence = true)
-        }
-
-        // Check if geofence is enabled from server configuration
-        val sdkParams = Prefs.sdkParameters
-        if (sdkParams != null && !sdkParams.geofenceEnabled) {
-            DengageLogger.debug("Geofence is disabled by server configuration, ignoring boot completed")
-            stopGeofence()
-            return
-        }
-
-        geofenceManager.handleBootCompleted()
-    }
-
-    fun startGeofence() {
-        DengageLogger.verbose("DengageGeofence -> startTracking")
-
-        // Check if geofence is enabled from server configuration
-        val sdkParams = Prefs.sdkParameters
-        if (sdkParams != null && !sdkParams.geofenceEnabled) {
-            DengageLogger.debug("Geofence is disabled by server configuration")
-            stopGeofence()
-            return
-        }
-
-        geofenceManager.startTracking()
-    }
-
-    fun stopGeofence() {
-        DengageLogger.verbose("DengageGeofence -> stopTracking")
-        geofenceManager.stopGeofence()
-    }
-
-    fun requestLocationPermissions(activity: Activity) {
-        GeofencePermissionsHelper.requestLocationPermissions(activity)
+        engine(context).handleMovement(location)
     }
 }
