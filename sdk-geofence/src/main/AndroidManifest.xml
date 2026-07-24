@@ -33,12 +33,17 @@
         tools:targetApi="lollipop" />
 
     <!-- Geofence Engine v2 (doc 21 §6.6) -->
+    <!-- PROVIDERS_CHANGED + MY_PACKAGE_REPLACED: konum servisleri toggle'ı ve uygulama
+         güncellemesi OS'taki geofence kayıtlarını silebilir; full re-register tetiklenir
+         (doc 23 İş 1). Her ikisi de implicit-broadcast yasağından muaftır. -->
     <receiver
         android:name="com.dengage.geofenceengine.receiver.GeofenceBroadcastReceiver"
         android:enabled="true"
         android:exported="false">
         <intent-filter>
             <action android:name="android.intent.action.BOOT_COMPLETED" />
+            <action android:name="android.location.PROVIDERS_CHANGED" />
+            <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
         </intent-filter>
     </receiver>
 

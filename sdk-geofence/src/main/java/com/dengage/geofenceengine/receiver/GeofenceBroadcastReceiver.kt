@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.location.Location
+import android.location.LocationManager
 import com.dengage.geofenceengine.DengageGeofenceEngine
 import com.dengage.geofenceengine.GeofenceDebugLogger
 import com.dengage.sdk.Dengage
@@ -28,6 +29,8 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             ACTION_GEOFENCE_EVENT -> handleGeofenceEvent(context, intent)
             ACTION_LOCATION_UPDATE -> handleLocationUpdate(context, intent)
             Intent.ACTION_BOOT_COMPLETED -> handleBoot(context)
+            LocationManager.PROVIDERS_CHANGED_ACTION,
+            Intent.ACTION_MY_PACKAGE_REPLACED -> handleSystemStateChange(context, intent)
             else -> DengageLogger.debug("GeofenceBroadcastReceiver -> unhandled action ${intent.action}")
         }
     }
@@ -71,6 +74,14 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     private fun handleBoot(context: Context) {
         DengageLogger.debug("GeofenceBroadcastReceiver -> boot completed, restarting engine")
         DengageGeofenceEngine.getInstance(context).start()
+    }
+
+    private fun handleSystemStateChange(context: Context, intent: Intent) {
+        // Konum servislerinin aç/kapa'sı ve uygulama güncellemesi OS'taki geofence kayıtlarını
+        // silebilir; store "kayıtlı" derken OS boş kalır ve diff "değişiklik yok" der. forceResync
+        // force=true olduğundan FULL register yapar ve store'u OS gerçeğiyle hizalar (doc 23 İş 1).
+        DengageLogger.debug("GeofenceBroadcastReceiver -> ${intent.action}, full re-register")
+        DengageGeofenceEngine.getInstance(context).forceResync()
     }
 
     private fun ensureEnabled(context: Context): Boolean {

@@ -28,7 +28,12 @@ data class GeofenceEventSignalRequestV2(
     @SerializedName("idempotencyKey") val idempotencyKey: String,
     @SerializedName("source") val source: GeofenceEventSource = GeofenceEventSource.ONLINE,
     /** Geçişi OS mu bildirdi (false) yoksa SDK mı çıkarsadı (true) — doc 22 §2.1. */
-    @SerializedName("syntheticTransition") val syntheticTransition: Boolean = false
+    @SerializedName("syntheticTransition") val syntheticTransition: Boolean = false,
+    /**
+     * Push token: backend'in geçişi push'lanabilir bir cihaza bağlaması için. Gönderim anında
+     * subscription'dan taze çözülür (per-event saklanmaz) ki offline replay bayat token göndermesin.
+     */
+    @SerializedName("token") val token: String? = null
 ) : Serializable {
 
     companion object {

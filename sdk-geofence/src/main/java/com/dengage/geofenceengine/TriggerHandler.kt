@@ -8,6 +8,7 @@ import android.os.Build
 import com.dengage.geofenceengine.storage.DeviceStateRepository
 import com.dengage.geofenceengine.storage.EventQueueRepository
 import com.dengage.geofenceengine.storage.FenceRepository
+import com.dengage.geofenceengine.storage.PendingCampaignStore
 import com.dengage.geofenceengine.storage.TriggerHistoryRepository
 import com.dengage.geofenceengine.storage.model.Fence
 import com.dengage.geofenceengine.storage.model.FenceState
@@ -41,6 +42,13 @@ class TriggerHandler(
 
     /** Guards the dedup's read-check-write section against concurrent `handle` calls. */
     private val stateMutex = Mutex()
+
+    /**
+     * State-only tüketilen geçişlerin kampanya borcu (doc 23 İş 3). state-only reconcile bir geçişi
+     * state'e işleyince sonraki gerçek OS callback'i dedup'a takılır; borç burada tutulur ve ilk
+     * `fireCampaigns=true` tekrarında state'e dokunmadan ödenir.
+     */
+    private val pendingCampaigns = PendingCampaignStore(context)
 
     /** Maps the OS (GMS) transition constant to an event type and delegates to [handle]. */
     suspend fun handleTransition(transitionType: Int, requestIds: List<String>, location: Location?) {
@@ -96,17 +104,34 @@ class TriggerHandler(
             // Keep read-check-write atomic with a mutex: `handle` can be called concurrently from
             // separate coroutines (OS transition + reconciler); otherwise both read OUTSIDE, both
             // fire, and the dedup is defeated.
-            val proceed = stateMutex.withLock {
+            // Dedup + pending-campaign gate: null → skip; değer → bu occurredAt ile kampanya
+            // akışına devam. State-only (fireCampaigns=false) tüketilen bir geçiş kampanya hakkını
+            // kaybetmesin diye borç marker'a yazılır; aynı geçişin sonraki fireCampaigns=true
+            // tekrarı (gerçek OS callback'i / movement reeval) dedup'a takıldığında state'e
+            // DOKUNMADAN borcu öder (occurredAt = tespit anı, sunucu bayatlığı görebilir).
+            val gateOccurredAt: Long? = stateMutex.withLock {
                 val previous = deviceStateRepository.getState(fence.geofenceId)
                 if (isDuplicateTransition(eventType, previous?.state)) {
-                    DengageLogger.debug("TriggerHandler -> duplicate ${eventType.wireValue} for fence ${fence.geofenceId}, skipping")
-                    false
+                    if (fireCampaigns) pendingCampaigns.consume(fence.geofenceId, eventType) else null
                 } else {
+                    pendingCampaigns.clearFence(fence.geofenceId)
+                    // Sentetik EXIT: fiziksel çıkış `occurred` (≈now) değil, cihazın içeride son görüldüğü
+                    // andan (lastSeenAt) sonra oldu. En dürüst tahmin lastSeenAt — sunucunun 15 dk staleness
+                    // gate'i geç exit'i buna göre eleyebilsin. DWELL'e dokunma: occurredAt=now zaten doğru.
+                    val exitOccurred = if (syntheticTransition && eventType == GeofenceEventType.EXIT)
+                        previous?.lastSeenAt ?: occurred
+                    else occurred
                     updateDeviceState(fence, eventType, now)
-                    true
+                    if (!fireCampaigns && fence.campaigns.any { it.triggerType == eventTypeToTrigger(eventType) }) {
+                        pendingCampaigns.mark(fence.geofenceId, eventType, now)
+                    }
+                    exitOccurred          // ← occurred yerine
                 }
             }
-            if (!proceed) continue
+            if (gateOccurredAt == null) {
+                DengageLogger.debug("TriggerHandler -> duplicate ${eventType.wireValue} for fence ${fence.geofenceId}, skipping")
+                continue
+            }
 
             // Davranış paritesi: enter'da host interceptor'ı tetikle (v1 ile aynı hook).
             // state-only (fireCampaigns=false) modda interceptor da atlanır.
@@ -140,7 +165,7 @@ class TriggerHandler(
                     clusterId = fence.clusterId,
                     title = fence.title,
                     eventType = eventType,
-                    occurredAtMillis = occurred,
+                    occurredAtMillis = gateOccurredAt,
                     campaignIds = matchingCampaigns.map { it.campaignId },
                     accuracyM = accuracyM,
                     stateOnly = !fireCampaigns,
@@ -164,7 +189,7 @@ class TriggerHandler(
             val lon = location?.longitude ?: fence.longitude
 
             for (campaign in matchingCampaigns) {
-                dispatch(fence, campaign, eventType, lat, lon, accuracyM, occurred, syntheticTransition, online)
+                dispatch(fence, campaign, eventType, lat, lon, accuracyM, gateOccurredAt, syntheticTransition, online)
             }
         }
 

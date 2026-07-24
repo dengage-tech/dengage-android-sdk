@@ -7,6 +7,7 @@ import com.dengage.geofenceengine.storage.FenceRepository
 import com.dengage.geofenceengine.storage.model.Fence
 import com.dengage.geofenceengine.storage.model.FenceState
 import com.dengage.sdk.domain.geofence.model.sync.GeofenceEventType
+import com.dengage.sdk.domain.geofence.model.sync.GeofenceTriggerType
 import com.dengage.sdk.util.DengageLogger
 
 /**
@@ -52,7 +53,8 @@ class ContainmentReconciler(
      */
     fun reconcile(
         location: Location,
-        nowElapsedNanos: Long = SystemClock.elapsedRealtimeNanos()
+        nowElapsedNanos: Long = SystemClock.elapsedRealtimeNanos(),
+        nowMillis: Long = System.currentTimeMillis()
     ): List<Pair<Fence, GeofenceEventType>> {
         // Accuracy yok/geçersizse tüm konum belirsiz sayılır → hiçbir fence için karar verme.
         if (!location.hasAccuracy()) {
@@ -82,13 +84,30 @@ class ContainmentReconciler(
             if (fence.geofenceId <= 0) continue
 
             val distance = distanceMeters(location, fence)
-            val state = deviceStateRepository.getState(fence.geofenceId)?.state
+            val record = deviceStateRepository.getState(fence.geofenceId)
+            val state = record?.state
             val deviceThinksInside = isInsideState(state)
 
             if (distance + margin <= fence.radiusM) {
                 // Kesin içeride (en kötü uzak nokta bile radius'ta) ama tablo bilmiyor → geç/eksik enter.
                 if (!deviceThinksInside) {
                     pending += fence to GeofenceEventType.ENTER
+                } else if (state == FenceState.INSIDE) {
+                    // Dwell repair (doc 23 İş 2): OS loiter timer'ı kaybolsa da (re-register /
+                    // GMS restart / Doze) persist edilen enteredAt üzerinden dwell tamamlanır.
+                    // Yalnızca "kesin içeride" dalında — margin/staleness disiplini enter/exit ile
+                    // aynı. INSIDE şartı DWELL_PENDING'i (bu ziyarette zaten atıldı) dışlar;
+                    // TriggerHandler dedup'ı da aynı kuralı uygular.
+                    val dwellMinutes = fence.campaigns
+                        .filter { it.triggerType == GeofenceTriggerType.DWELL }
+                        .mapNotNull { it.dwellMinutes }
+                        .maxOrNull()
+                    val enteredAt = record.enteredAt
+                    if (dwellMinutes != null && dwellMinutes > 0 && enteredAt != null &&
+                        nowMillis - enteredAt >= dwellMinutes * 60_000L
+                    ) {
+                        pending += fence to GeofenceEventType.DWELL
+                    }
                 }
             } else if (deviceThinksInside && distance - margin > fence.radiusM * EXIT_HYSTERESIS_FACTOR) {
                 // Kesin dışarıda (en kötü yakın nokta bile histerezis sınırının ötesinde) → kaçan exit.

@@ -37,7 +37,7 @@ class EventQueueFlusher(
 
         val acked = mutableListOf<String>()
         for (event in valid) {
-            val sent = send(integrationKey, subscription.deviceId, subscription.contactKey, event, GeofenceEventSource.REPLAY)
+            val sent = send(integrationKey, subscription.deviceId, subscription.contactKey, subscription.token, event, GeofenceEventSource.REPLAY)
             if (sent) acked.add(event.idempotencyKey) else break // network düştüyse dur, kalanı sonraki flush'a bırak
         }
         if (acked.isNotEmpty()) {
@@ -56,13 +56,14 @@ class EventQueueFlusher(
         val subscription = Prefs.subscription ?: return false
         val integrationKey = subscription.integrationKey
         if (integrationKey.isBlank()) return false
-        return send(integrationKey, subscription.deviceId, subscription.contactKey, event, GeofenceEventSource.ONLINE)
+        return send(integrationKey, subscription.deviceId, subscription.contactKey, subscription.token, event, GeofenceEventSource.ONLINE)
     }
 
     private suspend fun send(
         integrationKey: String,
         deviceId: String?,
         contactKey: String?,
+        token: String?,
         event: QueuedEvent,
         source: GeofenceEventSource
     ): Boolean {
@@ -81,7 +82,8 @@ class EventQueueFlusher(
                 ingestedAt = GeofenceEventSignalRequestV2.isoNow(),
                 idempotencyKey = event.idempotencyKey,
                 source = source,
-                syntheticTransition = event.syntheticTransition
+                syntheticTransition = event.syntheticTransition,
+                token = token
             )
             val response = apiRepository.sendGeofenceEventSignalV2(integrationKey, request)
             // 2xx ve 409 (idempotent no-op) başarılı sayılır (contract §6)

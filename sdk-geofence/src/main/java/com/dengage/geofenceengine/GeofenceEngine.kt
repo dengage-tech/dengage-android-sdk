@@ -10,8 +10,11 @@ import com.dengage.geofenceengine.storage.GeofenceStorage
 import com.dengage.geofenceengine.storage.model.Fence
 import com.dengage.geofenceengine.worker.ResumeSlcWorker
 import com.dengage.geofence.manager.GeofencePermissionsHelper
+import com.dengage.sdk.domain.geofence.model.sync.GeofenceEventType
 import com.dengage.sdk.util.DengageLogger
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.Tasks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +74,10 @@ internal class GeofenceEngine(private val context: Context) {
 
     @Volatile
     private var running = false
+
+    /** Son foreground kaynaklı organik sync anı (İş 5 debounce). */
+    @Volatile
+    private var lastForegroundSyncAt = 0L
 
     // ---- lifecycle ----
 
@@ -132,6 +139,18 @@ internal class GeofenceEngine(private val context: Context) {
 
     fun requestOrganicSync(reason: OrganicSyncTrigger.Reason) {
         if (!remoteConfig.geofenceEnabled()) return
+        // Foreground debounce (doc 23 İş 5): her ekran açılışı bir organic sync tetikler; kısa
+        // aralıklı foreground'lar (bildirim çekmecesi, app switcher) reeval churn'ü üretmesin.
+        // Diff-based register churn'ün en pahalı kısmını zaten kaldırdı; bu, sync/reconcile
+        // maliyetini de kırpar. Diğer reason'lar (push delivered / boot / manual) debounce'lanmaz.
+        if (reason == OrganicSyncTrigger.Reason.APP_FOREGROUND) {
+            val now = System.currentTimeMillis()
+            if (now - lastForegroundSyncAt < FOREGROUND_SYNC_DEBOUNCE_MS) {
+                DengageLogger.debug("GeofenceEngine -> foreground sync debounced")
+                return
+            }
+            lastForegroundSyncAt = now
+        }
         wakeupCap.attemptResume()
         scope.launch {
             val location = currentLocation()
@@ -279,6 +298,15 @@ internal class GeofenceEngine(private val context: Context) {
     ) {
         if (location != null) lastReevalLocation = location
 
+        // force=true kanalları (start / forceResync / silent push) tamir kanalıdır: store OS'un
+        // gerçeğinden sapmış olabilir → FULL (remove-all + re-register). Diğer yollar DIFF:
+        // değişmeyen fence'e dokunulmaz, OS dwell loiter timer'ı korunur (doc 23 İş 1).
+        val registerMode = if (force) {
+            OsGeofenceRegistrar.RegisterMode.FULL
+        } else {
+            OsGeofenceRegistrar.RegisterMode.DIFF
+        }
+
         if (syncAllowed) {
             when (syncer.sync(location?.latitude, location?.longitude)) {
                 is GeofenceSyncer.SyncResult.NoSubscription ->
@@ -291,7 +319,7 @@ internal class GeofenceEngine(private val context: Context) {
 
         // Storage'daki güncel fence'lerden top-N seç + OS register (cache'ten, transit modunda bile)
         if (location != null) {
-            registerTopN(location)
+            registerTopN(location, registerMode)
             reconcileContainment(location, fireCampaigns)
         }
         if (force || location != null) {
@@ -304,9 +332,15 @@ internal class GeofenceEngine(private val context: Context) {
      * gaps between the location and the state table with our own events (missed exit, enter that
      * never arrived).
      *
-     * [fireCampaigns]: movement kaynaklı reeval'de true → kampanya tetiklenebilir. Silent push /
-     * sync-only reeval'de false → yalnızca state reconcile edilir; occurredAt=now bir pasif wake'te
-     * dürüst olmadığından bayat/sahte push üretmemek için kampanya bastırılır.
+     * [fireCampaigns]: movement kaynaklı reeval'de true → her tip kampanya tetikleyebilir. Pasif
+     * wake'lerde (silent push / sync-only / cross-fence) yalnız ENTER bastırılır:
+     * - EXIT/DWELL muğlaklıksız gerçek geçiştir: sentetik EXIT yalnız state INSIDE iken üretilir
+     *   (daha önce gözlemlenmiş bir enter var), DWELL koşulu ise şu an doğrudur (kullanıcı hâlâ
+     *   içeride ve süre dolmuş) → occurredAt=now dürüst; bastırmak kampanyayı kalıcı kaybettirebilir
+     *   (OS exit'i hiç gelmeyebilir — ör. fence top-N'den düşüp OS'tan silindiyse).
+     * - ENTER'da "initial containment" muğlaklığı var (gece sync'lenen ev fence'i: cihaz zaten
+     *   içerideydi, geçiş yok) → state-only kalır; pending-campaign borcu + INITIAL_TRIGGER_ENTER
+     *   gerçek geçişi kapatır (doc 23 İş 3).
      */
     private suspend fun reconcileContainment(location: Location, fireCampaigns: Boolean) {
         val pending = containmentReconciler.reconcile(location)
@@ -314,21 +348,22 @@ internal class GeofenceEngine(private val context: Context) {
         // One call per event type: `handle` flushes the queue internally.
         pending.groupBy({ it.second }, { it.first.requestId })
             .forEach { (eventType, requestIds) ->
+                val fire = fireCampaigns || eventType != GeofenceEventType.ENTER
                 triggerHandler.handle(
                     eventType, requestIds, location,
-                    fireCampaigns = fireCampaigns,
+                    fireCampaigns = fire,
                     syntheticTransition = true
                 )
             }
     }
 
-    private fun registerTopN(location: Location) {
+    private fun registerTopN(location: Location, mode: OsGeofenceRegistrar.RegisterMode) {
         val config = remoteConfig.config()
         val all = storage.fenceRepository.loadAll()
         val selected = topNSelector.select(all, location.latitude, location.longitude, config.topN)
-        registrar.register(selected)
+        registrar.register(selected, mode)
         activeWindowScheduler.schedule(selected)
-        DengageLogger.debug("GeofenceEngine -> registered ${selected.size}/${all.size} fences (topN=${config.topN})")
+        DengageLogger.debug("GeofenceEngine -> registered ${selected.size}/${all.size} fences (topN=${config.topN}, mode=$mode)")
     }
 
     // ---- helpers ----
@@ -338,13 +373,32 @@ internal class GeofenceEngine(private val context: Context) {
             GeofencePermissionsHelper.coarseLocationPermission(context)
 
     private fun currentLocation(): Location? {
-        lastReevalLocation?.let { return it }
+        val now = System.currentTimeMillis()
+        val cached = lastReevalLocation
+        // Cache tazeyse yeterli (movement reeval'leri zaten taze fix'le gelir).
+        if (cached != null && now - cached.time <= FRESH_LOCATION_MAX_AGE_MS) return cached
+
+        // Bayat cache ile reconcile edilmez: reconciler 15 dk üstü fix'i zaten reddediyor, yani
+        // taze fix alınmazsa foreground/organic reeval hiçbir sentetik tamir yapamaz (doc 23 İş 4 —
+        // "içerideyim ama SDK bilmiyor" gecikmesinin kök nedeni). Organic/foreground anları
+        // kullanıcı-görünür; tek atımlık BALANCED fix maliyeti kabul edilebilir.
+        val client = LocationServices.getFusedLocationProviderClient(context)
         return try {
-            val client = LocationServices.getFusedLocationProviderClient(context)
-            Tasks.await(client.lastLocation, 5, TimeUnit.SECONDS)
+            Tasks.await(
+                client.getCurrentLocation(
+                    Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                    CancellationTokenSource().token
+                ),
+                10, TimeUnit.SECONDS
+            ) ?: cached ?: Tasks.await(client.lastLocation, 5, TimeUnit.SECONDS)
         } catch (e: Exception) {
-            DengageLogger.error("GeofenceEngine -> lastLocation failed: ${e.message}")
-            null
+            DengageLogger.error("GeofenceEngine -> fresh location failed: ${e.message}")
+            cached ?: try {
+                Tasks.await(client.lastLocation, 5, TimeUnit.SECONDS)
+            } catch (e2: Exception) {
+                DengageLogger.error("GeofenceEngine -> lastLocation failed: ${e2.message}")
+                null
+            }
         }
     }
 
@@ -360,5 +414,11 @@ internal class GeofenceEngine(private val context: Context) {
 
     companion object {
         private const val RESUME_WORK_NAME = "dengage_geofence_resume"
+
+        /** Bu yaştan taze cache/fix "güncel konum" sayılır; üstünde tek atımlık taze fix istenir. */
+        private const val FRESH_LOCATION_MAX_AGE_MS = 2L * 60_000L
+
+        /** Foreground kaynaklı organik sync'ler arası asgari süre (İş 5 debounce). */
+        private const val FOREGROUND_SYNC_DEBOUNCE_MS = 60_000L
     }
 }
