@@ -19,6 +19,7 @@ import com.dengage.sdk.ui.inappmessage.Mustache
 import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
+import com.dengage.sdk.util.DengageAppStateTracker
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
@@ -250,6 +251,12 @@ class InAppMessageManager :
      * Fetch in app messages if enabled and fetch time is available
      */
     internal fun fetchInAppMessages(inAppMessageFetchCallbackParam: InAppMessageFetchCallback?) {
+        // Uygulama silent push ile arka planda uyandırıldıysa in-app çekilmez; kullanıcı ekranda
+        // olmadığı için mesaj gösterilemez ve fetch interval'ı boşuna yanar.
+        if (DengageAppStateTracker.shouldSkipInAppFetch()) {
+            DengageLogger.debug("fetchInAppMessages skipped, app woken by push in background")
+            return
+        }
         // Cleanup expired show history entries (older than 2 weeks)
         Prefs.cleanupExpiredShowHistory()
         val inappMessage = inAppMessageFetchCallbackParam
@@ -266,6 +273,10 @@ class InAppMessageManager :
      * Fetch in app messages if enabled and fetch time is available
      */
     internal fun fetchCancelledInAppMessageIds() {
+        if (DengageAppStateTracker.shouldSkipInAppFetch()) {
+            DengageLogger.debug("fetchCancelledInAppMessageIds skipped, app woken by push in background")
+            return
+        }
         presenter.fetchCancelledInAppMessageIds()
     }
 

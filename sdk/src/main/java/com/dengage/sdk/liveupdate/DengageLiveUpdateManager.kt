@@ -1,6 +1,7 @@
 package com.dengage.sdk.liveupdate
 
 import android.content.Context
+import com.dengage.sdk.util.DengageAppStateTracker
 import com.dengage.sdk.util.DengageLogger
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
@@ -83,6 +84,11 @@ object DengageLiveUpdateManager {
      * Parses the JSON, validates event lifecycle, resolves the handler, and dispatches.
      */
     internal fun handleFromFcmData(context: Context, data: Map<String, String>) {
+        // Live update push'u da process'i arka planda uyandırır; uygulama öne gelene kadar in-app
+        // fetch edilmemeli.
+        DengageAppStateTracker.install(context)
+        DengageAppStateTracker.markBackgroundPushWake()
+
         val json = data["live_notification"]
         if (json.isNullOrEmpty()) {
             DengageLogger.verbose("LiveUpdate ignored — empty live_notification")

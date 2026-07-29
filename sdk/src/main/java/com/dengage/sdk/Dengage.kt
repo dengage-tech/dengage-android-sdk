@@ -104,6 +104,7 @@ object Dengage {
         ) {
         initialized = true
         ContextHolder.resetContext(context = context)
+        DengageAppStateTracker.install(context)
         SessionManager.getSessionId()
 
         subscriptionManager.buildSubscription(
@@ -526,6 +527,12 @@ object Dengage {
 
     fun onMessageReceived(data: Map<String, String?>?) {
         if (data.isNullOrEmpty()) return
+
+        // Push, process'i arka planda uyandırmış olabilir. Uygulama öne gelene kadar in-app fetch
+        // edilmemeli. Buraya FCM/HMS service'lerinin normal push dalı ve kendi messaging
+        // service'ini kullanan entegrasyonlar da düşer.
+        DengageAppStateTracker.install()
+        DengageAppStateTracker.markBackgroundPushWake()
 
         try {
             DengageLogger.verbose("onMessageReceived method is called")

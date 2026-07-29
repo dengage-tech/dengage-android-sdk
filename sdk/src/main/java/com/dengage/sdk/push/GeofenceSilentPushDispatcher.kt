@@ -1,6 +1,7 @@
 package com.dengage.sdk.push
 
 import android.content.Context
+import com.dengage.sdk.util.DengageAppStateTracker
 import com.dengage.sdk.util.DengageLogger
 
 /**
@@ -20,6 +21,11 @@ object GeofenceSilentPushDispatcher {
     fun dispatch(context: Context, data: Map<String, String?>): Boolean {
         val sourceType = data[SOURCE_TYPE_KEY]
         if (!SOURCE_TYPE_GEOFENCE.equals(sourceType, ignoreCase = true)) return false
+
+        // Kendi messaging service'ini kullanıp doğrudan buraya gelen entegrasyonlar için de arka
+        // plan silent push uyanışını işaretle; uygulama öne gelene kadar in-app fetch edilmez.
+        DengageAppStateTracker.install(context)
+        DengageAppStateTracker.markBackgroundPushWake()
 
         return try {
             val clazz = Class.forName(ENGINE_CLASS)
