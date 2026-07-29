@@ -1,5 +1,12 @@
 # Changelog
 
+
+## [6.0.97] - 2026-07-29
+
+### Bug Fixes
+
+- Use the app's push small icon for offline geofence notifications instead of a generic system icon
+
 ## [6.0.96] - 2026-07-24
 
 ### New Features
