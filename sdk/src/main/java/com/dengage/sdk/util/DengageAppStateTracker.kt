@@ -102,11 +102,12 @@ object DengageAppStateTracker {
     }
 
     /**
-     * Push ile arka planda uyanıldı ve uygulama hâlâ arka planda mı. true ise in-app mesajları
-     * çekilmemelidir.
+     * In-app tarafındaki istekler için kapı: uygulama arka plandayken hiçbir istek atılmaz.
+     * In-app yalnızca kullanıcı uygulamadayken gösterilebildiğine göre arka planda çekilen verinin
+     * faydası yok; üstelik fetch interval'ını yaktığı için kullanıcı uygulamayı gerçekten açtığında
+     * mesajın gelmemesine yol açıyor.
      */
-    fun shouldSkipInAppFetch(): Boolean {
-        if (!wokenByBackgroundPush) return false
+    fun shouldSkipRequest(): Boolean {
         if (isInForeground()) {
             wokenByBackgroundPush = false
             return false

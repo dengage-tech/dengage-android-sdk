@@ -9,6 +9,7 @@ import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.*
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
+import com.dengage.sdk.util.DengageAppStateTracker
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.manager.session.SessionManager
 
@@ -458,6 +459,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     private fun shouldFetchVisitorInfo(): Boolean {
 
+        if (DengageAppStateTracker.shouldSkipRequest()) return false
         if(!DengageUtils.isAppInForeground()) return false
 
         if (System.currentTimeMillis() < Prefs.visitorInfoFetchTime) return false
