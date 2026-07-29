@@ -46,6 +46,13 @@ class InAppMessageManager :
         private var timer = Timer()
         private var hourlyFetchTimer: Timer? = null
         internal var isInAppMessageShowing = false
+
+        /** Ön plana dönüşler arasındaki minimum fetch aralığı. */
+        private const val APP_FOREGROUND_FETCH_FLOOR_MS = 60_000L
+
+        /** Process içindeki son ön plan tetikli fetch zamanı; 0 ise henüz fetch yapılmadı. */
+        @Volatile
+        private var lastAppForegroundFetchTime = 0L
     }
 
     /**
@@ -251,18 +258,46 @@ class InAppMessageManager :
     /**
      * Fetch in app messages if enabled and fetch time is available
      */
-    internal fun fetchInAppMessages(inAppMessageFetchCallbackParam: InAppMessageFetchCallback?) {
+    internal fun fetchInAppMessages(
+        inAppMessageFetchCallbackParam: InAppMessageFetchCallback?,
+        trigger: InAppFetchTrigger = InAppFetchTrigger.OTHER,
+    ) {
         // Arka planda in-app çekilmez: kullanıcı ekranda olmadığı için mesaj gösterilemez ve
         // fetch interval'ı boşuna yanar.
         if (DengageAppStateTracker.shouldSkipRequest()) {
             DengageLogger.debug("fetchInAppMessages skipped, app is in background")
             return
         }
+        // Ön plana geçiş her zaman fetch eder; yalnızca kazara arka plan/ön plan çalkantısını
+        // eleyen küçük bir taban uygulanır.
+        if (trigger == InAppFetchTrigger.APP_FOREGROUND && shouldSkipForAppForegroundFloor()) return
+
         // Cleanup expired show history entries (older than 2 weeks)
         Prefs.cleanupExpiredShowHistory()
         val inappMessage = inAppMessageFetchCallbackParam
         inAppMessageFetchCallback = inappMessage
-        presenter.getInAppMessages()
+        presenter.getInAppMessages(
+            bypassFetchInterval = trigger == InAppFetchTrigger.APP_FOREGROUND
+        )
+    }
+
+    /**
+     * Ön plan tabanı. Process içindeki **ilk** fetch koşulsuzdur — uygulamayı tamamen kapatıp
+     * açmak her zaman fetch üretir, bu testçiye deterministik bir yol bırakır. Sonraki ön plana
+     * dönüşler [APP_FOREGROUND_FETCH_FLOOR_MS] tabanına tabidir.
+     */
+    private fun shouldSkipForAppForegroundFloor(): Boolean {
+        val now = System.currentTimeMillis()
+        val last = lastAppForegroundFetchTime
+        if (last != 0L && now - last < APP_FOREGROUND_FETCH_FLOOR_MS) {
+            val remainingSeconds = (APP_FOREGROUND_FETCH_FLOOR_MS - (now - last)) / 1000
+            DengageLogger.debug(
+                "fetchInAppMessages skipped by foreground floor, ${remainingSeconds}s remaining"
+            )
+            return true
+        }
+        lastAppForegroundFetchTime = now
+        return false
     }
 
     internal fun fetchVisitorInfo() {

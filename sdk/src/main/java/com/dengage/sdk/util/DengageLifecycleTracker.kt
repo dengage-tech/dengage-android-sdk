@@ -15,7 +15,7 @@ open class DengageLifecycleTracker : Application.ActivityLifecycleCallbacks {
         if (startedActivityCount == 0) {
             // app went to foreground
             ContextHolder.resetContext(activity.applicationContext)
-            Dengage.getInAppMessages()
+            Dengage.onAppForegrounded()
             Dengage.setLastSessionStartTime()
             Dengage.sendAppForegroundEvent()
             Dengage.getCancelledInAppMessageIds()

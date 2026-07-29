@@ -31,7 +31,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val getVisitorInfo by lazy { GetVisitorInfo() }
     private val assignCoupon by lazy { AssignCoupon() }
 
-    override fun getInAppMessages() {
+    override fun getInAppMessages(bypassFetchInterval: Boolean) {
         try {
             val sdkParameters = Prefs.sdkParameters
             val subscription = Prefs.subscription
@@ -44,7 +44,9 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
                 // Geliştirme modunda (manuel bayrak veya debug cihaz) fetch aralığı uygulanmaz.
                 if (!Prefs.isDevelopmentModeActive) {
-                    if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
+                    // Ön plana geçiş tetikleyicisi aralığa takılmaz (bkz. A) — ama bir sonraki
+                    // periyodik turu ileri itmek için damga yine de atılır.
+                    if (!bypassFetchInterval && System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
                     val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
                     Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
@@ -74,7 +76,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             ) {
                 // Geliştirme modunda (manuel bayrak veya debug cihaz) fetch aralığı uygulanmaz.
                 if (!Prefs.isDevelopmentModeActive) {
-                    if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
+                    if (!bypassFetchInterval && System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
 
                     val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
                         ?: 0) * 60000

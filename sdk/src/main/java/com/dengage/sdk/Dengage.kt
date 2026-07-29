@@ -33,6 +33,7 @@ import com.dengage.sdk.manager.configuration.ConfigurationManager
 import com.dengage.sdk.manager.deviceId.DeviceIdSenderManager
 import com.dengage.sdk.manager.event.EventManager
 import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
+import com.dengage.sdk.manager.inappmessage.InAppFetchTrigger
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
 import com.dengage.sdk.manager.inappmessage.session.InAppSessionManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
@@ -118,13 +119,15 @@ object Dengage {
 
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
-                inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
-                    InAppMessageFetchCallback {
-                    override fun inAppMessageFetched(realTime: Boolean) {
-                        isInAppFetched = true;
-                    }
-
-                })
+                // Soğuk başlatma zinciri — aralığa takılmaz (bkz. InAppFetchTrigger).
+                inAppMessageManager.fetchInAppMessages(
+                    inAppMessageFetchCallbackParam = object : InAppMessageFetchCallback {
+                        override fun inAppMessageFetched(realTime: Boolean) {
+                            isInAppFetched = true;
+                        }
+                    },
+                    trigger = InAppFetchTrigger.APP_FOREGROUND
+                )
             }
 
             override fun startAppTracking(appTrackings: List<AppTracking>?) {
@@ -375,6 +378,21 @@ object Dengage {
             }
 
         })
+    }
+
+    /**
+     * Uygulama ön plana geldi. Fetch aralığına takılmaz; yalnızca ön plan tabanı uygulanır.
+     * [DengageLifecycleTracker] tarafından çağrılır.
+     */
+    internal fun onAppForegrounded() {
+        inAppMessageManager.fetchInAppMessages(
+            inAppMessageFetchCallbackParam = object : InAppMessageFetchCallback {
+                override fun inAppMessageFetched(realTime: Boolean) {
+                    isInAppFetched = true
+                }
+            },
+            trigger = InAppFetchTrigger.APP_FOREGROUND
+        )
     }
 
     /**

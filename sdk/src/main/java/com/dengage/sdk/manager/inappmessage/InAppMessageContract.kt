@@ -16,7 +16,7 @@ interface InAppMessageContract {
     }
 
     interface Presenter : BasePresenter<View> {
-        fun getInAppMessages()
+        fun getInAppMessages(bypassFetchInterval: Boolean = false)
         fun setInAppMessageAsDisplayed(inAppMessage: InAppMessage)
         fun setInAppMessageAsClicked(
             inAppMessage: InAppMessage,
