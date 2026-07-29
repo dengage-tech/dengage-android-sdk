@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.dengage.sdk.domain.geofence.model.sync.OfflinePushContent
+import com.dengage.sdk.push.getSmallIconId
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.DengageLogger
 
@@ -30,7 +31,7 @@ class LocalNotificationFirer(private val context: Context) {
         ensureChannel()
 
         val builder = NotificationCompat.Builder(context, Constants.NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_map)
+            .setSmallIcon(smallIconId())
             .setContentTitle(title ?: "")
             .setContentText(body ?: "")
             .setStyle(NotificationCompat.BigTextStyle().bigText(body ?: ""))
@@ -78,6 +79,16 @@ class LocalNotificationFirer(private val context: Context) {
         } catch (e: Exception) {
             null
         }
+    }
+
+    /**
+     * Normal push ile aynı small icon'u kullan (`den_push_small_icon` meta-data'sı, yoksa uygulama
+     * ikonu). Böylece offline geofence bildirimi jenerik sistem ikonu yerine uygulama markasıyla çıkar.
+     * `getSmallIconId` geçersiz (-1) dönerse sistem harita ikonuna düş — bildirim ikonsuz kalmasın.
+     */
+    private fun smallIconId(): Int {
+        val id = context.getSmallIconId()
+        return if (id > 0) id else android.R.drawable.ic_dialog_map
     }
 
     private fun ensureChannel() {
