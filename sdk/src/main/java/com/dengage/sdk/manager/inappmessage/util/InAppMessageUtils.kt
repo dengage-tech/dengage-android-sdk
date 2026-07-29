@@ -70,9 +70,7 @@ object InAppMessageUtils {
         propertyId: String? = "",
         storyPropertyId: String? = null,
     ): InAppMessage? {
-        val subscription = Prefs.subscription
-        val sdkParameters = Prefs.sdkParameters
-        val isDebugDevice = isDebugDevice(subscription?.getSafeDeviceId(), sdkParameters?.debugDeviceIds)
+        val isDebugDevice = Prefs.isDebugDevice
         val traceId = if (isDebugDevice) UUID.randomUUID().toString() else null
         val currentCampaignList = if (isDebugDevice) {
             inAppMessages.map { inAppMessage ->
@@ -176,10 +174,6 @@ object InAppMessageUtils {
             return matchedWithScreenFilters ?: matchedWithoutScreenFilters
         }
 
-    }
-
-    private fun isDebugDevice(deviceId: String?, debugDeviceIds: List<String>?): Boolean {
-        return !deviceId.isNullOrEmpty() && !debugDeviceIds.isNullOrEmpty() && debugDeviceIds.contains(deviceId)
     }
 
     private fun isScreenNameFound(inAppMessage: InAppMessage, screenName: String): Boolean {

@@ -41,7 +41,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             ) {
 
 
-                if (Prefs.isDevelopmentStatusDebug == false) {
+                // Geliştirme modunda (manuel bayrak veya debug cihaz) fetch aralığı uygulanmaz.
+                if (!Prefs.isDevelopmentModeActive) {
                     if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
 
                     val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
@@ -70,7 +71,8 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
                 DengageUtils.isAppInForeground()
             ) {
-                if (Prefs.isDevelopmentStatusDebug == false) {
+                // Geliştirme modunda (manuel bayrak veya debug cihaz) fetch aralığı uygulanmaz.
+                if (!Prefs.isDevelopmentModeActive) {
                     if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
 
                     val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes

@@ -166,6 +166,23 @@ object Prefs {
         get() = preferences.get(PreferenceKey.DEVELOPMENT_STATUS, false)
         set(value) = preferences.set(PreferenceKey.DEVELOPMENT_STATUS, value)
 
+    /** Cihaz, panel'den gelen [SdkParameters.debugDeviceIds] listesinde mi. */
+    internal val isDebugDevice: Boolean
+        get() {
+            val deviceId = subscription?.getSafeDeviceId()
+            val debugDeviceIds = sdkParameters?.debugDeviceIds
+            return !deviceId.isNullOrEmpty() && !debugDeviceIds.isNullOrEmpty() &&
+                    debugDeviceIds.contains(deviceId)
+        }
+
+    /**
+     * Etkin geliştirme modu: `Dengage.setDevelopmentStatus(true)` çağrılmışsa **veya** cihaz
+     * panel'deki debugDeviceIds listesindeyse açıktır. Geliştirme modunda in-app fetch ve gösterim
+     * aralıkları uygulanmaz, böylece test cihazı kampanyayı beklemeden görür.
+     */
+    internal val isDevelopmentModeActive: Boolean
+        get() = isDevelopmentStatusDebug == true || isDebugDevice
+
     internal var visitorInfoFetchTime: Long
         get() = preferences.get(PreferenceKey.VISITOR_INFO_FETCH_TIME, 0) ?: 0
         set(value) = preferences.set(PreferenceKey.VISITOR_INFO_FETCH_TIME, value)

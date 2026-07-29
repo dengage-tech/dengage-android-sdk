@@ -95,7 +95,8 @@ class InAppMessageManager :
             cancelTimer()
         }
         // control next in app message show time
-        if (Prefs.isDevelopmentStatusDebug == false) {
+        // Geliştirme modunda (manuel bayrak veya debug cihaz) gösterim aralığı uygulanmaz.
+        if (!Prefs.isDevelopmentModeActive) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) {
                 hidePlacementIfNeeded(
                     inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
@@ -700,10 +701,6 @@ class InAppMessageManager :
         return storyCovers
     }
 
-    private fun isDebugDevice(deviceId: String?, debugDeviceIds: List<String>?): Boolean {
-        return !deviceId.isNullOrEmpty() && !debugDeviceIds.isNullOrEmpty() && debugDeviceIds.contains(deviceId)
-    }
-
     private fun sendCouponValidationFailureLog(
         couponContent: String,
         errorMessage: String,
@@ -715,12 +712,7 @@ class InAppMessageManager :
                 val subscription = Prefs.subscription
                 val sdkParameters = Prefs.sdkParameters
 
-                val isDebugDevice = isDebugDevice(
-                    subscription?.getSafeDeviceId(),
-                    sdkParameters?.debugDeviceIds
-                )
-
-                if (isDebugDevice) {
+                if (Prefs.isDebugDevice) {
                     val traceId = UUID.randomUUID().toString()
                     val campaignId = inAppMessage.data.publicId ?: inAppMessage.id
                     
