@@ -20,8 +20,9 @@ object EventHistoryUtils {
 
             // Filter events by time window
             val eventsInWindow = if (criterion.timeWindow?.type?.uppercase() == "SESSION") {
-                // For SESSION type, filter events that belong to current session
-                val currentSessionId = SessionManager.getSessionId()
+                // For SESSION type, filter events that belong to current session.
+                // Read-only access: evaluating a rule must not rotate the session.
+                val currentSessionId = SessionManager.currentSessionId
                 eventTypeEvents.filter { event ->
                     event.sessionId == currentSessionId
                 }

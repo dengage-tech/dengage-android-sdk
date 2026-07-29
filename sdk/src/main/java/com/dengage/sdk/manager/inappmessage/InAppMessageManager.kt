@@ -730,7 +730,8 @@ class InAppMessageManager :
                         appId = sdkParameters?.appId,
                         account = sdkParameters?.accountName,
                         device = subscription?.getSafeDeviceId() ?: "",
-                        sessionId = SessionManager.getSessionId(),
+                        // Debug log'u oturum döndürmemeli
+                        sessionId = SessionManager.currentSessionId,
                         sdkVersion = DengageUtils.getSdkVersion(),
                         currentCampaignList = emptyList(),
                         campaignId = campaignId,

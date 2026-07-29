@@ -17,7 +17,6 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.visitcount.model.VisitCountItem
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
-import com.dengage.sdk.util.DengageUtils
 
 import com.dengage.sdk.domain.inappmessage.model.Cart
 import com.dengage.sdk.domain.inappmessage.model.ClientPageInfo
@@ -90,8 +89,11 @@ object Prefs {
         get() = preferences.get(PreferenceKey.APP_SESSION_TIME, 0) ?: 0
         set(value) = preferences.set(PreferenceKey.APP_SESSION_TIME, value)
 
+    // Kayıt yokken boş döner; oturum id üretimi tek noktada, SessionManager'dadır. (Varsayılan
+    // olarak UUID üretmek, get(key, default) default'u kalıcılaştırmadığı için her okumada farklı
+    // bir id döndürüyordu.)
     internal var appSessionId: String
-        get() = preferences.get(PreferenceKey.APP_SESSION_ID, DengageUtils.generateUUID()) ?: ""
+        get() = preferences.get(PreferenceKey.APP_SESSION_ID, "") ?: ""
         set(value) = preferences.set(PreferenceKey.APP_SESSION_ID, value)
 
     internal var logVisibility: Boolean
