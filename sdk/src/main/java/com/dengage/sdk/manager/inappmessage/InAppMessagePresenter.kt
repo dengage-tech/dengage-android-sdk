@@ -43,23 +43,29 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
 
                 // Geliştirme modunda (manuel bayrak veya debug cihaz) fetch aralığı uygulanmaz.
-                if (!Prefs.isDevelopmentModeActive) {
-                    // Ön plana geçiş tetikleyicisi aralığa takılmaz (bkz. A) — ama bir sonraki
-                    // periyodik turu ileri itmek için damga yine de atılır.
-                    if (!bypassFetchInterval && System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
+                // Ön plana geçiş tetikleyicisi de aralığa takılmaz (bkz. A).
+                if (!Prefs.isDevelopmentModeActive && !bypassFetchInterval &&
+                    System.currentTimeMillis() < Prefs.inAppMessageFetchTime
+                ) return
 
-                    val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
-                    Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
-                }
+                val bulkBaseMs = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60_000L
                 getInAppMessages(this) {
                     onResponse = {
+                        // Uyarlamalı gate: boş yanıtta geri çekil, dolu yanıtta tabana dön.
+                        // Damga yanıt sonrasında atılır; aksi halde boş/dolu bilgisi henüz yok.
+                        val gate = InAppFetchGate.onResponse(
+                            InAppFetchGate.Channel.BULK, bulkBaseMs, it.isNullOrEmpty()
+                        )
+                        Prefs.inAppMessageFetchTime = System.currentTimeMillis() + gate
                         view {
                             fetchedInAppMessages(it, false)
                             fetchCancelledInAppMessageIds()
                         }
                     }
                     onError = {
-                        //  Prefs.inAppMessageFetchTime = System.currentTimeMillis()
+                        // Başarısız istek gate'i değiştirmez; mevcut gate kadar beklenir.
+                        Prefs.inAppMessageFetchTime = System.currentTimeMillis() +
+                                InAppFetchGate.current(InAppFetchGate.Channel.BULK, bulkBaseMs)
                         view { showError(it) }
                     }
                     params = GetInAppMessages.Params(
@@ -75,18 +81,20 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 DengageUtils.isAppInForeground()
             ) {
                 // Geliştirme modunda (manuel bayrak veya debug cihaz) fetch aralığı uygulanmaz.
-                if (!Prefs.isDevelopmentModeActive) {
-                    if (!bypassFetchInterval && System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
+                // Ön plana geçiş tetikleyicisi de aralığa takılmaz (bkz. A).
+                if (!Prefs.isDevelopmentModeActive && !bypassFetchInterval &&
+                    System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime
+                ) return
 
-                    val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
-                        ?: 0) * 60000
-                    Prefs.realTimeInAppMessageFetchTime =
-                        System.currentTimeMillis() + nextFetchTimePlus
-
-                }
+                val realTimeBaseMs =
+                    (sdkParameters?.realTimeInAppFetchIntervalInMinutes ?: 0) * 60_000L
 
                 getRealTimeInAppMessagesV2(this) {
                     onResponse = {
+                        val gate = InAppFetchGate.onResponse(
+                            InAppFetchGate.Channel.REAL_TIME, realTimeBaseMs, it.isNullOrEmpty()
+                        )
+                        Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis() + gate
                         view {
                             fetchedInAppMessages(it, true)
                         }
@@ -97,6 +105,13 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                             showError(it)
                             getRealTimeInAppMessages(this@InAppMessagePresenter) {
                                 onResponse = {
+                                    val gate = InAppFetchGate.onResponse(
+                                        InAppFetchGate.Channel.REAL_TIME,
+                                        realTimeBaseMs,
+                                        it.isNullOrEmpty()
+                                    )
+                                    Prefs.realTimeInAppMessageFetchTime =
+                                        System.currentTimeMillis() + gate
                                     view {
                                         fetchedInAppMessages(it, true)
                                     }

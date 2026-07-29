@@ -450,14 +450,14 @@ object Dengage {
 
     internal fun setLastSessionStartTime() {
         inAppSessionManager.setLastSessionStartTime()
-        // Start hourly fetch timer when app comes to foreground
-        inAppMessageManager.startHourlyFetchTimer()
+        // Oturum içi periyodik turu başlat
+        inAppMessageManager.startInSessionFetchTimer()
     }
 
     internal fun setLastSessionDuration() {
         inAppSessionManager.setLastSessionDuration()
-        // Stop hourly fetch timer when app goes to background
-        inAppMessageManager.stopHourlyFetchTimer()
+        // Uygulama arka plana düştü, oturum içi turu durdur
+        inAppMessageManager.stopInSessionFetchTimer()
     }
 
     internal fun setLastVisitTime() {

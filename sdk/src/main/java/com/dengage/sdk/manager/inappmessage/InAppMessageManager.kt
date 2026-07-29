@@ -44,11 +44,17 @@ class InAppMessageManager :
 
     companion object {
         private var timer = Timer()
-        private var hourlyFetchTimer: Timer? = null
+        private var inSessionFetchTimer: Timer? = null
         internal var isInAppMessageShowing = false
 
         /** Ön plana dönüşler arasındaki minimum fetch aralığı. */
         private const val APP_FOREGROUND_FETCH_FLOOR_MS = 60_000L
+
+        /**
+         * Oturum içi turlar arasındaki minimum bekleme. Gate henüz damgalanmamışken ya da
+         * istek başarısız olup damga güncellenmemişken sıkı döngüye girmeyi engeller.
+         */
+        private const val MIN_IN_SESSION_FETCH_DELAY_MS = 60_000L
 
         /** Process içindeki son ön plan tetikli fetch zamanı; 0 ise henüz fetch yapılmadı. */
         @Volatile
@@ -271,6 +277,9 @@ class InAppMessageManager :
         // Ön plana geçiş her zaman fetch eder; yalnızca kazara arka plan/ön plan çalkantısını
         // eleyen küçük bir taban uygulanır.
         if (trigger == InAppFetchTrigger.APP_FOREGROUND && shouldSkipForAppForegroundFloor()) return
+
+        // Geri çekilmenin sıfırlama çapası ön plana geçiştir.
+        if (trigger == InAppFetchTrigger.APP_FOREGROUND) InAppFetchGate.reset()
 
         // Cleanup expired show history entries (older than 2 weeks)
         Prefs.cleanupExpiredShowHistory()
@@ -543,27 +552,45 @@ class InAppMessageManager :
         }
     }
 
-    internal fun startHourlyFetchTimer() {
-        stopHourlyFetchTimer()
+    /**
+     * Oturum içi periyodik tur. Sabit bir aralıkta tick atmak yerine timer doğrudan **gate'in
+     * dolacağı ana** kurulur; her turdan sonra taze damgayla yeniden zamanlanır. Gecikme sık
+     * tick + gate kontrolüyle aynı, ama saatte onlarca yerine birkaç ateşleme oluyor.
+     */
+    internal fun startInSessionFetchTimer() {
+        stopInSessionFetchTimer()
 
-        val oneHourInMilliSeconds = 60 * 60 * 1000L
-        hourlyFetchTimer = Timer().apply {
+        inSessionFetchTimer = Timer().apply {
             schedule(object : TimerTask() {
                 override fun run() {
-                    if (DengageUtils.isAppInForeground()) {
-                        fetchInAppMessages(null)
-                    }
-                    // Reschedule for next hour
-                    startHourlyFetchTimer()
+                    fetchInAppMessages(null)
+                    startInSessionFetchTimer()
                 }
-            }, oneHourInMilliSeconds) // 1 hour in milliseconds
+            }, nextInSessionFetchDelay())
         }
     }
 
-    internal fun stopHourlyFetchTimer() {
-        hourlyFetchTimer?.cancel()
-        hourlyFetchTimer?.purge()
-        hourlyFetchTimer = null
+    internal fun stopInSessionFetchTimer() {
+        inSessionFetchTimer?.cancel()
+        inSessionFetchTimer?.purge()
+        inSessionFetchTimer = null
+    }
+
+    /**
+     * Bir sonraki turun ne kadar sonra atılacağı: bulk ve real-time gate'lerinden **önce dolanı**.
+     * Damga henüz atılmamışsa (0) taban gecikmeye düşülür.
+     */
+    private fun nextInSessionFetchDelay(): Long {
+        val now = System.currentTimeMillis()
+        // Yalnızca damgalanmış kanallar sayılır. Kapalı bir kanalın damgası hiç yazılmaz ve 0
+        // kalır; onu hesaba katmak timer'ı sonsuza dek taban gecikmede döndürürdü.
+        val nextAllowed = listOf(Prefs.inAppMessageFetchTime, Prefs.realTimeInAppMessageFetchTime)
+            .filter { it > 0L }
+            .minOrNull()
+            ?: return ((Prefs.sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60_000L)
+                .coerceAtLeast(MIN_IN_SESSION_FETCH_DELAY_MS)
+
+        return (nextAllowed - now).coerceAtLeast(MIN_IN_SESSION_FETCH_DELAY_MS)
     }
 
     override fun inAppMessageSetAsDisplayed() = Unit
