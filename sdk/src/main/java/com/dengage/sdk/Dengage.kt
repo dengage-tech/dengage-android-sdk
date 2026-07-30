@@ -39,7 +39,6 @@ import com.dengage.sdk.manager.inappmessage.session.InAppSessionManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
-import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.liveupdate.DengageLiveUpdateManager
@@ -105,8 +104,10 @@ object Dengage {
         ) {
         initialized = true
         ContextHolder.resetContext(context = context)
+        // Oturum dokunuşu burada yapılmaz: silent push process'i arka planda ayağa kaldırdığında
+        // init de çalışıyor ve süresi dolmuş oturumda yeni oturum + ziyaret sayıyordu. Dokunuş,
+        // kullanıcı gerçekten ekrana geldiğinde DengageAppStateTracker tarafından yapılır.
         DengageAppStateTracker.install(context)
-        SessionManager.getSessionId()
 
         subscriptionManager.buildSubscription(
             firebaseIntegrationKey,

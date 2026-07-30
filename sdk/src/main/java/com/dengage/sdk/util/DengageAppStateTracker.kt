@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import com.dengage.sdk.manager.session.SessionManager
 
 /**
  * Uygulamanın push ile arka planda uyandırılıp uyandırılmadığını ve gerçekten önde olup olmadığını
@@ -20,6 +21,9 @@ import android.os.Bundle
  * yokken bile "foreground" görünür. Bu yüzden [install] ile SDK kendi Activity lifecycle
  * callback'ini kaydeder ve Activity sayacını otoriter kaynak olarak kullanır. Kayıt yapılamadıysa
  * (ör. `Dengage.init` hiç çağrılmadıysa) eski davranışa düşülür.
+ *
+ * Aynı Activity sinyali oturum dokunuşu için de kullanılır (bkz. [touchSession]): kullanıcının
+ * gerçekten ekranda olduğunu bilen tek yer burası.
  */
 object DengageAppStateTracker {
 
@@ -35,12 +39,18 @@ object DengageAppStateTracker {
     private val lifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
 
-        override fun onActivityStarted(activity: Activity) = onActivityEnteredForeground()
+        override fun onActivityStarted(activity: Activity) {
+            onActivityEnteredForeground()
+            touchSession()
+        }
 
         override fun onActivityResumed(activity: Activity) {
             // Geç install edildiysek (ör. Dengage.init bir Activity içinden çağrıldıysa) onStart'ı
             // kaçırmış olabiliriz; sayacı burada onar.
-            if (startedActivityCount == 0) onActivityEnteredForeground()
+            if (startedActivityCount == 0) {
+                onActivityEnteredForeground()
+                touchSession()
+            }
         }
 
         override fun onActivityPaused(activity: Activity) = Unit
@@ -83,6 +93,28 @@ object DengageAppStateTracker {
     @Synchronized
     private fun onActivityLeftForeground() {
         if (startedActivityCount > 0) startedActivityCount--
+    }
+
+    /**
+     * Kullanıcı aktivitesine bağlı oturum dokunuşu: süresi dolmuşsa yeni oturum açar (ziyaret
+     * sayar), dolmamışsa kayan pencereyi ileri taşır.
+     *
+     * Bu iş eskiden `Dengage.init` içinde yapılıyordu; silent push process'i arka planda ayağa
+     * kaldırdığında da çalıştığı için `dn.visit_count` push hacmiyle şişiyordu. Ekranda Activity
+     * varsa kullanıcı gerçekten uygulamadadır — dokunuş için doğru an burası.
+     *
+     * `shouldSkipRequest()` ile kapılamak çözüm olmazdı: `Dengage.init`, `Application.onCreate`
+     * içinde, yani daha hiçbir Activity başlamamışken çalışıyor — gerçek kullanıcı açılışında da
+     * sayaç 0 olduğu için kapı iki senaryoyu ayırt edemiyor.
+     */
+    private fun touchSession() {
+        try {
+            SessionManager.getSessionId()
+        } catch (e: Exception) {
+            DengageLogger.error("touchSession error: ${e.message}")
+        } catch (e: Throwable) {
+            DengageLogger.error("touchSession error: ${e.message}")
+        }
     }
 
     /** Ekranda görünür bir Activity var mı. */
