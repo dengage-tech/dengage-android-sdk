@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import com.dengage.sdk.Dengage
 import com.dengage.sdk.manager.session.SessionManager
 
 /**
@@ -39,18 +40,12 @@ object DengageAppStateTracker {
     private val lifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
 
-        override fun onActivityStarted(activity: Activity) {
-            onActivityEnteredForeground()
-            touchSession()
-        }
+        override fun onActivityStarted(activity: Activity) = onActivityForegroundSignal()
 
         override fun onActivityResumed(activity: Activity) {
             // Geç install edildiysek (ör. Dengage.init bir Activity içinden çağrıldıysa) onStart'ı
             // kaçırmış olabiliriz; sayacı burada onar.
-            if (startedActivityCount == 0) {
-                onActivityEnteredForeground()
-                touchSession()
-            }
+            if (startedActivityCount == 0) onActivityForegroundSignal()
         }
 
         override fun onActivityPaused(activity: Activity) = Unit
@@ -84,10 +79,32 @@ object DengageAppStateTracker {
         }
     }
 
+    /**
+     * Ekranda bir Activity göründü. Sayaç ilerletilir ve oturuma dokunulur; bu **ilk** Activity
+     * ise (arka plandan ya da soğuk açılıştan ön plana geçiş) SDK parametrelerinin tazelenmesi
+     * tetiklenir.
+     */
+    private fun onActivityForegroundSignal() {
+        val enteredForeground = increaseStartedActivityCount()
+        touchSession()
+        if (enteredForeground) {
+            try {
+                Dengage.onAppEnteredForeground()
+            } catch (e: Exception) {
+                DengageLogger.error("onAppEnteredForeground error: ${e.message}")
+            } catch (e: Throwable) {
+                DengageLogger.error("onAppEnteredForeground error: ${e.message}")
+            }
+        }
+    }
+
+    /** @return ön plana **geçiş** mi (sayaç 0'dan 1'e mi çıktı) */
     @Synchronized
-    private fun onActivityEnteredForeground() {
+    private fun increaseStartedActivityCount(): Boolean {
+        val enteredForeground = startedActivityCount == 0
         startedActivityCount++
         wokenByBackgroundPush = false
+        return enteredForeground
     }
 
     @Synchronized

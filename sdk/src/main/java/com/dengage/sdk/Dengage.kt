@@ -76,6 +76,10 @@ object Dengage {
 
     var initialized = false
         internal set
+
+    /** SDK parametreleri bu process'te istendi mi; istek process başına birdir. */
+    @Volatile
+    private var sdkParametersRequested = false
     private var isInAppFetched: Boolean = false
     private var currentActivity: Activity? = null
 
@@ -379,6 +383,26 @@ object Dengage {
             }
 
         })
+    }
+
+    /**
+     * İlk Activity ekrana geldi (arka plandan ya da soğuk açılıştan ön plana geçiş).
+     * [DengageAppStateTracker] tarafından çağrılır.
+     *
+     * SDK parametreleri **process başına bir kez** çekilir; eskiden bu iş `init` içindeydi ama
+     * `init`, `Application.onCreate` içinde çalıştığı için o anda Activity sayacı gerçek kullanıcı
+     * açılışında da 0'dır ve arka plan kapısı isteği keser. Aynı iş, aynı sıklıkta, ilk Activity
+     * ekrana geldiğinde yapılır — böylece arka plan uyanışı parametre çekmez, gerçek açılış çeker.
+     */
+    internal fun onAppEnteredForeground() {
+        if (!initialized) return
+        if (sdkParametersRequested) return
+        // Abonelik henüz kurulmadıysa istek ConfigurationManager içinde sessizce düşer; bayrağı
+        // yakmayalım ki bir sonraki ön plana geçişte tekrar denensin.
+        if (Prefs.subscription?.integrationKey.isNullOrEmpty()) return
+
+        sdkParametersRequested = true
+        configurationManager.getSdkParameters()
     }
 
     /**

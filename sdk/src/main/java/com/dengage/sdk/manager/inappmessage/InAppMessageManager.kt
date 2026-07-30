@@ -270,7 +270,14 @@ class InAppMessageManager :
     ) {
         // Arka planda in-app çekilmez: kullanıcı ekranda olmadığı için mesaj gösterilemez ve
         // fetch interval'ı boşuna yanar.
-        if (DengageAppStateTracker.shouldSkipRequest()) {
+        //
+        // APP_FOREGROUND tetikleyicisi kapıdan muaftır: bu tetikleyici yalnızca lifecycle'ın
+        // "ön plana geçiliyor" sinyalinden doğar, yani kendisi ön planda olmanın kanıtıdır.
+        // Kapının Activity sayacı bu sinyalden bir adım geride kalabiliyor — host uygulama
+        // DengageLifecycleTracker'ı bizim tracker'ımızdan önce kaydettiyse, Activity başladığında
+        // önce host'un callback'i çalışıp fetch'i deniyor ve sayaç henüz 0 olduğu için ön plana
+        // dönüş fetch'i sessizce düşüyordu.
+        if (trigger != InAppFetchTrigger.APP_FOREGROUND && DengageAppStateTracker.shouldSkipRequest()) {
             DengageLogger.debug("fetchInAppMessages skipped, app is in background")
             return
         }
