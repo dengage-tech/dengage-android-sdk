@@ -47,8 +47,8 @@ class InAppMessageManager :
         private var inSessionFetchTimer: Timer? = null
         internal var isInAppMessageShowing = false
 
-        /** Ön plana dönüşler arasındaki minimum fetch aralığı. */
-        private const val APP_FOREGROUND_FETCH_FLOOR_MS = 60_000L
+        /** Ön plana dönüşler arasındaki minimum fetch aralığı. Geliştirme modunda uygulanmaz. */
+        private const val APP_FOREGROUND_FETCH_FLOOR_MS = 10_000L
 
         /**
          * Oturum içi turlar arasındaki minimum bekleme. Gate henüz damgalanmamışken ya da
@@ -274,6 +274,13 @@ class InAppMessageManager :
             DengageLogger.debug("fetchInAppMessages skipped, app is in background")
             return
         }
+        // İlk kurulumda Activity, SDK parametreleri gelmeden önce açılır; presenter bu durumda
+        // sessizce çıkar. Buradan dönmezsek o boş çağrı ön plan tabanını damgalar ve
+        // parametreler geldiğinde tetiklenen **gerçek** fetch tabana takılır.
+        if (Prefs.sdkParameters == null || Prefs.subscription == null) {
+            DengageLogger.debug("fetchInAppMessages skipped, sdk parameters are not ready yet")
+            return
+        }
         // Ön plana geçiş her zaman fetch eder; yalnızca kazara arka plan/ön plan çalkantısını
         // eleyen küçük bir taban uygulanır.
         if (trigger == InAppFetchTrigger.APP_FOREGROUND && shouldSkipForAppForegroundFloor()) return
@@ -293,13 +300,16 @@ class InAppMessageManager :
     /**
      * Ön plan tabanı. Process içindeki **ilk** fetch koşulsuzdur — uygulamayı tamamen kapatıp
      * açmak her zaman fetch üretir, bu testçiye deterministik bir yol bırakır. Sonraki ön plana
-     * dönüşler [APP_FOREGROUND_FETCH_FLOOR_MS] tabanına tabidir.
+     * dönüşler [APP_FOREGROUND_FETCH_FLOOR_MS] tabanına tabidir. Geliştirme modunda (manuel bayrak
+     * ya da panel `debugDeviceIds`) taban sıfırdır: testçinin arka plan/ön plan döngüsü her
+     * seferinde fetch üretir.
      */
     private fun shouldSkipForAppForegroundFloor(): Boolean {
         val now = System.currentTimeMillis()
+        val floor = if (Prefs.isDevelopmentModeActive) 0L else APP_FOREGROUND_FETCH_FLOOR_MS
         val last = lastAppForegroundFetchTime
-        if (last != 0L && now - last < APP_FOREGROUND_FETCH_FLOOR_MS) {
-            val remainingSeconds = (APP_FOREGROUND_FETCH_FLOOR_MS - (now - last)) / 1000
+        if (last != 0L && now - last < floor) {
+            val remainingSeconds = (floor - (now - last)) / 1000
             DengageLogger.debug(
                 "fetchInAppMessages skipped by foreground floor, ${remainingSeconds}s remaining"
             )

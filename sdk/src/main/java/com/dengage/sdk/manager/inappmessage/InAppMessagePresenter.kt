@@ -10,6 +10,7 @@ import com.dengage.sdk.domain.inappmessage.usecase.*
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
 import com.dengage.sdk.util.DengageAppStateTracker
+import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.manager.session.SessionManager
 
@@ -49,31 +50,39 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 ) return
 
                 val bulkBaseMs = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60_000L
-                getInAppMessages(this) {
-                    onResponse = {
-                        // Uyarlamalı gate: boş yanıtta geri çekil, dolu yanıtta tabana dön.
-                        // Damga yanıt sonrasında atılır; aksi halde boş/dolu bilgisi henüz yok.
-                        val gate = InAppFetchGate.onResponse(
-                            InAppFetchGate.Channel.BULK, bulkBaseMs, it.isNullOrEmpty()
-                        )
-                        Prefs.inAppMessageFetchTime = System.currentTimeMillis() + gate
-                        view {
-                            fetchedInAppMessages(it, false)
-                            fetchCancelledInAppMessageIds()
+                // Damga yanıt sonrasında atıldığı için, istek uçuştayken gelen ikinci bir
+                // tetikleyici aralık kontrolünü geçebilir. Aynı çağrı iki kez gitmesin.
+                if (!InAppFetchGate.beginRequest(InAppFetchGate.Channel.BULK)) {
+                    DengageLogger.debug("getInAppMessages skipped, a bulk request is already in flight")
+                } else {
+                    getInAppMessages(this) {
+                        onResponse = {
+                            InAppFetchGate.endRequest(InAppFetchGate.Channel.BULK)
+                            // Uyarlamalı gate: boş yanıtta geri çekil, dolu yanıtta tabana dön.
+                            // Damga yanıt sonrasında atılır; aksi halde boş/dolu bilgisi henüz yok.
+                            val gate = InAppFetchGate.onResponse(
+                                InAppFetchGate.Channel.BULK, bulkBaseMs, it.isNullOrEmpty()
+                            )
+                            Prefs.inAppMessageFetchTime = System.currentTimeMillis() + gate
+                            view {
+                                fetchedInAppMessages(it, false)
+                                fetchCancelledInAppMessageIds()
+                            }
                         }
-                    }
-                    onError = {
-                        // Başarısız istek gate'i değiştirmez; mevcut gate kadar beklenir.
-                        Prefs.inAppMessageFetchTime = System.currentTimeMillis() +
-                                InAppFetchGate.current(InAppFetchGate.Channel.BULK, bulkBaseMs)
-                        view { showError(it) }
-                    }
-                    params = GetInAppMessages.Params(
-                        account = sdkParameters?.accountName!!,
-                        subscription = Prefs.subscription!!,
-                        sdkParameters = sdkParameters
+                        onError = {
+                            InAppFetchGate.endRequest(InAppFetchGate.Channel.BULK)
+                            // Başarısız istek gate'i değiştirmez; mevcut gate kadar beklenir.
+                            Prefs.inAppMessageFetchTime = System.currentTimeMillis() +
+                                    InAppFetchGate.current(InAppFetchGate.Channel.BULK, bulkBaseMs)
+                            view { showError(it) }
+                        }
+                        params = GetInAppMessages.Params(
+                            account = sdkParameters?.accountName!!,
+                            subscription = Prefs.subscription!!,
+                            sdkParameters = sdkParameters
 
-                    )
+                        )
+                    }
                 }
             }
 
@@ -89,8 +98,15 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                 val realTimeBaseMs =
                     (sdkParameters?.realTimeInAppFetchIntervalInMinutes ?: 0) * 60_000L
 
+                // v2 hata verirse v1'e düşülüyor; bayrak o zincirin sonunda bırakılır.
+                if (!InAppFetchGate.beginRequest(InAppFetchGate.Channel.REAL_TIME)) {
+                    DengageLogger.debug("getRealTimeInAppMessages skipped, a request is already in flight")
+                    return
+                }
+
                 getRealTimeInAppMessagesV2(this) {
                     onResponse = {
+                        InAppFetchGate.endRequest(InAppFetchGate.Channel.REAL_TIME)
                         val gate = InAppFetchGate.onResponse(
                             InAppFetchGate.Channel.REAL_TIME, realTimeBaseMs, it.isNullOrEmpty()
                         )
@@ -105,6 +121,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                             showError(it)
                             getRealTimeInAppMessages(this@InAppMessagePresenter) {
                                 onResponse = {
+                                    InAppFetchGate.endRequest(InAppFetchGate.Channel.REAL_TIME)
                                     val gate = InAppFetchGate.onResponse(
                                         InAppFetchGate.Channel.REAL_TIME,
                                         realTimeBaseMs,
@@ -117,6 +134,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                                     }
                                 }
                                 onError = {
+                                    InAppFetchGate.endRequest(InAppFetchGate.Channel.REAL_TIME)
                                     Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
                                     view {
                                         showError(it)
