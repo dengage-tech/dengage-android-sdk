@@ -1,5 +1,26 @@
 # Changelog
 
+## [6.0.98] - 2026-08-03
+
+### New Features
+
+- Suppress in-app requests while the app is in the background: silent push, geofence and live-update wake-ups no longer fetch in-app messages, refresh SDK parameters or burn the fetch interval while nobody is on screen
+- Track foreground state from the SDK's own activity lifecycle callbacks instead of process importance, which reports "foreground" while a high-priority FCM message is being handled with no activity on screen
+- Always fetch in-app messages when the app comes to the foreground, regardless of the fetch interval, with a small floor to absorb accidental background / foreground churn
+- Replace the fixed hourly fetch timer with an adaptive per-channel gate that backs off on empty responses and returns to the account interval as soon as a message arrives, capped at 15 minutes
+- Fetch SDK parameters once per process when the first activity is shown, instead of during `Dengage.init`
+- Skip the fetch interval and the minimum time between messages in development mode, which now also covers devices listed in `debugDeviceIds`, so test devices see campaigns immediately
+- Add `SessionManager.currentSessionId` for read-only session access that never rotates the session
+
+### Bug Fixes
+
+- Open the session when an activity is started rather than in `Dengage.init`, so a silent push waking the process no longer starts a session and inflates `dn.visit_count`
+- Slide the session expiry on user activity instead of only setting it when a new session starts, so an active user is no longer rotated to a new session every 30 minutes
+- Stop rule evaluation and debug logging from rotating the session as a side effect of reading the session id
+- Fix `Prefs.appSessionId` returning a freshly generated UUID on every read when no session was stored, since the default value was never persisted
+- Prevent duplicate in-app requests when a second trigger arrives while a request is still in flight
+- Reschedule the next fetch after a failed request instead of leaving the window consumed
+
 
 ## [6.0.97] - 2026-07-29
 

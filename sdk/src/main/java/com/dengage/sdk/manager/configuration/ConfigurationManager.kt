@@ -18,6 +18,7 @@ import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.configuration.util.ConfigurationUtils
 import com.dengage.sdk.push.IDengageHmsManager
 import com.dengage.sdk.util.ContextHolder
+import com.dengage.sdk.util.DengageAppStateTracker
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.google.firebase.FirebaseApp
@@ -143,6 +144,9 @@ class ConfigurationManager : BaseMvpManager<ConfigurationContract.View,
         try {
             val subscription = Prefs.subscription
             if (subscription?.integrationKey.isNullOrEmpty()) return
+            // Arka planda uyanmada (silent push, geofence, arka plan görevi) bu akış in-app fetch'i
+            // ve iptal listesini tetikliyor; kullanıcı ekranda olmadığı için faydası yok.
+            if (DengageAppStateTracker.shouldSkipRequest()) return
             if (!DengageUtils.isAppInForeground()) return
             val sdkParameters = Prefs.sdkParameters
 

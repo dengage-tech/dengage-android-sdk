@@ -17,7 +17,6 @@ import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.domain.visitcount.model.VisitCountItem
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
-import com.dengage.sdk.util.DengageUtils
 
 import com.dengage.sdk.domain.inappmessage.model.Cart
 import com.dengage.sdk.domain.inappmessage.model.ClientPageInfo
@@ -90,8 +89,11 @@ object Prefs {
         get() = preferences.get(PreferenceKey.APP_SESSION_TIME, 0) ?: 0
         set(value) = preferences.set(PreferenceKey.APP_SESSION_TIME, value)
 
+    // Kayıt yokken boş döner; oturum id üretimi tek noktada, SessionManager'dadır. (Varsayılan
+    // olarak UUID üretmek, get(key, default) default'u kalıcılaştırmadığı için her okumada farklı
+    // bir id döndürüyordu.)
     internal var appSessionId: String
-        get() = preferences.get(PreferenceKey.APP_SESSION_ID, DengageUtils.generateUUID()) ?: ""
+        get() = preferences.get(PreferenceKey.APP_SESSION_ID, "") ?: ""
         set(value) = preferences.set(PreferenceKey.APP_SESSION_ID, value)
 
     internal var logVisibility: Boolean
@@ -163,6 +165,23 @@ object Prefs {
     internal var isDevelopmentStatusDebug: Boolean?
         get() = preferences.get(PreferenceKey.DEVELOPMENT_STATUS, false)
         set(value) = preferences.set(PreferenceKey.DEVELOPMENT_STATUS, value)
+
+    /** Cihaz, panel'den gelen [SdkParameters.debugDeviceIds] listesinde mi. */
+    internal val isDebugDevice: Boolean
+        get() {
+            val deviceId = subscription?.getSafeDeviceId()
+            val debugDeviceIds = sdkParameters?.debugDeviceIds
+            return !deviceId.isNullOrEmpty() && !debugDeviceIds.isNullOrEmpty() &&
+                    debugDeviceIds.contains(deviceId)
+        }
+
+    /**
+     * Etkin geliştirme modu: `Dengage.setDevelopmentStatus(true)` çağrılmışsa **veya** cihaz
+     * panel'deki debugDeviceIds listesindeyse açıktır. Geliştirme modunda in-app fetch ve gösterim
+     * aralıkları uygulanmaz, böylece test cihazı kampanyayı beklemeden görür.
+     */
+    internal val isDevelopmentModeActive: Boolean
+        get() = isDevelopmentStatusDebug == true || isDebugDevice
 
     internal var visitorInfoFetchTime: Long
         get() = preferences.get(PreferenceKey.VISITOR_INFO_FETCH_TIME, 0) ?: 0

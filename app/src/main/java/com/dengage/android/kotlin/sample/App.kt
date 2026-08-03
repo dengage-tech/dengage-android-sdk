@@ -71,7 +71,7 @@ class App : Application() {
           Dengage.setDeviceId("22")*/
         //Dengage.setClassName("com.dengage.android.kotlin.sample.ui.activity.MainActivity2")
         Dengage.setLogStatus(true)
-        Dengage.setDevelopmentStatus(true)
+        Dengage.setDevelopmentStatus(false)
 
 
         ////Dengage.inAppLinkConfiguration("www.chaitanyamunje.com")

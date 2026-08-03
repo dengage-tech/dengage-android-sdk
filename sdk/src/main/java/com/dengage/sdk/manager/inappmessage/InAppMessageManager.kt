@@ -19,6 +19,7 @@ import com.dengage.sdk.ui.inappmessage.Mustache
 import com.dengage.sdk.ui.story.StoriesListView
 import com.dengage.sdk.util.Constants
 import com.dengage.sdk.util.ContextHolder
+import com.dengage.sdk.util.DengageAppStateTracker
 import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.util.extension.launchActivity
@@ -43,8 +44,21 @@ class InAppMessageManager :
 
     companion object {
         private var timer = Timer()
-        private var hourlyFetchTimer: Timer? = null
+        private var inSessionFetchTimer: Timer? = null
         internal var isInAppMessageShowing = false
+
+        /** Ön plana dönüşler arasındaki minimum fetch aralığı. Geliştirme modunda uygulanmaz. */
+        private const val APP_FOREGROUND_FETCH_FLOOR_MS = 10_000L
+
+        /**
+         * Oturum içi turlar arasındaki minimum bekleme. Gate henüz damgalanmamışken ya da
+         * istek başarısız olup damga güncellenmemişken sıkı döngüye girmeyi engeller.
+         */
+        private const val MIN_IN_SESSION_FETCH_DELAY_MS = 60_000L
+
+        /** Process içindeki son ön plan tetikli fetch zamanı; 0 ise henüz fetch yapılmadı. */
+        @Volatile
+        private var lastAppForegroundFetchTime = 0L
     }
 
     /**
@@ -94,7 +108,8 @@ class InAppMessageManager :
             cancelTimer()
         }
         // control next in app message show time
-        if (Prefs.isDevelopmentStatusDebug == false) {
+        // Geliştirme modunda (manuel bayrak veya debug cihaz) gösterim aralığı uygulanmaz.
+        if (!Prefs.isDevelopmentModeActive) {
             if (Prefs.inAppMessageShowTime != 0L && System.currentTimeMillis() < Prefs.inAppMessageShowTime) {
                 hidePlacementIfNeeded(
                     inAppInlineElement, propertyId, storiesListView, storyPropertyId, hideIfNotFound
@@ -249,12 +264,66 @@ class InAppMessageManager :
     /**
      * Fetch in app messages if enabled and fetch time is available
      */
-    internal fun fetchInAppMessages(inAppMessageFetchCallbackParam: InAppMessageFetchCallback?) {
+    internal fun fetchInAppMessages(
+        inAppMessageFetchCallbackParam: InAppMessageFetchCallback?,
+        trigger: InAppFetchTrigger = InAppFetchTrigger.OTHER,
+    ) {
+        // Arka planda in-app çekilmez: kullanıcı ekranda olmadığı için mesaj gösterilemez ve
+        // fetch interval'ı boşuna yanar.
+        //
+        // APP_FOREGROUND tetikleyicisi kapıdan muaftır: bu tetikleyici yalnızca lifecycle'ın
+        // "ön plana geçiliyor" sinyalinden doğar, yani kendisi ön planda olmanın kanıtıdır.
+        // Kapının Activity sayacı bu sinyalden bir adım geride kalabiliyor — host uygulama
+        // DengageLifecycleTracker'ı bizim tracker'ımızdan önce kaydettiyse, Activity başladığında
+        // önce host'un callback'i çalışıp fetch'i deniyor ve sayaç henüz 0 olduğu için ön plana
+        // dönüş fetch'i sessizce düşüyordu.
+        if (trigger != InAppFetchTrigger.APP_FOREGROUND && DengageAppStateTracker.shouldSkipRequest()) {
+            DengageLogger.debug("fetchInAppMessages skipped, app is in background")
+            return
+        }
+        // İlk kurulumda Activity, SDK parametreleri gelmeden önce açılır; presenter bu durumda
+        // sessizce çıkar. Buradan dönmezsek o boş çağrı ön plan tabanını damgalar ve
+        // parametreler geldiğinde tetiklenen **gerçek** fetch tabana takılır.
+        if (Prefs.sdkParameters == null || Prefs.subscription == null) {
+            DengageLogger.debug("fetchInAppMessages skipped, sdk parameters are not ready yet")
+            return
+        }
+        // Ön plana geçiş her zaman fetch eder; yalnızca kazara arka plan/ön plan çalkantısını
+        // eleyen küçük bir taban uygulanır.
+        if (trigger == InAppFetchTrigger.APP_FOREGROUND && shouldSkipForAppForegroundFloor()) return
+
+        // Geri çekilmenin sıfırlama çapası ön plana geçiştir.
+        if (trigger == InAppFetchTrigger.APP_FOREGROUND) InAppFetchGate.reset()
+
         // Cleanup expired show history entries (older than 2 weeks)
         Prefs.cleanupExpiredShowHistory()
         val inappMessage = inAppMessageFetchCallbackParam
         inAppMessageFetchCallback = inappMessage
-        presenter.getInAppMessages()
+        presenter.getInAppMessages(
+            bypassFetchInterval = trigger == InAppFetchTrigger.APP_FOREGROUND
+        )
+    }
+
+    /**
+     * Ön plan tabanı. Process içindeki **ilk** fetch koşulsuzdur — uygulamayı tamamen kapatıp
+     * açmak her zaman fetch üretir, bu testçiye deterministik bir yol bırakır. Sonraki ön plana
+     * dönüşler [APP_FOREGROUND_FETCH_FLOOR_MS] tabanına tabidir. Geliştirme modunda (manuel bayrak
+     * ya da panel `debugDeviceIds`) taban sıfırdır: testçinin arka plan/ön plan döngüsü her
+     * seferinde fetch üretir.
+     */
+    private fun shouldSkipForAppForegroundFloor(): Boolean {
+        val now = System.currentTimeMillis()
+        val floor = if (Prefs.isDevelopmentModeActive) 0L else APP_FOREGROUND_FETCH_FLOOR_MS
+        val last = lastAppForegroundFetchTime
+        if (last != 0L && now - last < floor) {
+            val remainingSeconds = (floor - (now - last)) / 1000
+            DengageLogger.debug(
+                "fetchInAppMessages skipped by foreground floor, ${remainingSeconds}s remaining"
+            )
+            return true
+        }
+        lastAppForegroundFetchTime = now
+        return false
     }
 
     internal fun fetchVisitorInfo() {
@@ -266,6 +335,10 @@ class InAppMessageManager :
      * Fetch in app messages if enabled and fetch time is available
      */
     internal fun fetchCancelledInAppMessageIds() {
+        if (DengageAppStateTracker.shouldSkipRequest()) {
+            DengageLogger.debug("fetchCancelledInAppMessageIds skipped, app is in background")
+            return
+        }
         presenter.fetchCancelledInAppMessageIds()
     }
 
@@ -496,27 +569,45 @@ class InAppMessageManager :
         }
     }
 
-    internal fun startHourlyFetchTimer() {
-        stopHourlyFetchTimer()
+    /**
+     * Oturum içi periyodik tur. Sabit bir aralıkta tick atmak yerine timer doğrudan **gate'in
+     * dolacağı ana** kurulur; her turdan sonra taze damgayla yeniden zamanlanır. Gecikme sık
+     * tick + gate kontrolüyle aynı, ama saatte onlarca yerine birkaç ateşleme oluyor.
+     */
+    internal fun startInSessionFetchTimer() {
+        stopInSessionFetchTimer()
 
-        val oneHourInMilliSeconds = 60 * 60 * 1000L
-        hourlyFetchTimer = Timer().apply {
+        inSessionFetchTimer = Timer().apply {
             schedule(object : TimerTask() {
                 override fun run() {
-                    if (DengageUtils.isAppInForeground()) {
-                        fetchInAppMessages(null)
-                    }
-                    // Reschedule for next hour
-                    startHourlyFetchTimer()
+                    fetchInAppMessages(null)
+                    startInSessionFetchTimer()
                 }
-            }, oneHourInMilliSeconds) // 1 hour in milliseconds
+            }, nextInSessionFetchDelay())
         }
     }
 
-    internal fun stopHourlyFetchTimer() {
-        hourlyFetchTimer?.cancel()
-        hourlyFetchTimer?.purge()
-        hourlyFetchTimer = null
+    internal fun stopInSessionFetchTimer() {
+        inSessionFetchTimer?.cancel()
+        inSessionFetchTimer?.purge()
+        inSessionFetchTimer = null
+    }
+
+    /**
+     * Bir sonraki turun ne kadar sonra atılacağı: bulk ve real-time gate'lerinden **önce dolanı**.
+     * Damga henüz atılmamışsa (0) taban gecikmeye düşülür.
+     */
+    private fun nextInSessionFetchDelay(): Long {
+        val now = System.currentTimeMillis()
+        // Yalnızca damgalanmış kanallar sayılır. Kapalı bir kanalın damgası hiç yazılmaz ve 0
+        // kalır; onu hesaba katmak timer'ı sonsuza dek taban gecikmede döndürürdü.
+        val nextAllowed = listOf(Prefs.inAppMessageFetchTime, Prefs.realTimeInAppMessageFetchTime)
+            .filter { it > 0L }
+            .minOrNull()
+            ?: return ((Prefs.sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60_000L)
+                .coerceAtLeast(MIN_IN_SESSION_FETCH_DELAY_MS)
+
+        return (nextAllowed - now).coerceAtLeast(MIN_IN_SESSION_FETCH_DELAY_MS)
     }
 
     override fun inAppMessageSetAsDisplayed() = Unit
@@ -689,10 +780,6 @@ class InAppMessageManager :
         return storyCovers
     }
 
-    private fun isDebugDevice(deviceId: String?, debugDeviceIds: List<String>?): Boolean {
-        return !deviceId.isNullOrEmpty() && !debugDeviceIds.isNullOrEmpty() && debugDeviceIds.contains(deviceId)
-    }
-
     private fun sendCouponValidationFailureLog(
         couponContent: String,
         errorMessage: String,
@@ -704,22 +791,18 @@ class InAppMessageManager :
                 val subscription = Prefs.subscription
                 val sdkParameters = Prefs.sdkParameters
 
-                val isDebugDevice = isDebugDevice(
-                    subscription?.getSafeDeviceId(),
-                    sdkParameters?.debugDeviceIds
-                )
-
-                if (isDebugDevice) {
+                if (Prefs.isDebugDevice) {
                     val traceId = UUID.randomUUID().toString()
                     val campaignId = inAppMessage.data.publicId ?: inAppMessage.id
-                    
+
                     val debugLog = DebugLogRequest(
                         traceId = traceId,
                         appGuid = sdkParameters?.appId,
                         appId = sdkParameters?.appId,
                         account = sdkParameters?.accountName,
                         device = subscription?.getSafeDeviceId() ?: "",
-                        sessionId = SessionManager.getSessionId(),
+                        // Debug log'u oturum döndürmemeli
+                        sessionId = SessionManager.currentSessionId,
                         sdkVersion = DengageUtils.getSdkVersion(),
                         currentCampaignList = emptyList(),
                         campaignId = campaignId,

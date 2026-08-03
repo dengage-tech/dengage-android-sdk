@@ -9,6 +9,8 @@ import com.dengage.sdk.domain.inappmessage.model.StoryCover
 import com.dengage.sdk.domain.inappmessage.usecase.*
 import com.dengage.sdk.domain.subscription.model.Subscription
 import com.dengage.sdk.manager.base.BaseAbstractPresenter
+import com.dengage.sdk.util.DengageAppStateTracker
+import com.dengage.sdk.util.DengageLogger
 import com.dengage.sdk.util.DengageUtils
 import com.dengage.sdk.manager.session.SessionManager
 
@@ -30,7 +32,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
     private val getVisitorInfo by lazy { GetVisitorInfo() }
     private val assignCoupon by lazy { AssignCoupon() }
 
-    override fun getInAppMessages() {
+    override fun getInAppMessages(bypassFetchInterval: Boolean) {
         try {
             val sdkParameters = Prefs.sdkParameters
             val subscription = Prefs.subscription
@@ -41,47 +43,74 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
             ) {
 
 
-                if (Prefs.isDevelopmentStatusDebug == false) {
-                    if (System.currentTimeMillis() < Prefs.inAppMessageFetchTime) return
+                // Geliştirme modunda (manuel bayrak veya debug cihaz) fetch aralığı uygulanmaz.
+                // Ön plana geçiş tetikleyicisi de aralığa takılmaz (bkz. A).
+                if (!Prefs.isDevelopmentModeActive && !bypassFetchInterval &&
+                    System.currentTimeMillis() < Prefs.inAppMessageFetchTime
+                ) return
 
-                    val nextFetchTimePlus = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60000
-                    Prefs.inAppMessageFetchTime = System.currentTimeMillis() + nextFetchTimePlus
-                }
-                getInAppMessages(this) {
-                    onResponse = {
-                        view {
-                            fetchedInAppMessages(it, false)
-                            fetchCancelledInAppMessageIds()
+                val bulkBaseMs = (sdkParameters?.inAppFetchIntervalInMin ?: 0) * 60_000L
+                // Damga yanıt sonrasında atıldığı için, istek uçuştayken gelen ikinci bir
+                // tetikleyici aralık kontrolünü geçebilir. Aynı çağrı iki kez gitmesin.
+                if (!InAppFetchGate.beginRequest(InAppFetchGate.Channel.BULK)) {
+                    DengageLogger.debug("getInAppMessages skipped, a bulk request is already in flight")
+                } else {
+                    getInAppMessages(this) {
+                        onResponse = {
+                            InAppFetchGate.endRequest(InAppFetchGate.Channel.BULK)
+                            // Uyarlamalı gate: boş yanıtta geri çekil, dolu yanıtta tabana dön.
+                            // Damga yanıt sonrasında atılır; aksi halde boş/dolu bilgisi henüz yok.
+                            val gate = InAppFetchGate.onResponse(
+                                InAppFetchGate.Channel.BULK, bulkBaseMs, it.isNullOrEmpty()
+                            )
+                            Prefs.inAppMessageFetchTime = System.currentTimeMillis() + gate
+                            view {
+                                fetchedInAppMessages(it, false)
+                                fetchCancelledInAppMessageIds()
+                            }
                         }
-                    }
-                    onError = {
-                        //  Prefs.inAppMessageFetchTime = System.currentTimeMillis()
-                        view { showError(it) }
-                    }
-                    params = GetInAppMessages.Params(
-                        account = sdkParameters?.accountName!!,
-                        subscription = Prefs.subscription!!,
-                        sdkParameters = sdkParameters
+                        onError = {
+                            InAppFetchGate.endRequest(InAppFetchGate.Channel.BULK)
+                            // Başarısız istek gate'i değiştirmez; mevcut gate kadar beklenir.
+                            Prefs.inAppMessageFetchTime = System.currentTimeMillis() +
+                                    InAppFetchGate.current(InAppFetchGate.Channel.BULK, bulkBaseMs)
+                            view { showError(it) }
+                        }
+                        params = GetInAppMessages.Params(
+                            account = sdkParameters?.accountName!!,
+                            subscription = Prefs.subscription!!,
+                            sdkParameters = sdkParameters
 
-                    )
+                        )
+                    }
                 }
             }
 
             if (isRealTimeInAppMessageEnabled(subscription, sdkParameters) &&
                 DengageUtils.isAppInForeground()
             ) {
-                if (Prefs.isDevelopmentStatusDebug == false) {
-                    if (System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime) return
+                // Geliştirme modunda (manuel bayrak veya debug cihaz) fetch aralığı uygulanmaz.
+                // Ön plana geçiş tetikleyicisi de aralığa takılmaz (bkz. A).
+                if (!Prefs.isDevelopmentModeActive && !bypassFetchInterval &&
+                    System.currentTimeMillis() < Prefs.realTimeInAppMessageFetchTime
+                ) return
 
-                    val nextFetchTimePlus = (sdkParameters?.realTimeInAppFetchIntervalInMinutes
-                        ?: 0) * 60000
-                    Prefs.realTimeInAppMessageFetchTime =
-                        System.currentTimeMillis() + nextFetchTimePlus
+                val realTimeBaseMs =
+                    (sdkParameters?.realTimeInAppFetchIntervalInMinutes ?: 0) * 60_000L
 
+                // v2 hata verirse v1'e düşülüyor; bayrak o zincirin sonunda bırakılır.
+                if (!InAppFetchGate.beginRequest(InAppFetchGate.Channel.REAL_TIME)) {
+                    DengageLogger.debug("getRealTimeInAppMessages skipped, a request is already in flight")
+                    return
                 }
 
                 getRealTimeInAppMessagesV2(this) {
                     onResponse = {
+                        InAppFetchGate.endRequest(InAppFetchGate.Channel.REAL_TIME)
+                        val gate = InAppFetchGate.onResponse(
+                            InAppFetchGate.Channel.REAL_TIME, realTimeBaseMs, it.isNullOrEmpty()
+                        )
+                        Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis() + gate
                         view {
                             fetchedInAppMessages(it, true)
                         }
@@ -92,11 +121,20 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                             showError(it)
                             getRealTimeInAppMessages(this@InAppMessagePresenter) {
                                 onResponse = {
+                                    InAppFetchGate.endRequest(InAppFetchGate.Channel.REAL_TIME)
+                                    val gate = InAppFetchGate.onResponse(
+                                        InAppFetchGate.Channel.REAL_TIME,
+                                        realTimeBaseMs,
+                                        it.isNullOrEmpty()
+                                    )
+                                    Prefs.realTimeInAppMessageFetchTime =
+                                        System.currentTimeMillis() + gate
                                     view {
                                         fetchedInAppMessages(it, true)
                                     }
                                 }
                                 onError = {
+                                    InAppFetchGate.endRequest(InAppFetchGate.Channel.REAL_TIME)
                                     Prefs.realTimeInAppMessageFetchTime = System.currentTimeMillis()
                                     view {
                                         showError(it)
@@ -263,7 +301,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
         try {
             val sdkParameters = Prefs.sdkParameters
             val subscription = Prefs.subscription
-            
+
             if (sdkParameters?.accountName != null && subscription != null) {
                 assignCoupon.execute(this, callback(
                     onStart = null,
@@ -284,7 +322,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
                             } catch (_: Exception) {
                                 null
                             } ?: "Failed to validate coupon. Response code: ${response.code()}"
-                            
+
                             onInvalidCoupon(errorMessage)
                         }
                     },
@@ -456,6 +494,7 @@ class InAppMessagePresenter : BaseAbstractPresenter<InAppMessageContract.View>()
 
     private fun shouldFetchVisitorInfo(): Boolean {
 
+        if (DengageAppStateTracker.shouldSkipRequest()) return false
         if(!DengageUtils.isAppInForeground()) return false
 
         if (System.currentTimeMillis() < Prefs.visitorInfoFetchTime) return false

@@ -33,12 +33,12 @@ import com.dengage.sdk.manager.configuration.ConfigurationManager
 import com.dengage.sdk.manager.deviceId.DeviceIdSenderManager
 import com.dengage.sdk.manager.event.EventManager
 import com.dengage.sdk.manager.inappmessage.InAppMessageFetchCallback
+import com.dengage.sdk.manager.inappmessage.InAppFetchTrigger
 import com.dengage.sdk.manager.inappmessage.InAppMessageManager
 import com.dengage.sdk.manager.inappmessage.session.InAppSessionManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.inboxmessage.InboxMessageManager
 import com.dengage.sdk.manager.rfm.RFMManager
-import com.dengage.sdk.manager.session.SessionManager
 import com.dengage.sdk.manager.subscription.SubscriptionManager
 import com.dengage.sdk.manager.tag.TagManager
 import com.dengage.sdk.liveupdate.DengageLiveUpdateManager
@@ -76,6 +76,10 @@ object Dengage {
 
     var initialized = false
         internal set
+
+    /** SDK parametreleri bu process'te istendi mi; istek process başına birdir. */
+    @Volatile
+    private var sdkParametersRequested = false
     private var isInAppFetched: Boolean = false
     private var currentActivity: Activity? = null
 
@@ -101,10 +105,13 @@ object Dengage {
         notificationDisplayPriorityConfiguration: NotificationDisplayPriorityConfiguration =NotificationDisplayPriorityConfiguration.SHOW_WITH_DEFAULT_PRIORITY,
         apiUrlConfiguration: ApiUrlConfiguration? = null,
         initForGeofence: Boolean = false,
-        ) {
+    ) {
         initialized = true
         ContextHolder.resetContext(context = context)
-        SessionManager.getSessionId()
+        // Oturum dokunuşu burada yapılmaz: silent push process'i arka planda ayağa kaldırdığında
+        // init de çalışıyor ve süresi dolmuş oturumda yeni oturum + ziyaret sayıyordu. Dokunuş,
+        // kullanıcı gerçekten ekrana geldiğinde DengageAppStateTracker tarafından yapılır.
+        DengageAppStateTracker.install(context)
 
         subscriptionManager.buildSubscription(
             firebaseIntegrationKey,
@@ -117,13 +124,15 @@ object Dengage {
 
         val configurationCallback = object : ConfigurationCallback {
             override fun fetchInAppMessages() {
-                inAppMessageManager.fetchInAppMessages(inAppMessageFetchCallbackParam = object :
-                    InAppMessageFetchCallback {
-                    override fun inAppMessageFetched(realTime: Boolean) {
-                        isInAppFetched = true;
-                    }
-
-                })
+                // Soğuk başlatma zinciri — aralığa takılmaz (bkz. InAppFetchTrigger).
+                inAppMessageManager.fetchInAppMessages(
+                    inAppMessageFetchCallbackParam = object : InAppMessageFetchCallback {
+                        override fun inAppMessageFetched(realTime: Boolean) {
+                            isInAppFetched = true;
+                        }
+                    },
+                    trigger = InAppFetchTrigger.APP_FOREGROUND
+                )
             }
 
             override fun startAppTracking(appTrackings: List<AppTracking>?) {
@@ -224,10 +233,10 @@ object Dengage {
     fun setContactKey(contactKey: String?) {
         DengageLogger.verbose("setContactKey method is called")
         Handler(Looper.getMainLooper()).postDelayed({
-        // clear inbox manager cache if contact key has been changed
-        if (subscriptionManager.setContactKey(contactKey = contactKey)) {
-            inboxMessageManager.clearInboxMessageCache()
-        }
+            // clear inbox manager cache if contact key has been changed
+            if (subscriptionManager.setContactKey(contactKey = contactKey)) {
+                inboxMessageManager.clearInboxMessageCache()
+            }
         }, 2000)
     }
 
@@ -377,17 +386,52 @@ object Dengage {
     }
 
     /**
+     * İlk Activity ekrana geldi (arka plandan ya da soğuk açılıştan ön plana geçiş).
+     * [DengageAppStateTracker] tarafından çağrılır.
+     *
+     * SDK parametreleri **process başına bir kez** çekilir; eskiden bu iş `init` içindeydi ama
+     * `init`, `Application.onCreate` içinde çalıştığı için o anda Activity sayacı gerçek kullanıcı
+     * açılışında da 0'dır ve arka plan kapısı isteği keser. Aynı iş, aynı sıklıkta, ilk Activity
+     * ekrana geldiğinde yapılır — böylece arka plan uyanışı parametre çekmez, gerçek açılış çeker.
+     */
+    internal fun onAppEnteredForeground() {
+        if (!initialized) return
+        if (sdkParametersRequested) return
+        // Abonelik henüz kurulmadıysa istek ConfigurationManager içinde sessizce düşer; bayrağı
+        // yakmayalım ki bir sonraki ön plana geçişte tekrar denensin.
+        if (Prefs.subscription?.integrationKey.isNullOrEmpty()) return
+
+        sdkParametersRequested = true
+        configurationManager.getSdkParameters()
+    }
+
+    /**
+     * Uygulama ön plana geldi. Fetch aralığına takılmaz; yalnızca ön plan tabanı uygulanır.
+     * [DengageLifecycleTracker] tarafından çağrılır.
+     */
+    internal fun onAppForegrounded() {
+        inAppMessageManager.fetchInAppMessages(
+            inAppMessageFetchCallbackParam = object : InAppMessageFetchCallback {
+                override fun inAppMessageFetched(realTime: Boolean) {
+                    isInAppFetched = true
+                }
+            },
+            trigger = InAppFetchTrigger.APP_FOREGROUND
+        )
+    }
+
+    /**
      * Set cart for using in real time in app comparisons
-     * 
+     *
      * @param cart Cart object containing cart items
      */
     fun setCart(cart: Cart) {
         RealTimeInAppParamHolder.setCart(cart)
     }
-    
+
     /**
      * Get current cart
-     * 
+     *
      * @return Cart object containing all cart items
      */
     fun getCart(): Cart {
@@ -431,14 +475,14 @@ object Dengage {
 
     internal fun setLastSessionStartTime() {
         inAppSessionManager.setLastSessionStartTime()
-        // Start hourly fetch timer when app comes to foreground
-        inAppMessageManager.startHourlyFetchTimer()
+        // Oturum içi periyodik turu başlat
+        inAppMessageManager.startInSessionFetchTimer()
     }
 
     internal fun setLastSessionDuration() {
         inAppSessionManager.setLastSessionDuration()
-        // Stop hourly fetch timer when app goes to background
-        inAppMessageManager.stopHourlyFetchTimer()
+        // Uygulama arka plana düştü, oturum içi turu durdur
+        inAppMessageManager.stopInSessionFetchTimer()
     }
 
     internal fun setLastVisitTime() {
@@ -526,6 +570,12 @@ object Dengage {
 
     fun onMessageReceived(data: Map<String, String?>?) {
         if (data.isNullOrEmpty()) return
+
+        // Push, process'i arka planda uyandırmış olabilir. Uygulama öne gelene kadar in-app fetch
+        // edilmemeli. Buraya FCM/HMS service'lerinin normal push dalı ve kendi messaging
+        // service'ini kullanan entegrasyonlar da düşer.
+        DengageAppStateTracker.install()
+        DengageAppStateTracker.markBackgroundPushWake()
 
         try {
             DengageLogger.verbose("onMessageReceived method is called")
@@ -1132,7 +1182,7 @@ object Dengage {
     }
 
     fun getInAppDeviceInfo(): Map<String, String> {
-       return Prefs.inAppDeviceInfo ?: mutableMapOf()
+        return Prefs.inAppDeviceInfo ?: mutableMapOf()
     }
 
     fun setLocationPermission(status: String) {
