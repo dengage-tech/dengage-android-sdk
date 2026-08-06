@@ -490,6 +490,5 @@ class InAppMessageActivity : Activity(), View.OnClickListener {
                 }
             }
         )
-        finish()
     }
 }

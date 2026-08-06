@@ -54,7 +54,7 @@ object DengageUtils {
     }
 
     fun getSdkVersion(): String {
-        return "6.0.98"
+        return "6.0.99"
     }
 
     fun getUserAgent(context: Context): String {

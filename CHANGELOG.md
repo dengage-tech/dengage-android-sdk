@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.0.99] - 2026-08-06
+
+### Bug Fixes
+
+- Do not call `finish()` immediately after `showRatingDialog` in `InAppMessageActivity`; defer closing the in-app so Play In-App Review can hand off to the underlying activity
+
 ## [6.0.98] - 2026-08-03
 
 ### New Features
