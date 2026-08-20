@@ -19,7 +19,17 @@ class InAppMessageData(
 
     fun isRealTime(): Boolean = !publicId.isNullOrEmpty()
 
+    /**
+     * INLINE_CAROUSEL content is rendered inside a host view that controls its own
+     * lifecycle, so the showEveryXMinutes and maxShowCount frequency caps do not
+     * apply to it.
+     */
+    private fun isInlineCarousel(): Boolean =
+        "INLINE_CAROUSEL".equals(content.type, ignoreCase = true)
+
     fun isDisplayTimeAvailable(): Boolean {
+
+        if (isInlineCarousel()) return true
 
         if(displayTiming.showEveryXMinutes!=null &&displayTiming.maxShowCount!=null) {
             if (displayTiming.showEveryXMinutes == -1 || displayTiming.maxShowCount == -1) {
@@ -40,6 +50,17 @@ class InAppMessageData(
     ): Boolean {
         val currentTime = System.currentTimeMillis()
         var criterionIndex = baseIndex
+
+        if (isInlineCarousel()) {
+            // Still write both entries so the caller's criterionIndex accounting
+            // (which advances by 2 for time constraints) stays aligned.
+            context["show_every_x_minutes_${criterionIndex}"] =
+                "noLimit|INLINE_CAROUSEL|TIME_CONSTRAINT|true"
+            criterionIndex++
+            context["max_show_count_${criterionIndex}"] =
+                "noLimit|INLINE_CAROUSEL|SHOW_COUNT_CONSTRAINT|true"
+            return true
+        }
 
         // Check show every X minutes constraint
         val isTimeConstraintMet =
