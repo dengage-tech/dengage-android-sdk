@@ -276,6 +276,12 @@ object InAppMessageUtils {
         startingIndex: Int = 0
     ): Boolean {
         var criterionIndex = startingIndex
+        // No rules means no constraint. Handled here so that an empty rule list
+        // behaves the same for OR as it already does for AND and for a null rule set,
+        // instead of any {} returning false and silently suppressing the message.
+        if (displayRuleSet?.displayRules.isNullOrEmpty()) {
+            return true
+        }
         if (displayRuleSet != null) {
             when (displayRuleSet.logicOperator) {
                 LogicOperator.AND.name -> {
