@@ -39,6 +39,7 @@ open class RecommendationView : WebView {
     private var isClicked: Boolean = false
     var activityContext: Activity? = null
     private var dengageBridge: DengageBridge? = null
+    private var customParams: Map<String, String>? = null
 
     constructor(context: Context?) : super(context!!) {
         contextWebView = context
@@ -58,9 +59,14 @@ open class RecommendationView : WebView {
         fun sendTags(tags: List<TagItem>?)
     }
 
-    internal fun populateRecommendation(inAppMessageParam: InAppMessage, activityParam: Activity) {
+    internal fun populateRecommendation(
+        inAppMessageParam: InAppMessage,
+        activityParam: Activity,
+        customParamsParam: Map<String, String>? = null
+    ) {
         inAppMessage = inAppMessageParam
         activityContext = activityParam
+        customParams = customParamsParam
         val contentParams = inAppMessage.data.content.params
         setHtmlContent(contentParams)
     }
@@ -94,7 +100,7 @@ open class RecommendationView : WebView {
                     register(HttpRequestHandler(inAppMessage))
                     register(DeviceInfoHandler())
                     register(StorageHandler())
-                    register(RecommendationHandler())
+                    register(RecommendationHandler(customParams))
                     register(RecommendationEventHandler())
                 }
 

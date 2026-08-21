@@ -556,7 +556,7 @@ class InAppMessageManager :
         if (priorMessage != null) {
             DengageLogger.debug("getRecommendation: Found matching recommendation message: ${priorMessage.id}")
             recommendationView.visibility = View.VISIBLE
-            recommendationView.populateRecommendation(priorMessage, activity)
+            recommendationView.populateRecommendation(priorMessage, activity, params)
             RecommendationView.inAppMessageCallback = this@InAppMessageManager
             setInAppMessageAsDisplayed(priorMessage)
 

@@ -24,8 +24,13 @@ import java.util.concurrent.TimeUnit
  * Handler for recommendation requests from WebView.
  * Collects user behavior data, sends a POST request to the Recommendation API,
  * and returns the recommendation response back to the bridge.
+ *
+ * @param customParams extra key/value pairs supplied by the host app through
+ * Dengage.getRecommendation. They are merged into the request body.
  */
-class RecommendationHandler : AsyncBridgeHandler {
+class RecommendationHandler(
+    private val customParams: Map<String, String>? = null
+) : AsyncBridgeHandler {
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
@@ -133,6 +138,12 @@ class RecommendationHandler : AsyncBridgeHandler {
         }
         if (RealTimeInAppParamHolder.lastPurchasedCategories.isNotEmpty()) {
             body["lpc"] = RealTimeInAppParamHolder.lastPurchasedCategories
+        }
+
+        // Custom params from Dengage.getRecommendation. Applied before the payload so
+        // that a value the campaign explicitly requests through the bridge still wins.
+        customParams?.forEach { (key, value) ->
+            body[key] = value
         }
 
         // Add extra fields from payload (excluding containerKey, mapping known aliases)
