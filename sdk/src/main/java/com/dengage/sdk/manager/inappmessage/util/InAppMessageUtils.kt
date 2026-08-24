@@ -258,17 +258,20 @@ object InAppMessageUtils {
         startingIndex: Int = 0
     ): Boolean {
         var criterionIndex = startingIndex
-        if (displayRuleSet != null) {
-            when (displayRuleSet.logicOperator) {
-                LogicOperator.AND.name -> {
-                    return displayRuleSet.displayRules.all {
-                        operateDisplayRule(it, params, context, criterionIndex)
-                    }
+        // Missing or empty ruleSet means no targeting (matches iOS). Empty OR must not
+        // fail matching — List.any {} on [] is false.
+        if (displayRuleSet == null || displayRuleSet.displayRules.isNullOrEmpty()) {
+            return true
+        }
+        when (displayRuleSet.logicOperator) {
+            LogicOperator.AND.name -> {
+                return displayRuleSet.displayRules.all {
+                    operateDisplayRule(it, params, context, criterionIndex)
                 }
-                LogicOperator.OR.name -> {
-                    return displayRuleSet.displayRules.any {
-                        operateDisplayRule(it, params, context, criterionIndex)
-                    }
+            }
+            LogicOperator.OR.name -> {
+                return displayRuleSet.displayRules.any {
+                    operateDisplayRule(it, params, context, criterionIndex)
                 }
             }
         }
@@ -282,6 +285,9 @@ object InAppMessageUtils {
         startingIndex: Int = 0
     ): Boolean {
         var criterionIndex = startingIndex
+        if (displayRule.criterionList.isNullOrEmpty()) {
+            return true
+        }
         when (displayRule.logicOperator) {
             LogicOperator.AND.name -> {
                 return displayRule.criterionList.all {

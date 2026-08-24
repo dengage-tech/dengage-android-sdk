@@ -14,7 +14,8 @@ object InAppMessageMocker {
         hasRules: Boolean = true,
         maxShowCount: Int = 1,
         showCount: Long = 0,
-        androidSelector: String = ""
+        androidSelector: String = "",
+        ruleSetOperator: LogicOperator = LogicOperator.AND
     ): InAppMessage {
         val contentParams = ContentParams(
             position = ContentPosition.BOTTOM.position,
@@ -49,7 +50,7 @@ object InAppMessageMocker {
             },
             displayRuleSet = if (isRealTime) {
                 DisplayRuleSet(
-                    logicOperator = LogicOperator.AND.name,
+                    logicOperator = ruleSetOperator.name,
                     displayRules = if (hasRules) {
                         listOf(
                             DisplayRule(

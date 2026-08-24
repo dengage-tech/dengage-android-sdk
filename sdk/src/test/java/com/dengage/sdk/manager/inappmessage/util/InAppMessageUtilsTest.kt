@@ -13,6 +13,7 @@ import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.inappmessage.model.Criterion
 import com.dengage.sdk.domain.inappmessage.model.DataType
+import com.dengage.sdk.domain.inappmessage.model.LogicOperator
 import com.dengage.sdk.domain.inappmessage.model.Operator
 import com.dengage.sdk.domain.inappmessage.model.Priority
 import com.dengage.sdk.domain.inappmessage.model.SpecialRuleParameter
@@ -873,6 +874,25 @@ class InAppMessageUtilsTest {
             inAppMessages = inAppMessages
         )
         Assert.assertNull(priorInAppMessage)
+    }
+
+    @Test
+    fun `empty OR ruleSet is treated as no targeting`() {
+        val expireDateFormat = SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault())
+        val expireDate = expireDateFormat.format(Date())
+        val id = Math.random().toString()
+        val inAppMessage = InAppMessageMocker.createInAppMessage(
+            id = id,
+            priority = Priority.HIGH,
+            expireDate = expireDate,
+            isRealTime = true,
+            hasRules = false,
+            ruleSetOperator = LogicOperator.OR
+        )
+        val priorInAppMessage = InAppMessageUtils.findPriorInAppMessage(
+            inAppMessages = listOf(inAppMessage)
+        )
+        Assert.assertEquals(id, priorInAppMessage?.id)
     }
 
 }
