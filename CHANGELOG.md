@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.0.100] - 2026-09-04
+
+### Bug Fixes
+
+- Stop duplicate push notifications on companion apps that mirror notifications to a watch (e.g. Huawei Health): register the internal `NRTrampoline` receiver at most once per process instead of adding a new instance on every call
+- Skip subscribing the internal receiver to `PUSH_RECEIVE_EVENT` when the host app declares its own manifest receiver for it, so each push is rendered exactly once; the implicit click/dismiss actions are still always handled
+- De-duplicate `notify()` calls by notification id so a push is never posted twice even if more than one receiver handled the same broadcast
+
 ## [6.0.99] - 2026-08-06
 
 ### Bug Fixes
