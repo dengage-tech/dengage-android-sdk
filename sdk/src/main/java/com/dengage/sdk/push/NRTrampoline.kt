@@ -58,7 +58,6 @@ open class NRTrampoline : BroadcastReceiver() {
     }
 
     open fun onPushOpen(context: Context, intent: Intent) {
-        Constants.isBCRegistered = true
         DengageLogger.verbose("$TAG onPushOpen method is called")
 
         var uri: String? = null
@@ -199,9 +198,7 @@ open class NRTrampoline : BroadcastReceiver() {
         notificationBuilder.setLargeIcon(bitmap)
         notificationBuilder.setStyle(style)
 
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
-        val notification = notificationBuilder.build()
-        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification) }
+        postNotification(context, intent, notificationBuilder.build())
     }
 
     open fun onTextNotificationRender(
@@ -210,9 +207,19 @@ open class NRTrampoline : BroadcastReceiver() {
         message: Message,
         notificationBuilder: NotificationCompat.Builder,
     ) {
+        postNotification(context, intent, notificationBuilder.build())
+    }
+
+    private fun postNotification(context: Context, intent: Intent, notification: Notification) {
+        val extras = intent.extras ?: return
+        val requestCode = extras.getInt("requestCode")
+        // Only de-duplicate when the SDK assigned an id; without one the legacy behaviour (id 0) is kept.
+        if (extras.containsKey("requestCode") && !DengageUtils.markNotificationPosted(requestCode)) {
+            DengageLogger.verbose("$TAG notification $requestCode was already posted, skipping duplicate")
+            return
+        }
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
-        val notification = notificationBuilder.build()
-        intent.extras?.getInt("requestCode")?.let { manager?.notify(it, notification) }
+        manager?.notify(requestCode, notification)
     }
 
     protected open fun onCarouselRender(

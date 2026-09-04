@@ -159,33 +159,82 @@ object DengageUtils {
     }
 
 
+    private val pushBroadcastActions = listOf(
+        Constants.PUSH_RECEIVE_EVENT,
+        Constants.PUSH_OPEN_EVENT,
+        Constants.PUSH_DELETE_EVENT,
+        Constants.PUSH_ACTION_CLICK_EVENT,
+        Constants.PUSH_ITEM_CLICK_EVENT,
+        "com.dengage.push.intent.CAROUSEL_ITEM_CLICK"
+    )
+
+    /**
+     * Registers the SDK's internal push receiver ([NRTrampoline]) at most once per process.
+     *
+     * Previously every call registered a brand-new NRTrampoline instance and nothing ever
+     * unregistered it, so after N pushes there were N receivers, each calling notify() with the
+     * same id. On the phone the same id just replaces the notification, but companion apps that
+     * mirror notifications to a watch (e.g. Huawei Health) forward every notify() call, which
+     * produced duplicate notifications on the watch.
+     *
+     * PUSH_RECEIVE_EVENT is the only action that is broadcast with setPackage() (see
+     * [com.dengage.sdk.Dengage.sendBroadcast]), so it is the only one that also reaches a
+     * manifest-declared receiver in the host app. When the app has such a receiver (see README,
+     * "Defining Custom Receiver") the internal receiver does not subscribe to PUSH_RECEIVE_EVENT,
+     * so each push is rendered exactly once.
+     *
+     * The click/dismiss actions are re-broadcast implicitly by [sendBroadCast] (no setPackage), and
+     * implicit broadcasts never reach manifest receivers on Android 8+. The internal receiver must
+     * therefore always subscribe to those, regardless of what the manifest declares.
+     */
+    @Synchronized
     fun registerBroadcast() {
+        if (Constants.isBCRegistered) return
         try {
-            val filter = IntentFilter(Constants.PUSH_RECEIVE_EVENT)
-            filter.addAction(Constants.PUSH_OPEN_EVENT)
-            filter.addAction(Constants.PUSH_DELETE_EVENT)
-            filter.addAction(Constants.PUSH_ACTION_CLICK_EVENT)
-            filter.addAction(Constants.PUSH_ITEM_CLICK_EVENT)
-            filter.addAction("com.dengage.push.intent.CAROUSEL_ITEM_CLICK")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ContextHolder.context.applicationContext.registerReceiver(
-                    NRTrampoline(),
-                    filter, Context.RECEIVER_EXPORTED
-                )
-            } else {
-                ContextHolder.context.applicationContext.registerReceiver(
-                    NRTrampoline(),
-                    filter
-                )
+            val context = ContextHolder.context.applicationContext
+            val filter = IntentFilter()
+            for (action in pushBroadcastActions) {
+                if (action == Constants.PUSH_RECEIVE_EVENT && hasManifestReceiver(context, action)) {
+                    DengageLogger.verbose("registerBroadcast: $action is handled by the app's manifest receiver, skipping internal receiver")
+                } else {
+                    filter.addAction(action)
+                }
             }
-
-
+            if (filter.countActions() > 0) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    context.registerReceiver(NRTrampoline(), filter, Context.RECEIVER_EXPORTED)
+                } else {
+                    context.registerReceiver(NRTrampoline(), filter)
+                }
+            }
+            Constants.isBCRegistered = true
         } catch (_: Exception) {
             //  e.printStackTrace()
         } catch (ex: Throwable) {
             ex.printStackTrace()
 
         }
+    }
+
+    private fun hasManifestReceiver(context: Context, action: String): Boolean {
+        return try {
+            val intent = Intent(action).setPackage(context.packageName)
+            context.packageManager.queryBroadcastReceivers(intent, 0).any { it.activityInfo != null }
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
+    private val postedNotificationIds = mutableSetOf<Int>()
+
+    /**
+     * Returns true the first time a notification id is posted in this process and false for every
+     * later call with the same id. Callers skip notify() when this returns false so a push is never
+     * posted twice, even if more than one receiver handled the same broadcast.
+     */
+    @Synchronized
+    fun markNotificationPosted(notificationId: Int): Boolean {
+        return postedNotificationIds.add(notificationId)
     }
 
     fun unregisterBroadcast() {
@@ -254,12 +303,12 @@ object DengageUtils {
 
     fun isDeeplink(targetUrl: String): Boolean {
         val inAppDeeplink = Prefs.inAppDeeplink
-        return inAppDeeplink.isNotEmpty() 
-            && targetUrl.isNotEmpty() 
-            && targetUrl.startsWith(
-                inAppDeeplink,
-                ignoreCase = true
-            )
+        return inAppDeeplink.isNotEmpty()
+                && targetUrl.isNotEmpty()
+                && targetUrl.startsWith(
+            inAppDeeplink,
+            ignoreCase = true
+        )
     }
 
     /*  fun getSdkDefaultObj():SdkParameters
