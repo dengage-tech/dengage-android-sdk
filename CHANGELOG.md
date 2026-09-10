@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.0.101] - 2026-09-10
+
+### Bug Fixes
+
+- Stop merging `ACCESS_BACKGROUND_LOCATION` from `sdk-geofence` so host apps are not forced into Play Store background-location review; apps that need killed-state geofencing can still declare the permission themselves
+
 ## [6.0.100] - 2026-09-04
 
 ### Bug Fixes

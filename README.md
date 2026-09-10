@@ -97,11 +97,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Latest SDK version: `6.0.100`
+Latest SDK version: `6.0.101`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.100'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.101'
 }
 ```
 
@@ -1598,8 +1598,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.100'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.100'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.101'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.101'
 }
 ```
 
@@ -1721,7 +1721,7 @@ class App : Application() {
 
 3. **Handle Permissions Properly**: Request location permissions at an appropriate time in your app flow:
    - `ACCESS_FINE_LOCATION` is required for geofence functionality
-   - `ACCESS_BACKGROUND_LOCATION` (Android 10+) is required for geofence triggers when the app is not in foreground
+   - `ACCESS_BACKGROUND_LOCATION` (Android 10+) is **not** declared by `sdk-geofence`. If you need geofence triggers when the app is not in the foreground, add it in your app manifest and complete the Play Console background-location declaration yourself.
 
 4**Battery Optimization Whitelist**: On some devices, aggressive battery optimization may affect geofence delivery. Consider guiding users to exclude your app from battery optimization if geofence reliability is critical.
 
@@ -1760,8 +1760,8 @@ class App : Application() {
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.100'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.100'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.101'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.101'
 }
 ```
 
