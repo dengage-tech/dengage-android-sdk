@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.0.102] - 2026-09-16
+
+### New Features
+
+- Introduce Inbox Channel: fetch messages via `Dengage.getInboxChannelMessages(limit, dengageCallback)` and report impression/open/click/delete interactions in bulk via `Dengage.sendInboxChannelEvents(events)`, backed by the new `/api/inbox` endpoints
+- Cache Inbox Channel read/deleted state locally so it survives across fetches, is merged onto freshly fetched messages, and is pruned after 7 days
+
 ## [6.0.101] - 2026-09-10
 
 ### Bug Fixes

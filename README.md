@@ -49,6 +49,9 @@
     - [Removing all Inbox Messages](#removing-all-inbox-messages)
     - [Marking an Inbox Message as Read](#marking-an-inbox-message-as-read)
     - [Marking all Inbox Messages as Read](#marking-all-inbox-messages-as-read)
+- [Inbox Channel](#inbox-channel)
+  - [Getting Inbox Channel Messages](#getting-inbox-channel-messages)
+  - [Reporting Inbox Channel Events](#reporting-inbox-channel-events)
 - [In-App Messaging](#in-app-messaging)
   - [Methods](#methods)
   - [Real Time In-App Messaging](#real-time-in-app-messaging)
@@ -97,11 +100,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Latest SDK version: `6.0.101`
+Latest SDK version: `6.0.102`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.101'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.102'
 }
 ```
 
@@ -1361,6 +1364,53 @@ Dengage.setAllInboxMessagesAsClicked()
 > `receiveDate` property is used to store inbox message receive date. It keeps date as a UTC time format ("yyyy-MM-ddTHH:mm:ss.fffZ"). The applications which are using our SDKs need to convert this UTC date to the client time zone if the applications want to display the message receive date to their users.
 
 
+## Inbox Channel
+
+Inbox Channel is a newer, dedicated messaging channel served through `/api/inbox`, separate from App Inbox above. Messages are fetched on demand from the server rather than delivered via push, and read/deleted state is cached locally so it survives across fetches even before the server-side event is processed.
+
+> To use the Inbox Channel feature, please send an email to tech@dengage.com.
+
+### Getting Inbox Channel Messages
+
+Fetch the latest Inbox Channel messages:
+
+```kotlin
+Dengage.getInboxChannelMessages(
+    limit = 20, // Number of messages to retrieve (min: 1, max: 100, default: 20)
+    dengageCallback = object : DengageCallback<MutableList<InboxChannelMessage>> {
+        override fun onResult(result: MutableList<InboxChannelMessage>) {
+            // Handle the result
+            Toast.makeText(context, "Inbox Channel Messages: ${result.size}", Toast.LENGTH_SHORT)
+                .show()
+        }
+
+        override fun onError(error: DengageError) {
+            // Handle the error
+            Toast.makeText(context, "Error: ${error.errorMessage}", Toast.LENGTH_SHORT)
+                .show()
+        }
+    })
+```
+
+Each `InboxChannelMessage` carries an `id`, a `priority`, an `isRead` flag and a `data` payload (`title`, `message`, `imageUrl`, `ctaButtons`, `isPinned`, `receiveDate`, and an opaque `messageDetails` token). Locally deleted messages are filtered out of the result automatically.
+
+### Reporting Inbox Channel Events
+
+Report impressions, opens, clicks or deletes for a message. Multiple events can be sent together in a single bulk request:
+
+```kotlin
+val event = InboxChannelEvent(
+    eventType = InboxChannelEventType.CLICK, // IMPRESSION, OPEN, CLICK or DELETE
+    messageId = message.id,
+    messageDetails = message.data.messageDetails
+)
+
+Dengage.sendInboxChannelEvents(listOf(event))
+```
+
+> `OPEN` and `CLICK` events mark the message as read locally; `DELETE` marks it as deleted so it is excluded from subsequent fetches. `messageDetails` must be the token returned in the message's `data.messageDetails` field.
+
+
 ## In-App Messaging
 
 An in-app message is a type of mobile message where the notification is displayed within the app. It is not sent at a specific time but it is shown to users when the user is using the app.
@@ -1598,8 +1648,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.101'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.101'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.102'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.102'
 }
 ```
 
@@ -1760,8 +1810,8 @@ class App : Application() {
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.101'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.101'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.102'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.102'
 }
 ```
 
