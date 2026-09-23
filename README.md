@@ -62,6 +62,7 @@
   - [Geofence Installation](#geofence-installation)
   - [Geofence Initialization](#geofence-initialization)
   - [Request Location Permission](#request-location-permission)
+  - [Stopping and Restarting Geofence](#stopping-and-restarting-geofence)
   - [Geofence Interceptor](#geofence-interceptor)
   - [Performance Considerations and Best Practices](#performance-considerations-and-best-practices)
 - [Huawei Messaging Service](#huawei-messaging-service)
@@ -100,11 +101,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Latest SDK version: `6.0.102`
+Latest SDK version: `6.0.103`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.102'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.103'
 }
 ```
 
@@ -1648,8 +1649,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.102'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.102'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.103'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.103'
 }
 ```
 
@@ -1667,6 +1668,27 @@ To request location permissions at runtime, use the `DengageGeofence.requestLoca
 
 ```kotlin
 DengageGeofence.requestLocationPermissions(activity)
+```
+
+### Stopping and Restarting Geofence
+
+To stop geofence tracking (for example, when the user opts out of location-based features), call `DengageGeofence.stopGeofence`. It stops location updates and removes all monitored geofences.
+
+```kotlin
+DengageGeofence.stopGeofence()
+```
+
+The stop decision is persisted. Until `DengageGeofence.startGeofence()` is called again, no background trigger reactivates geofence, even in a new process: geofence silent pushes, device reboot (`BOOT_COMPLETED`), app updates (`MY_PACKAGE_REPLACED`), location provider changes, scheduled work and location/geofence broadcasts are all ignored.
+
+Calling `DengageGeofence.startGeofence()` clears the stop decision and starts geofence again.
+
+> **Important**: `Application.onCreate()` runs on every process start, including background launches caused by a silent push, a reboot or a scheduled job. If you call `startGeofence()` there unconditionally, it re-enables geofence after the user stopped it. Store the user's choice in your app and only call `startGeofence()` when geofence should be active:
+
+```kotlin
+// Application.onCreate()
+if (isGeofenceEnabledByUser()) {
+    DengageGeofence.startGeofence()
+}
 ```
 
 ### Geofence Interceptor
@@ -1734,7 +1756,7 @@ DengageGeofence SDK uses Google Play Services Location API with the following ch
 - **Automatic Region Updates**: When the user moves, the SDK recalculates and updates the monitored regions to always track the nearest 50 geofences from the server.
 - **Balanced Power Accuracy**: The SDK uses `PRIORITY_BALANCED_POWER_ACCURACY` for location updates, providing a good balance between accuracy and battery consumption.
 - **Rate Limiting**: Geofence data is fetched from the server at most every 15 minutes, and event signals for the same geofence are rate-limited to once every 5 minutes.
-- **Boot Persistence**: The SDK automatically re-registers geofences after device reboot via `BOOT_COMPLETED` broadcast receiver.
+- **Boot Persistence**: The SDK automatically re-registers geofences after device reboot via `BOOT_COMPLETED` broadcast receiver, unless geofence was stopped with `DengageGeofence.stopGeofence()`.
 - **Accuracy Filtering**: Location updates with accuracy worse than 1000 meters are automatically filtered out.
 
 #### Recommendations
@@ -1810,8 +1832,8 @@ class App : Application() {
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.102'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.102'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.103'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.103'
 }
 ```
 

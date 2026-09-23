@@ -1,5 +1,14 @@
 # Changelog
 
+## [6.0.103] - 2026-09-23
+
+### Bug Fixes
+
+- Persist `DengageGeofence.stopGeofence()` so geofence stays stopped until `DengageGeofence.startGeofence()` is called again; previously the stop decision was kept only in memory and ignored by background paths
+- Ignore geofence silent pushes, `forceResync`, organic sync, active window work, location updates and geofence transitions while geofence is stopped, so they no longer re-register fences or send heartbeats
+- Keep geofence stopped after device reboot (`BOOT_COMPLETED`) and app updates (`MY_PACKAGE_REPLACED`); boot now restarts the engine only if it was not stopped
+- Do not register fences from an in-flight sync or location lookup when `stopGeofence()` is called while it is running
+
 ## [6.0.102] - 2026-09-16
 
 ### New Features
