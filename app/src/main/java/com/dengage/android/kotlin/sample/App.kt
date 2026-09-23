@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import com.dengage.android.kotlin.sample.utils.Constants
+import com.dengage.android.kotlin.sample.utils.GeofencePreference
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
 import com.dengage.sdk.data.remote.api.NotificationDisplayPriorityConfiguration
@@ -104,7 +105,10 @@ class App : Application() {
             }
         }
 
-        DengageGeofence.startGeofence()
+        // Kullanıcı Geofence ekranından durdurduysa process başlangıcında yeniden başlatma.
+        if (GeofencePreference.isEnabled(this)) {
+            DengageGeofence.startGeofence()
+        }
 
         // Register Live Update handlers
         DengageLiveUpdateManager.register("ExampleAppFirstWidgetAttributes", DeliveryLiveUpdateHandler())

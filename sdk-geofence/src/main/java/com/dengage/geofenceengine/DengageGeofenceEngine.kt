@@ -39,6 +39,13 @@ class DengageGeofenceEngine private constructor(context: Context) {
         engine.stop()
     }
 
+    /** BOOT_COMPLETED sonrası yeniden başlatma; host `stop` ettiyse engine kapalı kalır. */
+    internal fun restartAfterBoot() {
+        DengageLogger.verbose("DengageGeofenceEngine -> restart after boot")
+        ensureInitialized()
+        engine.restartIfNotStopped()
+    }
+
     /** Server'dan sync, hareket bazlı reeval, OS register, event flush (force). */
     fun forceResync() {
         engine.forceResync()

@@ -42,6 +42,12 @@ internal class PrefsSyncMetadataRepository : SyncMetadataRepository {
             prefs.edit().putLong(KEY_WAKEUP_PAUSED_AT, value ?: 0L).apply()
         }
 
+    override var stoppedAt: Long?
+        get() = prefs.getLong(KEY_STOPPED_AT, 0L).takeIf { it > 0 }
+        set(value) {
+            prefs.edit().putLong(KEY_STOPPED_AT, value ?: 0L).apply()
+        }
+
     companion object {
         private const val PREFS_FILE = "dengage_geofence_engine_prefs"
         private const val KEY_ETAG = "etag"
@@ -49,5 +55,6 @@ internal class PrefsSyncMetadataRepository : SyncMetadataRepository {
         private const val KEY_HEARTBEAT_AT = "heartbeat_at"
         private const val KEY_SILENT_PUSH_AT = "silent_push_at"
         private const val KEY_WAKEUP_PAUSED_AT = "wakeup_paused_at"
+        private const val KEY_STOPPED_AT = "stopped_at"
     }
 }

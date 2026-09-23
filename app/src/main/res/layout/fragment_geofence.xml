@@ -19,6 +19,13 @@
                 android:text="@string/button_request_location_permission" />
 
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnStartGeofencing"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="12dp"
+                android:text="@string/button_start_geofencing" />
+
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnStopGeofencing"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/base_component_height"

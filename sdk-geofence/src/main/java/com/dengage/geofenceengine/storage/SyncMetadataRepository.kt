@@ -15,4 +15,11 @@ interface SyncMetadataRepository {
      * (aksi halde `attemptResume()` taze bellekte `paused=false` görüp erken döner).
      */
     var wakeupPausedAt: Long?
+
+    /**
+     * Host'un `stopGeofence` çağırdığı an (epoch millis); null = durdurulmadı. `startGeofence` temizler.
+     * Persist edilir ki silent push, boot, WorkManager gibi arka plan kanalları yeni bir process'te de
+     * stop kararına uysun.
+     */
+    var stoppedAt: Long?
 }

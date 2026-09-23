@@ -49,7 +49,7 @@ object DengageGeofence {
             Dengage.init(context = context, initForGeofence = true)
         }
         DengageLogger.debug("DengageGeofence -> handleBootCompleted (v2)")
-        engine(context).start()
+        engine(context).restartAfterBoot()
     }
 
     /**

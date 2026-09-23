@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.dengage.android.kotlin.sample.R
 import com.dengage.android.kotlin.sample.databinding.FragmentGeofenceBinding
 import com.dengage.android.kotlin.sample.ui.base.BaseDataBindingFragment
+import com.dengage.android.kotlin.sample.utils.GeofencePreference
 import com.dengage.geofence.DengageGeofence
 import com.dengage.geofenceengine.DengageGeofenceEngine
 import java.text.SimpleDateFormat
@@ -27,7 +28,13 @@ class GeofenceFragment : BaseDataBindingFragment<FragmentGeofenceBinding>() {
             DengageGeofence.requestLocationPermissions(activity)
         }
 
+        binding.btnStartGeofencing.setOnClickListener {
+            GeofencePreference.setEnabled(requireContext(), true)
+            DengageGeofence.startGeofence()
+        }
+
         binding.btnStopGeofencing.setOnClickListener {
+            GeofencePreference.setEnabled(requireContext(), false)
             DengageGeofence.stopGeofence()
         }
 

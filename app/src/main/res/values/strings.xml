@@ -54,6 +54,7 @@
     <string name="change_value">Change Value</string>
     <string name="remove_time">Remove Time</string>
     <string name="button_request_location_permission">Request Location Permission</string>
+    <string name="button_start_geofencing">Start Geofencing</string>
     <string name="button_stop_geofencing">Stop Geofencing</string>
     <string name="button_last_silent_push_sync">Show Last Silent Push Sync</string>
     <string name="label_last_silent_push_sync_none">Last silent push sync: none yet</string>

@@ -82,6 +82,20 @@ internal class GeofenceEngine(private val context: Context) {
     // ---- lifecycle ----
 
     fun start() {
+        storage.syncMetadataRepository.stoppedAt = null
+        startInternal()
+    }
+
+    /**
+     * Sistem kaynaklı yeniden başlatma (BOOT_COMPLETED). Host'un `start()`'ından farkı: stop kararını
+     * temizlemez — host durdurduysa cihaz yeniden başlasa da engine kapalı kalır.
+     */
+    fun restartIfNotStopped() {
+        if (isStopped("boot restart")) return
+        startInternal()
+    }
+
+    private fun startInternal() {
         if (!remoteConfig.geofenceEnabled()) {
             DengageLogger.debug("GeofenceEngine -> disabled by server config")
             stop()
@@ -110,6 +124,7 @@ internal class GeofenceEngine(private val context: Context) {
     }
 
     fun stop() {
+        storage.syncMetadataRepository.stoppedAt = System.currentTimeMillis()
         running = false
         movementListener.stop()
         registrar.removeAll()
@@ -119,6 +134,7 @@ internal class GeofenceEngine(private val context: Context) {
     }
 
     fun forceResync() {
+        if (isStopped("force resync")) return
         scope.launch {
             val location = currentLocation()
             reeval(location, syncAllowed = true, force = true)
@@ -130,6 +146,7 @@ internal class GeofenceEngine(private val context: Context) {
      * sunucudan fence'leri yeniden çeker (contract: ad-hoc/garanti senkronizasyon kanalı).
      */
     fun onSilentPush() {
+        if (isStopped("silent push")) return
         storage.syncMetadataRepository.lastSilentPushAt = System.currentTimeMillis()
         DengageLogger.debug("GeofenceEngine -> silent push resync")
         forceResync()
@@ -139,6 +156,7 @@ internal class GeofenceEngine(private val context: Context) {
 
     fun requestOrganicSync(reason: OrganicSyncTrigger.Reason) {
         if (!remoteConfig.geofenceEnabled()) return
+        if (isStopped("organic sync")) return
         // Foreground debounce (doc 23 İş 5): her ekran açılışı bir organic sync tetikler; kısa
         // aralıklı foreground'lar (bildirim çekmecesi, app switcher) reeval churn'ü üretmesin.
         // Diff-based register churn'ün en pahalı kısmını zaten kaldırdı; bu, sync/reconcile
@@ -172,6 +190,7 @@ internal class GeofenceEngine(private val context: Context) {
     fun attemptResume() = wakeupCap.attemptResume()
 
     fun onActiveWindowBoundary() {
+        if (isStopped("active window boundary")) return
         scope.launch {
             val location = currentLocation()
             reeval(location, syncAllowed = true, force = false)
@@ -181,6 +200,9 @@ internal class GeofenceEngine(private val context: Context) {
     // ---- movement ----
 
     fun handleMovement(location: Location, onComplete: () -> Unit = {}) {
+        if (isStopped("movement")) {
+            onComplete(); return
+        }
         if (!remoteConfig.geofenceEnabled()) {
             stop(); onComplete(); return
         }
@@ -218,6 +240,9 @@ internal class GeofenceEngine(private val context: Context) {
         location: Location?,
         onComplete: () -> Unit = {}
     ) {
+        if (isStopped("geofence transition")) {
+            onComplete(); return
+        }
         // Region monitoring callback'i pause süresini etkilemez; ayrıca resume fırsatı verir (K13)
         wakeupCap.attemptResume()
         scope.launch {
@@ -317,6 +342,9 @@ internal class GeofenceEngine(private val context: Context) {
             DengageLogger.debug("GeofenceEngine -> transit mode: local top-N only, server sync skipped")
         }
 
+        // Sync/konum beklenirken stop çağrıldıysa sonucu register etme.
+        if (isStopped("reeval")) return
+
         // Storage'daki güncel fence'lerden top-N seç + OS register (cache'ten, transit modunda bile)
         if (location != null) {
             registerTopN(location, registerMode)
@@ -367,6 +395,17 @@ internal class GeofenceEngine(private val context: Context) {
     }
 
     // ---- helpers ----
+
+    /**
+     * Host `stopGeofence` çağırdıysa (ve sonra `startGeofence` çağırmadıysa) true. Arka plan kanalları
+     * (silent push, boot, organik sync, konum/geofence broadcast'leri, WorkManager) geofence'i yeniden
+     * aktif edemez; bunu yalnızca `start()` yapabilir. Kalıcıdır: yeni process'te de geçerli.
+     */
+    private fun isStopped(reason: String): Boolean {
+        if (storage.syncMetadataRepository.stoppedAt == null) return false
+        DengageLogger.debug("GeofenceEngine -> $reason ignored, geofence is stopped")
+        return true
+    }
 
     private fun hasLocationPermission(): Boolean =
         GeofencePermissionsHelper.fineLocationPermission(context) ||

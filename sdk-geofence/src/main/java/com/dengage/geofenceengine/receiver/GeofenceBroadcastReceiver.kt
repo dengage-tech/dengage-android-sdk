@@ -73,7 +73,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     private fun handleBoot(context: Context) {
         DengageLogger.debug("GeofenceBroadcastReceiver -> boot completed, restarting engine")
-        DengageGeofenceEngine.getInstance(context).start()
+        DengageGeofenceEngine.getInstance(context).restartAfterBoot()
     }
 
     private fun handleSystemStateChange(context: Context, intent: Intent) {
