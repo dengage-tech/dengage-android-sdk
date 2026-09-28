@@ -1,5 +1,6 @@
 package com.dengage.sdk.manager.event
 
+import com.dengage.sdk.domain.event.model.PushEventType
 import com.dengage.sdk.manager.base.BasePresenter
 import com.dengage.sdk.manager.base.BaseView
 
@@ -26,7 +27,8 @@ interface EventContract {
             messageId: Int?,
             messageDetails: String?,
             transactionId: String?,
-            integrationKey: String?
+            integrationKey: String?,
+            eventType: PushEventType = PushEventType.OPEN
         )
 
         fun sendOpenEvent(
@@ -34,7 +36,8 @@ interface EventContract {
             itemId: String?,
             messageId: Int?,
             messageDetails: String?,
-            integrationKey: String?
+            integrationKey: String?,
+            eventType: PushEventType = PushEventType.OPEN
         )
     }
 }

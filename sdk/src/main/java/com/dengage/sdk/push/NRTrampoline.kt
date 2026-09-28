@@ -89,6 +89,8 @@ open class NRTrampoline : BroadcastReceiver() {
                 message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
             }
 
+            Dengage.sendDismissEvent("", "", message)
+
             clearNotification(context, message)
         }
     }

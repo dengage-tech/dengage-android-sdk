@@ -1,5 +1,6 @@
 package com.dengage.sdk.manager.event
 
+import com.dengage.sdk.domain.event.model.PushEventType
 import com.dengage.sdk.domain.event.usecase.SendEvent
 import com.dengage.sdk.domain.event.usecase.SendOpenEvent
 import com.dengage.sdk.domain.event.usecase.SendTransactionalOpenEvent
@@ -11,8 +12,10 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
     private val sendEvent by lazy { SendEvent() }
     private val sendTransactionalOpenEvent by lazy { SendTransactionalOpenEvent() }
     private val sendOpenEvent by lazy { SendOpenEvent() }
-    private var isOpenEventBeingSent :Boolean = false
-    private var isTransactionalOpenEventBeingSent :Boolean = false
+    // Tracked per event type and message: the same event for the same message is never sent twice
+    // at once, while other messages (e.g. several pushes cleared with "Clear all") are not dropped.
+    private val openEventsBeingSent = mutableSetOf<Pair<PushEventType, String?>>()
+    private val transactionalOpenEventsBeingSent = mutableSetOf<Pair<PushEventType, String?>>()
 
     override fun sendEvent(
         accountId: Int?,
@@ -41,17 +44,18 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         messageId: Int?,
         messageDetails: String?,
         transactionId: String?,
-        integrationKey: String?
+        integrationKey: String?,
+        eventType: PushEventType
     ) {
 
-        if(isTransactionalOpenEventBeingSent) return
-        isTransactionalOpenEventBeingSent=true
+        val inFlightKey = eventType to messageDetails
+        if (!transactionalOpenEventsBeingSent.add(inFlightKey)) return
         sendTransactionalOpenEvent(this) {
             onResponse = {
-                view { isTransactionalOpenEventBeingSent=false
-                    transactionalOpenEventSent() }
+                transactionalOpenEventsBeingSent.remove(inFlightKey)
+                view { transactionalOpenEventSent() }
             }
-            onError={ isTransactionalOpenEventBeingSent=false
+            onError={ transactionalOpenEventsBeingSent.remove(inFlightKey)
             }
             params = SendTransactionalOpenEvent.Params(
                 buttonId = buttonId,
@@ -59,7 +63,8 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
                 messageId = messageId,
                 messageDetails = messageDetails,
                 transactionId = transactionId,
-                integrationKey = integrationKey
+                integrationKey = integrationKey,
+                eventType = eventType
             )
         }
     }
@@ -69,19 +74,19 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
         itemId: String?,
         messageId: Int?,
         messageDetails: String?,
-        integrationKey: String?
+        integrationKey: String?,
+        eventType: PushEventType
     ) {
-        if(isOpenEventBeingSent) return
-        isOpenEventBeingSent=true
+        val inFlightKey = eventType to messageDetails
+        if (!openEventsBeingSent.add(inFlightKey)) return
 
         sendOpenEvent(this) {
             onResponse = {
-                view {
-                    isOpenEventBeingSent=false
-                    openEventSent() }
+                openEventsBeingSent.remove(inFlightKey)
+                view { openEventSent() }
             }
             onError ={
-                isOpenEventBeingSent=false
+                openEventsBeingSent.remove(inFlightKey)
 
             }
             params = SendOpenEvent.Params(
@@ -89,7 +94,8 @@ class EventPresenter : BaseAbstractPresenter<EventContract.View>(),
                 itemId = itemId,
                 messageId = messageId,
                 messageDetails = messageDetails,
-                integrationKey = integrationKey
+                integrationKey = integrationKey,
+                eventType = eventType
             )
         }
     }

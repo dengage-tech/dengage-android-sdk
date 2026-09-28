@@ -6,6 +6,7 @@ import androidx.core.net.toUri
 import com.dengage.sdk.data.cache.Prefs
 import com.dengage.sdk.domain.event.model.FilterOperator
 import com.dengage.sdk.domain.event.model.ClientEvent
+import com.dengage.sdk.domain.event.model.PushEventType
 import com.dengage.sdk.manager.base.BaseMvpManager
 import com.dengage.sdk.manager.inappmessage.util.RealTimeInAppParamHolder
 import com.dengage.sdk.manager.session.SessionManager
@@ -372,7 +373,8 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         itemId: String?,
         messageId: Int?,
         messageDetails: String?,
-        transactionId: String?
+        transactionId: String?,
+        eventType: PushEventType = PushEventType.OPEN
     ) {
         presenter.sendTransactionalOpenEvent(
             buttonId = buttonId,
@@ -380,7 +382,8 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
             messageId = messageId,
             messageDetails = messageDetails,
             transactionId = transactionId,
-            integrationKey = Prefs.subscription!!.integrationKey
+            integrationKey = Prefs.subscription!!.integrationKey,
+            eventType = eventType
         )
     }
 
@@ -388,14 +391,16 @@ class EventManager : BaseMvpManager<EventContract.View, EventContract.Presenter>
         buttonId: String?,
         itemId: String?,
         messageId: Int?,
-        messageDetails: String?
+        messageDetails: String?,
+        eventType: PushEventType = PushEventType.OPEN
     ) {
         presenter.sendOpenEvent(
             buttonId = buttonId,
             itemId = itemId,
             messageId = messageId,
             messageDetails = messageDetails,
-            integrationKey = Prefs.subscription!!.integrationKey
+            integrationKey = Prefs.subscription!!.integrationKey,
+            eventType = eventType
         )
     }
 

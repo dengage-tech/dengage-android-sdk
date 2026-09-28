@@ -4,6 +4,7 @@ import com.dengage.sdk.data.remote.api.ApiType
 import com.dengage.sdk.data.remote.api.service
 import com.dengage.sdk.domain.event.model.Event
 import com.dengage.sdk.domain.event.model.OpenEvent
+import com.dengage.sdk.domain.event.model.PushEventType
 import com.dengage.sdk.domain.event.model.TransactionalOpenEvent
 import retrofit2.Response
 
@@ -35,18 +36,21 @@ class EventRepository {
         messageId: Int?,
         messageDetails: String?,
         transactionId: String?,
-        integrationKey: String?
+        integrationKey: String?,
+        eventType: PushEventType = PushEventType.OPEN
     ): Response<Unit> {
-        return openEventService.sendTransactionalOpenEvent(
-            transactionalOpenEvent = TransactionalOpenEvent(
-                buttonId = buttonId,
-                itemId = itemId,
-                messageId = messageId,
-                messageDetails = messageDetails,
-                transactionId = transactionId,
-                integrationKey = integrationKey
-            )
+        val transactionalOpenEvent = TransactionalOpenEvent(
+            buttonId = buttonId,
+            itemId = itemId,
+            messageId = messageId,
+            messageDetails = messageDetails,
+            transactionId = transactionId,
+            integrationKey = integrationKey
         )
+        return when (eventType) {
+            PushEventType.OPEN -> openEventService.sendTransactionalOpenEvent(transactionalOpenEvent)
+            PushEventType.DISMISS -> openEventService.sendTransactionalDismissEvent(transactionalOpenEvent)
+        }
     }
 
     suspend fun sendOpenEvent(
@@ -54,16 +58,19 @@ class EventRepository {
         itemId: String?,
         messageId: Int?,
         messageDetails: String?,
-        integrationKey: String?
+        integrationKey: String?,
+        eventType: PushEventType = PushEventType.OPEN
     ): Response<Unit> {
-        return openEventService.sendOpenEvent(
-            openEvent = OpenEvent(
-                buttonId = buttonId,
-                itemId = itemId,
-                messageId = messageId,
-                messageDetails = messageDetails,
-                integrationKey = integrationKey
-            )
+        val openEvent = OpenEvent(
+            buttonId = buttonId,
+            itemId = itemId,
+            messageId = messageId,
+            messageDetails = messageDetails,
+            integrationKey = integrationKey
         )
+        return when (eventType) {
+            PushEventType.OPEN -> openEventService.sendOpenEvent(openEvent)
+            PushEventType.DISMISS -> openEventService.sendDismissEvent(openEvent)
+        }
     }
 }

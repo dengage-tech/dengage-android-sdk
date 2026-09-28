@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### New Features
+
+- Report push dismiss events: swiping away or clearing a push sends `POST /api/mobile/dismiss` (or `/api/transactional/mobile/dismiss` for transactional pushes) with the same parameters and routing as the open event, for text, rich and carousel pushes with or without action buttons, from both `NotificationReceiver` and the internal receiver
+- Add `Dengage.sendDismissEvent(buttonId, itemId, message)` (and `DengageManager.sendDismissEvent`) next to `sendOpenEvent`
+- Skip a dismiss for a message that was already opened, and send each dismiss at most once per message
+- Carousel pushes report dismiss through the delete intent the app sets in `onCarouselRender` (`getDeleteIntent` + `getDeletePendingIntent`, as in the sample app)
+
 ## [6.0.103] - 2026-09-23
 
 ### Bug Fixes

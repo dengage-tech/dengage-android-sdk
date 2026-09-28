@@ -277,6 +277,10 @@ object Prefs {
         get() = preferences.get(PreferenceKey.SENT_OPEN_EVENT_MESSAGE_DETAILS) ?: mutableListOf()
         set(value) = preferences.set(PreferenceKey.SENT_OPEN_EVENT_MESSAGE_DETAILS, value)
 
+    internal var sentDismissEventMessageDetails: MutableList<String>
+        get() = preferences.get(PreferenceKey.SENT_DISMISS_EVENT_MESSAGE_DETAILS) ?: mutableListOf()
+        set(value) = preferences.set(PreferenceKey.SENT_DISMISS_EVENT_MESSAGE_DETAILS, value)
+
 
     internal var userTrackingPermission: Boolean
         get() = preferences.get(PreferenceKey.USER_TRACKING_PERMISSION, true) ?: true

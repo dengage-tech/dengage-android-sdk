@@ -24,6 +24,7 @@ import com.dengage.sdk.domain.configuration.model.SdkParameters
 import com.dengage.sdk.domain.inboxchannel.model.InboxChannelEvent
 import com.dengage.sdk.domain.inboxchannel.model.InboxChannelMessage
 import com.dengage.sdk.domain.inboxmessage.model.InboxMessage
+import com.dengage.sdk.domain.event.model.PushEventType
 import com.dengage.sdk.domain.push.model.Message
 import com.dengage.sdk.domain.rfm.model.RFMGender
 import com.dengage.sdk.domain.rfm.model.RFMItem
@@ -837,6 +838,32 @@ object Dengage {
         message: Message?,
     ) {
         DengageLogger.verbose("sendOpenEvent method is called")
+        sendPushEvent(PushEventType.OPEN, buttonId, itemId, message)
+    }
+
+    /**
+     * Sends dismiss event
+     *
+     * Reported when the user dismisses (swipes away / clears) a push notification. Uses the same
+     * parameters and routing as [sendOpenEvent]; only the endpoint differs.
+     *
+     * @param message The dEngage message object.
+     */
+    fun sendDismissEvent(
+        buttonId: String,
+        itemId: String,
+        message: Message?,
+    ) {
+        DengageLogger.verbose("sendDismissEvent method is called")
+        sendPushEvent(PushEventType.DISMISS, buttonId, itemId, message)
+    }
+
+    private fun sendPushEvent(
+        eventType: PushEventType,
+        buttonId: String,
+        itemId: String,
+        message: Message?,
+    ) {
         DengageLogger.verbose(buttonId)
         DengageLogger.verbose(itemId)
         DengageLogger.verbose(message?.toJson())
@@ -850,19 +877,7 @@ object Dengage {
             val source = message.messageSource
             if (Constants.MESSAGE_SOURCE != source) return
 
-            val messageDetails = message.messageDetails
-            if (!messageDetails.isNullOrEmpty()) {
-                val sentDetails = Prefs.sentOpenEventMessageDetails
-                if (sentDetails.contains(messageDetails)) {
-                    DengageLogger.verbose("Duplicate open event detected for messageDetails: $messageDetails, skipping.")
-                    return
-                }
-                sentDetails.add(messageDetails)
-                if (sentDetails.size > 10) {
-                    sentDetails.removeAt(0)
-                }
-                Prefs.sentOpenEventMessageDetails = sentDetails
-            }
+            if (!markPushEventSent(eventType, message.messageDetails)) return
 
             if (!TextUtils.isEmpty(message.transactionId)) {
 
@@ -871,21 +886,55 @@ object Dengage {
                     itemId = itemId,
                     messageId = message.messageId,
                     messageDetails = message.messageDetails,
-                    transactionId = message.transactionId
+                    transactionId = message.transactionId,
+                    eventType = eventType
                 )
             } else {
                 eventManager.sendOpenEvent(
                     buttonId = buttonId,
                     itemId = itemId,
                     messageId = message.messageId,
-                    messageDetails = message.messageDetails
+                    messageDetails = message.messageDetails,
+                    eventType = eventType
                 )
 
-                eventManager.sessionStart(message.targetUrl ?: "")
+                if (eventType == PushEventType.OPEN) {
+                    eventManager.sessionStart(message.targetUrl ?: "")
+                }
             }
         } catch (e: Exception) {
-            DengageLogger.error("sendOpenEvent: " + e.message)
+            DengageLogger.error("sendPushEvent($eventType): " + e.message)
         }
+    }
+
+    /**
+     * Records that [eventType] was sent for [messageDetails] and returns false when it must be
+     * skipped: the same event was already sent for this message, or (for dismiss) the message was
+     * already opened. Messages without messageDetails are never de-duplicated.
+     */
+    internal fun markPushEventSent(eventType: PushEventType, messageDetails: String?): Boolean {
+        if (messageDetails.isNullOrEmpty()) return true
+        if (eventType == PushEventType.DISMISS && Prefs.sentOpenEventMessageDetails.contains(messageDetails)) {
+            DengageLogger.verbose("Message already opened, skipping dismiss event for messageDetails: $messageDetails")
+            return false
+        }
+        val sentDetails = when (eventType) {
+            PushEventType.OPEN -> Prefs.sentOpenEventMessageDetails
+            PushEventType.DISMISS -> Prefs.sentDismissEventMessageDetails
+        }
+        if (sentDetails.contains(messageDetails)) {
+            DengageLogger.verbose("Duplicate ${eventType.name.lowercase()} event detected for messageDetails: $messageDetails, skipping.")
+            return false
+        }
+        sentDetails.add(messageDetails)
+        if (sentDetails.size > 10) {
+            sentDetails.removeAt(0)
+        }
+        when (eventType) {
+            PushEventType.OPEN -> Prefs.sentOpenEventMessageDetails = sentDetails
+            PushEventType.DISMISS -> Prefs.sentDismissEventMessageDetails = sentDetails
+        }
+        return true
     }
 
     /**

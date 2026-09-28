@@ -2,6 +2,7 @@ package com.dengage.sdk.domain.event.usecase
 
 import com.dengage.sdk.domain.base.CoroutineUseCase
 import com.dengage.sdk.domain.event.EventRepository
+import com.dengage.sdk.domain.event.model.PushEventType
 import com.dengage.sdk.util.createLazy
 import retrofit2.Response
 
@@ -16,6 +17,7 @@ class SendOpenEvent : CoroutineUseCase<Response<Unit>, SendOpenEvent.Params>() {
             messageId = params.messageId,
             messageDetails = params.messageDetails,
             integrationKey = params.integrationKey,
+            eventType = params.eventType,
         )
 
     data class Params(
@@ -23,6 +25,7 @@ class SendOpenEvent : CoroutineUseCase<Response<Unit>, SendOpenEvent.Params>() {
         val itemId: String?,
         val messageId: Int?,
         val messageDetails: String?,
-        val integrationKey: String?
+        val integrationKey: String?,
+        val eventType: PushEventType = PushEventType.OPEN
     )
 }

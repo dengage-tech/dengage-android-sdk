@@ -212,6 +212,24 @@ public class DengageManager {
     }
 
     /**
+     * Sends dismiss event
+     * <p>
+     * Reported when the user dismisses a push notification. Uses the same parameters and routing
+     * as {@link #sendOpenEvent(String, String, Message)}; only the endpoint differs.
+     * </p>
+     *
+     * @param message The dEngage message object.
+     */
+    public void sendDismissEvent(String buttonId, String itemId, Message message) {
+        try {
+            DengageLogger.INSTANCE.verbose("sendDismissEvent method is called");
+            Dengage.INSTANCE.sendDismissEvent(buttonId, itemId, message);
+        } catch (Exception e) {
+            DengageLogger.INSTANCE.error("sendDismissEvent: " + e.getMessage());
+        }
+    }
+
+    /**
      * Console Log
      * <p>
      * Use to show logs on console.

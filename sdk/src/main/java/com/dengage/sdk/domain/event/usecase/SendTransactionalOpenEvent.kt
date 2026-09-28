@@ -2,6 +2,7 @@ package com.dengage.sdk.domain.event.usecase
 
 import com.dengage.sdk.domain.base.CoroutineUseCase
 import com.dengage.sdk.domain.event.EventRepository
+import com.dengage.sdk.domain.event.model.PushEventType
 import com.dengage.sdk.util.createLazy
 import retrofit2.Response
 
@@ -17,6 +18,7 @@ class SendTransactionalOpenEvent : CoroutineUseCase<Response<Unit>, SendTransact
             messageDetails = params.messageDetails,
             transactionId = params.transactionId,
             integrationKey = params.integrationKey,
+            eventType = params.eventType,
         )
 
     data class Params(
@@ -25,6 +27,7 @@ class SendTransactionalOpenEvent : CoroutineUseCase<Response<Unit>, SendTransact
         val messageId: Int?,
         val messageDetails: String?,
         val transactionId: String?,
-        val integrationKey: String?
+        val integrationKey: String?,
+        val eventType: PushEventType = PushEventType.OPEN
     )
 }

@@ -87,6 +87,8 @@ open class NotificationReceiver : BroadcastReceiver() {
                 message = GsonHolder.gson.fromJson(rawJson, Message::class.java)
             }
 
+            Dengage.sendDismissEvent("", "", message)
+
             clearNotification(context, message)
         }
     }
