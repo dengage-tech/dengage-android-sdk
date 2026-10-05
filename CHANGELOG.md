@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Bug Fixes
+
+- `Dengage.removeInAppMessageDisplay()` now releases the in-app lock when it cancels a message that is still waiting for its display delay; previously the cancelled message never reset `isInAppMessageShowing` (nothing is shown, so nothing is clicked or dismissed) and every following `setNavigation` was skipped until the app process restarted. A message that is already on screen is not affected
+
 ## [6.0.103] - 2026-09-23
 
 ### Bug Fixes

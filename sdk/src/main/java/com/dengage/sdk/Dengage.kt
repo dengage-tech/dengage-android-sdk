@@ -966,7 +966,7 @@ object Dengage {
     }
 
     fun removeInAppMessageDisplay() {
-        inAppMessageManager.cancelTimer()
+        inAppMessageManager.cancelPendingInAppMessage()
     }
 
     fun setDevelopmentStatus(isDebug: Boolean? = false) {
