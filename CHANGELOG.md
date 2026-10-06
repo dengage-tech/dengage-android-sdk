@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [6.0.104] - 2026-10-06
 
 ### Bug Fixes
 
