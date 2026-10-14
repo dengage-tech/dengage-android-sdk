@@ -34,8 +34,7 @@ data class Message(
     @SerializedName("expireDate") val expireDate: String?,
     @SerializedName("appId") val appId: String?,
     @SerializedName("muted") val muted: Boolean? = false,
-    @SerializedName("senderName") val senderName: String? = "",
-    @SerializedName("senderImageUrl") val senderImageUrl: String? = ""
+    @SerializedName("notificationIcon") val notificationIcon: String? = ""
 ) : Serializable {
 
     companion object {
@@ -230,14 +229,8 @@ data class Message(
                 false
             }
 
-            val senderName = if (bundleMap["senderName"].isNullOrEmpty().not()) {
-                bundleMap["senderName"]!!
-            } else {
-                ""
-            }
-
-            val senderImageUrl = if (bundleMap["senderImageUrl"].isNullOrEmpty().not()) {
-                bundleMap["senderImageUrl"]!!
+            val notificationIcon = if (bundleMap["notificationIcon"].isNullOrEmpty().not()) {
+                bundleMap["notificationIcon"]!!
             } else {
                 ""
             }
@@ -269,8 +262,7 @@ data class Message(
                 current = current,
                 appId = appId,
                 muted = muted,
-                senderName = senderName,
-                senderImageUrl = senderImageUrl
+                notificationIcon = notificationIcon
             )
         }
     }

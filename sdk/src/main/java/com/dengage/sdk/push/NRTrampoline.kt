@@ -413,14 +413,11 @@ open class NRTrampoline : BroadcastReceiver() {
 
             CommunicationNotification.isCommunication(message) -> {
                 DengageLogger.verbose("$TAG this is a communication notification")
-                ImageDownloadUtils.downloadImage(
-                    imageUrl = message.senderImageUrl,
-                    onComplete = { senderImage ->
-                        val notificationBuilder = getNotificationBuilder(context, intent, message)
-                        CommunicationNotification.apply(context, notificationBuilder, message, senderImage)
-                        onTextNotificationRender(context, intent, message, notificationBuilder)
-                    }
-                )
+                CommunicationNotification.loadImages(context, message) { icon, image ->
+                    val notificationBuilder = getNotificationBuilder(context, intent, message)
+                    CommunicationNotification.apply(context, notificationBuilder, message, icon, image)
+                    onTextNotificationRender(context, intent, message, notificationBuilder)
+                }
             }
 
             message.notificationType === NotificationType.RICH -> {

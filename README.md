@@ -1071,19 +1071,21 @@ class PushNotificationReceiver : NotificationReceiver() {
 
 ### Communication Push
 
-When the push data contains `senderName`, the SDK shows it as a conversation notification: the sender's name as the title and the image at `senderImageUrl` (optional) as the avatar. On Android 11 and later it is listed in the "Conversations" section of the notification shade. No integration code is needed.
+When the push data contains `notificationIcon`, the SDK shows it as a conversation notification: the image at `notificationIcon` as the sender's avatar, and the title (or the app name, when the title is empty) as the sender's name. On Android 11 and later it is listed in the "Conversations" section of the notification shade. No integration code is needed.
 
 ```json
 {
+  "title": "Dengage",
   "message": "Your 100 TL coupon expires today!",
-  "senderName": "Dengage",
-  "senderImageUrl": "https://example.com/avatar.jpg"
+  "notificationIcon": "https://example.com/icon.jpg",
+  "mediaUrl": "https://example.com/product.jpg"
 }
 ```
 
-- The SDK publishes a long-lived shortcut per sender (id `dengage_conversation_<senderName>`) that opens the app's launcher activity, and links the notification to it.
-- The notification uses `MessagingStyle`; the `mediaUrl` image is not shown for these pushes.
-- Carousel pushes are not affected by `senderName`.
+- The SDK publishes a long-lived shortcut per `notificationIcon` (id `dengage_conversation_<notificationIcon>`) that opens the app's launcher activity, and links the notification to it. Pushes with the same `notificationIcon` share one conversation.
+- The notification uses `MessagingStyle`. On Android 9 and later the `mediaUrl` image is shown above the message (as a thumbnail when collapsed); the SDK shares it with the system UI through its own `FileProvider`, so no setup is needed.
+- `subTitle` is shown in bold before the message, because the conversation template does not show the sub text.
+- Carousel pushes are not affected by `notificationIcon`.
 - With a custom receiver, the notification is passed to `onTextNotificationRender` with the conversation style already applied.
 
 ## Live Updates
