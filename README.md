@@ -37,6 +37,7 @@
     - [Defining Custom Receiver](#defining-custom-receiver)
     - [Preparing Custom Layouts](#preparing-custom-layouts)
     - [Building Carousel Notification](#building-carousel-notification)
+  - [Communication Push](#communication-push)
 - [Live Updates](#live-updates)
   - [How It Works](#how-it-works)
   - [Implementing a Handler](#implementing-a-handler)
@@ -1067,6 +1068,23 @@ class PushNotificationReceiver : NotificationReceiver() {
     }
 }
 ```
+
+### Communication Push
+
+When the push data contains `senderName`, the SDK shows it as a conversation notification: the sender's name as the title and the image at `senderImageUrl` (optional) as the avatar. On Android 11 and later it is listed in the "Conversations" section of the notification shade. No integration code is needed.
+
+```json
+{
+  "message": "Your 100 TL coupon expires today!",
+  "senderName": "Dengage",
+  "senderImageUrl": "https://example.com/avatar.jpg"
+}
+```
+
+- The SDK publishes a long-lived shortcut per sender (id `dengage_conversation_<senderName>`) that opens the app's launcher activity, and links the notification to it.
+- The notification uses `MessagingStyle`; the `mediaUrl` image is not shown for these pushes.
+- Carousel pushes are not affected by `senderName`.
+- With a custom receiver, the notification is passed to `onTextNotificationRender` with the conversation style already applied.
 
 ## Live Updates
 
