@@ -33,7 +33,8 @@ data class Message(
     @SerializedName("addToInbox") val addToInbox: Boolean? = false,
     @SerializedName("expireDate") val expireDate: String?,
     @SerializedName("appId") val appId: String?,
-    @SerializedName("muted") val muted: Boolean? = false
+    @SerializedName("muted") val muted: Boolean? = false,
+    @SerializedName("notificationIcon") val notificationIcon: String? = ""
 ) : Serializable {
 
     companion object {
@@ -228,6 +229,12 @@ data class Message(
                 false
             }
 
+            val notificationIcon = if (bundleMap["notificationIcon"].isNullOrEmpty().not()) {
+                bundleMap["notificationIcon"]!!
+            } else {
+                ""
+            }
+
             return Message(
                 messageId = messageId,
                 messageSource = messageSource,
@@ -254,7 +261,8 @@ data class Message(
                 expireDate = expireDate,
                 current = current,
                 appId = appId,
-                muted = muted
+                muted = muted,
+                notificationIcon = notificationIcon
             )
         }
     }

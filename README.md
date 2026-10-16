@@ -37,6 +37,7 @@
     - [Defining Custom Receiver](#defining-custom-receiver)
     - [Preparing Custom Layouts](#preparing-custom-layouts)
     - [Building Carousel Notification](#building-carousel-notification)
+  - [Communication Push](#communication-push)
 - [Live Updates](#live-updates)
   - [How It Works](#how-it-works)
   - [Implementing a Handler](#implementing-a-handler)
@@ -101,11 +102,11 @@ The Dengage SDK is organized into three modules, allowing you to import only wha
 | sdk-geofence | Enables geofence features.                                                                       |
 | sdk-hms      | Huawei messaging service integration.                                                            |
 
-Latest SDK version: `6.0.104`
+Latest SDK version: `6.0.105`
 
 ```groovy
 dependencies {
-    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.104'
+    implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.105'
 }
 ```
 
@@ -1068,6 +1069,25 @@ class PushNotificationReceiver : NotificationReceiver() {
 }
 ```
 
+### Communication Push
+
+When the push data contains `notificationIcon`, the SDK shows it as a conversation notification: the image at `notificationIcon` as the sender's avatar, and the title (or the app name, when the title is empty) as the sender's name. On Android 11 and later it is listed in the "Conversations" section of the notification shade. No integration code is needed.
+
+```json
+{
+  "title": "Dengage",
+  "message": "Your 100 TL coupon expires today!",
+  "notificationIcon": "https://example.com/icon.jpg",
+  "mediaUrl": "https://example.com/product.jpg"
+}
+```
+
+- The SDK publishes a long-lived shortcut per `notificationIcon` (id `dengage_conversation_<notificationIcon>`) that opens the app's launcher activity, and links the notification to it. Pushes with the same `notificationIcon` share one conversation.
+- The notification uses `MessagingStyle`. On Android 9 and later the `mediaUrl` image is shown above the message (as a thumbnail when collapsed); the SDK shares it with the system UI through its own `FileProvider`, so no setup is needed.
+- `subTitle` is shown in bold before the message, because the conversation template does not show the sub text.
+- Carousel pushes are not affected by `notificationIcon`.
+- With a custom receiver, the notification is passed to `onTextNotificationRender` with the conversation style already applied.
+
 ## Live Updates
 
 Live Updates let you show a single, continuously updating notification for an ongoing activity — such as a delivery in progress, a live match score, or a ride status. Updates are delivered as silent FCM data messages carrying a `live_notification` payload, and the SDK routes each event to a handler you register for that activity type.
@@ -1649,8 +1669,8 @@ The **Dengage Android Geofence SDK** is available via **JitPack**. To install th
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.104'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.104'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.105'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-geofence:6.0.105'
 }
 ```
 
@@ -1832,8 +1852,8 @@ class App : Application() {
 
 ```groovy
 dependencies {
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.104'
-  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.104'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk:6.0.105'
+  implementation 'com.github.dengage-tech.dengage-android-sdk:sdk-hms:6.0.105'
 }
 ```
 

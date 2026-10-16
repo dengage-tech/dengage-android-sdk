@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.0.105] - 2026-10-16
+
+### New Features
+
+- Show pushes that contain `notificationIcon` as conversation notifications: the `notificationIcon` image is used as the sender's avatar and the title (or the app name when the title is empty) as the sender's name, and on Android 11 and later the notification is listed in the "Conversations" section of the notification shade. The SDK publishes a long-lived shortcut per `notificationIcon`, so pushes with the same `notificationIcon` share one conversation. No integration code is needed
+- Show the `mediaUrl` image in conversation notifications on Android 9 and later, shared with the system UI through the SDK's own `FileProvider`, and show `subTitle` in bold before the message since the conversation template does not show the sub text
+
 ## [6.0.104] - 2026-10-06
 
 ### Bug Fixes
