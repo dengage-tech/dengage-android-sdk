@@ -2,37 +2,88 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/dengage_page_margin_medium"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tvOrderTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Recommendation Order"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvProductId"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:textSize="18sp"
-            tools:text="Product ID: 42" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnBuy"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/base_component_height"
-            android:layout_marginTop="32dp"
-            android:text="Buy" />
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/dengage_page_margin_medium"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tvOrderTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Recommendation Order"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvProductId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:textSize="18sp"
+                tools:text="Product ID: 42" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etQuantity"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="16dp"
+                android:hint="quantity"
+                android:inputType="number"
+                android:text="1"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etUnitPrice"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:hint="unit price"
+                android:inputType="numberDecimal"
+                android:text="995000"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etPaymentMethod"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:hint="payment method"
+                android:inputType="text"
+                android:text="card"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/etCouponCode"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:hint="coupon code"
+                android:inputType="text"
+                android:textSize="@dimen/dengage_text_size_medium" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnBuy"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/base_component_height"
+                android:layout_marginTop="16dp"
+                android:text="Send Order Event" />
+
+            <TextView
+                android:id="@+id/tvResult"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="monospace"
+                android:textIsSelectable="true"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </layout>

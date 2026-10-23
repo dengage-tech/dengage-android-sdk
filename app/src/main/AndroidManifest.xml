@@ -21,6 +21,8 @@
                     dengagesample://recommendation?productId=42&name=Shoes
                 The SDK recognizes them as deeplinks because the same prefix is
                 registered via Dengage.inAppLinkConfiguration("dengagesample://").
+                "dengage://" is also accepted so the same recommendation links
+                as the iOS sample (dengage://recommendationOrder?productId=...) work.
             -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -29,6 +31,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="dengagesample" />
+                <data android:scheme="dengage" />
             </intent-filter>
         </activity>
         <activity

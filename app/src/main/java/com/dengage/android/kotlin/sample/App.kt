@@ -1,7 +1,13 @@
 package com.dengage.android.kotlin.sample
 
 import android.app.Application
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.Uri
+import androidx.core.content.ContextCompat
+import com.dengage.android.kotlin.sample.ui.activity.MainActivity2
 import com.dengage.android.kotlin.sample.utils.Constants
 import com.dengage.sdk.Dengage
 import com.dengage.sdk.data.remote.api.DeviceConfigurationPreference
@@ -63,6 +69,24 @@ class App : Application() {
         // starting with it (e.g. links inside a RecommendationView) as a deeplink
         // and opens it through an ACTION_VIEW intent that MainActivity2 handles.
         Dengage.inAppLinkConfiguration("dengagesample://")
+
+        // Links opened with "retrieve link on same screen" arrive as this broadcast instead of
+        // an ACTION_VIEW intent, so forward recommendation order links to MainActivity2.
+        ContextCompat.registerReceiver(
+            this,
+            object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    val uri = intent.getStringExtra("targetUrl")?.let(Uri::parse) ?: return
+                    if (uri.host != "recommendationOrder") return
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, uri, context, MainActivity2::class.java)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                }
+            },
+            IntentFilter(com.dengage.sdk.util.Constants.DEEPLINK_RETRIEVE_EVENT),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
 
         DengageGeofence.startGeofence()
 
