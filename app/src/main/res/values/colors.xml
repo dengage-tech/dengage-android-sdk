@@ -8,6 +8,7 @@
     <color name="teal_700">#FF018786</color>
     <color name="dengage_color_black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="notification_color">#FF125CF9</color>
 
     <color name="progress_primary">@color/white</color>
     <color name="progress_secondary">#8affffff</color>
