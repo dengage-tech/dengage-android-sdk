@@ -511,10 +511,7 @@ open class NotificationReceiver : BroadcastReceiver() {
             notificationBuilder.setSound(message.sound.getSoundUri(context))
         }
 
-        if (message.badgeCount ?: 0 > 0) {
-            notificationBuilder.setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
-            notificationBuilder.setNumber(message.badgeCount ?: 0)
-        }
+        NotificationBadge.apply(context, notificationBuilder, message, extras?.getInt("requestCode") ?: 0)
         if (!message.actionButtons.isNullOrEmpty()) {
             for (actionButton in message.actionButtons) {
                 val requestCode = random.nextInt()
