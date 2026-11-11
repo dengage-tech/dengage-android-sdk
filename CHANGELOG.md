@@ -1,5 +1,17 @@
 # Changelog
 
+## [6.0.106] - 2026-11-11
+
+### New Features
+
+- Support incremental badge numbers: when a push has `isIncrementalBadge` set (1/0 or true/false), the notification's `number` is set so that the launcher badge becomes the current badge + 1, matching the iOS SDK. Android has no app-wide badge value, so launchers that show a count add up the `number` of the app's active notifications
+- `badgeCount` N now sets the launcher badge to N instead of adding N on top of the other active notifications: the new notification's `number` is N minus what the app's other active notifications already add up to (at least 1). Below Android 6.0 (API 23) active notifications cannot be read, so `badgeCount` is used as is
+
+### Bug Fixes
+
+- Prevent duplicate geofence heartbeats: concurrent heartbeat triggers (movement + reevaluation, back-to-back location broadcasts, start + first location fix) could all read the old `lastHeartbeatAt` and send a heartbeat in the same second. The heartbeat slot is now reserved atomically before the network call and released on an HTTP error or exception, so the next trigger retries without waiting a full interval
+- Limit forced heartbeats (start, `forceResync`, silent push, `PROVIDERS_CHANGED`) to one per 15 minutes; previously they skipped throttling entirely, so clustered or repeated forced triggers multiplied the heartbeat volume
+
 ## [6.0.105] - 2026-10-16
 
 ### New Features
