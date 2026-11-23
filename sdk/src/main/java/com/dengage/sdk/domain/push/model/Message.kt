@@ -33,7 +33,9 @@ data class Message(
     @SerializedName("addToInbox") val addToInbox: Boolean? = false,
     @SerializedName("expireDate") val expireDate: String?,
     @SerializedName("appId") val appId: String?,
-    @SerializedName("muted") val muted: Boolean? = false
+    @SerializedName("muted") val muted: Boolean? = false,
+    @SerializedName("notificationIcon") val notificationIcon: String? = "",
+    @SerializedName("isIncrementalBadge") val isIncrementalBadge: Boolean? = false
 ) : Serializable {
 
     companion object {
@@ -228,6 +230,15 @@ data class Message(
                 false
             }
 
+            val notificationIcon = if (bundleMap["notificationIcon"].isNullOrEmpty().not()) {
+                bundleMap["notificationIcon"]!!
+            } else {
+                ""
+            }
+
+            // The panel sends 1/0; true/false is accepted as well.
+            val isIncrementalBadge = bundleMap["isIncrementalBadge"]?.trim()?.lowercase() in setOf("1", "true", "yes")
+
             return Message(
                 messageId = messageId,
                 messageSource = messageSource,
@@ -254,7 +265,9 @@ data class Message(
                 expireDate = expireDate,
                 current = current,
                 appId = appId,
-                muted = muted
+                muted = muted,
+                notificationIcon = notificationIcon,
+                isIncrementalBadge = isIncrementalBadge
             )
         }
     }

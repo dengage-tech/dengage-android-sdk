@@ -409,6 +409,14 @@ open class NotificationReceiver : BroadcastReceiver() {
                     )
                 }
             }
+            CommunicationNotification.isCommunication(message) -> {
+                DengageLogger.verbose("$TAG this is a communication notification")
+                CommunicationNotification.loadImages(context, message) { icon, image ->
+                    val notificationBuilder = getNotificationBuilder(context, intent, message)
+                    CommunicationNotification.apply(context, notificationBuilder, message, icon, image)
+                    onTextNotificationRender(context, intent, message, notificationBuilder)
+                }
+            }
             message.notificationType === NotificationType.RICH -> {
                 DengageLogger.verbose("${TAG} this is a rich notification")
                 if (!message.mediaUrl.isNullOrEmpty()) {
@@ -505,10 +513,7 @@ open class NotificationReceiver : BroadcastReceiver() {
             notificationBuilder.setSound(message.sound.getSoundUri(context))
         }
 
-        if (message.badgeCount ?: 0 > 0) {
-            notificationBuilder.setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
-            notificationBuilder.setNumber(message.badgeCount ?: 0)
-        }
+        NotificationBadge.apply(context, notificationBuilder, message, extras?.getInt("requestCode") ?: 0)
         if (!message.actionButtons.isNullOrEmpty()) {
             for (actionButton in message.actionButtons) {
                 val requestCode = random.nextInt()

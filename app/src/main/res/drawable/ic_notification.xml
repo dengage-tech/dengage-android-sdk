@@ -1,0 +1,13 @@
+<!-- Push small icon: white silhouette of the Dengage logo on a transparent background -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="654"
+    android:viewportHeight="654">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,98H211A229,229 0,0 1,211 556H149V460H211A133,133 0,0 0,211 194H147V282H229V377H54Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M503,322A48,48 0,1 0,599 322A48,48 0,1 0,503 322Z" />
+</vector>

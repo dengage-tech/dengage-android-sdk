@@ -80,9 +80,16 @@
                 <action android:name="com.dengage.push.intent.ITEM_CLICK" />
                 <action android:name="com.dengage.push.intent.CAROUSEL_ITEM_CLICK" />
             </intent-filter>
-        </receiver> <!-- Event api url of Dengage -->
+        </receiver>
 
+        <meta-data
+            android:name="den_push_small_icon"
+            android:value="ic_notification" />
+        <meta-data
+            android:name="den_push_small_icon_color"
+            android:value="notification_color" />
 
+        <!-- Event api url of Dengage -->
         <meta-data
             android:name="den_event_api_url"
             android:value="https://dev-push.dengage.com" />

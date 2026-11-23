@@ -47,6 +47,14 @@ class InAppMessageManager :
         private var inSessionFetchTimer: Timer? = null
         internal var isInAppMessageShowing = false
 
+        /**
+         * True from the moment a (non-inline) in-app message is scheduled until its delay fires
+         * or it is cancelled. Lets [cancelPendingInAppMessage] release [isInAppMessageShowing]
+         * only when the message is not on screen yet.
+         */
+        @Volatile
+        private var isInAppDisplayPending = false
+
         /** Ön plana dönüşler arasındaki minimum fetch aralığı. Geliştirme modunda uygulanmaz. */
         private const val APP_FOREGROUND_FETCH_FLOOR_MS = 10_000L
 
@@ -387,12 +395,14 @@ class InAppMessageManager :
             // Mark as showing immediately to prevent duplicate calls
             if (inAppInlineElement == null) {
                 isInAppMessageShowing = true
+                isInAppDisplayPending = true
             }
 
             // set delay for showing in app message
             val delay = (inAppMessage.data.displayTiming.delay ?: 0) * 1000L
             timer.schedule(object : TimerTask() {
                 override fun run() {
+                    isInAppDisplayPending = false
                     activity.runOnUiThread {
 
                         setInAppMessageAsDisplayed(
@@ -453,9 +463,11 @@ class InAppMessageManager :
                 }
             }, delay)
         } catch (e: Exception) {
+            isInAppDisplayPending = false
             isInAppMessageShowing = false
             e.printStackTrace()
         } catch (e: Throwable) {
+            isInAppDisplayPending = false
             isInAppMessageShowing = false
             e.printStackTrace()
         }
@@ -633,6 +645,21 @@ class InAppMessageManager :
     override fun sendTags(tags: List<TagItem>?) {
         if (!tags.isNullOrEmpty()) {
             Dengage.setTags(tags)
+        }
+    }
+
+    /**
+     * Cancels the in-app message that is waiting for its display delay and releases
+     * [isInAppMessageShowing]. Without the release the cancelled message could never
+     * reset the flag (nothing is shown, so nothing is clicked or dismissed) and every
+     * following setNavigation would be skipped. A message that is already on screen is
+     * left untouched.
+     */
+    fun cancelPendingInAppMessage() {
+        cancelTimer()
+        if (isInAppDisplayPending) {
+            isInAppDisplayPending = false
+            isInAppMessageShowing = false
         }
     }
 
